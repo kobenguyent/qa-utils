@@ -2,6 +2,9 @@ import {Container} from "react-bootstrap";
 import {Header} from "../Header.tsx";
 import {Footer} from "../Footer.tsx";
 import { useState } from 'react';
+import Form from 'react-bootstrap/Form';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
 export const UnixTimestamp = () => {
   const [postContent, setPostContent] = useState(Date.now());
@@ -27,17 +30,29 @@ export const UnixTimestamp = () => {
       <Header></Header>
       <div className="text-center">
         <h1>Unix Timestamp Converter</h1>
-        <label>
-          Enter Unix Timestamp here to convert:
-        </label> <br />
-        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-        {/*
-// @ts-ignore */}
-        <textarea id="timstamp-input"  rows={1} cols={20} value={postContent} onChange={e => setPostContent(e.target.value)}></textarea>
-        <div>
-          <textarea disabled value={convertTimestamp(postContent)}></textarea>
-        </div>
       </div>
+      <Form>
+        <Form.Group as={Row} className="mb-3" controlId="input">
+          <Form.Label column sm="2">
+            Enter Unix Timestamp here to convert:
+          </Form.Label>
+          <Col sm="10">
+            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+            {/*
+// @ts-ignore */}
+            <Form.Control id="timstamp-input" value={postContent} onChange={e => setPostContent(e.target.value)}></Form.Control>
+          </Col>
+        </Form.Group>
+
+        <Form.Group as={Row} className="mb-3" controlId="result">
+          <Form.Label column sm="2">
+            Results
+          </Form.Label>
+          <Col sm="10">
+            <Form.Control plaintext readOnly value={convertTimestamp(postContent)}></Form.Control>
+          </Col>
+        </Form.Group>
+      </Form>
       <Footer></Footer>
     </Container>
   )
