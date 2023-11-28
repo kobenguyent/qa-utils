@@ -23,6 +23,12 @@ export const JWTDebugger = () => {
       <textarea id="jwt-input"  rows={4}
                 cols={150} value={postContent}
                 onChange={e => setPostContent(e.target.value)}></textarea>
+      <label>
+        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+        {/*
+// @ts-ignore */}
+        Your JWT is:  {decodeToken(postContent)?.exp < Date.now() ? <text style={{ color: 'red' }}>Expired</text> : <text style={{ color: 'green' }}>Valid</text>}
+      </label> <br />
 
       <div>
         <JSONViewer view="dual" data={decodeToken(postContent)} collapsible styles={jsonStyles}/>
