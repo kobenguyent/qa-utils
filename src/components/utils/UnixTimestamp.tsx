@@ -30,10 +30,10 @@ export const UnixTimestamp = () => {
         <label>
           Enter Unix Timestamp here to convert:
         </label> <br />
-        <textarea id="timstamp-input"  rows={1}
-                  cols={20} value={postContent}
-                  onChange={e => setPostContent(e.target.value)}></textarea>
-
+        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+        {/*
+// @ts-ignore */}
+        <textarea id="timstamp-input"  rows={1} cols={20} value={postContent} onChange={e => setPostContent(e.target.value)}></textarea>
         <div>
           <textarea disabled value={convertTimestamp(postContent)}></textarea>
         </div>

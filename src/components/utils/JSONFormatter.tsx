@@ -2,6 +2,8 @@ import {Container} from "react-bootstrap";
 import {Header} from "../Header.tsx";
 import {Footer} from "../Footer.tsx";
 import { useState } from 'react';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import {JSONViewer} from 'react-json-editor-viewer';
 import { jsonStyles } from '../../styles/jsonStyles.ts';
 
