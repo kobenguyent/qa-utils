@@ -4,6 +4,9 @@
 Where you find useful things :D 
 
 # How to run
+
+## With NodeJS
+
 ````
 npm i & npm run dev
 
@@ -20,4 +23,22 @@ npm i & npm run dev
   ➜  press h to show help
 
 ````
+
+## With Bunjs
+
+````
+bun install & bun run dev
+
+➜  qa-utils git:(main) bun run dev
+$ bunx --bun vite
+vite:istanbul> Sourcemaps was automatically enabled for code coverage to be accurate.
+ To hide this message set build.sourcemap to true, 'inline' or 'hidden'.
+
+  VITE v4.3.2  ready in 580 ms
+
+  ➜  Local:   http://localhost:5173/qa-utils/
+  ➜  Network: use --host to expose
+  ➜  press h to show help
+````
+
 Then you could access the QA utils via http://127.0.0.1:5173/
