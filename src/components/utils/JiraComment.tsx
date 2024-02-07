@@ -13,9 +13,7 @@ import { useUA } from 'use-ua-parser-js';
 
 export const JiraComment = () => {
   const UADetails = useUA();
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  const osInfo = `${UADetails.os.name} - ${UADetails.os.version}`;
+  const osInfo: any = `${UADetails?.os.name}`;
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const browserInfo = `${UADetails.browser.name} - ${UADetails.browser.version}`;
@@ -32,7 +30,6 @@ export const JiraComment = () => {
 ||Branch|...|
 ||Commit|...|
 {panel}
-// eslint-disable-next-line no-irregular-whitespace
  
 *QA passed* (/)
  * Scenario  (/)
