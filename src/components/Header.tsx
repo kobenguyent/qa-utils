@@ -21,6 +21,7 @@ export const Header = ()  => {
             <NavDropdown.Item href="#/timestamp">⏰ Unix Timestamp Converter</NavDropdown.Item>
             <NavDropdown.Item href="#/jsonFormatter">﹛ JSON Formatter ﹜</NavDropdown.Item>
             <NavDropdown.Item href="#/uuid">🌠 UUID Generator</NavDropdown.Item>
+            <NavDropdown.Item href="#/jiraComment">🌠 JIRA Comment Generator</NavDropdown.Item>
           </NavDropdown>
         </Nav>
       </Container>

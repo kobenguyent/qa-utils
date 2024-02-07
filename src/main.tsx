@@ -12,6 +12,7 @@ import { Base64 } from './components/utils/Base64.tsx';
 import { UnixTimestamp } from './components/utils/UnixTimestamp.tsx';
 import { JSONFormatter } from './components/utils/JSONFormatter.tsx';
 import { UuidGenerator } from './components/utils/UuidGenerator.tsx';
+import { JiraComment } from './components/utils/JiraComment.tsx';
 
 const router = createHashRouter([
   {
@@ -53,6 +54,10 @@ const router = createHashRouter([
   {
     path: 'uuid',
     element: <UuidGenerator></UuidGenerator>
+  },
+  {
+    path: 'jiraComment',
+    element: <JiraComment></JiraComment>
   },
 ]);
 
