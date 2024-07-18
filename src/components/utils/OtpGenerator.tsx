@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button, Container, Toast, Table, Form, Row, Col } from "react-bootstrap";
 import { Header } from "../Header.tsx";
 import { Footer } from "../Footer.tsx";
-// @ts-ignore
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
@@ -23,12 +22,13 @@ export const OtpGenerator = () => {
   // Function to generate OTP
   const generateOtp = () => {
     if (secret) {
+      // @ts-ignore
       const newOtp = window.otplib.authenticator.generate(secret.trim());
       setOtp(newOtp);
       setIsSecretValid(true);
 
       // Check if the secret key is already in the list
-      const keyExists = secretKeys.some((key) => key.key === secret.trim());
+      const keyExists = secretKeys.some((key: { key: string; }) => key.key === secret.trim());
       if (!keyExists) {
         // Add the secret key with timestamp to the list
         const newSecret = {
@@ -46,7 +46,7 @@ export const OtpGenerator = () => {
   };
 
   // Handle change in secret key input
-  const handleSecretChange = (e) => {
+  const handleSecretChange = (e: { target: { value: string; }; }) => {
     // Remove spaces from the secret key
     const cleanedSecret = e.target.value.replace(/\s/g, "");
     setSecret(cleanedSecret);
@@ -171,6 +171,7 @@ export const OtpGenerator = () => {
             </tr>
             </thead>
             <tbody>
+            {/* @ts-ignore */}
             {secretKeys.map((key, index) => (
               <tr key={index}>
                 <td>{index + 1}</td>
