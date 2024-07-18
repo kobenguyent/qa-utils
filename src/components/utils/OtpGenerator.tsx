@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button, Container, Toast, Table, Form, Row, Col } from "react-bootstrap";
 import { Header } from "../Header.tsx";
 import { Footer } from "../Footer.tsx";
+// @ts-ignore
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
