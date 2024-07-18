@@ -13,6 +13,7 @@ import { UnixTimestamp } from './components/utils/UnixTimestamp.tsx';
 import { JSONFormatter } from './components/utils/JSONFormatter.tsx';
 import { UuidGenerator } from './components/utils/UuidGenerator.tsx';
 import { JiraComment } from './components/utils/JiraComment.tsx';
+import { OtpGenerator } from './components/utils/OtpGenerator.tsx';
 
 const router = createHashRouter([
   {
@@ -58,6 +59,10 @@ const router = createHashRouter([
   {
     path: 'jiraComment',
     element: <JiraComment></JiraComment>
+  },
+  {
+    path: 'otp',
+    element: <OtpGenerator></OtpGenerator>
   },
 ]);
 
