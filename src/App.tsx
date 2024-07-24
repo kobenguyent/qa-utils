@@ -4,16 +4,27 @@ import {Container} from "react-bootstrap";
 import {Footer} from "./components/Footer.tsx";
 import {Home} from "./components/Home.tsx";
 import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 import { trackPageView } from './utils/umami.ts';
 
 function App() {
-
-  const location = useLocation();
+  // This function is used to track the page view using the current hash.
+  const trackCurrentHash = () => {
+    const currentHash = window.location.hash || '#';
+    trackPageView(currentHash);
+  };
 
   useEffect(() => {
-    trackPageView(location.pathname + location.search);
-  }, [location]);
+    // Track the initial load
+    trackCurrentHash();
+
+    // Set up a listener for hash changes
+    window.addEventListener('hashchange', trackCurrentHash);
+
+    // Clean up the event listener on unmount
+    return () => {
+      window.removeEventListener('hashchange', trackCurrentHash);
+    };
+  }, []);
 
   return (
     <Container>
