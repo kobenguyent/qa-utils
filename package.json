@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "bunx --bun vite",
     "build": "tsc && bunx --bun vite build",
+    "build:github": "DEPLOY_ENV=github bun run build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "bunx --bun vite preview"
   },
