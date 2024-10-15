@@ -1,6 +1,9 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import istanbul from 'vite-plugin-istanbul'
+import { execSync } from 'child_process'
+
+const commitHash = execSync('git rev-parse --short HEAD').toString().trim()
 
 // Dynamically configure base based on environment
 export default defineConfig(({ mode }) => {
@@ -25,5 +28,8 @@ export default defineConfig(({ mode }) => {
     build: {
       target: 'esnext',
     },
+    define: {
+    __COMMIT_HASH__: JSON.stringify(commitHash),
+  },
   }
 })
