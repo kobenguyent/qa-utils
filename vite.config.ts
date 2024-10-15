@@ -28,5 +28,8 @@ export default defineConfig(({ mode }) => {
     build: {
       target: 'esnext',
     },
+    define: {
+    __COMMIT_HASH__: JSON.stringify(commitHash),
+  },
   }
 })
