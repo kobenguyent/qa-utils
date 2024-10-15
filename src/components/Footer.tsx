@@ -1,5 +1,5 @@
 export const Footer = () => {
-  const commitHash = typeof __COMMIT_HASH__ !== 'undefined' ? __COMMIT_HASH__ : 'unknown';
+  const commitHash = __COMMIT_HASH__ ?? 'unknown'
 
   return (
     <footer className="text-muted text-center" style={{ marginTop: 10 }}>
