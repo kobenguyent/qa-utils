@@ -1,4 +1,4 @@
-import { Container } from "react-bootstrap"
+import { Container } from "react-bootstrap";
 import { Header } from "../Header";
 import { Footer } from "../Footer";
 import { useState } from "react";
@@ -9,26 +9,25 @@ import Col from "react-bootstrap/Col";
 export const UnixTimestamp = () => {
   const [postContent, setPostContent] = useState<string>(Date.now().toString());
 
-  // Convert Unix timestamp to readable date
-  const convertTimestamp = (timestamp: string): string => {
+  // Convert Unix timestamp to readable date in both GMT and local time
+  const convertTimestamp = (timestamp: string): { gmt: string; local: string } => {
     const unixTimestamp = parseInt(timestamp, 10);
 
     // Handle invalid timestamp input
-    if (isNaN(unixTimestamp)) return "Invalid Timestamp";
+    if (isNaN(unixTimestamp)) return { gmt: "Invalid Timestamp", local: "Invalid Timestamp" };
 
     const date = new Date(unixTimestamp); // Convert Unix timestamp to date object
 
-    // Format date components with leading zeros if needed
-    const pad = (n: number) => n.toString().padStart(2, "0");
-    const year = date.getFullYear();
-    const month = pad(date.getMonth() + 1);
-    const day = pad(date.getDate());
-    const hours = pad(date.getHours());
-    const minutes = pad(date.getMinutes());
-    const seconds = pad(date.getSeconds());
+    // Convert to GMT time (UTC)
+    const gmtTime = date.toUTCString();
 
-    return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+    // Convert to user's local time
+    const localTime = date.toLocaleString();
+
+    return { gmt: gmtTime, local: localTime };
   };
+
+  const { gmt, local } = convertTimestamp(postContent);
 
   return (
     <Container>
@@ -53,14 +52,19 @@ export const UnixTimestamp = () => {
 
         <Form.Group as={Row} className="mb-3" controlId="result">
           <Form.Label column sm="2">
-            Result:
+            GMT Time:
           </Form.Label>
           <Col sm="10">
-            <Form.Control
-              plaintext
-              readOnly
-              value={convertTimestamp(postContent)}
-            />
+            <Form.Control plaintext readOnly value={gmt} />
+          </Col>
+        </Form.Group>
+
+        <Form.Group as={Row} className="mb-3" controlId="result">
+          <Form.Label column sm="2">
+            Local Time:
+          </Form.Label>
+          <Col sm="10">
+            <Form.Control plaintext readOnly value={local} />
           </Col>
         </Form.Group>
       </Form>
