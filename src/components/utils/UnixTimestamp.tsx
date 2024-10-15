@@ -1,59 +1,74 @@
-import {Container} from "react-bootstrap";
-import {Header} from "../Header.tsx";
-import {Footer} from "../Footer.tsx";
-import { useState } from 'react';
-import Form from 'react-bootstrap/Form';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
+import { Container } from "react-bootstrap";
+import { Header } from "../Header";
+import { Footer } from "../Footer";
+import { useState } from "react";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 
 export const UnixTimestamp = () => {
-  const [postContent, setPostContent] = useState(Date.now());
+  const [postContent, setPostContent] = useState<string>(Date.now().toString());
 
-  function convertTimestamp (timestamp: any) {
-    const unixTimestamp = parseInt(timestamp); // Replace this with your Unix timestamp
+  // Convert Unix timestamp to readable date in both GMT and local time
+  const convertTimestamp = (timestamp: string): { gmt: string; local: string } => {
+    const unixTimestamp = parseInt(timestamp, 10);
 
-    const date = new Date(unixTimestamp); // Convert Unix timestamp to milliseconds
+    // Handle invalid timestamp input
+    if (isNaN(unixTimestamp)) return { gmt: "Invalid Timestamp", local: "Invalid Timestamp" };
 
-    // Get the various components of the date
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1; // Month is 0-indexed, so we add 1
-    const day = date.getDate();
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    const seconds = date.getSeconds();
+    const date = new Date(unixTimestamp); // Convert Unix timestamp to date object
 
-    return (`${day.toString()}.${month.toString()}.${year.toString()} ${hours.toString()}:${minutes.toString()}:${seconds.toString()}`)
-  }
+    // Convert to GMT time (UTC)
+    const gmtTime = date.toUTCString();
 
-  return(
+    // Convert to user's local time
+    const localTime = date.toLocaleString();
+
+    return { gmt: gmtTime, local: localTime };
+  };
+
+  const { gmt, local } = convertTimestamp(postContent);
+
+  return (
     <Container>
-      <Header></Header>
+      <Header />
       <div className="text-center">
         <h1>Unix Timestamp Converter</h1>
       </div>
       <Form>
         <Form.Group as={Row} className="mb-3" controlId="input">
           <Form.Label column sm="2">
-            Enter Unix Timestamp here to convert:
+            Enter Unix Timestamp:
           </Form.Label>
           <Col sm="10">
-            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-            {/*
-// @ts-ignore */}
-            <Form.Control id="timstamp-input" value={postContent} onChange={e => setPostContent(e.target.value)}></Form.Control>
+            <Form.Control
+              id="timestamp-input"
+              value={postContent}
+              onChange={(e) => setPostContent(e.target.value)}
+              placeholder="Enter Unix timestamp"
+            />
           </Col>
         </Form.Group>
 
         <Form.Group as={Row} className="mb-3" controlId="result">
           <Form.Label column sm="2">
-            Results
+            GMT Time:
           </Form.Label>
           <Col sm="10">
-            <Form.Control plaintext readOnly value={convertTimestamp(postContent)}></Form.Control>
+            <Form.Control plaintext readOnly value={gmt} />
+          </Col>
+        </Form.Group>
+
+        <Form.Group as={Row} className="mb-3" controlId="result">
+          <Form.Label column sm="2">
+            Local Time:
+          </Form.Label>
+          <Col sm="10">
+            <Form.Control plaintext readOnly value={local} />
           </Col>
         </Form.Group>
       </Form>
-      <Footer></Footer>
+      <Footer />
     </Container>
-  )
-}
+  );
+};
