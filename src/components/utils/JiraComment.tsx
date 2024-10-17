@@ -18,11 +18,11 @@ export const JiraComment = () => {
     .filter(browser => browser.toLowerCase().includes('chrome') || browser.toLowerCase().includes('safari') || browser.toLowerCase().includes('mozilla'))
     .join(', ');
 
-  const [selectedContent, setSelectedContent] = useState('setup');
+  const [selectedContent, setSelectedContent] = useState('frontend');
   const [show, setShow] = useState(false);
 
   // Content options
-  const postContentSetup = `{panel:title= Test Setup}
+  const postContentFE = `{panel:title= Test Setup}
 (i)
 ||Environment|LOCALHOST|
 ||OS details|${osInfo} |
@@ -36,7 +36,7 @@ export const JiraComment = () => {
 
 Ticket will be marked as Done. 🎉`;
 
-  const postContentApp = `1. APP: [url] - "version": "v1.0.0"
+  const postContentBE = `1. APP: [url] - "version": "v1.0.0"
 
 ||Scenarios||Request||Response||Status||
 | Scenario |GET endpoint|200 OK|(/)|
@@ -44,7 +44,7 @@ Ticket will be marked as Done. 🎉`;
 Ticket will be marked as Done. 🎉`;
 
   // Dynamically set the post content based on selection
-  const postContent = selectedContent === 'setup' ? postContentSetup : postContentApp;
+  const postContent = selectedContent === 'frontend' ? postContentFE : postContentBE;
 
   return (
     <Container>
@@ -61,8 +61,8 @@ Ticket will be marked as Done. 🎉`;
               value={selectedContent}
               onChange={(e) => setSelectedContent(e.target.value)}
             >
-              <option value="setup">Test Setup</option>
-              <option value="app">App Info</option>
+              <option value="frontend">FrontEnd</option>
+              <option value="backend">BackEnd</option>
             </Form.Select>
           </Col>
 
