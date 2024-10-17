@@ -1,9 +1,7 @@
 import { Button, Container, Toast } from "react-bootstrap";
-import {Header} from "../Header.tsx";
-import {Footer} from "../Footer.tsx";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import {CopyToClipboard} from 'react-copy-to-clipboard';
+import { Header } from "../Header.tsx";
+import { Footer } from "../Footer.tsx";
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useState } from 'react';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
@@ -14,15 +12,17 @@ import { useUA } from 'use-ua-parser-js';
 export const JiraComment = () => {
   const UADetails = useUA();
   const osInfo: any = `${UADetails?.os.name}`;
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  const browserInfo = `${UADetails.browser.name} - ${UADetails.browser.version}`;
-  const installedBrowsers = navigator.userAgent.split(' ').filter(browser => browser.toLowerCase().includes('chrome') || browser.toLowerCase().includes('safari') || browser.toLowerCase().includes('mozilla')).join(', ');
+  const browserInfo = `${UADetails?.browser.name} - ${UADetails?.browser.version}`;
+  const installedBrowsers = navigator.userAgent
+    .split(' ')
+    .filter(browser => browser.toLowerCase().includes('chrome') || browser.toLowerCase().includes('safari') || browser.toLowerCase().includes('mozilla'))
+    .join(', ');
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  // eslint-disable-next-line no-irregular-whitespace
-  const [postContent] = useState(`{panel:title= Test Setup}
+  const [selectedContent, setSelectedContent] = useState('frontend');
+  const [show, setShow] = useState(false);
+
+  // Content options
+  const postContentFE = `{panel:title= Test Setup}
 (i)
 ||Environment|LOCALHOST|
 ||OS details|${osInfo} |
@@ -30,14 +30,23 @@ export const JiraComment = () => {
 ||Branch|...|
 ||Commit|...|
 {panel}
- 
+
 *QA passed* (/)
  * Scenario  (/)
- 
- Ticket will be marked as Done. 🎉`);
-  const [show, setShow] = useState(false);
 
-  return(
+Ticket will be marked as Done. 🎉`;
+
+  const postContentBE = `1. APP: [url] - "version": "v1.0.0"
+
+||Scenarios||Request||Response||Status||
+| Scenario |GET endpoint|200 OK|(/)|
+
+Ticket will be marked as Done. 🎉`;
+
+  // Dynamically set the post content based on selection
+  const postContent = selectedContent === 'frontend' ? postContentFE : postContentBE;
+
+  return (
     <Container>
       <Header></Header>
       <div className="text-center">
@@ -46,31 +55,29 @@ export const JiraComment = () => {
 
       <Form>
         <Form.Group as={Row} className="mb-3">
-          <Form.Label column sm="2">
-            <b>OS Info:</b>
-          </Form.Label>
+          <Form.Label column sm="2"><b>Content Type:</b></Form.Label>
           <Col sm="10">
-            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-            {/*
-// @ts-ignore */}
+            <Form.Select
+              value={selectedContent}
+              onChange={(e) => setSelectedContent(e.target.value)}
+            >
+              <option value="frontend">FrontEnd</option>
+              <option value="backend">BackEnd</option>
+            </Form.Select>
+          </Col>
+
+          <Form.Label column sm="2"><b>OS Info:</b></Form.Label>
+          <Col sm="10">
             <Form.Control id="osInfo" readOnly plaintext value={osInfo}></Form.Control>
           </Col>
-          <Form.Label column sm="2">
-            <b>Installed Browser Info:</b>
-          </Form.Label>
+
+          <Form.Label column sm="2"><b>Installed Browser Info:</b></Form.Label>
           <Col sm="10">
-            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-            {/*
-// @ts-ignore */}
-            <Form.Control id="osInfo" readOnly plaintext value={installedBrowsers}></Form.Control>
+            <Form.Control id="installedBrowsers" readOnly plaintext value={installedBrowsers}></Form.Control>
           </Col>
-          <Form.Label column sm="2">
-            Your comment:
-          </Form.Label>
+
+          <Form.Label column sm="2">Your comment:</Form.Label>
           <Col sm="10">
-            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-            {/*
-// @ts-ignore */}
             <Markdown>{postContent}</Markdown>
           </Col>
         </Form.Group>
@@ -83,6 +90,7 @@ export const JiraComment = () => {
           </Col>
         </Form.Group>
       </Form>
+
       <Row>
         <Col xs={6}>
           <Toast onClose={() => setShow(false)} show={show} delay={3000} autohide>
@@ -93,7 +101,8 @@ export const JiraComment = () => {
           </Toast>
         </Col>
       </Row>
+
       <Footer></Footer>
     </Container>
-  )
-}
+  );
+};
