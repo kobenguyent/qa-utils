@@ -83,7 +83,7 @@ test.describe('Mocking with HAR files', () => {
 // Helper function to convert Playwright syntax to CodeceptJS syntax
 function convertPlaywrightToCodeceptJS(playwrightCode) {
   // Remove imports from '@playwright/test'
-  let codeceptjsCode = playwrightCode.replace(/import.*from '@playwright\/test';?/g, '');
+  const codeceptjsCode = playwrightCode.replace(/import.*from '@playwright\/test';?/g, '');
 
   // Extract `test.describe` blocks and their associated tests
   const describeBlocks = Array.from(codeceptjsCode.matchAll(/test\.describe\((['"`])(.*?)\1, \(\) => {(.*?)\n}\);/gs));

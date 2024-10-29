@@ -2,7 +2,6 @@ import {Container} from "react-bootstrap";
 import {Header} from "../Header.tsx";
 import {Footer} from "../Footer.tsx";
 import { useState } from 'react';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import {JSONViewer} from 'react-json-editor-viewer';
 import { jsonStyles } from '../../styles/jsonStyles.ts';
@@ -38,7 +37,6 @@ export const JSONFormatter = () => {
             Enter JSON here to format:
           </Form.Label>
           <Col sm="10">
-            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
             {/*
 // @ts-ignore */}
             <Form.Control id="json-input" value={postContent} onChange={e => setPostContent(e.target.value)}></Form.Control>
