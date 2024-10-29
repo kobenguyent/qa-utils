@@ -14,6 +14,7 @@ import { JSONFormatter } from './components/utils/JSONFormatter.tsx';
 import { UuidGenerator } from './components/utils/UuidGenerator.tsx';
 import { JiraComment } from './components/utils/JiraComment.tsx';
 import { OtpGenerator } from './components/utils/OtpGenerator.tsx';
+import PlaywrightToCodeceptjs from './components/utils/PlaywrightToCodeceptjs.tsx';
 
 const router = createHashRouter([
   {
@@ -63,6 +64,10 @@ const router = createHashRouter([
   {
     path: 'otp',
     element: <OtpGenerator></OtpGenerator>
+  },
+  {
+    path: 'playwright2codecept',
+    element: <PlaywrightToCodeceptjs></PlaywrightToCodeceptjs>
   },
 ]);
 
