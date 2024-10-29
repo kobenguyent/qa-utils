@@ -3,7 +3,6 @@ import {Header} from "../Header.tsx";
 import {Footer} from "../Footer.tsx";
 import { decodeToken } from "react-jwt";
 import { useState } from 'react';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import {JSONViewer} from 'react-json-editor-viewer';
 import { jsonStyles } from '../../styles/jsonStyles.ts';
@@ -22,7 +21,6 @@ export const JWTDebugger = () => {
       </div>
 
       <label>
-        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
         {/*
 // @ts-ignore */}
         Your JWT is:  {decodeToken(postContent)?.exp < Date.now() ? <text style={{ color: 'red' }}>Expired</text> : <text style={{ color: 'green' }}>Valid</text>}
@@ -34,7 +32,6 @@ export const JWTDebugger = () => {
             Enter JWT here to debug:
           </Form.Label>
           <Col sm="10">
-            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
             {/*
 // @ts-ignore */}
             <Form.Control id="jwt-input" value={postContent} onChange={e => setPostContent(e.target.value)}></Form.Control>

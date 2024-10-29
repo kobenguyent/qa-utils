@@ -1,13 +1,13 @@
-import { Button, Container, Toast } from "react-bootstrap";
+import { Container } from "react-bootstrap";
 import { Header } from "../Header.tsx";
 import { Footer } from "../Footer.tsx";
-import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useState } from 'react';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Markdown from 'react-markdown';
 import { useUA } from 'use-ua-parser-js';
+import CopyWithToast from '../CopyWithToast.tsx';
 
 export const JiraComment = () => {
   const UADetails = useUA();
@@ -19,7 +19,6 @@ export const JiraComment = () => {
     .join(', ');
 
   const [selectedContent, setSelectedContent] = useState('frontend');
-  const [show, setShow] = useState(false);
 
   // Content options
   const postContentFE = `{panel:title= Test Setup}
@@ -84,23 +83,10 @@ Ticket will be marked as Done. 🎉`;
 
         <Form.Group as={Row} className="mb-3" controlId="copy-to-clipboard">
           <Col sm="10">
-            <CopyToClipboard text={postContent}>
-              <Button onClick={() => setShow(true)}>Copy to clipboard</Button>
-            </CopyToClipboard>
+            <CopyWithToast text={postContent}></CopyWithToast>
           </Col>
         </Form.Group>
       </Form>
-
-      <Row>
-        <Col xs={6}>
-          <Toast onClose={() => setShow(false)} show={show} delay={3000} autohide>
-            <Toast.Header>
-              <strong className="me-auto">Info</strong>
-            </Toast.Header>
-            <Toast.Body>Woohoo, your text is copied!</Toast.Body>
-          </Toast>
-        </Col>
-      </Row>
 
       <Footer></Footer>
     </Container>

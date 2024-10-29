@@ -2,7 +2,6 @@ import { Button, Container, Toast } from "react-bootstrap";
 import {Header} from "../Header.tsx";
 import {Footer} from "../Footer.tsx";
 import { v4 as uuidv4 } from 'uuid';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { useState } from 'react';
@@ -27,7 +26,6 @@ export const UuidGenerator = () => {
             Your UUID:
           </Form.Label>
           <Col sm="10">
-            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
             {/*
 // @ts-ignore */}
             <Form.Control id="uuid" readOnly plaintext value={postContent}></Form.Control>

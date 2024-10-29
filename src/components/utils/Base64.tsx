@@ -24,7 +24,6 @@ export const Base64 = () => {
             Enter something here:
           </Form.Label>
           <Col sm="10">
-            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
             {/*
 // @ts-ignore */}
             <Form.Control id="json-input" value={postContent} onChange={e => setPostContent(e.target.value)}></Form.Control>
