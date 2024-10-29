@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Button, Row, Col, Toast } from 'react-bootstrap';
 
-const CopyWithToast = ({ text }) => {
+const CopyWithToast = ({ text }:{ text: string}) => {
   const [show, setShow] = useState(false);
 
   const handleCopy = () => {

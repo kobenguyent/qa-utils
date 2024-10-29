@@ -1,4 +1,4 @@
-import { Button, Container, Toast } from "react-bootstrap";
+import { Container } from "react-bootstrap";
 import { Header } from "../Header.tsx";
 import { Footer } from "../Footer.tsx";
 import { useState } from 'react';
@@ -19,7 +19,6 @@ export const JiraComment = () => {
     .join(', ');
 
   const [selectedContent, setSelectedContent] = useState('frontend');
-  const [show, setShow] = useState(false);
 
   // Content options
   const postContentFE = `{panel:title= Test Setup}

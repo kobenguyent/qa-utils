@@ -81,7 +81,7 @@ test.describe('Mocking with HAR files', () => {
 });`
 
 // Helper function to convert Playwright syntax to CodeceptJS syntax
-function convertPlaywrightToCodeceptJS(playwrightCode) {
+function convertPlaywrightToCodeceptJS(playwrightCode: string) {
   // Remove imports from '@playwright/test'
   const codeceptjsCode = playwrightCode.replace(/import.*from '@playwright\/test';?/g, '');
 
@@ -90,7 +90,7 @@ function convertPlaywrightToCodeceptJS(playwrightCode) {
 
   let convertedCode = '';
 
-  describeBlocks.forEach((block) => {
+  describeBlocks.forEach((block: RegExpMatchArray) => {
     const describeName = block[2];
     const tests = block[3].trim();
 
@@ -119,8 +119,6 @@ function convertPlaywrightToCodeceptJS(playwrightCode) {
 const TestConverter = () => {
   const [playwrightCode, setPlaywrightCode] = useState('');
   const [codeceptjsCode, setCodeceptjsCode] = useState('');
-  const [show, setShow] = useState(false);
-
 
   const handleConversion = () => {
     const convertedCode = convertPlaywrightToCodeceptJS(playwrightCode);
@@ -146,7 +144,7 @@ const TestConverter = () => {
           placeholder="Paste your Playwright test code here"
           value={playwrightCode}
           onChange={(e) => setPlaywrightCode (e.target.value)}
-          rows="10"
+          rows={10}
           style={{width: '100%', marginBottom: '10px', fontFamily: 'monospace'}}
         />
 
