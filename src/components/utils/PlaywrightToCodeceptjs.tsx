@@ -6,114 +6,121 @@ import CopyWithToast from '../CopyWithToast.tsx';
 import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 
-const examplePlaywrightCode = `import { test, expect, type Page } from '@playwright/test';
+const examplePlaywrightCode = `import { test, expect } from '@playwright/test';
 
-test.describe('Mocking an API call', () => {
-
-  test('mocks a fruit and does not call api', async ({ page }) => {
-    // Mock the api call before navigating
-    await page.route('*/**/api/v1/fruits', async (route) => {
-      const json = [{ name: 'Strawberry', id: 21 }];
-      await route.fulfill({ json });
-    });
-    // Go to the page
-    await page.goto('https://demo.playwright.dev/api-mocking');
-  
-    // Assert that the Strawberry fruit is visible
-    await expect(page.getByText('Strawberry')).toBeVisible();
-  });
-  
+test.beforeEach(async ({ page }) => {
+  await page.goto('https://todomvc.com/examples/vanilla-es6/');
 });
 
-test.describe('Intercepting the request and modifying it', () => {
+/**
+ * Locators are used to represent a selector on a page and re-use them. They have
+ * strictMode enabled by default. This option will throw an error if the selector
+ * will resolve to multiple elements.
+ * In this example we create a todo item, assert that it exists and then filter
+ * by the completed items to ensure that the item is not visible anymore.
+ * @see https://playwright.dev/docs/api/class-locator
+ */
+test('basic interaction', async ({ page }) => {
+  const inputBox = page.locator('input.new-todo');
+  const todoList = page.locator('.todo-list');
 
-  test('gets the json from api and adds a new fruit', async ({ page }) => {
-    // Get the response and add to it
-    await page.route('*/**/api/v1/fruits', async (route) => {
-      const response = await route.fetch();
-      const json = await response.json();
-      json.push({ name: 'Playwright', id: 100 });
-      // Fulfill using the original response, while patching the response body
-      // with the given JSON object.
-      await route.fulfill({ response, json });
-    });
-
-    // Go to the page
-    await page.goto('https://demo.playwright.dev/api-mocking');
-
-    // Assert that the new fruit is visible
-    await expect(page.getByText('Playwright', { exact: true })).toBeVisible();
-  });
-  
+  await inputBox.fill('Learn Playwright');
+  await inputBox.press('Enter');
+  await expect(todoList).toHaveText('Learn Playwright');
+  await page.locator('.filters >> text=Completed').click();
+  await expect(todoList).not.toHaveText('Learn Playwright');
 });
 
-test.describe('Mocking with HAR files', () => {
+/**
+ * Playwright supports different selector engines which you can combine with '>>'.
+ * @see https://playwright.dev/docs/selectors
+ */
+test('element selectors', async ({ page }) => {
+  // When no selector engine is specified, Playwright will use the css selector engine.
+  await page.type('.header input', 'Learn Playwright');
+  // So the selector above is the same as the following:
+  await page.press('css=.header input', 'Enter');
 
-  test('records or updates the HAR file', async ({ page }) => {
-    // Get the response from the HAR file
-    await page.routeFromHAR('./hars/fruits.har', {
-      url: '*/**/api/v1/fruits',
-      update: true,
-    });
+  // select by text with the text selector engine:
+  await page.click('text=All');
 
-    // Go to the page
-    await page.goto('https://demo.playwright.dev/api-mocking');
+  // css allows you to select by attribute:
+  await page.click('[id="toggle-all"]');
 
-    // Assert that the Playwright fruit is visible
-    await expect(page.getByText('Strawberry')).toBeVisible();
-  });
+  // Combine css and text selectors (https://playwright.dev/docs/selectors/#text-selector)
+  await page.click('.todo-list > li:has-text("Playwright")');
+  await page.click('.todoapp .footer >> text=Completed');
 
-  test('gets the json from HAR and checks the new fruit has been added', async ({ page }) => {
-    // Replay API requests from HAR.
-    // Either use a matching response from the HAR,
-    // or abort the request if nothing matches.
-    await page.routeFromHAR('./hars/fruits.har', {
-      url: '*/**/api/v1/fruits',
-      update: false,
-    });
+  // Selecting based on layout, with css selector
+  expect(await page.innerText('a:right-of(:text("Active"))')).toBe('Completed1'); //TODO: to fix this test use ".toBe('Completed')"
 
-    // Go to the page
-    await page.goto('https://demo.playwright.dev/api-mocking');
+  // Only visible elements, with css selector
+  await page.click('text=Completed >> visible=true');
 
-    // Assert that the Playwright fruit is visible
-    await expect(page.getByText('Strawberry')).toBeVisible();
-  });
+  // XPath selector
+  await page.click('xpath=//html/body/section/section/label');
 });`
 
 // Helper function to convert Playwright syntax to CodeceptJS syntax
 function convertPlaywrightToCodeceptJS(playwrightCode: string) {
+  let convertedCode = '';
+
   // Remove imports from '@playwright/test'
   const codeceptjsCode = playwrightCode.replace(/import.*from '@playwright\/test';?/g, '');
 
   // Extract `test.describe` blocks and their associated tests
   const describeBlocks = Array.from(codeceptjsCode.matchAll(/test\.describe\((['"`])(.*?)\1, \(\) => {(.*?)\n}\);/gs));
 
-  let convertedCode = '';
+  if (describeBlocks.length > 0) {
+    // Handle code with `test.describe` blocks
+    describeBlocks.forEach((block: RegExpMatchArray) => {
+      const describeName = block[2];
+      const tests = block[3].trim();
 
-  describeBlocks.forEach((block: RegExpMatchArray) => {
-    const describeName = block[2];
-    const tests = block[3].trim();
+      // Start the Feature block
+      convertedCode += `Feature("${describeName}");\n\n`;
 
-    // Start the Feature block without a function
-    convertedCode += `Feature("${describeName}");\n\n`;
+      // Convert each `test()` within this `describe` block to a Scenario
+      let scenarios = tests.replaceAll('test(', 'Scenario(');
 
-    // Convert each `test()` within this `describe` block to a Scenario() outside the Feature block
-    let scenarios = tests.replaceAll('test(', 'Scenario(');
+      // Replace Playwright methods with equivalent CodeceptJS methods in the scenario body
+      scenarios = _scenarioConversion(scenarios)
 
-    // Replace Playwright methods with equivalent CodeceptJS methods in the scenario body
-    scenarios = scenarios
-      .replaceAll('({ page })', '({ I })')
-      .replaceAll(/await page\.goto\((['"`])(.*?)\1\);/g, 'I.amOnPage("$2");')
-      .replaceAll(/await expect\(page\.getByText\((['"`])(.*?)\1(?:, ?\{ exact: true \})?\)\)\.toBeVisible\(\);/g, 'I.see("$2");')
-      .replaceAll(/await page\.route\((['"`])(.*?)\1, async \(route\) => {/g, 'I.mockRoute("$2", async (request) => {')
-      .replaceAll(/route\.fulfill\(/g, 'request.continue(')
-      .replaceAll('await page.routeFromHAR', 'I.replayFromHar');
+      // Add the converted Scenario to the output
+      convertedCode += `${scenarios}\n\n`;
+    });
+  } else {
+    // Handle code with only standalone `test()` blocks
+    convertedCode += `Feature("Converted Playwright Tests");\n\n`;
 
-    // Add the converted Scenario to the output
-    convertedCode += `${scenarios}\n\n`;
-  });
+    let standaloneTests = _scenarioConversion(codeceptjsCode)
+
+    convertedCode += `${standaloneTests}\n\n`;
+    convertedCode = convertedCode.replaceAll('test.beforeEach', 'Before')
+  }
 
   return convertedCode;
+}
+
+function _scenarioConversion(text: string) {
+  return text
+    .replaceAll('test(', 'Scenario(')
+    .replaceAll('({ page })', '({ I })')
+    .replaceAll(/const (.*?) = page\.locator\((['"`])(.*?)\2\);/g, 'const $1 = locate("$3");')  // Convert page.locator to locate
+    .replaceAll(/await (.*?)\.fill\((['"`])(.*?)\2\);/g, 'I.fillField($1, "$3");')  // Convert inputBox.fill to I.fillField
+    .replaceAll(/await page\.goto\((['"`])(.*?)\1\);/g, 'I.amOnPage("$2");')
+    .replaceAll(/await page\.locator\((['"`])(.*?)\1\);/g, 'I.amOnPage("$2");')
+    .replaceAll(/await expect\(page\.getByText\((['"`])(.*?)\1(?:, ?\{ exact: true \})?\)\)\.toBeVisible\(\);/g, 'I.see("$2");')
+    .replaceAll(/await page\.route\((['"`])(.*?)\1, async \(route\) => {/g, 'I.mockRoute("$2", async (request) => {')
+    .replaceAll(/route\.fulfill\(/g, 'request.continue(')
+    .replaceAll('await page.routeFromHAR', 'I.replayFromHar')
+    .replaceAll(/await (.*?)\.locator\((['"`])(.*?)\2\)\.click\(\);/g, 'I.click("$3");')  // Convert locator with text to I.click
+    .replaceAll(/await (.*?)\.locator\((['"`])(.*?)\2\);/g, 'I.$1("$3");')
+    .replaceAll(/await expect\((.*?)\)\.toHaveText\((['"`])(.*?)\2\);/g, 'I.see("$3", $1);')
+    .replaceAll(/await expect\((.*?)\)\.not.toHaveText\((['"`])(.*?)\2\);/g, 'I.dontSee("$3", $1);')
+    .replaceAll(/await (.*?)\.press\((['"`])(.*?)\2\);/g, 'I.pressKey("$3");')
+    .replaceAll(/await (.*?)\.click\((['"`])(.*?)\2\);/g, 'I.click("$3");')
+    .replaceAll(/await (.*?)\.type\((['"`])(.*?)\2\);/g, 'I.type("$3");');
 }
 
 const TestConverter = () => {
