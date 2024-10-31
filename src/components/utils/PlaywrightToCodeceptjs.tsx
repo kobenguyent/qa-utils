@@ -3,8 +3,12 @@ import { Header } from "../Header.tsx";
 import { Footer } from "../Footer.tsx";
 import { Button, Container } from 'react-bootstrap';
 import CopyWithToast from '../CopyWithToast.tsx';
-import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
+import js from 'react-syntax-highlighter/dist/esm/languages/hljs/javascript';
+import docco from 'react-syntax-highlighter/dist/esm/styles/hljs/docco';
+
+SyntaxHighlighter.registerLanguage('javascript', js);
 
 const examplePlaywrightCode = `import { test, expect } from '@playwright/test';
 
