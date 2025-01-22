@@ -3,3 +3,12 @@
     margin-bottom: 1rem;
     font-weight: 700;
 }
+
+@media (max-width: 768px) {
+    .navbar-nav .nav-link, .navbar-nav .nav-dropdown {
+        font-size: 14px;
+    }
+    .navbar-brand {
+        font-size: 18px;
+    }
+}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Header } from "../Header.tsx";
 import { Footer } from "../Footer.tsx";
-import { Button, Container, Table, Dropdown } from 'react-bootstrap';
+import { Button, Container, Table, Dropdown, Image } from 'react-bootstrap';
 import { QuestionBanks } from './questionBanks.ts';
 
 export const Ctfl = () => {
@@ -148,7 +148,7 @@ export const Ctfl = () => {
             !result.isCorrect && (
               <div key={index}>
                 <h4>Question {index + 1}: {result.question}</h4>
-                { result.image ? (<img src={result.image}/>) : ''}
+                { result.image ? (<Image src={result.image} style={{ width: "95%", height: "95%" }}/>) : ''}
                 <p>Your Answer: {result.selectedOptions.join (", ")}</p>
                 <div>
                   <strong>Explanation:</strong>
@@ -165,7 +165,7 @@ export const Ctfl = () => {
             <span>Question {currentQuestionIndex + 1}</span>/{questions.length}
           </div>
           <p className="question">{currentQuestion.question}</p>
-          { currentQuestion.image ? (<img src={currentQuestion.image} alt={questions[currentQuestionIndex].question}/>) : ''}
+          { currentQuestion.image ? (<Image src={currentQuestion.image} style={{ width: "95%", height: "95%" }}/>) : ''}
           <Table striped bordered hover>
             <tbody>
             {currentQuestion.options.map((option: any, index: any) => (
