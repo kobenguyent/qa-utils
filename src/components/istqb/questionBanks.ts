@@ -1,4 +1,4 @@
-export const QuestionBanks = {
+export const QuestionBanks: any = {
   sampleA: [
     {
       id: 1,

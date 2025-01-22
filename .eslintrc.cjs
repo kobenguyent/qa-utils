@@ -11,6 +11,7 @@ module.exports = {
   rules: {
     'react-refresh/only-export-components': 'warn',
     'no-irregular-whitespace': 0,
-    '@typescript-eslint/ban-ts-comment': 0
+    '@typescript-eslint/ban-ts-comment': 0,
+
   },
 }

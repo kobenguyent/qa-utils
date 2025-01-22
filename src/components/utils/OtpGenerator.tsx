@@ -27,7 +27,7 @@ export const OtpGenerator = () => {
       setOtp(newOtp);
       setIsSecretValid(true);
 
-      const keyExists = secretKeys.some((key) => key.key === secret.trim());
+      const keyExists = secretKeys.some((key: any) => key.key === secret.trim());
       if (!keyExists) {
         const newSecret = {
           name: name.trim() || "Unnamed",
@@ -44,7 +44,7 @@ export const OtpGenerator = () => {
     }
   };
 
-  const handleSecretChange = (e) => {
+  const handleSecretChange = (e: any) => {
     const cleanedSecret = e.target.value.replace(/\s/g, "");
     setSecret(cleanedSecret);
   };
@@ -89,7 +89,7 @@ export const OtpGenerator = () => {
     localStorage.removeItem("secretKeys");
   };
 
-  const handleSetCurrentSecret = (key, name) => {
+  const handleSetCurrentSecret = (key: any, name: string) => {
     setSecret(key);
     setName(name);
     setOtp(""); // Clear OTP when switching secrets
@@ -197,7 +197,7 @@ export const OtpGenerator = () => {
             </tr>
             </thead>
             <tbody>
-            {secretKeys.map((key, index) => (
+            {secretKeys.map((key: any, index: number) => (
               <tr key={index}>
                 <td>{index + 1}</td>
                 <td>{key.name}</td>

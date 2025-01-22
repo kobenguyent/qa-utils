@@ -18,7 +18,7 @@ export const Ctfl = () => {
   const [timerInterval, setTimerInterval] = useState(null);
 
   useEffect(() => {
-    const countdown = setInterval(() => {
+    const countdown: any = setInterval(() => {
       setTimer((prev) => {
         if (prev <= 1) {
           clearInterval(countdown);
@@ -43,18 +43,18 @@ export const Ctfl = () => {
     setTimer(60 * 60);
   }, [selectedQuestionBank]);
 
-  const formatTime = (seconds) => {
+  const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
-  const handleOptionClick = (option) => {
+  const handleOptionClick = (option: any) => {
     const updatedOptions = [...selectedOptionsByQuestion];
     const currentOptions = updatedOptions[currentQuestionIndex];
 
     if (currentOptions.includes(option)) {
-      updatedOptions[currentQuestionIndex] = currentOptions.filter((o) => o !== option);
+      updatedOptions[currentQuestionIndex] = currentOptions.filter((o: any) => o !== option);
     } else {
       updatedOptions[currentQuestionIndex] = [...currentOptions, option];
     }
@@ -76,11 +76,11 @@ export const Ctfl = () => {
       setTimerInterval(null);
     }
 
-    const detailedResults = questions.map((question, index) => {
+    const detailedResults = questions.map((question: any, index: number) => {
       const selectedOptions = selectedOptionsByQuestion[index];
       const isCorrect =
         selectedOptions.length === question.correctOptions.length &&
-        selectedOptions.every((option) => question.correctOptions.includes(option));
+        selectedOptions.every((option: any) => question.correctOptions.includes(option));
 
       if (isCorrect) {
         setScore((prevScore) => prevScore + 1);
@@ -106,7 +106,7 @@ export const Ctfl = () => {
     setResults([]);
     setTimer(60 * 60);
 
-    const countdown = setInterval(() => {
+    const countdown: any = setInterval(() => {
       setTimer((prev) => {
         if (prev <= 1) {
           clearInterval(countdown);
@@ -128,7 +128,7 @@ export const Ctfl = () => {
       <div className="text-center">
         <h1>CTFL v4 Practice Exam - { selectedQuestionBank }</h1>
         <div>Time Remaining: {formatTime(timer)}</div>
-        <Dropdown onSelect={(e) => setSelectedQuestionBank(e)}>
+        <Dropdown onSelect={(e: any) => setSelectedQuestionBank(e)}>
           <Dropdown.Toggle variant="success">{ selectedQuestionBank }</Dropdown.Toggle>
           <Dropdown.Menu>
             {Object.keys(QuestionBanks).map((key) => (
@@ -143,7 +143,7 @@ export const Ctfl = () => {
         <div className="score-section">
           <h2>You scored {score} out of {questions.length}</h2>
           <h3>Review Incorrect Answers:</h3>
-          {results.map ((result, index) => (
+          {results.map ((result: any, index) => (
             !result.isCorrect && (
               <div key={index}>
                 <h4>Question {index + 1}: {result.question}</h4>
@@ -165,7 +165,7 @@ export const Ctfl = () => {
           <p className="question">{currentQuestion.question}</p>
           <Table striped bordered hover>
             <tbody>
-            {currentQuestion.options.map((option, index) => (
+            {currentQuestion.options.map((option: any, index: any) => (
               <tr
                 key={index}
                 onClick={() => handleOptionClick(option.charAt(0))}
