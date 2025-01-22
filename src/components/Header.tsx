@@ -25,6 +25,9 @@ export const Header = ()  => {
             <NavDropdown.Item href="#/otp">🌠 OTP Generator</NavDropdown.Item>
             <NavDropdown.Item href="#/playwright2codecept">🤖 Playwright Tests to CodeceptJS</NavDropdown.Item>
           </NavDropdown>
+          <NavDropdown title="📚 ISTQB" id="istqb">
+            <NavDropdown.Item href="#/ctfl">📚 CTFL v4 - Practice Exams</NavDropdown.Item>
+          </NavDropdown>
         </Nav>
       </Container>
     </Navbar>
