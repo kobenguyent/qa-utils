@@ -88,6 +88,7 @@ export const Ctfl = () => {
 
       return {
         question: question.question,
+        image: question.image,
         selectedOptions,
         isCorrect,
         explanation: question.explanation.answer,
@@ -147,6 +148,7 @@ export const Ctfl = () => {
             !result.isCorrect && (
               <div key={index}>
                 <h4>Question {index + 1}: {result.question}</h4>
+                { result.image ? (<img src={result.image}/>) : ''}
                 <p>Your Answer: {result.selectedOptions.join (", ")}</p>
                 <div>
                   <strong>Explanation:</strong>
@@ -163,6 +165,7 @@ export const Ctfl = () => {
             <span>Question {currentQuestionIndex + 1}</span>/{questions.length}
           </div>
           <p className="question">{currentQuestion.question}</p>
+          { currentQuestion.image ? (<img src={currentQuestion.image} alt={questions[currentQuestionIndex].question}/>) : ''}
           <Table striped bordered hover>
             <tbody>
             {currentQuestion.options.map((option: any, index: any) => (
@@ -185,6 +188,7 @@ export const Ctfl = () => {
           >
             {currentQuestionIndex === questions.length - 1 ? "Submit" : "Next"}
           </Button>
+          <Button onClick={handleRestart}>Restart Test</Button>
         </div>
       )}
       <Footer />
