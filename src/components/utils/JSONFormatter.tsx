@@ -8,6 +8,7 @@ import { jsonStyles } from '../../styles/jsonStyles.ts';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import CopyWithToast from '../CopyWithToast.tsx';
 
 export const JSONFormatter = () => {
   const [postContent, setPostContent] = useState('{\n' +
@@ -49,6 +50,12 @@ export const JSONFormatter = () => {
           </Form.Label>
           <Col sm="10">
             <JSONViewer data={jsonParse(postContent)} collapsible styles={jsonStyles}/>
+          </Col>
+        </Form.Group>
+
+        <Form.Group as={Row} className="mb-3" controlId="copy-to-clipboard">
+          <Col sm="10">
+            <CopyWithToast text={JSON.stringify(jsonParse(postContent), null, 2) || ''}></CopyWithToast>
           </Col>
         </Form.Group>
       </Form>

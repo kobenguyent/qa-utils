@@ -9,6 +9,7 @@ import { jsonStyles } from '../../styles/jsonStyles.ts';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import CopyWithToast from '../CopyWithToast.tsx';
 
 export const JWTDebugger = () => {
   const [postContent, setPostContent] = useState('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c');
@@ -44,6 +45,12 @@ export const JWTDebugger = () => {
           </Form.Label>
           <Col sm="10">
             <JSONViewer data={decodeToken(postContent)} collapsible styles={jsonStyles}/>
+          </Col>
+        </Form.Group>
+
+        <Form.Group as={Row} className="mb-3" controlId="copy-to-clipboard">
+          <Col sm="10">
+            <CopyWithToast text={JSON.stringify(decodeToken(postContent), null, 2) || ''}></CopyWithToast>
           </Col>
         </Form.Group>
       </Form>
