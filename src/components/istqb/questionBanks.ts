@@ -1608,6 +1608,16 @@ export const QuestionBanks: any = {
       "id": 38,
       "question": "You are testing a sort function that gets a set of numbers as input and returns the same set of numbers sorted in ascending order. The log from the test execution looks as follows.",
       "image": null,
+      "code": 'Environment configuration: sort function build 2.002.2182, test case set: TCS-3, # of TCs: 5\n' +
+        'Test run ID: 736\n' +
+        'Start 12:43:21.003\n' +
+        '12:43:21.003 Execution of TC1. Input: 3.              Output: 3.        Result: passed\n' +
+        '12:43:21.003 Execution of TC2. Input: 3 11 6 5.       Output: 3 5 6 11. Result: passed\n' +
+        '12:43:21.004 Execution of TC3. Input: 8 7 3 7 1.      Output: 1 3 7 8.  Result: failed\n' +
+        '12:43:21.005 Execution of TC4. Input: -2 -2 -2 -3 -3. Output: -3 -2.    Result: failed\n' +
+        '12:43:21.005 Execution of TC5. Input: 0 -2 0 3 4 4.   Output: -2 0 3 4. Result: failed\n' +
+        'End 12:43:21.005\n' +
+        'Total time of test cycle: 0:00:00.002',
       "options": [
         "a) The system fails to sort several sets of numbers. Reference: TC3, TC4, TC5.",
         "b) The system seems to disregard duplicates while sorting. Reference: TC3, TC4, TC5.",

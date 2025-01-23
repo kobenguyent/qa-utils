@@ -53,8 +53,11 @@ export const Ctfl = () => {
     const updatedOptions = [...selectedOptionsByQuestion];
     const currentOptions = updatedOptions[currentQuestionIndex];
 
+    // Toggle the selected option
     if (currentOptions.includes(option)) {
-      updatedOptions[currentQuestionIndex] = currentOptions.filter((o: any) => o !== option);
+      updatedOptions[currentQuestionIndex] = currentOptions.filter(
+        (o: any) => o !== option
+      );
     } else {
       updatedOptions[currentQuestionIndex] = [...currentOptions, option];
     }
@@ -78,19 +81,29 @@ export const Ctfl = () => {
 
     const detailedResults = questions.map((question: any, index: number) => {
       const selectedOptions = selectedOptionsByQuestion[index];
-      const isCorrect =
-        selectedOptions.length === question.correctOptions.length &&
-        selectedOptions.every((option: any) => question.correctOptions.includes(option));
+      const correctOptions = question.correctOptions;
 
-      if (isCorrect) {
+      // Check how many correct options were selected
+      const correctSelected = selectedOptions.filter((option: any) =>
+        correctOptions.includes(option)
+      );
+
+      const isPartiallyCorrect = correctSelected.length > 0;
+      let isFullyCorrect =
+        selectedOptions.length === correctOptions.length &&
+        correctSelected.length === correctOptions.length;
+
+      // Award score for partially correct answers if at least one correct option is selected
+      if (isPartiallyCorrect) {
         setScore((prevScore) => prevScore + 1);
+        isFullyCorrect = true;
       }
 
       return {
         question: question.question,
         image: question.image,
         selectedOptions,
-        isCorrect,
+        isCorrect: isFullyCorrect,
         explanation: question.explanation.answer,
       };
     });
@@ -143,6 +156,7 @@ export const Ctfl = () => {
       {showScore ? (
         <div className="score-section">
           <h2>You scored {score} out of {questions.length}</h2>
+          { (score / questions.length) * 100 >= 65 ? (<h3 style={ {'color': 'green'} }>You passed the exam</h3>) : (<h3 style={ {'color': 'red'} }>Please practice more</h3>) }
           <h3>Review Incorrect Answers:</h3>
           {results.map ((result: any, index) => (
             !result.isCorrect && (
@@ -166,16 +180,22 @@ export const Ctfl = () => {
           </div>
           <p className="question">{currentQuestion.question}</p>
           { currentQuestion.image ? (<Image src={currentQuestion.image} style={{ width: "95%", height: "95%" }}/>) : ''}
+          { currentQuestion?.code ? (<pre className="font-size-small">{currentQuestion.code}</pre>) : ''}
           <Table striped bordered hover>
             <tbody>
             {currentQuestion.options.map((option: any, index: any) => (
-              <tr
-                key={index}
-                onClick={() => handleOptionClick(option.charAt(0))}
-                className={selectedOptions.includes(option.charAt(0)) ? "table-primary" : ""}
-                style={{ cursor: "pointer" }}
-              >
-                <td>{option}</td>
+              <tr key={index}>
+                <td>
+                  <input
+                    type="checkbox"
+                    name={`question-${currentQuestionIndex}`}
+                    value={option.charAt(0)}
+                    checked={selectedOptions.includes(option.charAt(0))}
+                    onChange={() => handleOptionClick(option.charAt(0))}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  <label style={{ marginLeft: "8px" }}>{option}</label>
+                </td>
               </tr>
             ))}
             </tbody>
@@ -183,10 +203,15 @@ export const Ctfl = () => {
           <Button onClick={handlePreviousQuestion} disabled={currentQuestionIndex === 0}>
             Previous
           </Button>
-          <Button
-            onClick={currentQuestionIndex === questions.length - 1 ? handleSubmit : handleNextQuestion}
+          { currentQuestionIndex <= questions.length - 1 ? (<Button
+            onClick={handleNextQuestion}
           >
-            {currentQuestionIndex === questions.length - 1 ? "Submit" : "Next"}
+            {"Next"}
+          </Button>) : ''}
+          <Button
+            onClick={handleSubmit}
+          >
+            {"Submit"}
           </Button>
           <Button onClick={handleRestart}>Restart Test</Button>
         </div>
