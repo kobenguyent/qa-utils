@@ -15,6 +15,7 @@ import { UuidGenerator } from './components/utils/UuidGenerator.tsx';
 import { JiraComment } from './components/utils/JiraComment.tsx';
 import { OtpGenerator } from './components/utils/OtpGenerator.tsx';
 import PlaywrightToCodeceptjs from './components/utils/PlaywrightToCodeceptjs.tsx';
+import { EncryptionTool } from './components/utils/EncryptionTool.tsx';
 import { Ctfl } from './components/istqb/ctfl.tsx';
 
 const router = createHashRouter([
@@ -69,6 +70,10 @@ const router = createHashRouter([
   {
     path: 'playwright2codecept',
     element: <PlaywrightToCodeceptjs></PlaywrightToCodeceptjs>
+  },
+  {
+    path: 'encryption',
+    element: <EncryptionTool></EncryptionTool>
   },
   {
     path: 'ctfl',

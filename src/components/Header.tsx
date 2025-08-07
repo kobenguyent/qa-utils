@@ -25,6 +25,7 @@ export const Header = ()  => {
               <NavDropdown.Item href="#/uuid">🌠 UUID Generator</NavDropdown.Item>
               <NavDropdown.Item href="#/jiraComment">🌠 JIRA Comment Generator</NavDropdown.Item>
               <NavDropdown.Item href="#/otp">🌠 OTP Generator</NavDropdown.Item>
+              <NavDropdown.Item href="#/encryption">🔐 Encryption/Decryption Tool</NavDropdown.Item>
               <NavDropdown.Item href="#/playwright2codecept">🤖 Playwright Tests to CodeceptJS</NavDropdown.Item>
             </NavDropdown>
             <NavDropdown title="📚 ISTQB" id="istqb">
