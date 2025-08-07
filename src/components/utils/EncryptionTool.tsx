@@ -1,6 +1,7 @@
 import { Button, Container, Alert } from "react-bootstrap";
 import { Header } from "../Header.tsx";
 import { Footer } from "../Footer.tsx";
+import CopyWithToast from '../CopyWithToast.tsx';
 import { useState } from 'react';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
@@ -227,6 +228,11 @@ export const EncryptionTool = () => {
               value={result}
               placeholder="Encryption/decryption result will appear here"
             />
+            {result && (
+              <div className="mt-2">
+                <CopyWithToast text={result} />
+              </div>
+            )}
           </Col>
         </Form.Group>
 
