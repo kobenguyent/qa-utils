@@ -1,14 +1,107 @@
+/* Global styles */
 .question {
     white-space: pre-line;
     margin-bottom: 1rem;
     font-weight: 700;
 }
 
-@media (max-width: 768px) {
-    .navbar-nav .nav-link, .navbar-nav .nav-dropdown {
+/* Mobile-first responsive design */
+@media (max-width: 576px) {
+    .navbar-nav .nav-link, .navbar-nav .dropdown-toggle {
         font-size: 14px;
+        padding: 0.5rem 0.75rem;
     }
+    
     .navbar-brand {
         font-size: 18px;
+    }
+    
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    h1.h3 {
+        font-size: 1.5rem;
+    }
+    
+    .lead {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar-nav .nav-link, .navbar-nav .dropdown-toggle {
+        font-size: 14px;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .navbar-brand {
+        font-size: 18px;
+    }
+    
+    .navbar-toggler {
+        padding: 0.25rem 0.5rem;
+        font-size: 1rem;
+    }
+}
+
+/* Improved navigation styles */
+.navbar {
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+.navbar-brand {
+    font-weight: 600;
+    color: #0d6efd !important;
+}
+
+.nav-link {
+    transition: color 0.2s ease-in-out;
+}
+
+.nav-link:hover {
+    color: #0d6efd !important;
+}
+
+/* Loading and error styles */
+.loading-container {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Utility classes */
+.min-vh-100 {
+    min-height: 100vh;
+}
+
+.shadow-sm {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+/* Focus states for accessibility */
+.nav-link:focus,
+.navbar-brand:focus,
+.btn:focus {
+    outline: 2px solid #0d6efd;
+    outline-offset: 2px;
+}
+
+/* Improved text readability */
+.text-muted {
+    opacity: 0.8;
+}
+
+/* Footer improvements */
+footer {
+    margin-top: auto;
+}
+
+@media (max-width: 768px) {
+    footer .col-md-6:last-child {
+        text-align: center !important;
+        margin-top: 0.5rem;
     }
 }

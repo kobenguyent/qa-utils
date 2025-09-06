@@ -27,9 +27,24 @@ export default defineConfig(({ mode }) => {
     assetsInclude: ['**/*.png', '**/*.jpeg', '**/*.svg'],
     build: {
       target: 'esnext',
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ['react', 'react-dom', 'react-router-dom'],
+            bootstrap: ['react-bootstrap', 'bootstrap'],
+            utils: ['axios', 'date-fns', 'humps', 'js-base64', 'uuid'],
+          },
+        },
+      },
+      sourcemap: mode === 'development',
+      minify: 'esbuild',
+      cssMinify: true,
+    },
+    optimizeDeps: {
+      include: ['react', 'react-dom', 'react-router-dom'],
     },
     define: {
-    __COMMIT_HASH__: JSON.stringify(commitHash),
-  },
+      __COMMIT_HASH__: JSON.stringify(commitHash),
+    },
   }
 })

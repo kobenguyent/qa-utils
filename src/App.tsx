@@ -1,17 +1,18 @@
+import { useEffect, useCallback } from 'react';
 import './App.css'
 import {Header} from "./components/Header.tsx";
 import {Container} from "react-bootstrap";
 import {Footer} from "./components/Footer.tsx";
 import {Home} from "./components/Home.tsx";
-import { useEffect } from 'react';
 import { trackPageView } from './utils/umami.ts';
+import { ErrorBoundary } from './components/ErrorBoundary.tsx';
 
 function App() {
   // This function is used to track the page view using the current hash.
-  const trackCurrentHash = () => {
+  const trackCurrentHash = useCallback(() => {
     const currentHash = window.location.hash || '#';
     trackPageView(currentHash);
-  };
+  }, []);
 
   useEffect(() => {
     // Track the initial load
@@ -24,14 +25,18 @@ function App() {
     return () => {
       window.removeEventListener('hashchange', trackCurrentHash);
     };
-  }, []);
+  }, [trackCurrentHash]);
 
   return (
-    <Container>
-      <Header></Header>
-      <Home></Home>
-      <Footer></Footer>
-    </Container>
+    <ErrorBoundary>
+      <Container fluid className="d-flex flex-column min-vh-100">
+        <Header />
+        <main className="flex-grow-1">
+          <Home />
+        </main>
+        <Footer />
+      </Container>
+    </ErrorBoundary>
   )
 }
 
