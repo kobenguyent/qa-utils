@@ -1,19 +1,28 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { trackPageView } from '../umami';
 
+// Create a minimal window mock
+const mockWindow = {
+  umami: undefined,
+} as any;
+
+// Set up global window mock
+Object.defineProperty(global, 'window', {
+  value: mockWindow,
+  writable: true,
+});
+
 describe('umami utilities', () => {
   beforeEach(() => {
-    // Reset window.umami before each test
-    // @ts-ignore
-    delete window.umami;
+    // Clear all mocks and reset umami
     vi.clearAllMocks();
+    mockWindow.umami = undefined;
   });
 
   describe('trackPageView', () => {
     it('should call umami.trackView when umami is available', () => {
       const mockTrackView = vi.fn();
-      // @ts-ignore
-      window.umami = {
+      mockWindow.umami = {
         trackView: mockTrackView
       };
 
@@ -25,7 +34,7 @@ describe('umami utilities', () => {
     });
 
     it('should log warning when umami is not available', () => {
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       
       const testUrl = '/test-page';
       trackPageView(testUrl);
@@ -36,9 +45,8 @@ describe('umami utilities', () => {
     });
 
     it('should log warning when umami.trackView is not a function', () => {
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      // @ts-ignore
-      window.umami = {
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+      mockWindow.umami = {
         trackView: 'not a function'
       };
       
