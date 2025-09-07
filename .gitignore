@@ -6,11 +6,20 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+bun-debug.log*
+
+# Package manager lock files (keep only bun.lockb)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
 node_modules
 dist
 dist-ssr
 *.local
+
+# Testing and Coverage
+coverage/
 
 # Editor directories and files
 .vscode/*

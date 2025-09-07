@@ -97,7 +97,7 @@ function convertPlaywrightToCodeceptJS(playwrightCode: string) {
     // Handle code with only standalone `test()` blocks
     convertedCode += `Feature("Converted Playwright Tests");\n\n`;
 
-    let standaloneTests = _scenarioConversion(codeceptjsCode)
+    const standaloneTests = _scenarioConversion(codeceptjsCode)
 
     convertedCode += `${standaloneTests}\n\n`;
     convertedCode = convertedCode.replaceAll('test.beforeEach', 'Before')
