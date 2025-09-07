@@ -20,6 +20,7 @@ const JiraComment = lazy(() => import('./components/utils/JiraComment.tsx').then
 const OtpGenerator = lazy(() => import('./components/utils/OtpGenerator.tsx').then(module => ({default: module.OtpGenerator})));
 const PlaywrightToCodeceptjs = lazy(() => import('./components/utils/PlaywrightToCodeceptjs.tsx'));
 const EncryptionTool = lazy(() => import('./components/utils/EncryptionTool.tsx').then(module => ({default: module.EncryptionTool})));
+const WorkflowGenerator = lazy(() => import('./components/utils/WorkflowGenerator.tsx').then(module => ({default: module.WorkflowGenerator})));
 const Ctfl = lazy(() => import('./components/istqb/ctfl.tsx').then(module => ({default: module.Ctfl})));
 
 // Component wrapper with error boundary and suspense
@@ -87,6 +88,10 @@ const router = createHashRouter([
   {
     path: 'encryption',
     element: <RouteWrapper><EncryptionTool /></RouteWrapper>
+  },
+  {
+    path: 'workflow-generator',
+    element: <RouteWrapper><WorkflowGenerator /></RouteWrapper>
   },
   {
     path: 'ctfl',

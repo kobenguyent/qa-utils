@@ -73,6 +73,9 @@ export const Header: React.FC = () => {
               <NavDropdown.Item href="#/playwright2codecept">
                 🤖 Playwright Tests to CodeceptJS
               </NavDropdown.Item>
+              <NavDropdown.Item href="#/workflow-generator">
+                🚀 CI/CD Workflow Generator
+              </NavDropdown.Item>
             </NavDropdown>
             <NavDropdown 
               title="📚 ISTQB" 
