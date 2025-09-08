@@ -48,7 +48,7 @@ export const sanitizeHTML = (html: string): string => {
 /**
  * Debounce function to limit the rate of function calls
  */
-export const debounce = <T extends (...args: any[]) => any>(
+export const debounce = <T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): ((...args: Parameters<T>) => void) => {

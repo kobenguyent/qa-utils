@@ -1,4 +1,21 @@
-export const QuestionBanks: any = {
+interface Question {
+  id: number;
+  question: string;
+  image: string | null;
+  code?: string;
+  options: string[];
+  correctOptions: string[];
+  explanation: {
+    answer: string;
+    ref: string;
+  };
+}
+
+interface QuestionBank {
+  [key: string]: Question[];
+}
+
+export const QuestionBanks: QuestionBank = {
   sampleA: [
     {
       id: 1,

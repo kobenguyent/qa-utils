@@ -64,12 +64,12 @@ describe('API Client Integration Tests', () => {
       const client = createWebSocketClient(config);
 
       // Set up callbacks for handling real-time updates
-      let lastResponse: any = null;
       client.onUpdateCallback((response) => {
-        lastResponse = response;
+        // Response handling would go here in real usage
+        void response;
       });
 
-      let receivedMessages: any[] = [];
+      const receivedMessages: unknown[] = [];
       client.onMessageCallback((message) => {
         receivedMessages.push(message);
       });

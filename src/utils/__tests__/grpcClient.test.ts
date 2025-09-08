@@ -18,7 +18,7 @@ const mockAbortController = {
   abort: vi.fn(),
 };
 
-global.AbortController = vi.fn(() => mockAbortController) as any;
+global.AbortController = vi.fn(() => mockAbortController) as unknown as typeof AbortController;
 
 describe('grpcClient', () => {
   beforeEach(() => {
@@ -220,7 +220,7 @@ describe('grpcClient', () => {
 
       mockFetch.mockResolvedValue(mockResponse);
 
-      const messages: any[] = [];
+      const messages: unknown[] = [];
       const onMessage = vi.fn((message) => {
         messages.push(message);
       });
@@ -230,8 +230,8 @@ describe('grpcClient', () => {
       expect(response.status).toBe(200);
       expect(onMessage).toHaveBeenCalledTimes(2);
       expect(messages).toHaveLength(2);
-      expect(messages[0].data).toBe('{"message": "Hello"}');
-      expect(messages[1].data).toBe('{"message": "World"}');
+      expect((messages[0] as { data: string }).data).toBe('{"message": "Hello"}');
+      expect((messages[1] as { data: string }).data).toBe('{"message": "World"}');
     });
 
     it('should handle streaming call error', async () => {

@@ -11,7 +11,7 @@ import CopyWithToast from '../CopyWithToast.tsx';
 
 export const JiraComment = () => {
   const UADetails = useUA();
-  const osInfo: any = `${UADetails?.os.name}`;
+  const osInfo = `${UADetails?.os.name ?? 'Unknown'}`;
   const browserInfo = `${UADetails?.browser.name} - ${UADetails?.browser.version}`;
   const installedBrowsers = navigator.userAgent
     .split(' ')

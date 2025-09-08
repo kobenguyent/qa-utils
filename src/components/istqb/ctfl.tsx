@@ -4,6 +4,14 @@ import { Footer } from "../Footer.tsx";
 import { Button, Container, Table, Dropdown, Image } from 'react-bootstrap';
 import { QuestionBanks } from './questionBanks.ts';
 
+interface QuizResult {
+  question: string;
+  image: string | null;
+  selectedOptions: string[];
+  isCorrect: boolean;
+  explanation: string;
+}
+
 export const Ctfl = () => {
   const [selectedQuestionBank, setSelectedQuestionBank] = useState('sampleA');
   const [questions, setQuestions] = useState(QuestionBanks.sampleA);
@@ -14,8 +22,8 @@ export const Ctfl = () => {
   const [score, setScore] = useState(0);
   const [showScore, setShowScore] = useState(false);
   const [timer, setTimer] = useState(60 * 60); // 60 minutes in seconds
-  const [results, setResults] = useState([]);
-  const [timerInterval, setTimerInterval] = useState(null);
+  const [results, setResults] = useState<QuizResult[]>([]);
+  const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const countdown: any = setInterval(() => {

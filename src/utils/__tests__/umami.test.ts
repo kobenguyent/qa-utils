@@ -4,7 +4,7 @@ import { trackPageView } from '../umami';
 // Create a minimal window mock
 const mockWindow = {
   umami: undefined,
-} as any;
+} as Partial<Window & { umami?: { trackView: (url: string) => void } }>;
 
 // Set up global window mock
 Object.defineProperty(global, 'window', {
@@ -47,7 +47,7 @@ describe('umami utilities', () => {
     it('should log warning when umami.trackView is not a function', () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       mockWindow.umami = {
-        trackView: 'not a function'
+        trackView: 'not a function' as unknown as (url: string) => void
       };
       
       const testUrl = '/test-page';

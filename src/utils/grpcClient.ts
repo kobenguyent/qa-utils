@@ -255,6 +255,7 @@ export class GrpcClient {
     const decoder = new TextDecoder();
 
     try {
+      // eslint-disable-next-line no-constant-condition
       while (true) {
         const { done, value } = await reader.read();
         

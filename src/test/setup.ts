@@ -2,7 +2,7 @@ import '@testing-library/jest-dom'
 import { vi } from 'vitest'
 
 // Make vi available globally
-(globalThis as any).vi = vi
+(globalThis as typeof globalThis & { vi: typeof vi }).vi = vi
 
 // Mock global variables that might be used in components
 Object.defineProperty(globalThis, '__COMMIT_HASH__', {
