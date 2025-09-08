@@ -76,6 +76,9 @@ export const Header: React.FC = () => {
               <NavDropdown.Item href="#/workflow-generator">
                 🚀 CI/CD Workflow Generator
               </NavDropdown.Item>
+              <NavDropdown.Item href="#/rest-client">
+                🌐 REST Client
+              </NavDropdown.Item>
             </NavDropdown>
             <NavDropdown 
               title="📚 ISTQB" 
