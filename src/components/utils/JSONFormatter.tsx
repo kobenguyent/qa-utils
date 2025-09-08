@@ -20,8 +20,8 @@ export const JSONFormatter = () => {
   function jsonParse (string: string) {
     try {
       return JSON.parse(string)
-    } catch (e: any) {
-      return { error: e.message }
+    } catch (e: unknown) {
+      return { error: e instanceof Error ? e.message : 'Unknown error' }
     }
   }
 

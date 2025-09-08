@@ -35,7 +35,7 @@ describe('Data Processing Helpers', () => {
   });
 
   it('should format JSON data safely', () => {
-    const formatJSON = (data: any, indent = 2) => {
+    const formatJSON = (data: unknown, indent = 2) => {
       try {
         if (typeof data === 'string') {
           return JSON.stringify(JSON.parse(data), null, indent);
