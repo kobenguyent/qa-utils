@@ -128,7 +128,7 @@ export const parseCurlCommand = (curlCommand: string): CurlCommand => {
 
   // Extract URL - be very specific about URL patterns
   // First try to find URLs with protocol
-  let urlMatch = normalizedCurl.match(/https?:\/\/[^\s'"]+/);
+  const urlMatch = normalizedCurl.match(/https?:\/\/[^\s'"]+/);
   
   if (urlMatch) {
     result.url = urlMatch[0];
