@@ -1,27 +1,46 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import axios from 'axios';
-import {
-  makeRequest,
-  parseCurlCommand,
-  curlToRequestConfig,
-  requestConfigToCurl,
-  isValidUrl,
-  formatJsonResponse,
-  RequestConfig,
-} from '../restClient';
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll } from 'vitest';
+import type { RequestConfig } from '../restClient';
 
-// Mock axios using a more compatible approach
-vi.mock('axios', () => {
-  return {
-    default: vi.fn(),
-  };
+// Import the module functions we want to test
+let makeRequest: typeof import('../restClient').makeRequest;
+let parseCurlCommand: typeof import('../restClient').parseCurlCommand;
+let curlToRequestConfig: typeof import('../restClient').curlToRequestConfig;
+let requestConfigToCurl: typeof import('../restClient').requestConfigToCurl;
+let isValidUrl: typeof import('../restClient').isValidUrl;
+let formatJsonResponse: typeof import('../restClient').formatJsonResponse;
+
+// Use vi.hoisted properly for mocking
+const { mockAxios } = vi.hoisted(() => {
+  const mockAxios = vi.fn() as any;
+  mockAxios.get = vi.fn();
+  mockAxios.post = vi.fn();
+  mockAxios.put = vi.fn();
+  mockAxios.patch = vi.fn();
+  mockAxios.delete = vi.fn();
+  mockAxios.request = vi.fn();
+  
+  return { mockAxios };
 });
 
-const mockedAxios = vi.mocked(axios);
+vi.mock('axios', () => ({
+  default: mockAxios
+}));
+
+// Now import after setting up the mock
+beforeAll(async () => {
+  const module = await import('../restClient');
+  makeRequest = module.makeRequest;
+  parseCurlCommand = module.parseCurlCommand;
+  curlToRequestConfig = module.curlToRequestConfig;
+  requestConfigToCurl = module.requestConfigToCurl;
+  isValidUrl = module.isValidUrl;
+  formatJsonResponse = module.formatJsonResponse;
+});
 
 describe('restClient', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockAxios.mockClear();
   });
 
   afterEach(() => {
@@ -36,7 +55,7 @@ describe('restClient', () => {
       };
 
       // Mock network error
-      mockedAxios.mockRejectedValue({
+      mockAxios.mockRejectedValue({
         request: {},
         message: 'getaddrinfo ENOTFOUND invalid-domain-that-does-not-exist-12345.com'
       });
@@ -51,7 +70,7 @@ describe('restClient', () => {
       };
 
       // Mock network error for malformed URL
-      mockedAxios.mockRejectedValue({
+      mockAxios.mockRejectedValue({
         request: {},
         message: 'Invalid URL'
       });
@@ -66,7 +85,7 @@ describe('restClient', () => {
       };
 
       // Mock network error
-      mockedAxios.mockRejectedValue({
+      mockAxios.mockRejectedValue({
         request: {},
         message: 'getaddrinfo ENOTFOUND invalid-domain-12345.com'
       });
@@ -94,7 +113,7 @@ describe('restClient', () => {
       };
 
       // Mock network error
-      mockedAxios.mockRejectedValue({
+      mockAxios.mockRejectedValue({
         request: {},
         message: 'getaddrinfo ENOTFOUND invalid-domain-12345.com'
       });
