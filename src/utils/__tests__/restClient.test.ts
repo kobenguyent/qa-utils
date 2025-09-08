@@ -10,8 +10,12 @@ import {
   RequestConfig,
 } from '../restClient';
 
-// Mock axios for integration tests
-vi.mock('axios');
+// Mock axios using a more compatible approach
+vi.mock('axios', () => {
+  return {
+    default: vi.fn(),
+  };
+});
 
 const mockedAxios = vi.mocked(axios);
 
