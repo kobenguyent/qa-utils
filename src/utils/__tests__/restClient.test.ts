@@ -41,7 +41,7 @@ describe('restClient', () => {
       } catch (error) {
         const duration = Date.now() - startTime;
         expect(duration).toBeGreaterThanOrEqual(0);
-        expect(error.message).toContain('Network error');
+        expect((error as Error).message).toContain('Network error');
       }
     });
 
@@ -292,7 +292,7 @@ describe('restClient', () => {
       
       expect(config.url).toBe('https://api.example.com/status');
       expect(config.method).toBe('GET');
-      expect(config.headers.Accept).toBe('application/json');
+      expect(config.headers?.Accept).toBe('application/json');
       
       // Test curl generation
       const generatedCurl = requestConfigToCurl(config);

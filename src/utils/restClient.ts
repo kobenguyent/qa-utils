@@ -42,7 +42,7 @@ export const makeRequest = async (config: RequestConfig): Promise<RestResponse> 
       },
       timeout: config.timeout || 30000,
       data: config.body,
-      transformResponse: [(data) => data], // Keep raw response
+      transformResponse: [(data: any) => data], // Keep raw response
     };
 
     const response: AxiosResponse = await axios(axiosConfig);
@@ -105,9 +105,10 @@ export const parseCurlCommand = (curlCommand: string): CurlCommand => {
   }
 
   // Extract headers
-  const headerMatches = normalizedCurl.matchAll(/-H\s+['"]([^'"]+)['"]|--header\s+['"]([^'"]+)['"]/g);
-  for (const match of headerMatches) {
-    const headerValue = match[1] || match[2];
+  const headerRegex = /-H\s+['"]([^'"]+)['"]|--header\s+['"]([^'"]+)['"]/g;
+  let headerMatch;
+  while ((headerMatch = headerRegex.exec(normalizedCurl)) !== null) {
+    const headerValue = headerMatch[1] || headerMatch[2];
     const [key, ...valueParts] = headerValue.split(':');
     if (key && valueParts.length > 0) {
       result.headers[key.trim()] = valueParts.join(':').trim();
