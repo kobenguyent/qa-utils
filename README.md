@@ -5,7 +5,7 @@
 
 A comprehensive collection of quality assurance tools and utilities designed to enhance your testing workflow. Built with modern React, TypeScript, and optimized for performance with comprehensive test coverage.
 
-🌐 **[Live Demo](https://kobenguyent.github.io/qa-utils/#/)** | 📊 **62 Tests** | 🎯 **Mobile-First Design**
+🌐 **[Live Demo](https://kobenguyent.github.io/qa-utils/#/)** | 📊 **83 Tests** | 🎯 **Mobile-First Design**
 
 ![QA Utils Homepage](https://github.com/user-attachments/assets/ba5c6fd8-efe8-4dc3-921a-9accbe53690b)
 
@@ -36,6 +36,18 @@ Professional workflow generator supporting multiple platforms:
 - **Comprehensive Instructions**: Detailed setup guidance for each platform
 
 ![CI/CD Workflow Generator](https://github.com/user-attachments/assets/84580edc-ab15-432c-a016-a26ea00f13d8)
+
+#### 🌐 REST Client
+Advanced REST API testing and development tool:
+- **HTTP Methods**: Support for GET, POST, PUT, DELETE, HEAD requests
+- **Curl Import**: Parse and import curl commands automatically
+- **Request Builder**: Visual interface for building requests
+- **Response Viewer**: Formatted JSON display with syntax highlighting
+- **Request History**: Track and reload previous requests
+- **Header Management**: Easy header editing and management
+- **Copy Functionality**: Copy responses and export as curl commands
+
+![REST Client](https://github.com/user-attachments/assets/rest-client-placeholder)
 
 #### 🛸 Base64 Encode/Decode
 Simple and efficient Base64 operations:
@@ -91,7 +103,7 @@ Convert between Unix timestamps and human-readable dates:
 - **Mobile-first responsive design** with Bootstrap
 
 ### 🧪 Comprehensive Testing
-- **62 test cases** across 8 test files
+- **83 test cases** across 9 test files
 - **Component testing** with React Testing Library
 - **Utility function testing** with comprehensive coverage
 - **CI/CD integration** with automated testing on PRs

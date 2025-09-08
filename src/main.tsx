@@ -21,6 +21,7 @@ const OtpGenerator = lazy(() => import('./components/utils/OtpGenerator.tsx').th
 const PlaywrightToCodeceptjs = lazy(() => import('./components/utils/PlaywrightToCodeceptjs.tsx'));
 const EncryptionTool = lazy(() => import('./components/utils/EncryptionTool.tsx').then(module => ({default: module.EncryptionTool})));
 const WorkflowGenerator = lazy(() => import('./components/utils/WorkflowGenerator.tsx').then(module => ({default: module.WorkflowGenerator})));
+const RestClient = lazy(() => import('./components/utils/RestClient.tsx').then(module => ({default: module.RestClient})));
 const Ctfl = lazy(() => import('./components/istqb/ctfl.tsx').then(module => ({default: module.Ctfl})));
 
 // Component wrapper with error boundary and suspense
@@ -92,6 +93,10 @@ const router = createHashRouter([
   {
     path: 'workflow-generator',
     element: <RouteWrapper><WorkflowGenerator /></RouteWrapper>
+  },
+  {
+    path: 'rest-client',
+    element: <RouteWrapper><RestClient /></RouteWrapper>
   },
   {
     path: 'ctfl',
