@@ -5,7 +5,7 @@
 
 A comprehensive collection of quality assurance tools and utilities designed to enhance your testing workflow. Built with modern React, TypeScript, and optimized for performance with comprehensive test coverage.
 
-🌐 **[Live Demo](https://kobenguyent.github.io/qa-utils/#/)** | 📊 **83 Tests** | 🎯 **Mobile-First Design**
+🌐 **[Live Demo](https://kobenguyent.github.io/qa-utils/#/)** | 📊 **130 Tests** | 🎯 **Mobile-First Design**
 
 ![QA Utils Homepage](https://github.com/user-attachments/assets/ba5c6fd8-efe8-4dc3-921a-9accbe53690b)
 
@@ -48,6 +48,27 @@ Advanced REST API testing and development tool:
 - **Copy Functionality**: Copy responses and export as curl commands
 
 ![REST Client](https://github.com/user-attachments/assets/rest-client-placeholder)
+
+#### 🔌 WebSocket Client
+Real-time WebSocket testing and debugging tool:
+- **Real-time Connection**: Live WebSocket connection management
+- **Auto-reconnect**: Configurable automatic reconnection with retry limits
+- **Protocol Support**: Custom WebSocket protocols and subprotocols
+- **Message History**: Complete conversation tracking with timestamps
+- **Connection Status**: Visual indicators for connection state
+- **Message Formatting**: JSON formatting and syntax highlighting
+- **Copy Functionality**: Copy individual messages or entire conversations
+
+#### ⚡ gRPC Client
+Test gRPC services with browser-compatible gRPC-Web support:
+- **gRPC-Web Protocol**: Browser-compatible gRPC communication
+- **Unary Calls**: Standard request-response gRPC calls
+- **Streaming Support**: Server streaming call handling
+- **Protobuf Integration**: Parse .proto files for service discovery
+- **Metadata Management**: Custom headers and gRPC metadata
+- **Request History**: Track and reload previous gRPC calls
+- **JSON Interface**: User-friendly JSON input for protobuf messages
+- **Response Analysis**: Detailed response inspection with status codes
 
 #### 🛸 Base64 Encode/Decode
 Simple and efficient Base64 operations:
@@ -103,9 +124,11 @@ Convert between Unix timestamps and human-readable dates:
 - **Mobile-first responsive design** with Bootstrap
 
 ### 🧪 Comprehensive Testing
-- **83 test cases** across 9 test files
+- **130 test cases** across 12 test files
 - **Component testing** with React Testing Library
 - **Utility function testing** with comprehensive coverage
+- **WebSocket & gRPC client testing** with mocked services
+- **Integration tests** demonstrating real-world usage patterns
 - **CI/CD integration** with automated testing on PRs
 - **Coverage reporting** with detailed metrics
 
