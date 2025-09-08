@@ -28,7 +28,7 @@ describe('grpcClient', () => {
   });
 
   afterEach(() => {
-    vi.clearAllTimers();
+    vi.clearAllMocks();
   });
 
   describe('GrpcClient', () => {

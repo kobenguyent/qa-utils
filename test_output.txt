@@ -1,0 +1,25 @@
+
+> qa-utils@1.0.0 test
+> vitest
+
+
+[7m[1m[36m RUN [39m[22m[27m [36mv1.6.1[39m [90m/home/runner/work/qa-utils/qa-utils[39m
+
+ [32m✓[39m src/utils/__tests__/grpcClient.test.ts [2m ([22m[2m24 tests[22m[2m)[22m[90m 51[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/workflowGenerator.test.ts [2m ([22m[2m24 tests[22m[2m)[22m[90m 19[2mms[22m[39m
+ [32m✓[39m src/utils/__tests__/restClient.test.ts [2m ([22m[2m27 tests[22m[2m)[22m[90m 24[2mms[22m[39m
+ [32m✓[39m src/utils/__tests__/integration.test.ts [2m ([22m[2m10 tests[22m[2m)[22m[90m 54[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/dataHelpers.test.ts [2m ([22m[2m5 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m src/utils/__tests__/helpers.test.ts [2m ([22m[2m11 tests[22m[2m)[22m[33m 366[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/formHelpers.test.ts [2m ([22m[2m5 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m src/utils/__tests__/websocketClient.test.ts [2m ([22m[2m7 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/navigationHelpers.test.ts [2m ([22m[2m5 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/uiHelpers.test.ts [2m ([22m[2m6 tests[22m[2m)[22m[90m 4[2mms[22m[39m
+ [32m✓[39m src/utils/__tests__/umami.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/jwtHelpers.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m12 passed[39m[22m[90m (12)[39m
+[2m      Tests [22m [1m[32m130 passed[39m[22m[90m (130)[39m
+[2m   Start at [22m 10:35:33
+[2m   Duration [22m 4.42s[2m (transform 353ms, setup 1.04s, collect 583ms, tests 556ms, environment 6.27s, prepare 1.64s)[22m
+
