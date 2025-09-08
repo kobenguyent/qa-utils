@@ -1,16 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterEach, beforeAll } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { RequestConfig } from '../restClient';
 
-// Import the module functions we want to test
-let makeRequest: typeof import('../restClient').makeRequest;
-let parseCurlCommand: typeof import('../restClient').parseCurlCommand;
-let curlToRequestConfig: typeof import('../restClient').curlToRequestConfig;
-let requestConfigToCurl: typeof import('../restClient').requestConfigToCurl;
-let isValidUrl: typeof import('../restClient').isValidUrl;
-let formatJsonResponse: typeof import('../restClient').formatJsonResponse;
-
-// Use vi.hoisted properly for mocking
-const { mockAxios } = vi.hoisted(() => {
+// Mock axios without external variables - everything inside the factory
+vi.mock('axios', () => {
   const mockAxios = vi.fn() as any;
   mockAxios.get = vi.fn();
   mockAxios.post = vi.fn();
@@ -19,28 +11,35 @@ const { mockAxios } = vi.hoisted(() => {
   mockAxios.delete = vi.fn();
   mockAxios.request = vi.fn();
   
-  return { mockAxios };
+  return {
+    default: mockAxios
+  };
 });
 
-vi.mock('axios', () => ({
-  default: mockAxios
-}));
+// Import the module functions after setting up the mock
+import {
+  makeRequest,
+  parseCurlCommand,
+  curlToRequestConfig,
+  requestConfigToCurl,
+  isValidUrl,
+  formatJsonResponse,
+} from '../restClient';
 
-// Now import after setting up the mock
-beforeAll(async () => {
-  const module = await import('../restClient');
-  makeRequest = module.makeRequest;
-  parseCurlCommand = module.parseCurlCommand;
-  curlToRequestConfig = module.curlToRequestConfig;
-  requestConfigToCurl = module.requestConfigToCurl;
-  isValidUrl = module.isValidUrl;
-  formatJsonResponse = module.formatJsonResponse;
-});
+// Import axios to get the mocked version
+import axios from 'axios';
+const mockAxios = axios as any;
 
 describe('restClient', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockAxios.mockClear();
+    mockAxios.get.mockClear();
+    mockAxios.post.mockClear();
+    mockAxios.put.mockClear();
+    mockAxios.patch.mockClear();
+    mockAxios.delete.mockClear();
+    mockAxios.request.mockClear();
   });
 
   afterEach(() => {
