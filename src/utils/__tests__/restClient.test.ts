@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import axios from 'axios';
 import {
   makeRequest,
   parseCurlCommand,
@@ -9,13 +10,32 @@ import {
   RequestConfig,
 } from '../restClient';
 
+// Mock axios for integration tests
+vi.mock('axios');
+
+const mockedAxios = vi.mocked(axios);
+
 describe('restClient', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   describe('makeRequest - Integration Tests', () => {
     it('should handle network errors and invalid URLs gracefully', async () => {
       const config: RequestConfig = {
         url: 'https://invalid-domain-that-does-not-exist-12345.com',
         method: 'GET',
       };
+
+      // Mock network error
+      mockedAxios.mockRejectedValue({
+        request: {},
+        message: 'getaddrinfo ENOTFOUND invalid-domain-that-does-not-exist-12345.com'
+      });
 
       await expect(makeRequest(config)).rejects.toThrow('Network error');
     });
@@ -26,6 +46,12 @@ describe('restClient', () => {
         method: 'GET',
       };
 
+      // Mock network error for malformed URL
+      mockedAxios.mockRejectedValue({
+        request: {},
+        message: 'Invalid URL'
+      });
+
       await expect(makeRequest(config)).rejects.toThrow();
     });
 
@@ -34,6 +60,12 @@ describe('restClient', () => {
         url: 'https://invalid-domain-12345.com',
         method: 'GET',
       };
+
+      // Mock network error
+      mockedAxios.mockRejectedValue({
+        request: {},
+        message: 'getaddrinfo ENOTFOUND invalid-domain-12345.com'
+      });
 
       const startTime = Date.now();
       try {
@@ -56,6 +88,12 @@ describe('restClient', () => {
         body: '{"test": true}',
         timeout: 5000,
       };
+
+      // Mock network error
+      mockedAxios.mockRejectedValue({
+        request: {},
+        message: 'getaddrinfo ENOTFOUND invalid-domain-12345.com'
+      });
 
       // Test that the function handles the config properly even when network fails
       await expect(makeRequest(config)).rejects.toThrow();
