@@ -232,8 +232,7 @@ export class GrpcClient {
       throw new Error('Invalid gRPC-Web response: too short');
     }
     
-    // Parse gRPC-Web frame
-    const compressionFlag = data[0];
+    // Skip compression flag at data[0] - unused in simplified implementation
     const length = (data[1] << 24) | (data[2] << 16) | (data[3] << 8) | data[4];
     
     if (data.length < 5 + length) {

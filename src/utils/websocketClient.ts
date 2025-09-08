@@ -68,7 +68,7 @@ export class WebSocketClient {
           }
         }, this.config.timeout);
 
-        this.ws.onopen = (event) => {
+        this.ws.onopen = (_event) => {
           if (this.connectionTimeout) {
             clearTimeout(this.connectionTimeout);
             this.connectionTimeout = null;
@@ -107,7 +107,7 @@ export class WebSocketClient {
           }
         };
 
-        this.ws.onerror = (event) => {
+        this.ws.onerror = (_event) => {
           if (this.connectionTimeout) {
             clearTimeout(this.connectionTimeout);
             this.connectionTimeout = null;

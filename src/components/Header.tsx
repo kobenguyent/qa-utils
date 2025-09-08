@@ -79,6 +79,12 @@ export const Header: React.FC = () => {
               <NavDropdown.Item href="#/rest-client">
                 🌐 REST Client
               </NavDropdown.Item>
+              <NavDropdown.Item href="#/websocket-client">
+                🔌 WebSocket Client
+              </NavDropdown.Item>
+              <NavDropdown.Item href="#/grpc-client">
+                ⚡ gRPC Client
+              </NavDropdown.Item>
             </NavDropdown>
             <NavDropdown 
               title="📚 ISTQB" 

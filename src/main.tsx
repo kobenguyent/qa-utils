@@ -22,6 +22,8 @@ const PlaywrightToCodeceptjs = lazy(() => import('./components/utils/PlaywrightT
 const EncryptionTool = lazy(() => import('./components/utils/EncryptionTool.tsx').then(module => ({default: module.EncryptionTool})));
 const WorkflowGenerator = lazy(() => import('./components/utils/WorkflowGenerator.tsx').then(module => ({default: module.WorkflowGenerator})));
 const RestClient = lazy(() => import('./components/utils/RestClient.tsx').then(module => ({default: module.RestClient})));
+const WebSocketClient = lazy(() => import('./components/utils/WebSocketClient.tsx').then(module => ({default: module.WebSocketClientComponent})));
+const GrpcClient = lazy(() => import('./components/utils/GrpcClient.tsx').then(module => ({default: module.GrpcClientComponent})));
 const Ctfl = lazy(() => import('./components/istqb/ctfl.tsx').then(module => ({default: module.Ctfl})));
 
 // Component wrapper with error boundary and suspense
@@ -97,6 +99,14 @@ const router = createHashRouter([
   {
     path: 'rest-client',
     element: <RouteWrapper><RestClient /></RouteWrapper>
+  },
+  {
+    path: 'websocket-client',
+    element: <RouteWrapper><WebSocketClient /></RouteWrapper>
+  },
+  {
+    path: 'grpc-client',
+    element: <RouteWrapper><GrpcClient /></RouteWrapper>
   },
   {
     path: 'ctfl',
