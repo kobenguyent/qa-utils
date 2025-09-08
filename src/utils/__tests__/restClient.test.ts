@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import axios from 'axios';
 import {
   makeRequest,
   parseCurlCommand,
@@ -9,15 +10,9 @@ import {
   RequestConfig,
 } from '../restClient';
 
-// Mock axios using vi.hoisted to ensure it runs before imports
-const { mockedAxios } = vi.hoisted(() => {
-  const mockedAxios = vi.fn();
-  return { mockedAxios };
-});
-
-vi.mock('axios', () => ({
-  default: mockedAxios,
-}));
+// Mock axios
+vi.mock('axios');
+const mockedAxios = vi.mocked(axios);
 
 describe('restClient', () => {
   beforeEach(() => {
