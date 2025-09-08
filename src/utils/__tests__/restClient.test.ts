@@ -1,22 +1,26 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { RequestConfig } from '../restClient';
 
-// Mock axios without external variables - everything inside the factory
-vi.mock('axios', () => {
-  const mockAxios = vi.fn() as any;
-  mockAxios.get = vi.fn();
-  mockAxios.post = vi.fn();
-  mockAxios.put = vi.fn();
-  mockAxios.patch = vi.fn();
-  mockAxios.delete = vi.fn();
-  mockAxios.request = vi.fn();
+// Mock axios using a factory function that creates everything inline
+// This avoids any reference to external variables that could cause hoisting issues
+vi.mock('axios', async () => {
+  // Create the main axios function mock with proper typing
+  const axiosMock = vi.fn() as any;
+  
+  // Add method mocks for other parts of the code that might use them
+  axiosMock.get = vi.fn();
+  axiosMock.post = vi.fn();
+  axiosMock.put = vi.fn();
+  axiosMock.patch = vi.fn();
+  axiosMock.delete = vi.fn();
+  axiosMock.request = vi.fn();
   
   return {
-    default: mockAxios
+    default: axiosMock
   };
 });
 
-// Import the module functions after setting up the mock
+// Import the module functions
 import {
   makeRequest,
   parseCurlCommand,
@@ -33,13 +37,14 @@ const mockAxios = axios as any;
 describe('restClient', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockAxios.mockClear();
-    mockAxios.get.mockClear();
-    mockAxios.post.mockClear();
-    mockAxios.put.mockClear();
-    mockAxios.patch.mockClear();
-    mockAxios.delete.mockClear();
-    mockAxios.request.mockClear();
+    // Reset all mock functions
+    if (mockAxios.mockClear) mockAxios.mockClear();
+    if (mockAxios.get?.mockClear) mockAxios.get.mockClear();
+    if (mockAxios.post?.mockClear) mockAxios.post.mockClear();
+    if (mockAxios.put?.mockClear) mockAxios.put.mockClear();
+    if (mockAxios.patch?.mockClear) mockAxios.patch.mockClear();
+    if (mockAxios.delete?.mockClear) mockAxios.delete.mockClear();
+    if (mockAxios.request?.mockClear) mockAxios.request.mockClear();
   });
 
   afterEach(() => {
