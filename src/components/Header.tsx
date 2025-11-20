@@ -85,6 +85,9 @@ export const Header: React.FC = () => {
               <NavDropdown.Item href="#/grpc-client">
                 ⚡ gRPC Client
               </NavDropdown.Item>
+              <NavDropdown.Item href="#/character-counter">
+                🔢 Character Counter
+              </NavDropdown.Item>
             </NavDropdown>
             <NavDropdown 
               title="📚 ISTQB" 

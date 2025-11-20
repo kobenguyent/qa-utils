@@ -25,6 +25,7 @@ const RestClient = lazy(() => import('./components/utils/RestClient.tsx').then(m
 const WebSocketClient = lazy(() => import('./components/utils/WebSocketClient.tsx').then(module => ({default: module.WebSocketClientComponent})));
 const GrpcClient = lazy(() => import('./components/utils/GrpcClient.tsx').then(module => ({default: module.GrpcClientComponent})));
 const Ctfl = lazy(() => import('./components/istqb/ctfl.tsx').then(module => ({default: module.Ctfl})));
+const CharacterCounter = lazy(() => import('./components/utils/CharacterCounter.tsx').then(module => ({default: module.CharacterCounter})));
 
 // Component wrapper with error boundary and suspense
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -111,6 +112,10 @@ const router = createHashRouter([
   {
     path: 'ctfl',
     element: <RouteWrapper><Ctfl /></RouteWrapper>
+  },
+  {
+    path: 'character-counter',
+    element: <RouteWrapper><CharacterCounter /></RouteWrapper>
   },
 ]);
 

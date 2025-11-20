@@ -58,3 +58,10 @@ export const debounce = <T extends (...args: unknown[]) => unknown>(
     timeout = setTimeout(() => func(...args), wait);
   };
 };
+
+/**
+ * Count the number of characters in a string
+ */
+export const countCharacters = (text: string): number => {
+  return text.length;
+};
