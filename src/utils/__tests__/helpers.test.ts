@@ -4,7 +4,8 @@ import {
   isValidEmail, 
   generateRandomString, 
   sanitizeHTML, 
-  debounce 
+  debounce,
+  countCharacters
 } from '../helpers';
 
 describe('helpers', () => {
@@ -95,6 +96,38 @@ describe('helpers', () => {
       
       await new Promise(resolve => setTimeout(resolve, 100));
       expect(mockFn).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('countCharacters', () => {
+    it('should return 0 for empty string', () => {
+      expect(countCharacters('')).toBe(0);
+    });
+
+    it('should count basic text correctly', () => {
+      expect(countCharacters('Hello')).toBe(5);
+      expect(countCharacters('Hello World')).toBe(11);
+    });
+
+    it('should count special characters', () => {
+      expect(countCharacters('Hello, World!')).toBe(13);
+      expect(countCharacters('@#$%^&*()')).toBe(9);
+    });
+
+    it('should count whitespace characters', () => {
+      expect(countCharacters('   ')).toBe(3);
+      expect(countCharacters('\n\t')).toBe(2);
+      expect(countCharacters('Hello\nWorld')).toBe(11);
+    });
+
+    it('should count unicode characters correctly', () => {
+      expect(countCharacters('😀😁😂')).toBe(6); // Each emoji is 2 UTF-16 code units
+      expect(countCharacters('Hello 世界')).toBe(8);
+    });
+
+    it('should count numbers', () => {
+      expect(countCharacters('12345')).toBe(5);
+      expect(countCharacters('123.45')).toBe(6);
     });
   });
 });
