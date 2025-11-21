@@ -25,12 +25,16 @@ import {
   ChatConfig,
   AIProvider,
   getDefaultModel,
-  fetchOpenAIModels,
-  fetchOllamaModels,
+  fetchModels,
+  estimateTokenCount,
+  getSystemPrompt,
   ModelInfo,
 } from '../../utils/aiChatClient';
 import { KnowledgeBase, parseFileContent } from '../../utils/knowledgeManager';
 import { MCPClient, MCPServerConfig } from '../../utils/mcpClient';
+import { ConversationManager, downloadConversation } from '../../utils/conversationManager';
+import { DEFAULT_MCP_TOOLS, getToolCategories } from '../../utils/mcpTools';
+import { MCPToolManager, getMCPToolGuide } from '../../utils/mcpToolManager';
 import { useSessionStorage } from '../../utils/useSessionStorage';
 
 interface ConversationMessage extends ChatMessage {
@@ -43,9 +47,17 @@ export const AIChat: React.FC = () => {
   const [provider, setProvider] = useSessionStorage<AIProvider>('aiChat_provider', 'openai');
   const [apiKey, setApiKey] = useSessionStorage<string>('aiChat_apiKey', '');
   const [endpoint, setEndpoint] = useSessionStorage<string>('aiChat_endpoint', 'http://localhost:11434');
+  const [azureApiVersion, setAzureApiVersion] = useSessionStorage<string>('aiChat_azureApiVersion', '2024-02-15-preview');
   const [model, setModel] = useSessionStorage<string>('aiChat_model', '');
   const [temperature, setTemperature] = useSessionStorage<number>('aiChat_temperature', 0.7);
+  const [optimizeTokens, setOptimizeTokens] = useSessionStorage<boolean>('aiChat_optimizeTokens', true);
+  const [systemPromptType, setSystemPromptType] = useSessionStorage<'default' | 'technical' | 'creative'>('aiChat_systemPromptType', 'default');
   const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
+  
+  // Conversation management
+  const [conversationManager] = useState(() => new ConversationManager());
+  const [currentConversationId, setCurrentConversationId] = useSessionStorage<string | null>('aiChat_currentConversationId', null);
+  const [conversations, setConversations] = useState(conversationManager.getConversations());
   
   // Chat state with session storage
   const [messages, setMessages] = useSessionStorage<ConversationMessage[]>('aiChat_messages', []);
@@ -53,6 +65,7 @@ export const AIChat: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [connectionStatus, setConnectionStatus] = useState<'unknown' | 'connected' | 'disconnected'>('unknown');
+  const [tokenCount, setTokenCount] = useState({ input: 0, total: 0 });
   
   // Knowledge base state with session storage
   const [knowledgeBase] = useState(() => new KnowledgeBase());
@@ -63,7 +76,9 @@ export const AIChat: React.FC = () => {
   const [, setMcpClient] = useState<MCPClient | null>(null);
   const [mcpServerUrl, setMcpServerUrl] = useSessionStorage<string>('aiChat_mcpServerUrl', '');
   const [mcpConnected, setMcpConnected] = useState(false);
-  const [mcpTools, setMcpTools] = useSessionStorage<Array<{ name: string; description: string }>>('aiChat_mcpTools', []);
+  const [showMcpGuide, setShowMcpGuide] = useState(false);
+  const [mcpToolManager] = useState(() => new MCPToolManager());
+  const [mcpToolStats, setMcpToolStats] = useState(mcpToolManager.getStats());
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -118,10 +133,16 @@ export const AIChat: React.FC = () => {
 
   // Update configured status when settings change
   useEffect(() => {
-    if (provider === 'openai') {
+    if (provider === 'openai' || provider === 'anthropic' || provider === 'google') {
       setIsConfigured(!!apiKey);
       if (!model) {
-        setModel('gpt-3.5-turbo');
+        const defaultModel = getDefaultModel(provider);
+        setModel(defaultModel.id);
+      }
+    } else if (provider === 'azure-openai') {
+      setIsConfigured(!!apiKey && !!endpoint);
+      if (!model) {
+        setModel('gpt-35-turbo');
       }
     } else if (provider === 'ollama') {
       setIsConfigured(!!endpoint);
@@ -132,14 +153,25 @@ export const AIChat: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [provider, apiKey, endpoint, model]); // setModel is intentionally excluded as it's a setter
 
+  // Update token count when input changes
+  useEffect(() => {
+    const inputTokens = estimateTokenCount(inputMessage);
+    const conversationTokens = messages.reduce((sum, msg) => sum + estimateTokenCount(msg.content), 0);
+    setTokenCount({ input: inputTokens, total: conversationTokens + inputTokens });
+  }, [inputMessage, messages]);
+
   const getConfig = (): ChatConfig => {
+    const defaultModel = getDefaultModel(provider);
     return {
       provider,
-      apiKey: provider === 'openai' ? apiKey : undefined,
-      endpoint: provider === 'ollama' ? endpoint : undefined,
-      model: model || (provider === 'openai' ? 'gpt-3.5-turbo' : 'llama2'),
+      apiKey: (provider === 'openai' || provider === 'anthropic' || provider === 'google' || provider === 'azure-openai') ? apiKey : undefined,
+      endpoint: (provider === 'ollama' || provider === 'azure-openai') ? endpoint : undefined,
+      azureApiVersion: provider === 'azure-openai' ? azureApiVersion : undefined,
+      model: model || defaultModel.id,
       temperature,
       timeout: 60000,
+      optimizeTokens,
+      systemPrompt: getSystemPrompt(systemPromptType),
     };
   };
 
@@ -263,14 +295,7 @@ export const AIChat: React.FC = () => {
   const handleLoadModels = async () => {
     setLoading(true);
     try {
-      let models: ModelInfo[];
-      if (provider === 'openai' && apiKey) {
-        models = await fetchOpenAIModels(apiKey);
-      } else if (provider === 'ollama' && endpoint) {
-        models = await fetchOllamaModels(endpoint);
-      } else {
-        models = [getDefaultModel(provider)];
-      }
+      const models = await fetchModels(provider, { apiKey, endpoint });
       setAvailableModels(models);
     } catch (err) {
       setError(`Failed to load models: ${(err as Error).message}`);
@@ -333,10 +358,11 @@ export const AIChat: React.FC = () => {
       const client = new MCPClient(config);
       await client.connect();
       
-      const tools = await client.listTools();
+      // Load tools via tool manager
+      await mcpToolManager.loadToolsFromServer(client);
       setMcpClient(client);
-      setMcpTools(tools.map(t => ({ name: t.name, description: t.description })));
       setMcpConnected(true);
+      setMcpToolStats(mcpToolManager.getStats());
       setError('');
     } catch (err) {
       setError(`MCP connection failed: ${(err as Error).message}`);
@@ -344,6 +370,75 @@ export const AIChat: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Disconnect from MCP server
+  const handleDisconnectMCP = () => {
+    mcpToolManager.unloadServerTools();
+    setMcpClient(null);
+    setMcpConnected(false);
+    setMcpToolStats(mcpToolManager.getStats());
+  };
+
+  // Initialize default tools
+  const handleInitializeDefaultTools = () => {
+    mcpToolManager.initializeDefaultTools();
+    setMcpToolStats(mcpToolManager.getStats());
+  };
+
+  // Enable all default tools
+  const handleEnableAllDefaultTools = () => {
+    mcpToolManager.enableAllDefaultTools();
+    setMcpToolStats(mcpToolManager.getStats());
+  };
+
+  // Disable all tools
+  const handleDisableAllTools = () => {
+    mcpToolManager.disableAllTools();
+    setMcpToolStats(mcpToolManager.getStats());
+  };
+
+  // Toggle tool enabled state
+  const handleToggleTool = (toolName: string) => {
+    if (mcpToolManager.isToolEnabled(toolName)) {
+      mcpToolManager.disableTool(toolName);
+    } else {
+      mcpToolManager.enableTool(toolName);
+    }
+    setMcpToolStats(mcpToolManager.getStats());
+  };
+
+  // Export tool configuration
+  const handleExportToolConfig = () => {
+    const config = mcpToolManager.exportConfig();
+    const blob = new Blob([config], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `mcp-tools-config-${Date.now()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Import tool configuration
+  const handleImportToolConfig = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      const success = mcpToolManager.importConfig(content);
+      if (success) {
+        setMcpToolStats(mcpToolManager.getStats());
+        setError('');
+      } else {
+        setError('Failed to import tool configuration');
+      }
+    };
+    reader.readAsText(file);
   };
 
   // Enhance message with knowledge base context
@@ -356,6 +451,45 @@ export const AIChat: React.FC = () => {
     return message;
   };
 
+  // Conversation management
+  const handleNewConversation = () => {
+    const conversation = conversationManager.createConversation(
+      `Chat ${new Date().toLocaleString()}`,
+      provider,
+      model
+    );
+    setCurrentConversationId(conversation.id);
+    setMessages([]);
+    setConversations(conversationManager.getConversations());
+    setError('');
+  };
+
+  const handleLoadConversation = (id: string) => {
+    const conversation = conversationManager.getConversation(id);
+    if (conversation) {
+      setCurrentConversationId(id);
+      setMessages(conversation.messages as ConversationMessage[]);
+      setError('');
+    }
+  };
+
+  const handleDeleteConversation = (id: string) => {
+    if (conversationManager.deleteConversation(id)) {
+      setConversations(conversationManager.getConversations());
+      if (currentConversationId === id) {
+        setCurrentConversationId(null);
+        setMessages([]);
+      }
+    }
+  };
+
+  const handleExportConversation = (id: string, format: 'json' | 'markdown') => {
+    const conversation = conversationManager.getConversation(id);
+    if (conversation) {
+      downloadConversation(conversation, format);
+    }
+  };
+
   return (
     <Container fluid>
       <Header />
@@ -363,7 +497,8 @@ export const AIChat: React.FC = () => {
         <div className="text-center mb-4">
           <h1>🤖 AI Chat</h1>
           <p className="text-muted">
-            Advanced AI chat with OpenAI/Ollama support, file uploads, MCP integration, and Cache-Augmented Generation (CAG)
+            Advanced AI chat with multi-provider support (OpenAI, Anthropic Claude, Google Gemini, Azure OpenAI, Ollama),
+            token optimization, conversation management, file uploads, MCP integration, and Cache-Augmented Generation (CAG)
           </p>
         </div>
 
@@ -391,10 +526,14 @@ export const AIChat: React.FC = () => {
                       onChange={(e) => {
                         setProvider(e.target.value as AIProvider);
                         setConnectionStatus('unknown');
+                        setAvailableModels([]);
                       }}
                       disabled={loading}
                     >
                       <option value="openai">OpenAI</option>
+                      <option value="anthropic">Anthropic Claude</option>
+                      <option value="google">Google Gemini</option>
+                      <option value="azure-openai">Azure OpenAI</option>
                       <option value="ollama">Ollama (Local)</option>
                     </Form.Select>
                   </Form.Group>
@@ -462,6 +601,102 @@ export const AIChat: React.FC = () => {
                     </a>
                   </Form.Text>
                 </Form.Group>
+              )}
+
+              {provider === 'anthropic' && (
+                <Form.Group className="mb-3">
+                  <Form.Label>API Key</Form.Label>
+                  <Form.Control
+                    type="password"
+                    placeholder="sk-ant-..."
+                    value={apiKey}
+                    onChange={(e) => {
+                      setApiKey(e.target.value);
+                      setConnectionStatus('unknown');
+                    }}
+                    disabled={loading}
+                  />
+                  <Form.Text className="text-muted">
+                    Your Anthropic API key. Get it from{' '}
+                    <a 
+                      href="https://console.anthropic.com/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                    >
+                      Anthropic Console
+                    </a>
+                  </Form.Text>
+                </Form.Group>
+              )}
+
+              {provider === 'google' && (
+                <Form.Group className="mb-3">
+                  <Form.Label>API Key</Form.Label>
+                  <Form.Control
+                    type="password"
+                    placeholder="AIza..."
+                    value={apiKey}
+                    onChange={(e) => {
+                      setApiKey(e.target.value);
+                      setConnectionStatus('unknown');
+                    }}
+                    disabled={loading}
+                  />
+                  <Form.Text className="text-muted">
+                    Your Google API key. Get it from{' '}
+                    <a 
+                      href="https://makersuite.google.com/app/apikey" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                    >
+                      Google AI Studio
+                    </a>
+                  </Form.Text>
+                </Form.Group>
+              )}
+
+              {provider === 'azure-openai' && (
+                <>
+                  <Form.Group className="mb-3">
+                    <Form.Label>API Key</Form.Label>
+                    <Form.Control
+                      type="password"
+                      placeholder="Your Azure OpenAI API key"
+                      value={apiKey}
+                      onChange={(e) => {
+                        setApiKey(e.target.value);
+                        setConnectionStatus('unknown');
+                      }}
+                      disabled={loading}
+                    />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Endpoint</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="https://your-resource.openai.azure.com"
+                      value={endpoint}
+                      onChange={(e) => {
+                        setEndpoint(e.target.value);
+                        setConnectionStatus('unknown');
+                      }}
+                      disabled={loading}
+                    />
+                    <Form.Text className="text-muted">
+                      Your Azure OpenAI resource endpoint
+                    </Form.Text>
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>API Version</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="2024-02-15-preview"
+                      value={azureApiVersion}
+                      onChange={(e) => setAzureApiVersion(e.target.value)}
+                      disabled={loading}
+                    />
+                  </Form.Group>
+                </>
               )}
 
               {provider === 'ollama' && (
@@ -536,28 +771,70 @@ export const AIChat: React.FC = () => {
                 </>
               )}
 
+              <Row className="mb-3">
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label>Temperature: {temperature.toFixed(1)}</Form.Label>
+                    <Form.Range
+                      min={0}
+                      max={2}
+                      step={0.1}
+                      value={temperature}
+                      onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                      disabled={loading}
+                    />
+                    <Form.Text className="text-muted">
+                      Higher values make output more random, lower values more focused
+                    </Form.Text>
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label>System Prompt Type</Form.Label>
+                    <Form.Select
+                      value={systemPromptType}
+                      onChange={(e) => setSystemPromptType(e.target.value as 'default' | 'technical' | 'creative')}
+                      disabled={loading}
+                    >
+                      <option value="default">Default (Balanced)</option>
+                      <option value="technical">Technical (Precise)</option>
+                      <option value="creative">Creative (Innovative)</option>
+                    </Form.Select>
+                    <Form.Text className="text-muted">
+                      Choose the AI's response style and approach
+                    </Form.Text>
+                  </Form.Group>
+                </Col>
+              </Row>
+
               <Form.Group className="mb-3">
-                <Form.Label>Temperature: {temperature.toFixed(1)}</Form.Label>
-                <Form.Range
-                  min={0}
-                  max={2}
-                  step={0.1}
-                  value={temperature}
-                  onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                <Form.Check 
+                  type="checkbox"
+                  id="optimize-tokens"
+                  label="Enable token optimization (reduces API costs)"
+                  checked={optimizeTokens}
+                  onChange={(e) => setOptimizeTokens(e.target.checked)}
                   disabled={loading}
                 />
-                <Form.Text className="text-muted">
-                  Higher values make output more random, lower values more focused
+                <Form.Text className="text-muted d-block">
+                  Automatically removes redundant whitespace and compresses messages
                 </Form.Text>
               </Form.Group>
 
-              <Button 
-                variant="primary" 
-                onClick={handleTestConnection}
-                disabled={loading || !isConfigured}
-              >
+              <div className="d-flex gap-2 align-items-center">
+                <Button 
+                  variant="primary" 
+                  onClick={handleTestConnection}
+                  disabled={loading || !isConfigured}
+                >
                 {loading ? <Spinner animation="border" size="sm" /> : '🔌 Test Connection'}
               </Button>
+              {tokenCount.total > 0 && (
+                <Badge bg="info" className="ms-2">
+                  📊 Tokens: {tokenCount.input} input / ~{tokenCount.total} total
+                </Badge>
+              )}
+            </div>
             </Form>
           </Card.Body>
         </Card>
@@ -572,7 +849,77 @@ export const AIChat: React.FC = () => {
         {/* Advanced Features */}
         <Card className="mb-4">
           <Card.Body>
-            <Tabs defaultActiveKey="knowledge" className="mb-3">
+            <Tabs defaultActiveKey="conversations" className="mb-3">
+              <Tab eventKey="conversations" title="💬 Conversations">
+                <div className="mb-3">
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <h6 className="mb-0">Chat History</h6>
+                    <Button
+                      variant="success"
+                      size="sm"
+                      onClick={handleNewConversation}
+                      disabled={loading}
+                    >
+                      ➕ New Conversation
+                    </Button>
+                  </div>
+                  
+                  {conversations.length > 0 ? (
+                    <ListGroup>
+                      {conversations.map(conv => (
+                        <ListGroup.Item 
+                          key={conv.id}
+                          active={conv.id === currentConversationId}
+                          className="d-flex justify-content-between align-items-center"
+                        >
+                          <div 
+                            style={{ cursor: 'pointer', flex: 1 }}
+                            onClick={() => handleLoadConversation(conv.id)}
+                          >
+                            <strong>{conv.name}</strong>
+                            <br />
+                            <small className="text-muted">
+                              {conv.messageCount} messages • {new Date(conv.createdAt).toLocaleDateString()}
+                              {conv.provider && ` • ${conv.provider}`}
+                            </small>
+                          </div>
+                          <div className="d-flex gap-1">
+                            <Button
+                              variant="outline-primary"
+                              size="sm"
+                              onClick={() => handleExportConversation(conv.id, 'json')}
+                              title="Export as JSON"
+                            >
+                              📥 JSON
+                            </Button>
+                            <Button
+                              variant="outline-info"
+                              size="sm"
+                              onClick={() => handleExportConversation(conv.id, 'markdown')}
+                              title="Export as Markdown"
+                            >
+                              📝 MD
+                            </Button>
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={() => handleDeleteConversation(conv.id)}
+                              title="Delete conversation"
+                            >
+                              🗑️
+                            </Button>
+                          </div>
+                        </ListGroup.Item>
+                      ))}
+                    </ListGroup>
+                  ) : (
+                    <Alert variant="info">
+                      No saved conversations yet. Start chatting and your conversations will be saved automatically.
+                    </Alert>
+                  )}
+                </div>
+              </Tab>
+
               <Tab eventKey="knowledge" title="📚 Knowledge Base">
                 <div className="mb-3">
                   <Form.Label>Upload Documents to Extend LLM Knowledge</Form.Label>
@@ -621,47 +968,177 @@ export const AIChat: React.FC = () => {
               </Tab>
 
               <Tab eventKey="mcp" title="🔧 MCP Tools">
-                <div className="mb-3">
-                  <Form.Label>MCP Server URL</Form.Label>
-                  <InputGroup>
-                    <Form.Control
-                      type="text"
-                      placeholder="http://localhost:8080"
-                      value={mcpServerUrl}
-                      onChange={(e) => setMcpServerUrl(e.target.value)}
-                      disabled={loading || mcpConnected}
+                {/* Tool Statistics */}
+                <Alert variant="secondary" className="mb-3">
+                  <Row className="small">
+                    <Col xs={6} sm={3}>
+                      <strong>Total:</strong> {mcpToolStats.total}
+                    </Col>
+                    <Col xs={6} sm={3}>
+                      <strong>Enabled:</strong> {mcpToolStats.enabled}
+                    </Col>
+                    <Col xs={6} sm={3}>
+                      <strong>Default:</strong> {mcpToolStats.defaultTools}
+                    </Col>
+                    <Col xs={6} sm={3}>
+                      <strong>Custom:</strong> {mcpToolStats.customTools}
+                    </Col>
+                  </Row>
+                </Alert>
+
+                {/* Quick Actions */}
+                <div className="mb-3 d-flex flex-wrap gap-2">
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    onClick={handleInitializeDefaultTools}
+                    disabled={loading}
+                  >
+                    📥 Load Default Tools
+                  </Button>
+                  <Button
+                    variant="outline-success"
+                    size="sm"
+                    onClick={handleEnableAllDefaultTools}
+                    disabled={loading || mcpToolStats.defaultTools === 0}
+                  >
+                    ✅ Enable All Default
+                  </Button>
+                  <Button
+                    variant="outline-warning"
+                    size="sm"
+                    onClick={handleDisableAllTools}
+                    disabled={loading || mcpToolStats.enabled === 0}
+                  >
+                    ❌ Disable All
+                  </Button>
+                  <Button
+                    variant="outline-info"
+                    size="sm"
+                    onClick={handleExportToolConfig}
+                    disabled={mcpToolStats.total === 0}
+                  >
+                    💾 Export Config
+                  </Button>
+                  <label className="btn btn-outline-info btn-sm">
+                    📁 Import Config
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={handleImportToolConfig}
+                      style={{ display: 'none' }}
                     />
-                    <Button
-                      variant={mcpConnected ? "success" : "primary"}
-                      onClick={handleConnectMCP}
-                      disabled={loading || !mcpServerUrl || mcpConnected}
-                    >
-                      {mcpConnected ? '✓ Connected' : '🔌 Connect'}
-                    </Button>
-                  </InputGroup>
-                  <Form.Text className="text-muted">
-                    Connect to a Model Context Protocol (MCP) server to access tools and resources
-                  </Form.Text>
+                  </label>
                 </div>
 
-                {mcpConnected && mcpTools.length > 0 && (
+                {/* MCP Server Connection */}
+                <Card className="mb-3">
+                  <Card.Header className="bg-light">
+                    <strong>Custom MCP Server</strong>
+                  </Card.Header>
+                  <Card.Body>
+                    <Form.Label>Server URL</Form.Label>
+                    <InputGroup className="mb-2">
+                      <Form.Control
+                        type="text"
+                        placeholder="http://localhost:8080"
+                        value={mcpServerUrl}
+                        onChange={(e) => setMcpServerUrl(e.target.value)}
+                        disabled={loading || mcpConnected}
+                      />
+                      <Button
+                        variant={mcpConnected ? "success" : "primary"}
+                        onClick={mcpConnected ? handleDisconnectMCP : handleConnectMCP}
+                        disabled={loading || (!mcpConnected && !mcpServerUrl)}
+                      >
+                        {mcpConnected ? '🔌 Disconnect' : '🔌 Connect'}
+                      </Button>
+                    </InputGroup>
+                    <Form.Text className="text-muted">
+                      Connect to load custom tools from an MCP server
+                    </Form.Text>
+                  </Card.Body>
+                </Card>
+
+                {/* Tool List by Category */}
+                {mcpToolStats.total > 0 && (
                   <div>
-                    <h6>Available Tools ({mcpTools.length}):</h6>
-                    <ListGroup>
-                      {mcpTools.map(tool => (
-                        <ListGroup.Item key={tool.name}>
-                          <strong>🔧 {tool.name}</strong>
-                          <br />
-                          <small className="text-muted">{tool.description}</small>
-                        </ListGroup.Item>
-                      ))}
-                    </ListGroup>
+                    <h6 className="mb-3">Tool Management</h6>
+                    {getToolCategories().map(category => {
+                      const categoryTools = mcpToolManager.getToolsByCategory(category);
+                      if (categoryTools.length === 0) return null;
+                      
+                      return (
+                        <Card key={category} className="mb-3">
+                          <Card.Header className="bg-light">
+                            <strong className="text-capitalize">
+                              {category} Tools ({categoryTools.filter(t => t.enabled).length}/{categoryTools.length})
+                            </strong>
+                          </Card.Header>
+                          <ListGroup variant="flush">
+                            {categoryTools.map(tool => (
+                              <ListGroup.Item key={tool.name}>
+                                <div className="d-flex justify-content-between align-items-start">
+                                  <div className="flex-grow-1">
+                                    <Form.Check
+                                      type="checkbox"
+                                      id={`tool-${tool.name}`}
+                                      label={
+                                        <span>
+                                          <strong>🔧 {tool.name}</strong>
+                                          <Badge bg={tool.source === 'default' ? 'primary' : 'info'} className="ms-2 small">
+                                            {tool.source}
+                                          </Badge>
+                                        </span>
+                                      }
+                                      checked={tool.enabled}
+                                      onChange={() => handleToggleTool(tool.name)}
+                                    />
+                                    <small className="text-muted d-block ms-4">
+                                      {tool.definition?.description || 'No description'}
+                                    </small>
+                                  </div>
+                                </div>
+                              </ListGroup.Item>
+                            ))}
+                          </ListGroup>
+                        </Card>
+                      );
+                    })}
                   </div>
                 )}
 
-                {!mcpConnected && (
-                  <Alert variant="info">
-                    MCP (Model Context Protocol) allows the AI to access external tools and data sources. Connect to an MCP server to enhance capabilities.
+                {/* Help & Documentation */}
+                <div className="mt-3">
+                  <Button 
+                    variant="outline-secondary" 
+                    size="sm"
+                    onClick={() => setShowMcpGuide(!showMcpGuide)}
+                  >
+                    {showMcpGuide ? '▼ Hide' : '📖 View'} Complete MCP Tools Guide
+                  </Button>
+                  
+                  {showMcpGuide && (
+                    <Alert variant="light" className="mt-3 small" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                      <pre className="mb-0" style={{ whiteSpace: 'pre-wrap', fontSize: '0.85em' }}>
+                        {getMCPToolGuide()}
+                      </pre>
+                    </Alert>
+                  )}
+                </div>
+
+                {mcpToolStats.total === 0 && (
+                  <Alert variant="info" className="mt-3">
+                    <Alert.Heading className="h6">Get Started with MCP Tools</Alert.Heading>
+                    <p className="mb-2 small">
+                      MCP (Model Context Protocol) tools extend AI capabilities. Here's how to start:
+                    </p>
+                    <ol className="mb-0 small">
+                      <li>Click "📥 Load Default Tools" to add {DEFAULT_MCP_TOOLS.length} pre-configured tools</li>
+                      <li>Enable the tools you need</li>
+                      <li>Optionally connect to a custom MCP server for additional tools</li>
+                      <li>Export your configuration to save your tool preferences</li>
+                    </ol>
                   </Alert>
                 )}
               </Tab>

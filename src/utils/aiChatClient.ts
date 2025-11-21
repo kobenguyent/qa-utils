@@ -1,10 +1,10 @@
 /**
  * AI Chat Client Utilities
- * Supports OpenAI API and local LLM services like Ollama
- * Enhanced with knowledge management and default model support
+ * Supports multiple AI providers: OpenAI, Anthropic Claude, Google Gemini, Azure OpenAI, and Ollama
+ * Enhanced with knowledge management, token optimization, and prompt guidance
  */
 
-export type AIProvider = 'openai' | 'ollama';
+export type AIProvider = 'openai' | 'anthropic' | 'google' | 'azure-openai' | 'ollama';
 
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
@@ -20,6 +20,9 @@ export interface ChatConfig {
   maxTokens?: number;
   timeout?: number;
   contextWindow?: number; // Support for large context windows
+  azureApiVersion?: string; // For Azure OpenAI
+  optimizeTokens?: boolean; // Enable token optimization
+  systemPrompt?: string; // Custom system prompt for guidance
 }
 
 export interface ChatResponse {
@@ -51,6 +54,27 @@ const DEFAULT_MODELS: Record<AIProvider, ModelInfo> = {
     provider: 'openai',
     isDefault: true,
   },
+  anthropic: {
+    id: 'claude-3-sonnet-20240229',
+    name: 'Claude 3 Sonnet',
+    contextWindow: 200000,
+    provider: 'anthropic',
+    isDefault: true,
+  },
+  google: {
+    id: 'gemini-pro',
+    name: 'Gemini Pro',
+    contextWindow: 32768,
+    provider: 'google',
+    isDefault: true,
+  },
+  'azure-openai': {
+    id: 'gpt-35-turbo',
+    name: 'GPT-3.5 Turbo (Azure)',
+    contextWindow: 4096,
+    provider: 'azure-openai',
+    isDefault: true,
+  },
   ollama: {
     id: 'llama2',
     name: 'Llama 2',
@@ -60,6 +84,33 @@ const DEFAULT_MODELS: Record<AIProvider, ModelInfo> = {
   },
 };
 
+// System prompts for better AI responses
+const SYSTEM_PROMPTS = {
+  default: `You are a helpful, accurate, and concise AI assistant. Follow these guidelines:
+- Provide clear, well-structured responses
+- Use examples when helpful
+- Be precise and avoid unnecessary verbosity
+- Ask for clarification if the question is ambiguous
+- Cite sources when making factual claims`,
+  
+  technical: `You are a technical expert AI assistant. Follow these guidelines:
+- Provide technically accurate and detailed information
+- Use proper terminology and explain complex concepts clearly
+- Include code examples with proper formatting when relevant
+- Consider security, performance, and best practices
+- Reference official documentation when applicable`,
+  
+  creative: `You are a creative AI assistant. Follow these guidelines:
+- Think outside the box and provide innovative solutions
+- Use engaging language and storytelling when appropriate
+- Consider multiple perspectives and approaches
+- Balance creativity with practicality
+- Inspire and encourage exploration`,
+};
+
+// Providers that require API keys
+const PROVIDERS_REQUIRING_API_KEY: AIProvider[] = ['openai', 'anthropic', 'google', 'azure-openai'];
+
 /**
  * Validates the chat configuration
  */
@@ -68,8 +119,12 @@ export function validateConfig(config: ChatConfig): { valid: boolean; error?: st
     return { valid: false, error: 'Provider is required' };
   }
 
-  if (config.provider === 'openai' && !config.apiKey) {
-    return { valid: false, error: 'API key is required for OpenAI' };
+  if (PROVIDERS_REQUIRING_API_KEY.includes(config.provider) && !config.apiKey) {
+    return { valid: false, error: 'API key is required for this provider' };
+  }
+
+  if (config.provider === 'azure-openai' && !config.endpoint) {
+    return { valid: false, error: 'Endpoint is required for Azure OpenAI' };
   }
 
   if (config.provider === 'ollama' && !config.endpoint) {
@@ -77,6 +132,55 @@ export function validateConfig(config: ChatConfig): { valid: boolean; error?: st
   }
 
   return { valid: true };
+}
+
+/**
+ * Simple token estimation (rough approximation: ~4 chars per token for English)
+ * 
+ * This uses a hybrid approach combining word and character counts:
+ * - Words are multiplied by 1.3 (empirical average: English words ~1-2 tokens)
+ * - Characters are divided by 4 (common approximation: 1 token ≈ 4 characters)
+ * - The average of both methods provides a reasonable estimate
+ * 
+ * Note: This is an approximation. Actual token counts vary by model and tokenizer.
+ * For precise counts, use the provider's tokenizer (e.g., tiktoken for OpenAI).
+ */
+export function estimateTokenCount(text: string): number {
+  const words = text.split(/\s+/).length;
+  const chars = text.length;
+  // Hybrid estimation: average of word-based (words * 1.3) and char-based (chars / 4)
+  return Math.ceil((words * 1.3 + chars / 4) / 2);
+}
+
+/**
+ * Optimize messages by removing redundant whitespace and compressing content
+ */
+export function optimizeMessages(messages: ChatMessage[]): ChatMessage[] {
+  return messages.map(msg => ({
+    ...msg,
+    content: msg.content
+      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+      .replace(/\n{3,}/g, '\n\n') // Replace multiple newlines with double newline
+      .trim(),
+  }));
+}
+
+/**
+ * Get system prompt based on context
+ */
+export function getSystemPrompt(type: 'default' | 'technical' | 'creative' = 'default', custom?: string): string {
+  return custom || SYSTEM_PROMPTS[type];
+}
+
+/**
+ * Add system prompt to messages if not present
+ */
+export function enhanceMessagesWithSystemPrompt(messages: ChatMessage[], systemPrompt?: string): ChatMessage[] {
+  const hasSystemPrompt = messages.some(m => m.role === 'system');
+  if (!hasSystemPrompt && systemPrompt) {
+    return [{ role: 'system', content: systemPrompt }, ...messages];
+  }
+  return messages;
 }
 
 /**
@@ -217,6 +321,235 @@ async function sendToOllama(
 }
 
 /**
+ * Send a chat message to Anthropic Claude API
+ */
+async function sendToAnthropic(
+  messages: ChatMessage[],
+  config: ChatConfig
+): Promise<ChatResponse> {
+  const apiKey = config.apiKey;
+  const model = config.model || 'claude-3-sonnet-20240229';
+  const endpoint = config.endpoint || 'https://api.anthropic.com/v1/messages';
+
+  // Anthropic requires separating system messages
+  const systemMessages = messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
+  const conversationMessages = messages.filter(m => m.role !== 'system');
+
+  const requestBody = {
+    model,
+    messages: conversationMessages,
+    max_tokens: config.maxTokens || 4096,
+    temperature: config.temperature ?? 0.7,
+    system: systemMessages || undefined,
+  };
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(
+    () => controller.abort(),
+    config.timeout || DEFAULT_TIMEOUT
+  );
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey || '',
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify(requestBody),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.error?.message || `Anthropic API error: ${response.status} ${response.statusText}`
+      );
+    }
+
+    const data = await response.json();
+
+    if (!data.content || data.content.length === 0) {
+      throw new Error('No response from Anthropic');
+    }
+
+    return {
+      message: data.content[0].text,
+      model: data.model,
+      usage: {
+        promptTokens: data.usage?.input_tokens,
+        completionTokens: data.usage?.output_tokens,
+        totalTokens: (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0),
+      },
+    };
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if ((error as Error).name === 'AbortError') {
+      throw new Error('Request timeout');
+    }
+    throw error;
+  }
+}
+
+/**
+ * Send a chat message to Google Gemini API
+ */
+async function sendToGoogle(
+  messages: ChatMessage[],
+  config: ChatConfig
+): Promise<ChatResponse> {
+  const apiKey = config.apiKey;
+  const model = config.model || 'gemini-pro';
+  const endpoint = config.endpoint || `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+
+  // Convert messages to Gemini format
+  const contents = messages.filter(m => m.role !== 'system').map(msg => ({
+    role: msg.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: msg.content }],
+  }));
+
+  // Add system instruction if present
+  const systemInstruction = messages.find(m => m.role === 'system')?.content;
+
+  const requestBody = {
+    contents,
+    systemInstruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined,
+    generationConfig: {
+      temperature: config.temperature ?? 0.7,
+      maxOutputTokens: config.maxTokens || 2048,
+    },
+  };
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(
+    () => controller.abort(),
+    config.timeout || DEFAULT_TIMEOUT
+  );
+
+  try {
+    const response = await fetch(`${endpoint}?key=${apiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.error?.message || `Google API error: ${response.status} ${response.statusText}`
+      );
+    }
+
+    const data = await response.json();
+
+    if (!data.candidates || data.candidates.length === 0 || !data.candidates[0].content) {
+      throw new Error('No response from Google Gemini');
+    }
+
+    const messageText = data.candidates[0].content.parts[0].text;
+
+    return {
+      message: messageText,
+      model: model,
+      usage: {
+        promptTokens: data.usageMetadata?.promptTokenCount,
+        completionTokens: data.usageMetadata?.candidatesTokenCount,
+        totalTokens: data.usageMetadata?.totalTokenCount,
+      },
+    };
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if ((error as Error).name === 'AbortError') {
+      throw new Error('Request timeout');
+    }
+    throw error;
+  }
+}
+
+/**
+ * Send a chat message to Azure OpenAI API
+ */
+async function sendToAzureOpenAI(
+  messages: ChatMessage[],
+  config: ChatConfig
+): Promise<ChatResponse> {
+  const apiKey = config.apiKey;
+  const model = config.model || 'gpt-35-turbo';
+  const endpoint = config.endpoint;
+  const apiVersion = config.azureApiVersion || '2024-02-15-preview';
+
+  if (!endpoint) {
+    throw new Error('Azure OpenAI endpoint is required');
+  }
+
+  // Azure endpoint format: https://<resource-name>.openai.azure.com/openai/deployments/<deployment-name>/chat/completions?api-version=<version>
+  const url = `${endpoint}/openai/deployments/${model}/chat/completions?api-version=${apiVersion}`;
+
+  const requestBody = {
+    messages,
+    temperature: config.temperature ?? 0.7,
+    max_tokens: config.maxTokens,
+  };
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(
+    () => controller.abort(),
+    config.timeout || DEFAULT_TIMEOUT
+  );
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': apiKey || '',
+      },
+      body: JSON.stringify(requestBody),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.error?.message || `Azure OpenAI API error: ${response.status} ${response.statusText}`
+      );
+    }
+
+    const data = await response.json();
+
+    if (!data.choices || data.choices.length === 0) {
+      throw new Error('No response from Azure OpenAI');
+    }
+
+    return {
+      message: data.choices[0].message.content,
+      model: data.model,
+      usage: {
+        promptTokens: data.usage?.prompt_tokens,
+        completionTokens: data.usage?.completion_tokens,
+        totalTokens: data.usage?.total_tokens,
+      },
+    };
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if ((error as Error).name === 'AbortError') {
+      throw new Error('Request timeout');
+    }
+    throw error;
+  }
+}
+
+/**
  * Send a chat message using the specified provider
  */
 export async function sendChatMessage(
@@ -232,11 +565,28 @@ export async function sendChatMessage(
     throw new Error('At least one message is required');
   }
 
+  // Apply token optimization if enabled
+  let processedMessages = messages;
+  if (config.optimizeTokens) {
+    processedMessages = optimizeMessages(messages);
+  }
+
+  // Add system prompt if provided and not present
+  if (config.systemPrompt) {
+    processedMessages = enhanceMessagesWithSystemPrompt(processedMessages, config.systemPrompt);
+  }
+
   switch (config.provider) {
     case 'openai':
-      return sendToOpenAI(messages, config);
+      return sendToOpenAI(processedMessages, config);
+    case 'anthropic':
+      return sendToAnthropic(processedMessages, config);
+    case 'google':
+      return sendToGoogle(processedMessages, config);
+    case 'azure-openai':
+      return sendToAzureOpenAI(processedMessages, config);
     case 'ollama':
-      return sendToOllama(messages, config);
+      return sendToOllama(processedMessages, config);
     default:
       throw new Error(`Unsupported provider: ${config.provider}`);
   }
@@ -334,5 +684,82 @@ export async function fetchOllamaModels(endpoint: string): Promise<ModelInfo[]> 
   } catch (error) {
     // Return default models if API call fails
     return [DEFAULT_MODELS.ollama];
+  }
+}
+
+/**
+ * Fetch available models from Anthropic (returns predefined models)
+ */
+export async function fetchAnthropicModels(): Promise<ModelInfo[]> {
+  // Anthropic doesn't have a models list API, so we return predefined models
+  return [
+    {
+      id: 'claude-3-opus-20240229',
+      name: 'Claude 3 Opus',
+      contextWindow: 200000,
+      provider: 'anthropic',
+    },
+    {
+      id: 'claude-3-sonnet-20240229',
+      name: 'Claude 3 Sonnet',
+      contextWindow: 200000,
+      provider: 'anthropic',
+      isDefault: true,
+    },
+    {
+      id: 'claude-3-haiku-20240307',
+      name: 'Claude 3 Haiku',
+      contextWindow: 200000,
+      provider: 'anthropic',
+    },
+  ];
+}
+
+/**
+ * Fetch available models from Google (returns predefined models)
+ */
+export async function fetchGoogleModels(): Promise<ModelInfo[]> {
+  // Google Gemini API doesn't have a list models endpoint available publicly
+  return [
+    {
+      id: 'gemini-pro',
+      name: 'Gemini Pro',
+      contextWindow: 32768,
+      provider: 'google',
+      isDefault: true,
+    },
+    {
+      id: 'gemini-pro-vision',
+      name: 'Gemini Pro Vision',
+      contextWindow: 16384,
+      provider: 'google',
+    },
+    {
+      id: 'gemini-1.5-pro',
+      name: 'Gemini 1.5 Pro',
+      contextWindow: 1048576,
+      provider: 'google',
+    },
+  ];
+}
+
+/**
+ * Fetch available models based on provider
+ */
+export async function fetchModels(provider: AIProvider, config: { apiKey?: string; endpoint?: string }): Promise<ModelInfo[]> {
+  switch (provider) {
+    case 'openai':
+      return config.apiKey ? fetchOpenAIModels(config.apiKey) : [DEFAULT_MODELS.openai];
+    case 'anthropic':
+      return fetchAnthropicModels();
+    case 'google':
+      return fetchGoogleModels();
+    case 'azure-openai':
+      // Azure OpenAI uses deployment names, not model IDs
+      return [DEFAULT_MODELS['azure-openai']];
+    case 'ollama':
+      return config.endpoint ? fetchOllamaModels(config.endpoint) : [DEFAULT_MODELS.ollama];
+    default:
+      return [getDefaultModel(provider)];
   }
 }

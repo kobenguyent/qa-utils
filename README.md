@@ -96,18 +96,40 @@ Convert between Unix timestamps and human-readable dates:
 
 #### 🤖 AI Chat (Enhanced)
 Advanced AI chat interface with cutting-edge features:
-- **Multi-Provider Support**: OpenAI API and local Ollama LLMs
-- **MCP Integration**: Connect to Model Context Protocol servers for tool/resource access
-- **File Upload**: Extend LLM knowledge with document uploads (.txt, .md, .json, .csv)
-- **Cache-Augmented Generation (CAG)**: Fast document retrieval with LRU caching
-- **Alternative RAG Approaches**:
-  - Keyword-based search
-  - Metadata filtering
-  - Large context window support (4K-8K tokens)
-  - Automatic prompt engineering
-- **Model Management**: Fetch and select from available models
-- **Knowledge Base**: Upload and manage documents for context-aware responses
-- **Real-time Statistics**: Monitor cache usage and document count
+- **Multi-Provider Support**: 
+  - **OpenAI** - GPT-3.5, GPT-4, and more
+  - **Anthropic Claude** - Claude 3 Opus, Sonnet, and Haiku
+  - **Google Gemini** - Gemini Pro and Gemini 1.5 Pro
+  - **Azure OpenAI** - Enterprise-grade OpenAI deployments
+  - **Ollama** - Local LLMs (Llama 2, Mistral, CodeLlama, etc.)
+- **Token Optimization**: 
+  - Automatic token counting and display
+  - Smart token compression to reduce API costs
+  - Real-time token usage monitoring
+- **Smart Prompt Engineering**:
+  - Three system prompt types: Default, Technical, and Creative
+  - Automatic context injection for enhanced responses
+  - Optimized for better AI responses
+- **Conversation Management**:
+  - Multiple chat contexts with easy switching
+  - Save and load conversation history
+  - Export conversations (JSON/Markdown format)
+  - Delete or rename conversations
+- **MCP Tool Management**: Comprehensive tool enable/disable/load/unload system
+  - 11 pre-configured default tools (file system, web, computation, data, utility)
+  - Enable/disable individual tools or entire categories
+  - Load custom tools from MCP servers
+  - Import/export tool configurations
+  - Real-time statistics (total, enabled, default, custom tools)
+  - Complete usage guide with code examples
+  - Custom MCP server support with auto-discovery
+- **Knowledge Base & CAG**:
+  - File upload support (.txt, .md, .json, .csv, .pdf)
+  - Cache-Augmented Generation (CAG) for fast retrieval
+  - Keyword-based search and metadata filtering
+  - Large context window support (up to 1M tokens for Gemini 1.5)
+- **Model Management**: Fetch and select from available models for each provider
+- **Real-time Statistics**: Monitor cache usage, document count, and token usage
 
 #### 🌠 Additional Tools
 - **UUID Generator**: Generate UUIDs v1, v4 with copy functionality
@@ -139,10 +161,12 @@ Advanced AI chat interface with cutting-edge features:
 - **Mobile-first responsive design** with Bootstrap
 
 ### 🧪 Comprehensive Testing
-- **219 test cases** across 16 test files
+- **273 test cases** across 18 test files
 - **Component testing** with React Testing Library
 - **Utility function testing** with comprehensive coverage
-- **AI/ML features testing** with MCP and knowledge management tests
+- **AI/ML features testing** with MCP, conversation management, and knowledge base tests
+- **Multi-provider AI testing** for OpenAI, Anthropic, Google, Azure, and Ollama
+- **Token optimization testing** for cost-effective AI usage
 - **WebSocket & gRPC client testing** with mocked services
 - **Integration tests** demonstrating real-world usage patterns
 - **CI/CD integration** with automated testing on PRs
@@ -159,6 +183,143 @@ Advanced AI chat interface with cutting-edge features:
 - **Touch-friendly interfaces** with proper target sizes
 - **Progressive enhancement** for all devices
 - **Accessibility compliance** with ARIA attributes
+
+## 🤖 AI Provider Setup
+
+The AI Chat feature supports multiple providers. Here's how to get started with each:
+
+### OpenAI
+1. Sign up at [OpenAI Platform](https://platform.openai.com/)
+2. Generate an API key from the [API Keys page](https://platform.openai.com/api-keys)
+3. Select "OpenAI" provider and enter your API key
+4. Available models: GPT-3.5 Turbo, GPT-4, GPT-4 Turbo
+
+### Anthropic Claude
+1. Sign up at [Anthropic Console](https://console.anthropic.com/)
+2. Generate an API key from your account settings
+3. Select "Anthropic Claude" provider and enter your API key
+4. Available models: Claude 3 Opus, Sonnet, Haiku (200K context window)
+
+### Google Gemini
+1. Sign up at [Google AI Studio](https://makersuite.google.com/)
+2. Generate an API key from the [API Keys page](https://makersuite.google.com/app/apikey)
+3. Select "Google Gemini" provider and enter your API key
+4. Available models: Gemini Pro, Gemini Pro Vision, Gemini 1.5 Pro (up to 1M tokens)
+
+### Azure OpenAI
+1. Create an Azure OpenAI resource in Azure Portal
+2. Deploy a model (e.g., gpt-35-turbo)
+3. Get your API key and endpoint from the resource
+4. Select "Azure OpenAI" provider and enter your credentials
+
+### Ollama (Local)
+1. Install Ollama from [ollama.ai](https://ollama.ai)
+2. Pull a model: `ollama pull llama2` (or mistral, codellama, etc.)
+3. Set CORS environment variable:
+   ```bash
+   # macOS/Linux
+   export OLLAMA_ORIGINS="https://kobenguyent.github.io"
+   ollama serve
+   
+   # Windows PowerShell
+   $env:OLLAMA_ORIGINS="https://kobenguyent.github.io"
+   ollama serve
+   ```
+4. Select "Ollama (Local)" provider and use default endpoint
+
+### 💡 Tips for Best Results
+- **Token Optimization**: Enable to reduce costs by removing redundant whitespace
+- **System Prompts**: Choose "Technical" for code/technical tasks, "Creative" for brainstorming
+- **Conversation Management**: Save important chats for future reference
+- **Knowledge Base**: Upload relevant documents to provide context to the AI
+- **MCP Tools**: Connect MCP servers to give AI access to external tools and data
+
+## 🔧 MCP Tool Management
+
+The AI Chat includes a comprehensive MCP (Model Context Protocol) tool management system:
+
+### Default Tools (11 Pre-configured)
+
+**Filesystem Tools:**
+- `read_file` - Read file contents
+- `list_directory` - List directory contents
+- `write_file` - Write to files
+
+**Web Tools:**
+- `fetch_url` - Fetch content from URLs
+- `web_search` - Search the web
+
+**Computation Tools:**
+- `calculate` - Perform calculations
+- `execute_code` - Execute code in sandbox
+
+**Data Tools:**
+- `parse_json` - Parse JSON data
+- `query_database` - Query databases
+
+**Utility Tools:**
+- `generate_uuid` - Generate UUIDs
+- `get_timestamp` - Get timestamps
+
+### Tool Management Features
+
+**Quick Actions:**
+- 📥 Load Default Tools - Initialize 11 pre-configured tools
+- ✅ Enable All Default - Enable all default tools at once
+- ❌ Disable All - Disable all tools
+- 💾 Export Config - Save tool configuration as JSON
+- 📁 Import Config - Load tool configuration from file
+
+**Per-Tool Control:**
+- Enable/disable individual tools via checkboxes
+- View tool descriptions and categories
+- Track tool source (default vs custom)
+- Real-time statistics (total, enabled, disabled)
+
+**Custom MCP Servers:**
+- Connect to external MCP servers
+- Auto-discover and load server tools
+- Disconnect to unload server tools
+- Tools loaded from servers marked as "custom"
+
+### Usage Example
+
+```typescript
+import { MCPToolManager } from './utils/mcpToolManager';
+
+// Create manager
+const manager = new MCPToolManager();
+
+// Load default tools
+manager.initializeDefaultTools();
+
+// Enable specific tools
+manager.enableTool('read_file');
+manager.enableTool('web_search');
+
+// Or enable all at once
+manager.enableAllDefaultTools();
+
+// Connect to custom server
+const client = new MCPClient({ 
+  name: 'my-server', 
+  url: 'http://localhost:8080' 
+});
+await manager.loadToolsFromServer(client);
+
+// Export configuration
+const config = manager.exportConfig();
+// Save to file...
+
+// Import configuration
+manager.importConfig(configJson);
+
+// Get statistics
+const stats = manager.getStats();
+// { total: 15, enabled: 8, defaultTools: 11, customTools: 4 }
+```
+
+For the complete MCP Tool Management Guide, click "📖 View Complete MCP Tools Guide" in the AI Chat interface.
 
 ## 🚀 Getting Started
 
