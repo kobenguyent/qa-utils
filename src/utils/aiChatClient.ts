@@ -783,7 +783,7 @@ export async function fetchGoogleModels(apiKey?: string): Promise<ModelInfo[]> {
       )
       .map((model: GeminiModel, index: number) => {
         // Extract model ID from name (e.g., "models/gemini-pro" -> "gemini-pro")
-        const modelId = model.name.split('/').pop() || model.name;
+        const modelId = model.name?.split('/').pop() || model.name || '';
         
         // Get display name, fallback to ID
         const displayName = model.displayName || modelId;
@@ -819,7 +819,7 @@ export async function fetchModels(provider: AIProvider, config: { apiKey?: strin
     case 'anthropic':
       return fetchAnthropicModels();
     case 'google':
-      return config.apiKey ? fetchGoogleModels(config.apiKey) : fetchGoogleModels();
+      return fetchGoogleModels(config.apiKey);
     case 'azure-openai':
       // Azure OpenAI uses deployment names, not model IDs
       return [DEFAULT_MODELS['azure-openai']];
