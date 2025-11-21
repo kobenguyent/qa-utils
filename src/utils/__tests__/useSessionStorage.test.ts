@@ -2,7 +2,10 @@ import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { useSessionStorage, clearSessionStorage, clearAllSessionStorage } from '../useSessionStorage';
 
-describe('useSessionStorage', () => {
+// Skip these tests if window is not defined (Node environment)
+const describeOrSkip = typeof window !== 'undefined' ? describe : describe.skip;
+
+describeOrSkip('useSessionStorage', () => {
   beforeEach(() => {
     // Clear sessionStorage before each test
     window.sessionStorage.clear();
@@ -128,7 +131,7 @@ describe('useSessionStorage', () => {
   });
 });
 
-describe('clearSessionStorage', () => {
+describeOrSkip('clearSessionStorage', () => {
   beforeEach(() => {
     window.sessionStorage.clear();
   });
@@ -160,7 +163,7 @@ describe('clearSessionStorage', () => {
   });
 });
 
-describe('clearAllSessionStorage', () => {
+describeOrSkip('clearAllSessionStorage', () => {
   beforeEach(() => {
     window.sessionStorage.clear();
   });

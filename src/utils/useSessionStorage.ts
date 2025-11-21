@@ -9,6 +9,11 @@ import { useState, useEffect, useCallback } from 'react';
 export function useSessionStorage<T>(key: string, initialValue: T): [T, (value: T | ((prev: T) => T)) => void] {
   // Get initial state from sessionStorage or use initialValue
   const [storedValue, setStoredValue] = useState<T>(() => {
+    // Check if window is defined (SSR/Node environment compatibility)
+    if (typeof window === 'undefined') {
+      return initialValue;
+    }
+    
     try {
       const item = window.sessionStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
@@ -26,10 +31,13 @@ export function useSessionStorage<T>(key: string, initialValue: T): [T, (value: 
         const valueToStore = value instanceof Function ? value(prevState) : value;
         
         // Save to sessionStorage inside a try-catch to handle errors
-        try {
-          window.sessionStorage.setItem(key, JSON.stringify(valueToStore));
-        } catch (storageError) {
-          console.warn(`Error setting sessionStorage key "${key}":`, storageError);
+        // Check if window is defined (SSR/Node environment compatibility)
+        if (typeof window !== 'undefined') {
+          try {
+            window.sessionStorage.setItem(key, JSON.stringify(valueToStore));
+          } catch (storageError) {
+            console.warn(`Error setting sessionStorage key "${key}":`, storageError);
+          }
         }
         
         return valueToStore;
@@ -41,6 +49,11 @@ export function useSessionStorage<T>(key: string, initialValue: T): [T, (value: 
 
   // Sync state with sessionStorage when key changes
   useEffect(() => {
+    // Check if window is defined (SSR/Node environment compatibility)
+    if (typeof window === 'undefined') {
+      return;
+    }
+    
     try {
       const item = window.sessionStorage.getItem(key);
       if (item) {
@@ -59,6 +72,11 @@ export function useSessionStorage<T>(key: string, initialValue: T): [T, (value: 
  * @param keys - Array of keys to clear
  */
 export function clearSessionStorage(keys: string[]): void {
+  // Check if window is defined (SSR/Node environment compatibility)
+  if (typeof window === 'undefined') {
+    return;
+  }
+  
   try {
     keys.forEach(key => {
       window.sessionStorage.removeItem(key);
@@ -72,6 +90,11 @@ export function clearSessionStorage(keys: string[]): void {
  * Clears all sessionStorage (use with caution)
  */
 export function clearAllSessionStorage(): void {
+  // Check if window is defined (SSR/Node environment compatibility)
+  if (typeof window === 'undefined') {
+    return;
+  }
+  
   try {
     window.sessionStorage.clear();
   } catch (error) {

@@ -71,6 +71,11 @@ export const AIChat: React.FC = () => {
 
   // Restore knowledge base documents from session storage on mount
   useEffect(() => {
+    // Check if window is defined (SSR/Node environment compatibility)
+    if (typeof window === 'undefined') {
+      return;
+    }
+    
     try {
       const storedDocuments = window.sessionStorage.getItem('aiChat_knowledgeBaseDocuments');
       if (storedDocuments) {
@@ -87,6 +92,11 @@ export const AIChat: React.FC = () => {
 
   // Save knowledge base documents to session storage when files change
   useEffect(() => {
+    // Check if window is defined (SSR/Node environment compatibility)
+    if (typeof window === 'undefined') {
+      return;
+    }
+    
     if (uploadedFiles.length > 0) {
       try {
         const documents = uploadedFiles.map(file => {
@@ -233,7 +243,9 @@ export const AIChat: React.FC = () => {
     setMessages([]);
     setError('');
     // Clear chat-related session storage
-    window.sessionStorage.removeItem('aiChat_messages');
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.removeItem('aiChat_messages');
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -680,8 +692,10 @@ export const AIChat: React.FC = () => {
                     knowledgeBase.clear();
                     setUploadedFiles([]);
                     // Clear knowledge base from session storage
-                    window.sessionStorage.removeItem('aiChat_knowledgeBaseDocuments');
-                    window.sessionStorage.removeItem('aiChat_uploadedFiles');
+                    if (typeof window !== 'undefined') {
+                      window.sessionStorage.removeItem('aiChat_knowledgeBaseDocuments');
+                      window.sessionStorage.removeItem('aiChat_uploadedFiles');
+                    }
                   }}
                   disabled={uploadedFiles.length === 0}
                 >
