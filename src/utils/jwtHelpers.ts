@@ -38,7 +38,7 @@ export const base64UrlDecode = (str: string): string => {
       if (pad === 1) {
         throw new Error('Invalid base64url string');
       }
-      base64 += new Array(5 - pad).join('=');
+      base64 += '='.repeat(4 - pad);
     }
     // Decode base64
     return decodeURIComponent(
@@ -118,7 +118,7 @@ export const isValidJWTStructure = (token: string): boolean => {
  * Check if JWT is expired
  */
 export const isJWTExpired = (payload: JWTPayload | null): boolean => {
-  if (!payload || !payload.exp) return false;
+  if (!payload || !payload.exp || typeof payload.exp !== 'number') return false;
   return payload.exp * 1000 < Date.now();
 };
 
