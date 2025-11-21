@@ -3,6 +3,10 @@ import {
   validateConfig,
   sendChatMessage,
   testConnection,
+  getDefaultModel,
+  getAllDefaultModels,
+  fetchOpenAIModels,
+  fetchOllamaModels,
   ChatConfig,
   ChatMessage,
 } from '../aiChatClient';
@@ -416,6 +420,83 @@ describe('aiChatClient', () => {
       const fetchCall = mockFetch.mock.calls[0];
       const requestBody = JSON.parse(fetchCall[1].body);
       expect(requestBody.options.temperature).toBe(0.9);
+    });
+  });
+
+  describe('Model Management', () => {
+    it('should get default model for OpenAI', () => {
+      const model = getDefaultModel('openai');
+      expect(model.provider).toBe('openai');
+      expect(model.id).toBe('gpt-3.5-turbo');
+      expect(model.isDefault).toBe(true);
+    });
+
+    it('should get default model for Ollama', () => {
+      const model = getDefaultModel('ollama');
+      expect(model.provider).toBe('ollama');
+      expect(model.id).toBe('llama2');
+      expect(model.isDefault).toBe(true);
+    });
+
+    it('should get all default models', () => {
+      const models = getAllDefaultModels();
+      expect(models.length).toBe(2);
+      expect(models.some(m => m.provider === 'openai')).toBe(true);
+      expect(models.some(m => m.provider === 'ollama')).toBe(true);
+    });
+
+    it('should fetch OpenAI models', async () => {
+      const mockModels = {
+        data: [
+          { id: 'gpt-3.5-turbo' },
+          { id: 'gpt-4' },
+          { id: 'whisper-1' }, // Should be filtered out
+        ],
+      };
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockModels,
+      });
+
+      const models = await fetchOpenAIModels('sk-test123');
+      expect(models.length).toBe(2);
+      expect(models.every(m => m.id.includes('gpt'))).toBe(true);
+    });
+
+    it('should return default model when OpenAI fetch fails', async () => {
+      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+
+      const models = await fetchOpenAIModels('sk-test123');
+      expect(models.length).toBe(1);
+      expect(models[0].id).toBe('gpt-3.5-turbo');
+    });
+
+    it('should fetch Ollama models', async () => {
+      const mockModels = {
+        models: [
+          { name: 'llama2' },
+          { name: 'mistral' },
+          { name: 'codellama' },
+        ],
+      };
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockModels,
+      });
+
+      const models = await fetchOllamaModels('http://localhost:11434');
+      expect(models.length).toBe(3);
+      expect(models[0].provider).toBe('ollama');
+    });
+
+    it('should return default model when Ollama fetch fails', async () => {
+      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+
+      const models = await fetchOllamaModels('http://localhost:11434');
+      expect(models.length).toBe(1);
+      expect(models[0].id).toBe('llama2');
     });
   });
 });
