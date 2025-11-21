@@ -43,6 +43,18 @@ export interface ModelInfo {
   isDefault?: boolean;
 }
 
+// Google Gemini API response types
+interface GeminiModel {
+  name: string;
+  displayName?: string;
+  supportedGenerationMethods?: string[];
+  inputTokenLimit?: number;
+}
+
+interface GeminiModelsResponse {
+  models?: GeminiModel[];
+}
+
 const DEFAULT_TIMEOUT = 30000; // 30 seconds
 
 // Default models configuration
@@ -716,11 +728,11 @@ export async function fetchAnthropicModels(): Promise<ModelInfo[]> {
 }
 
 /**
- * Fetch available models from Google (returns predefined models)
+ * Fetch available models from Google Gemini API
  */
-export async function fetchGoogleModels(): Promise<ModelInfo[]> {
-  // Google Gemini API doesn't have a list models endpoint available publicly
-  return [
+export async function fetchGoogleModels(apiKey?: string): Promise<ModelInfo[]> {
+  // Default models to return when API key is not provided or API call fails
+  const defaultModels: ModelInfo[] = [
     {
       id: 'gemini-pro',
       name: 'Gemini Pro',
@@ -741,6 +753,60 @@ export async function fetchGoogleModels(): Promise<ModelInfo[]> {
       provider: 'google',
     },
   ];
+
+  // If no API key provided, return default models
+  if (!apiKey) {
+    return defaultModels;
+  }
+
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch Google Gemini models');
+    }
+
+    const data: GeminiModelsResponse = await response.json();
+    
+    // Parse models from API response
+    if (!data.models || !Array.isArray(data.models)) {
+      return defaultModels;
+    }
+
+    // Filter for generateContent-capable models and map to ModelInfo
+    const models: ModelInfo[] = data.models
+      .filter((model: GeminiModel) => 
+        model.supportedGenerationMethods?.includes('generateContent') &&
+        model.name?.includes('gemini')
+      )
+      .map((model: GeminiModel, index: number) => {
+        // Extract model ID from name (e.g., "models/gemini-pro" -> "gemini-pro")
+        const modelId = model.name.split('/').pop() || model.name;
+        
+        // Get display name, fallback to ID
+        const displayName = model.displayName || modelId;
+        
+        // Extract context window from inputTokenLimit or use default
+        const contextWindow = model.inputTokenLimit || 32768;
+        
+        return {
+          id: modelId,
+          name: displayName,
+          contextWindow: contextWindow,
+          provider: 'google' as AIProvider,
+          // Mark the first model as default
+          isDefault: index === 0,
+        };
+      });
+
+    // If we got models from API, return them; otherwise return defaults
+    return models.length > 0 ? models : defaultModels;
+  } catch (error) {
+    // Return default models if API call fails
+    return defaultModels;
+  }
 }
 
 /**
@@ -753,7 +819,7 @@ export async function fetchModels(provider: AIProvider, config: { apiKey?: strin
     case 'anthropic':
       return fetchAnthropicModels();
     case 'google':
-      return fetchGoogleModels();
+      return config.apiKey ? fetchGoogleModels(config.apiKey) : fetchGoogleModels();
     case 'azure-openai':
       // Azure OpenAI uses deployment names, not model IDs
       return [DEFAULT_MODELS['azure-openai']];
