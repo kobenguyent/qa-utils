@@ -31,6 +31,7 @@ import {
 } from '../../utils/aiChatClient';
 import { KnowledgeBase, parseFileContent } from '../../utils/knowledgeManager';
 import { MCPClient, MCPServerConfig } from '../../utils/mcpClient';
+import { useSessionStorage } from '../../utils/useSessionStorage';
 
 interface ConversationMessage extends ChatMessage {
   id: string;
@@ -38,35 +39,77 @@ interface ConversationMessage extends ChatMessage {
 }
 
 export const AIChat: React.FC = () => {
-  // Configuration state
-  const [provider, setProvider] = useState<AIProvider>('openai');
-  const [apiKey, setApiKey] = useState('');
-  const [endpoint, setEndpoint] = useState('http://localhost:11434');
-  const [model, setModel] = useState('');
-  const [temperature, setTemperature] = useState(0.7);
+  // Configuration state with session storage
+  const [provider, setProvider] = useSessionStorage<AIProvider>('aiChat_provider', 'openai');
+  const [apiKey, setApiKey] = useSessionStorage<string>('aiChat_apiKey', '');
+  const [endpoint, setEndpoint] = useSessionStorage<string>('aiChat_endpoint', 'http://localhost:11434');
+  const [model, setModel] = useSessionStorage<string>('aiChat_model', '');
+  const [temperature, setTemperature] = useSessionStorage<number>('aiChat_temperature', 0.7);
   const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
   
-  // Chat state
-  const [messages, setMessages] = useState<ConversationMessage[]>([]);
+  // Chat state with session storage
+  const [messages, setMessages] = useSessionStorage<ConversationMessage[]>('aiChat_messages', []);
   const [inputMessage, setInputMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [connectionStatus, setConnectionStatus] = useState<'unknown' | 'connected' | 'disconnected'>('unknown');
   
-  // Knowledge base state
+  // Knowledge base state with session storage
   const [knowledgeBase] = useState(() => new KnowledgeBase());
-  const [uploadedFiles, setUploadedFiles] = useState<Array<{ id: string; name: string }>>([]);
+  const [uploadedFiles, setUploadedFiles] = useSessionStorage<Array<{ id: string; name: string }>>('aiChat_uploadedFiles', []);
   const [uploadProgress, setUploadProgress] = useState(0);
   
-  // MCP state
+  // MCP state with session storage
   const [, setMcpClient] = useState<MCPClient | null>(null);
-  const [mcpServerUrl, setMcpServerUrl] = useState('');
+  const [mcpServerUrl, setMcpServerUrl] = useSessionStorage<string>('aiChat_mcpServerUrl', '');
   const [mcpConnected, setMcpConnected] = useState(false);
-  const [mcpTools, setMcpTools] = useState<Array<{ name: string; description: string }>>([]);
+  const [mcpTools, setMcpTools] = useSessionStorage<Array<{ name: string; description: string }>>('aiChat_mcpTools', []);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isConfigured, setIsConfigured] = useState(false);
+
+  // Restore knowledge base documents from session storage on mount
+  useEffect(() => {
+    // Check if window is defined (SSR/Node environment compatibility)
+    if (typeof window === 'undefined') {
+      return;
+    }
+    
+    try {
+      const storedDocuments = window.sessionStorage.getItem('aiChat_knowledgeBaseDocuments');
+      if (storedDocuments) {
+        const documents = JSON.parse(storedDocuments);
+        documents.forEach((doc: { content: string; metadata: Record<string, unknown> }) => {
+          knowledgeBase.addDocument(doc.content, doc.metadata);
+        });
+      }
+    } catch (error) {
+      console.warn('Error restoring knowledge base documents:', error);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount - knowledgeBase is intentionally stable
+
+  // Save knowledge base documents to session storage when files change
+  useEffect(() => {
+    // Check if window is defined (SSR/Node environment compatibility)
+    if (typeof window === 'undefined') {
+      return;
+    }
+    
+    if (uploadedFiles.length > 0) {
+      try {
+        const documents = uploadedFiles.map(file => {
+          const doc = knowledgeBase.getDocument(file.id);
+          return doc ? { content: doc.content, metadata: doc.metadata } : null;
+        }).filter(Boolean);
+        window.sessionStorage.setItem('aiChat_knowledgeBaseDocuments', JSON.stringify(documents));
+      } catch (error) {
+        console.warn('Error saving knowledge base documents:', error);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uploadedFiles]); // knowledgeBase is intentionally stable and doesn't need to be in deps
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -86,7 +129,8 @@ export const AIChat: React.FC = () => {
         setModel('llama2');
       }
     }
-  }, [provider, apiKey, endpoint, model]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [provider, apiKey, endpoint, model]); // setModel is intentionally excluded as it's a setter
 
   const getConfig = (): ChatConfig => {
     return {
@@ -198,6 +242,10 @@ export const AIChat: React.FC = () => {
   const handleClearChat = () => {
     setMessages([]);
     setError('');
+    // Clear chat-related session storage
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.removeItem('aiChat_messages');
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -643,6 +691,11 @@ export const AIChat: React.FC = () => {
                   onClick={() => {
                     knowledgeBase.clear();
                     setUploadedFiles([]);
+                    // Clear knowledge base from session storage
+                    if (typeof window !== 'undefined') {
+                      window.sessionStorage.removeItem('aiChat_knowledgeBaseDocuments');
+                      window.sessionStorage.removeItem('aiChat_uploadedFiles');
+                    }
                   }}
                   disabled={uploadedFiles.length === 0}
                 >
