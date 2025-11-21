@@ -524,9 +524,13 @@ export const AIChat: React.FC = () => {
                     <Form.Select
                       value={provider}
                       onChange={(e) => {
-                        setProvider(e.target.value as AIProvider);
+                        const newProvider = e.target.value as AIProvider;
+                        setProvider(newProvider);
                         setConnectionStatus('unknown');
                         setAvailableModels([]);
+                        // Reset model to the new provider's default
+                        const defaultModel = getDefaultModel(newProvider);
+                        setModel(defaultModel.id);
                       }}
                       disabled={loading}
                     >
