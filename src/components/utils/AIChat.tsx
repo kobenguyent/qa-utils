@@ -14,6 +14,7 @@ import {
   Tab,
   ListGroup,
   ProgressBar,
+  Collapse,
 } from 'react-bootstrap';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
@@ -83,6 +84,7 @@ export const AIChat: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isConfigured, setIsConfigured] = useState(false);
+  const [configExpanded, setConfigExpanded] = useSessionStorage<boolean>('aiChat_configExpanded', true);
 
   // Restore knowledge base documents from session storage on mount
   useEffect(() => {
@@ -488,8 +490,22 @@ export const AIChat: React.FC = () => {
   const enhanceMessageWithContext = async (message: string): Promise<string> => {
     const relevantDocs = knowledgeBase.search(message, { method: 'keyword', limit: 3 });
     if (relevantDocs.length > 0) {
-      const context = knowledgeBase.buildContext(relevantDocs, 2000);
-      return `${context}\n\nUser question: ${message}`;
+      // Check if user is asking for full/complete data
+      const wantsFullData = /\b(full|complete|entire|whole|all|untruncated|raw)\b.*\b(data|document|file|content|information)\b/i.test(message) ||
+                           /\b(show|display|read|access|see)\b.*\b(full|complete|entire|whole|all)\b/i.test(message);
+      
+      // If user wants full data or references specific document, load more content
+      const maxLength = wantsFullData ? 0 : 2000; // 0 means unlimited
+      const includeFullContent = wantsFullData;
+      
+      const context = knowledgeBase.buildContext(relevantDocs, maxLength, includeFullContent);
+      
+      // Add a note to help AI understand the context
+      const contextNote = uploadedFiles.length > 0 
+        ? `\n[Context: The following information is from uploaded knowledge base documents. Use this information to answer the user's question, but also apply your general knowledge when relevant.]\n\n`
+        : '';
+      
+      return `${contextNote}${context}\n\nUser question: ${message}`;
     }
     return message;
   };
@@ -556,18 +572,28 @@ export const AIChat: React.FC = () => {
 
         {/* Configuration Panel */}
         <Card className="mb-4" style={{ border: '1px solid #dee2e6' }}>
-          <Card.Header style={{ backgroundColor: '#f8f9fa', borderBottom: '1px solid #dee2e6' }}>
-            <h5 className="mb-0" style={{ fontSize: '1.25rem', fontWeight: '600', color: '#495057' }}>
-              ⚙️ Configuration
-              {connectionStatus === 'connected' && (
-                <Badge bg="success" className="ms-2" style={{ fontSize: '0.85rem' }}>Connected</Badge>
-              )}
-              {connectionStatus === 'disconnected' && (
-                <Badge bg="danger" className="ms-2" style={{ fontSize: '0.85rem' }}>Disconnected</Badge>
-              )}
-            </h5>
+          <Card.Header 
+            style={{ backgroundColor: '#f8f9fa', borderBottom: '1px solid #dee2e6', cursor: 'pointer' }}
+            onClick={() => setConfigExpanded(!configExpanded)}
+            role="button"
+            aria-expanded={configExpanded}
+            aria-controls="config-collapse"
+          >
+            <div className="d-flex justify-content-between align-items-center">
+              <h5 className="mb-0" style={{ fontSize: '1.25rem', fontWeight: '600', color: '#495057' }}>
+                {configExpanded ? '▼' : '▶'} ⚙️ Configuration
+                {connectionStatus === 'connected' && (
+                  <Badge bg="success" className="ms-2" style={{ fontSize: '0.85rem' }}>Connected</Badge>
+                )}
+                {connectionStatus === 'disconnected' && (
+                  <Badge bg="danger" className="ms-2" style={{ fontSize: '0.85rem' }}>Disconnected</Badge>
+                )}
+              </h5>
+              <small className="text-muted">Click to {configExpanded ? 'collapse' : 'expand'}</small>
+            </div>
           </Card.Header>
-          <Card.Body>
+          <Collapse in={configExpanded}>
+            <Card.Body id="config-collapse">
             <Form>
               <Row className="mb-3">
                 <Col md={6}>
@@ -888,7 +914,8 @@ export const AIChat: React.FC = () => {
               )}
             </div>
             </Form>
-          </Card.Body>
+            </Card.Body>
+          </Collapse>
         </Card>
 
         {/* Error Alert */}
@@ -928,9 +955,9 @@ export const AIChat: React.FC = () => {
                             style={{ cursor: 'pointer', flex: 1 }}
                             onClick={() => handleLoadConversation(conv.id)}
                           >
-                            <strong>{conv.name}</strong>
+                            <strong style={{ color: conv.id === currentConversationId ? 'inherit' : '#212529' }}>{conv.name}</strong>
                             <br />
-                            <small className="text-muted">
+                            <small style={{ color: conv.id === currentConversationId ? 'rgba(255,255,255,0.8)' : '#6c757d' }}>
                               {conv.messageCount} messages • {new Date(conv.createdAt).toLocaleDateString()}
                               {conv.provider && ` • ${conv.provider}`}
                             </small>

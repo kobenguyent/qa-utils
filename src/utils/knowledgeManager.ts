@@ -276,19 +276,36 @@ export class KnowledgeBase {
 
   /**
    * Build context from search results for LLM
+   * @param documents - Documents to include in context
+   * @param maxLength - Maximum length of context (0 = unlimited)
+   * @param includeFullContent - Whether to include full document content without truncation
    */
-  buildContext(documents: KnowledgeDocument[], maxLength = 4000): string {
+  buildContext(documents: KnowledgeDocument[], maxLength = 4000, includeFullContent = false): string {
     let context = 'Relevant information from knowledge base:\n\n';
     let currentLength = context.length;
 
     for (const doc of documents) {
       const docContext = `[${doc.metadata.filename || 'Document'}]\n${doc.content}\n\n`;
       
+      // If includeFullContent is true or maxLength is 0, include full content
+      if (includeFullContent || maxLength === 0) {
+        context += docContext;
+        currentLength += docContext.length;
+        continue;
+      }
+
       if (currentLength + docContext.length > maxLength) {
         // Truncate if needed
         const remaining = maxLength - currentLength;
         if (remaining > 100) {
-          context += docContext.substring(0, remaining - 3) + '...';
+          // Reserve space for truncation indicator and note
+          const truncationNote = '...\n[Note: Content truncated. Ask to access full document for complete information.]';
+          const availableSpace = remaining - truncationNote.length;
+          if (availableSpace > 50) {
+            context += docContext.substring(0, availableSpace) + truncationNote;
+          } else {
+            context += docContext.substring(0, remaining - 3) + '...';
+          }
         }
         break;
       }
