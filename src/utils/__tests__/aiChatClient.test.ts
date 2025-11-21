@@ -368,6 +368,125 @@ describe('aiChatClient', () => {
       const result = await testConnection(config);
       expect(result).toBe(false);
     });
+
+    it('should return true for 2xx response even with unexpected format', async () => {
+      // Simulate a 2xx response but with unexpected/empty body
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({}),
+      });
+
+      const config: ChatConfig = {
+        provider: 'openai',
+        apiKey: 'sk-test123',
+      };
+
+      const result = await testConnection(config);
+      expect(result).toBe(true);
+    });
+
+    it('should return false for 4xx response', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        json: async () => ({ error: { message: 'Unauthorized' } }),
+      });
+
+      const config: ChatConfig = {
+        provider: 'openai',
+        apiKey: 'invalid-key',
+      };
+
+      const result = await testConnection(config);
+      expect(result).toBe(false);
+    });
+
+    it('should return false for 5xx response', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => ({ error: 'Internal server error' }),
+      });
+
+      const config: ChatConfig = {
+        provider: 'openai',
+        apiKey: 'sk-test123',
+      };
+
+      const result = await testConnection(config);
+      expect(result).toBe(false);
+    });
+
+    it('should return false for invalid config', async () => {
+      const config: ChatConfig = {
+        provider: 'openai',
+        // Missing API key
+      };
+
+      const result = await testConnection(config);
+      expect(result).toBe(false);
+    });
+
+    it('should test connection for Ollama provider', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ message: { content: 'test' }, model: 'llama2' }),
+      });
+
+      const config: ChatConfig = {
+        provider: 'ollama',
+        endpoint: 'http://localhost:11434',
+      };
+
+      const result = await testConnection(config);
+      expect(result).toBe(true);
+    });
+
+    it('should test connection for Anthropic provider', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ content: [{ text: 'test' }], model: 'claude-3' }),
+      });
+
+      const config: ChatConfig = {
+        provider: 'anthropic',
+        apiKey: 'sk-ant-test',
+      };
+
+      const result = await testConnection(config);
+      expect(result).toBe(true);
+    });
+
+    it('should test connection for Google provider', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ candidates: [{ content: { parts: [{ text: 'test' }] } }] }),
+      });
+
+      const config: ChatConfig = {
+        provider: 'google',
+        apiKey: 'test-api-key',
+      };
+
+      const result = await testConnection(config);
+      expect(result).toBe(true);
+    });
+
+    it('should test connection for Azure OpenAI provider', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ choices: [{ message: { content: 'test' } }], model: 'gpt-35-turbo' }),
+      });
+
+      const config: ChatConfig = {
+        provider: 'azure-openai',
+        apiKey: 'test-key',
+        endpoint: 'https://test.openai.azure.com',
+      };
+
+      const result = await testConnection(config);
+      expect(result).toBe(true);
+    });
   });
 
   describe('configuration options', () => {

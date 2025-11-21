@@ -333,9 +333,16 @@ export const AIChat: React.FC = () => {
     try {
       const models = await fetchModels(provider, { apiKey, endpoint });
       setAvailableModels(models);
+      // Auto-select the first model from the fetched list
+      if (models.length > 0) {
+        setModel(models[0].id);
+      }
     } catch (err) {
       setError(`Failed to load models: ${(err as Error).message}`);
-      setAvailableModels([getDefaultModel(provider)]);
+      const defaultModel = getDefaultModel(provider);
+      setAvailableModels([defaultModel]);
+      // Auto-select the default model on error
+      setModel(defaultModel.id);
     } finally {
       setLoading(false);
     }
