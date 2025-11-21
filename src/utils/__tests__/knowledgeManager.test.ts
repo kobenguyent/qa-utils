@@ -1,6 +1,50 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { KnowledgeBase, CAGManager, parseFileContent } from '../knowledgeManager';
 
+// Mock FileReader for environments where it might not be available
+if (typeof FileReader === 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (global as any).FileReader = class FileReader {
+    result: string | ArrayBuffer | null = null;
+    error: Error | null = null;
+    readyState = 0;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onload: ((event: any) => void) | null = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onerror: ((event: any) => void) | null = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onloadend: ((event: any) => void) | null = null;
+    
+    readAsText(blob: Blob) {
+      this.readyState = 2;
+      blob.text().then((text) => {
+        this.result = text;
+        if (this.onload) {
+          this.onload({ target: this });
+        }
+      }).catch((error) => {
+        this.error = error;
+        if (this.onerror) {
+          this.onerror({ target: this });
+        }
+      });
+    }
+    
+    abort() {
+      // No-op for mock
+    }
+    addEventListener() {
+      // No-op for mock
+    }
+    removeEventListener() {
+      // No-op for mock
+    }
+    dispatchEvent() { 
+      return true; 
+    }
+  };
+}
+
 describe('knowledgeManager', () => {
   describe('CAGManager', () => {
     let cagManager: CAGManager;
