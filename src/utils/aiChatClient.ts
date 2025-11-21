@@ -56,6 +56,7 @@ interface GeminiModelsResponse {
 }
 
 const DEFAULT_TIMEOUT = 30000; // 30 seconds
+const DEFAULT_GEMINI_CONTEXT_WINDOW = 32768; // Default context window for Gemini models
 
 // Default models configuration
 const DEFAULT_MODELS: Record<AIProvider, ModelInfo> = {
@@ -76,7 +77,7 @@ const DEFAULT_MODELS: Record<AIProvider, ModelInfo> = {
   google: {
     id: 'gemini-pro',
     name: 'Gemini Pro',
-    contextWindow: 32768,
+    contextWindow: DEFAULT_GEMINI_CONTEXT_WINDOW,
     provider: 'google',
     isDefault: true,
   },
@@ -736,7 +737,7 @@ export async function fetchGoogleModels(apiKey?: string): Promise<ModelInfo[]> {
     {
       id: 'gemini-pro',
       name: 'Gemini Pro',
-      contextWindow: 32768,
+      contextWindow: DEFAULT_GEMINI_CONTEXT_WINDOW,
       provider: 'google',
       isDefault: true,
     },
@@ -779,17 +780,19 @@ export async function fetchGoogleModels(apiKey?: string): Promise<ModelInfo[]> {
     const models: ModelInfo[] = data.models
       .filter((model: GeminiModel) => 
         model.supportedGenerationMethods?.includes('generateContent') &&
-        model.name?.includes('gemini')
+        model.name?.toLowerCase().includes('gemini')
       )
       .map((model: GeminiModel, index: number) => {
-        // Extract model ID from name (e.g., "models/gemini-pro" -> "gemini-pro")
+        // Extract model ID from the full name path
+        // API returns names like "models/gemini-pro" or "models/gemini-1.5-pro"
+        // We extract just the model ID part after the last slash
         const modelId = model.name?.split('/').pop() || model.name || '';
         
         // Get display name, fallback to ID
         const displayName = model.displayName || modelId;
         
         // Extract context window from inputTokenLimit or use default
-        const contextWindow = model.inputTokenLimit || 32768;
+        const contextWindow = model.inputTokenLimit || DEFAULT_GEMINI_CONTEXT_WINDOW;
         
         return {
           id: modelId,
