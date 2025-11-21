@@ -8,8 +8,11 @@ import {
 } from '../aiChatClient';
 
 describe('aiChatClient', () => {
+  let mockFetch: ReturnType<typeof vi.fn>;
+
   beforeEach(() => {
-    global.fetch = vi.fn();
+    mockFetch = vi.fn();
+    global.fetch = mockFetch as unknown as typeof fetch;
   });
 
   afterEach(() => {
@@ -86,7 +89,7 @@ describe('aiChatClient', () => {
         },
       };
 
-      (global.fetch as any).mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
       });
@@ -119,7 +122,7 @@ describe('aiChatClient', () => {
     });
 
     it('should handle OpenAI API errors', async () => {
-      (global.fetch as any).mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 401,
         statusText: 'Unauthorized',
@@ -141,7 +144,7 @@ describe('aiChatClient', () => {
     });
 
     it('should handle no response from OpenAI', async () => {
-      (global.fetch as any).mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ choices: [] }),
       });
@@ -164,7 +167,7 @@ describe('aiChatClient', () => {
         model: 'gpt-3.5-turbo',
       };
 
-      (global.fetch as any).mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
       });
@@ -197,7 +200,7 @@ describe('aiChatClient', () => {
         model: 'llama2',
       };
 
-      (global.fetch as any).mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
       });
@@ -228,7 +231,7 @@ describe('aiChatClient', () => {
     });
 
     it('should handle Ollama API errors', async () => {
-      (global.fetch as any).mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 500,
         statusText: 'Internal Server Error',
@@ -250,7 +253,7 @@ describe('aiChatClient', () => {
     });
 
     it('should handle no response from Ollama', async () => {
-      (global.fetch as any).mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({}),
       });
@@ -292,10 +295,10 @@ describe('aiChatClient', () => {
     });
 
     it('should reject unsupported provider', async () => {
-      const config: ChatConfig = {
-        provider: 'unsupported' as any,
+      const config = {
+        provider: 'unsupported',
         apiKey: 'test',
-      };
+      } as unknown as ChatConfig;
 
       const messages: ChatMessage[] = [
         { role: 'user', content: 'Hello' },
@@ -312,7 +315,7 @@ describe('aiChatClient', () => {
         model: 'gpt-3.5-turbo',
       };
 
-      (global.fetch as any).mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
       });
@@ -327,7 +330,7 @@ describe('aiChatClient', () => {
     });
 
     it('should return false for failed connection test', async () => {
-      (global.fetch as any).mockRejectedValueOnce(new Error('Connection failed'));
+      mockFetch.mockRejectedValueOnce(new Error('Connection failed'));
 
       const config: ChatConfig = {
         provider: 'openai',
@@ -346,7 +349,7 @@ describe('aiChatClient', () => {
         model: 'gpt-3.5-turbo',
       };
 
-      (global.fetch as any).mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
       });
@@ -364,7 +367,7 @@ describe('aiChatClient', () => {
 
       await sendChatMessage(messages, config);
 
-      const fetchCall = (global.fetch as any).mock.calls[0];
+      const fetchCall = mockFetch.mock.calls[0];
       const requestBody = JSON.parse(fetchCall[1].body);
       expect(requestBody.temperature).toBe(0.5);
       expect(requestBody.max_tokens).toBe(100);
@@ -376,7 +379,7 @@ describe('aiChatClient', () => {
         model: 'llama2',
       };
 
-      (global.fetch as any).mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
       });
@@ -393,7 +396,7 @@ describe('aiChatClient', () => {
 
       await sendChatMessage(messages, config);
 
-      const fetchCall = (global.fetch as any).mock.calls[0];
+      const fetchCall = mockFetch.mock.calls[0];
       const requestBody = JSON.parse(fetchCall[1].body);
       expect(requestBody.options.temperature).toBe(0.9);
     });

@@ -110,9 +110,9 @@ async function sendToOpenAI(
         totalTokens: data.usage?.total_tokens,
       },
     };
-  } catch (error: any) {
+  } catch (error) {
     clearTimeout(timeoutId);
-    if (error.name === 'AbortError') {
+    if ((error as Error).name === 'AbortError') {
       throw new Error('Request timeout');
     }
     throw error;
@@ -175,9 +175,9 @@ async function sendToOllama(
       message: data.message.content,
       model: data.model,
     };
-  } catch (error: any) {
+  } catch (error) {
     clearTimeout(timeoutId);
-    if (error.name === 'AbortError') {
+    if ((error as Error).name === 'AbortError') {
       throw new Error('Request timeout');
     }
     throw error;

@@ -92,9 +92,9 @@ export const AIChat: React.FC = () => {
         setConnectionStatus('disconnected');
         setError('Connection test failed');
       }
-    } catch (err: any) {
+    } catch (err) {
       setConnectionStatus('disconnected');
-      setError(err.message || 'Connection test failed');
+      setError((err as Error).message || 'Connection test failed');
     } finally {
       setLoading(false);
     }
@@ -140,8 +140,8 @@ export const AIChat: React.FC = () => {
 
       setMessages(prev => [...prev, assistantMessage]);
       setConnectionStatus('connected');
-    } catch (err: any) {
-      setError(err.message || 'Failed to send message');
+    } catch (err) {
+      setError((err as Error).message || 'Failed to send message');
       setConnectionStatus('disconnected');
     } finally {
       setLoading(false);

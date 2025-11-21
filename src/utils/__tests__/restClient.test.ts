@@ -12,7 +12,7 @@ import {
 
 // For bun compatibility, we'll skip the axios-dependent integration tests
 // and focus on testing the utility functions that don't need mocking
-const isBunEnvironment = typeof (globalThis as any).Bun !== 'undefined';
+const isBunEnvironment = typeof (globalThis as Record<string, unknown>).Bun !== 'undefined';
 
 describe('restClient', () => {
   beforeEach(() => {
