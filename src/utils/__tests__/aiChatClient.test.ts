@@ -269,6 +269,23 @@ describe('aiChatClient', () => {
 
       await expect(sendChatMessage(messages, config)).rejects.toThrow('No response from Ollama');
     });
+
+    it('should provide helpful CORS error message for Ollama fetch failures', async () => {
+      mockFetch.mockRejectedValueOnce(new TypeError('Failed to fetch'));
+
+      const config: ChatConfig = {
+        provider: 'ollama',
+        endpoint: 'http://localhost:11434',
+      };
+
+      const messages: ChatMessage[] = [
+        { role: 'user', content: 'Hello' },
+      ];
+
+      const error = await sendChatMessage(messages, config).catch(e => e);
+      expect(error.message).toContain('CORS issue');
+      expect(error.message).toContain('OLLAMA_ORIGINS');
+    });
   });
 
   describe('sendChatMessage - validation', () => {
