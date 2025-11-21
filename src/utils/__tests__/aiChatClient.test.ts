@@ -7,6 +7,12 @@ import {
   getAllDefaultModels,
   fetchOpenAIModels,
   fetchOllamaModels,
+  fetchAnthropicModels,
+  fetchGoogleModels,
+  estimateTokenCount,
+  optimizeMessages,
+  getSystemPrompt,
+  enhanceMessagesWithSystemPrompt,
   ChatConfig,
   ChatMessage,
 } from '../aiChatClient';
@@ -440,8 +446,11 @@ describe('aiChatClient', () => {
 
     it('should get all default models', () => {
       const models = getAllDefaultModels();
-      expect(models.length).toBe(2);
+      expect(models.length).toBe(5);
       expect(models.some(m => m.provider === 'openai')).toBe(true);
+      expect(models.some(m => m.provider === 'anthropic')).toBe(true);
+      expect(models.some(m => m.provider === 'google')).toBe(true);
+      expect(models.some(m => m.provider === 'azure-openai')).toBe(true);
       expect(models.some(m => m.provider === 'ollama')).toBe(true);
     });
 
@@ -497,6 +506,112 @@ describe('aiChatClient', () => {
       const models = await fetchOllamaModels('http://localhost:11434');
       expect(models.length).toBe(1);
       expect(models[0].id).toBe('llama2');
+    });
+
+    it('should fetch Anthropic models', async () => {
+      const models = await fetchAnthropicModels();
+      expect(models.length).toBeGreaterThan(0);
+      expect(models.every(m => m.provider === 'anthropic')).toBe(true);
+      expect(models.some(m => m.id.includes('claude'))).toBe(true);
+    });
+
+    it('should fetch Google models', async () => {
+      const models = await fetchGoogleModels();
+      expect(models.length).toBeGreaterThan(0);
+      expect(models.every(m => m.provider === 'google')).toBe(true);
+      expect(models.some(m => m.id.includes('gemini'))).toBe(true);
+    });
+  });
+
+  describe('Token Optimization', () => {
+    it('should estimate token count', () => {
+      const text = 'Hello world, this is a test message.';
+      const count = estimateTokenCount(text);
+      expect(count).toBeGreaterThan(0);
+      expect(count).toBeLessThan(text.length);
+    });
+
+    it('should optimize messages by removing extra whitespace', () => {
+      const messages: ChatMessage[] = [
+        { role: 'user', content: 'Hello    world   with    extra   spaces' },
+        { role: 'assistant', content: 'Line1\n\n\n\nLine2\n\n\n\nLine3' },
+      ];
+
+      const optimized = optimizeMessages(messages);
+      expect(optimized[0].content).toBe('Hello world with extra spaces');
+      // Multiple newlines replaced with double newline, then all whitespace normalized
+      expect(optimized[1].content).not.toContain('\n\n\n');
+      expect(optimized[1].content.length).toBeLessThan(messages[1].content.length);
+    });
+
+    it('should not modify messages with normal spacing', () => {
+      const messages: ChatMessage[] = [
+        { role: 'user', content: 'Normal message' },
+        { role: 'assistant', content: 'Normal response' },
+      ];
+
+      const optimized = optimizeMessages(messages);
+      expect(optimized[0].content).toBe('Normal message');
+      expect(optimized[1].content).toBe('Normal response');
+    });
+  });
+
+  describe('System Prompts', () => {
+    it('should get default system prompt', () => {
+      const prompt = getSystemPrompt('default');
+      expect(prompt).toContain('helpful');
+      expect(prompt).toContain('accurate');
+    });
+
+    it('should get technical system prompt', () => {
+      const prompt = getSystemPrompt('technical');
+      expect(prompt).toContain('technical');
+      expect(prompt).toContain('code examples');
+    });
+
+    it('should get creative system prompt', () => {
+      const prompt = getSystemPrompt('creative');
+      expect(prompt).toContain('creative');
+      expect(prompt).toContain('innovative');
+    });
+
+    it('should use custom system prompt', () => {
+      const custom = 'Custom prompt';
+      const prompt = getSystemPrompt('default', custom);
+      expect(prompt).toBe(custom);
+    });
+
+    it('should enhance messages with system prompt', () => {
+      const messages: ChatMessage[] = [
+        { role: 'user', content: 'Hello' },
+      ];
+
+      const enhanced = enhanceMessagesWithSystemPrompt(messages, 'System instruction');
+      expect(enhanced.length).toBe(2);
+      expect(enhanced[0].role).toBe('system');
+      expect(enhanced[0].content).toBe('System instruction');
+      expect(enhanced[1].role).toBe('user');
+    });
+
+    it('should not add system prompt if already present', () => {
+      const messages: ChatMessage[] = [
+        { role: 'system', content: 'Existing system' },
+        { role: 'user', content: 'Hello' },
+      ];
+
+      const enhanced = enhanceMessagesWithSystemPrompt(messages, 'New system instruction');
+      expect(enhanced.length).toBe(2);
+      expect(enhanced[0].content).toBe('Existing system');
+    });
+
+    it('should not modify messages if no system prompt provided', () => {
+      const messages: ChatMessage[] = [
+        { role: 'user', content: 'Hello' },
+      ];
+
+      const enhanced = enhanceMessagesWithSystemPrompt(messages);
+      expect(enhanced.length).toBe(1);
+      expect(enhanced[0].role).toBe('user');
     });
   });
 });
