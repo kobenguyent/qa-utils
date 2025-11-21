@@ -26,6 +26,7 @@ const WebSocketClient = lazy(() => import('./components/utils/WebSocketClient.ts
 const GrpcClient = lazy(() => import('./components/utils/GrpcClient.tsx').then(module => ({default: module.GrpcClientComponent})));
 const Ctfl = lazy(() => import('./components/istqb/ctfl.tsx').then(module => ({default: module.Ctfl})));
 const CharacterCounter = lazy(() => import('./components/utils/CharacterCounter.tsx').then(module => ({default: module.CharacterCounter})));
+const AIChat = lazy(() => import('./components/utils/AIChat.tsx').then(module => ({default: module.AIChat})));
 
 // Component wrapper with error boundary and suspense
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -116,6 +117,10 @@ const router = createHashRouter([
   {
     path: 'character-counter',
     element: <RouteWrapper><CharacterCounter /></RouteWrapper>
+  },
+  {
+    path: 'ai-chat',
+    element: <RouteWrapper><AIChat /></RouteWrapper>
   },
 ]);
 
