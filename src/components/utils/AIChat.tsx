@@ -160,6 +160,32 @@ export const AIChat: React.FC = () => {
     setTokenCount({ input: inputTokens, total: conversationTokens + inputTokens });
   }, [inputMessage, messages]);
 
+  // Auto-save conversation when messages change
+  useEffect(() => {
+    if (messages.length > 0 && currentConversationId) {
+      // Update existing conversation with new messages
+      conversationManager.updateConversation(currentConversationId, {
+        messages: messages,
+        provider: provider,
+        model: model,
+      });
+      setConversations(conversationManager.getConversations());
+    } else if (messages.length > 0 && !currentConversationId) {
+      // Auto-create a conversation when user starts chatting without explicitly creating one
+      const conversation = conversationManager.createConversation(
+        `Chat ${new Date().toLocaleString()}`,
+        provider,
+        model
+      );
+      setCurrentConversationId(conversation.id);
+      conversationManager.updateConversation(conversation.id, {
+        messages: messages,
+      });
+      setConversations(conversationManager.getConversations());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages]); // Only depend on messages to avoid infinite loops
+
   const getConfig = (): ChatConfig => {
     const defaultModel = getDefaultModel(provider);
     return {
@@ -479,6 +505,15 @@ export const AIChat: React.FC = () => {
     if (conversation) {
       setCurrentConversationId(id);
       setMessages(conversation.messages as ConversationMessage[]);
+      
+      // Restore AI provider configuration from conversation
+      if (conversation.provider && conversation.provider !== provider) {
+        setProvider(conversation.provider as AIProvider);
+      }
+      if (conversation.model && conversation.model !== model) {
+        setModel(conversation.model);
+      }
+      
       setError('');
     }
   };
