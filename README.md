@@ -5,7 +5,7 @@
 
 A comprehensive collection of quality assurance tools and utilities designed to enhance your testing workflow. Built with modern React, TypeScript, and optimized for performance with comprehensive test coverage.
 
-🌐 **[Live Demo](https://kobenguyent.github.io/qa-utils/#/)** | 📊 **130 Tests** | 🎯 **Mobile-First Design**
+🌐 **[Live Demo](https://kobenguyent.github.io/qa-utils/#/)** | 📊 **219 Tests** | 🎯 **Mobile-First Design** | 🤖 **AI-Powered**
 
 ![QA Utils Homepage](https://github.com/user-attachments/assets/ba5c6fd8-efe8-4dc3-921a-9accbe53690b)
 
@@ -94,6 +94,21 @@ Convert between Unix timestamps and human-readable dates:
 - **Timezone handling** with local time display
 - **Real-time conversion** with validation
 
+#### 🤖 AI Chat (Enhanced)
+Advanced AI chat interface with cutting-edge features:
+- **Multi-Provider Support**: OpenAI API and local Ollama LLMs
+- **MCP Integration**: Connect to Model Context Protocol servers for tool/resource access
+- **File Upload**: Extend LLM knowledge with document uploads (.txt, .md, .json, .csv)
+- **Cache-Augmented Generation (CAG)**: Fast document retrieval with LRU caching
+- **Alternative RAG Approaches**:
+  - Keyword-based search
+  - Metadata filtering
+  - Large context window support (4K-8K tokens)
+  - Automatic prompt engineering
+- **Model Management**: Fetch and select from available models
+- **Knowledge Base**: Upload and manage documents for context-aware responses
+- **Real-time Statistics**: Monitor cache usage and document count
+
 #### 🌠 Additional Tools
 - **UUID Generator**: Generate UUIDs v1, v4 with copy functionality
 - **JIRA Comment Generator**: Format comments for JIRA with markdown support
@@ -124,9 +139,10 @@ Convert between Unix timestamps and human-readable dates:
 - **Mobile-first responsive design** with Bootstrap
 
 ### 🧪 Comprehensive Testing
-- **130 test cases** across 12 test files
+- **219 test cases** across 16 test files
 - **Component testing** with React Testing Library
 - **Utility function testing** with comprehensive coverage
+- **AI/ML features testing** with MCP and knowledge management tests
 - **WebSocket & gRPC client testing** with mocked services
 - **Integration tests** demonstrating real-world usage patterns
 - **CI/CD integration** with automated testing on PRs

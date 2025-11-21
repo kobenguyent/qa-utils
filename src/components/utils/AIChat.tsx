@@ -10,6 +10,10 @@ import {
   Badge,
   Spinner,
   InputGroup,
+  Tabs,
+  Tab,
+  ListGroup,
+  ProgressBar,
 } from 'react-bootstrap';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
@@ -20,7 +24,13 @@ import {
   ChatMessage,
   ChatConfig,
   AIProvider,
+  getDefaultModel,
+  fetchOpenAIModels,
+  fetchOllamaModels,
+  ModelInfo,
 } from '../../utils/aiChatClient';
+import { KnowledgeBase, parseFileContent } from '../../utils/knowledgeManager';
+import { MCPClient, MCPServerConfig } from '../../utils/mcpClient';
 
 interface ConversationMessage extends ChatMessage {
   id: string;
@@ -34,6 +44,7 @@ export const AIChat: React.FC = () => {
   const [endpoint, setEndpoint] = useState('http://localhost:11434');
   const [model, setModel] = useState('');
   const [temperature, setTemperature] = useState(0.7);
+  const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
   
   // Chat state
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
@@ -42,7 +53,19 @@ export const AIChat: React.FC = () => {
   const [error, setError] = useState('');
   const [connectionStatus, setConnectionStatus] = useState<'unknown' | 'connected' | 'disconnected'>('unknown');
   
+  // Knowledge base state
+  const [knowledgeBase] = useState(() => new KnowledgeBase());
+  const [uploadedFiles, setUploadedFiles] = useState<Array<{ id: string; name: string }>>([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  
+  // MCP state
+  const [, setMcpClient] = useState<MCPClient | null>(null);
+  const [mcpServerUrl, setMcpServerUrl] = useState('');
+  const [mcpConnected, setMcpConnected] = useState(false);
+  const [mcpTools, setMcpTools] = useState<Array<{ name: string; description: string }>>([]);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isConfigured, setIsConfigured] = useState(false);
 
   // Scroll to bottom when messages change
@@ -119,10 +142,17 @@ export const AIChat: React.FC = () => {
       return;
     }
 
+    const originalMessage = inputMessage.trim();
+    
+    // Enhance message with knowledge base context if available
+    const enhancedMessage = uploadedFiles.length > 0 
+      ? await enhanceMessageWithContext(originalMessage)
+      : originalMessage;
+
     const userMessage: ConversationMessage = {
       id: crypto.randomUUID(),
       role: 'user',
-      content: inputMessage.trim(),
+      content: originalMessage, // Show original message in UI
       timestamp: Date.now(),
     };
 
@@ -133,10 +163,18 @@ export const AIChat: React.FC = () => {
 
     try {
       const config = getConfig();
-      const chatHistory: ChatMessage[] = [...messages, userMessage].map(msg => ({
-        role: msg.role,
-        content: msg.content,
-      }));
+      
+      // Build chat history with enhanced last message
+      const chatHistory: ChatMessage[] = [
+        ...messages.map(msg => ({
+          role: msg.role,
+          content: msg.content,
+        })),
+        {
+          role: 'user' as const,
+          content: enhancedMessage, // Use enhanced message for LLM
+        },
+      ];
 
       const response = await sendChatMessage(chatHistory, config);
 
@@ -173,6 +211,103 @@ export const AIChat: React.FC = () => {
     return new Date(timestamp).toLocaleTimeString();
   };
 
+  // Load available models when provider changes
+  const handleLoadModels = async () => {
+    setLoading(true);
+    try {
+      let models: ModelInfo[];
+      if (provider === 'openai' && apiKey) {
+        models = await fetchOpenAIModels(apiKey);
+      } else if (provider === 'ollama' && endpoint) {
+        models = await fetchOllamaModels(endpoint);
+      } else {
+        models = [getDefaultModel(provider)];
+      }
+      setAvailableModels(models);
+    } catch (err) {
+      setError(`Failed to load models: ${(err as Error).message}`);
+      setAvailableModels([getDefaultModel(provider)]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // File upload handler
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadProgress(0);
+    const uploadedFilesList: Array<{ id: string; name: string }> = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      try {
+        const content = await parseFileContent(file);
+        const id = knowledgeBase.addDocument(content, {
+          filename: file.name,
+          type: file.type,
+        });
+        uploadedFilesList.push({ id, name: file.name });
+        setUploadProgress(((i + 1) / files.length) * 100);
+      } catch (err) {
+        setError(`Failed to upload ${file.name}: ${(err as Error).message}`);
+      }
+    }
+
+    setUploadedFiles(prev => [...prev, ...uploadedFilesList]);
+    setUploadProgress(0);
+    
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // Remove uploaded file
+  const handleRemoveFile = (id: string) => {
+    knowledgeBase.removeDocument(id);
+    setUploadedFiles(prev => prev.filter(f => f.id !== id));
+  };
+
+  // Connect to MCP server
+  const handleConnectMCP = async () => {
+    if (!mcpServerUrl) return;
+
+    setLoading(true);
+    try {
+      const config: MCPServerConfig = {
+        name: 'user-mcp-server',
+        url: mcpServerUrl,
+        apiKey: apiKey || undefined,
+      };
+
+      const client = new MCPClient(config);
+      await client.connect();
+      
+      const tools = await client.listTools();
+      setMcpClient(client);
+      setMcpTools(tools.map(t => ({ name: t.name, description: t.description })));
+      setMcpConnected(true);
+      setError('');
+    } catch (err) {
+      setError(`MCP connection failed: ${(err as Error).message}`);
+      setMcpConnected(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Enhance message with knowledge base context
+  const enhanceMessageWithContext = async (message: string): Promise<string> => {
+    const relevantDocs = knowledgeBase.search(message, { method: 'keyword', limit: 3 });
+    if (relevantDocs.length > 0) {
+      const context = knowledgeBase.buildContext(relevantDocs, 2000);
+      return `${context}\n\nUser question: ${message}`;
+    }
+    return message;
+  };
+
   return (
     <Container fluid>
       <Header />
@@ -180,7 +315,7 @@ export const AIChat: React.FC = () => {
         <div className="text-center mb-4">
           <h1>🤖 AI Chat</h1>
           <p className="text-muted">
-            Connect to OpenAI or local LLM services like Ollama for chat functionality
+            Advanced AI chat with OpenAI/Ollama support, file uploads, MCP integration, and Cache-Augmented Generation (CAG)
           </p>
         </div>
 
@@ -216,20 +351,40 @@ export const AIChat: React.FC = () => {
                     </Form.Select>
                   </Form.Group>
                 </Col>
-                <Col md={6}>
+                <Col md={5}>
                   <Form.Group>
                     <Form.Label>Model</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder={provider === 'openai' ? 'gpt-3.5-turbo' : 'llama2'}
-                      value={model}
-                      onChange={(e) => setModel(e.target.value)}
-                      disabled={loading}
-                    />
+                    <InputGroup>
+                      {availableModels.length > 0 ? (
+                        <Form.Select
+                          value={model}
+                          onChange={(e) => setModel(e.target.value)}
+                          disabled={loading}
+                        >
+                          {availableModels.map(m => (
+                            <option key={m.id} value={m.id}>{m.name}</option>
+                          ))}
+                        </Form.Select>
+                      ) : (
+                        <Form.Control
+                          type="text"
+                          placeholder={provider === 'openai' ? 'gpt-3.5-turbo' : 'llama2'}
+                          value={model}
+                          onChange={(e) => setModel(e.target.value)}
+                          disabled={loading}
+                        />
+                      )}
+                      <Button 
+                        variant="outline-secondary"
+                        onClick={handleLoadModels}
+                        disabled={loading || !isConfigured}
+                        title="Load available models"
+                      >
+                        🔄
+                      </Button>
+                    </InputGroup>
                     <Form.Text className="text-muted">
-                      {provider === 'openai' 
-                        ? 'e.g., gpt-3.5-turbo, gpt-4' 
-                        : 'e.g., llama2, mistral, codellama'}
+                      Click 🔄 to load available models
                     </Form.Text>
                   </Form.Group>
                 </Col>
@@ -365,6 +520,138 @@ export const AIChat: React.FC = () => {
             {error}
           </Alert>
         )}
+
+        {/* Advanced Features */}
+        <Card className="mb-4">
+          <Card.Body>
+            <Tabs defaultActiveKey="knowledge" className="mb-3">
+              <Tab eventKey="knowledge" title="📚 Knowledge Base">
+                <div className="mb-3">
+                  <Form.Label>Upload Documents to Extend LLM Knowledge</Form.Label>
+                  <Form.Control
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept=".txt,.md,.json,.csv,.pdf"
+                    onChange={handleFileUpload}
+                    disabled={loading}
+                  />
+                  <Form.Text className="text-muted">
+                    Upload files (.txt, .md, .json, .csv, .pdf) to provide additional context to the AI
+                  </Form.Text>
+                </div>
+
+                {uploadProgress > 0 && (
+                  <ProgressBar now={uploadProgress} label={`${Math.round(uploadProgress)}%`} className="mb-3" />
+                )}
+
+                {uploadedFiles.length > 0 && (
+                  <div>
+                    <h6>Uploaded Files ({uploadedFiles.length}):</h6>
+                    <ListGroup>
+                      {uploadedFiles.map(file => (
+                        <ListGroup.Item key={file.id} className="d-flex justify-content-between align-items-center">
+                          <span>📄 {file.name}</span>
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => handleRemoveFile(file.id)}
+                          >
+                            Remove
+                          </Button>
+                        </ListGroup.Item>
+                      ))}
+                    </ListGroup>
+                  </div>
+                )}
+
+                {uploadedFiles.length === 0 && (
+                  <Alert variant="info">
+                    No files uploaded yet. Upload documents to enable context-aware responses using Cache-Augmented Generation (CAG).
+                  </Alert>
+                )}
+              </Tab>
+
+              <Tab eventKey="mcp" title="🔧 MCP Tools">
+                <div className="mb-3">
+                  <Form.Label>MCP Server URL</Form.Label>
+                  <InputGroup>
+                    <Form.Control
+                      type="text"
+                      placeholder="http://localhost:8080"
+                      value={mcpServerUrl}
+                      onChange={(e) => setMcpServerUrl(e.target.value)}
+                      disabled={loading || mcpConnected}
+                    />
+                    <Button
+                      variant={mcpConnected ? "success" : "primary"}
+                      onClick={handleConnectMCP}
+                      disabled={loading || !mcpServerUrl || mcpConnected}
+                    >
+                      {mcpConnected ? '✓ Connected' : '🔌 Connect'}
+                    </Button>
+                  </InputGroup>
+                  <Form.Text className="text-muted">
+                    Connect to a Model Context Protocol (MCP) server to access tools and resources
+                  </Form.Text>
+                </div>
+
+                {mcpConnected && mcpTools.length > 0 && (
+                  <div>
+                    <h6>Available Tools ({mcpTools.length}):</h6>
+                    <ListGroup>
+                      {mcpTools.map(tool => (
+                        <ListGroup.Item key={tool.name}>
+                          <strong>🔧 {tool.name}</strong>
+                          <br />
+                          <small className="text-muted">{tool.description}</small>
+                        </ListGroup.Item>
+                      ))}
+                    </ListGroup>
+                  </div>
+                )}
+
+                {!mcpConnected && (
+                  <Alert variant="info">
+                    MCP (Model Context Protocol) allows the AI to access external tools and data sources. Connect to an MCP server to enhance capabilities.
+                  </Alert>
+                )}
+              </Tab>
+
+              <Tab eventKey="settings" title="⚙️ Advanced Settings">
+                <Alert variant="info">
+                  <Alert.Heading className="h6">💡 Advanced Features</Alert.Heading>
+                  <ul className="mb-0 small">
+                    <li><strong>Cache-Augmented Generation (CAG):</strong> Uploaded documents are cached for fast retrieval</li>
+                    <li><strong>Keyword Search:</strong> Documents are indexed and searched using keyword matching</li>
+                    <li><strong>Metadata Filtering:</strong> Files can be filtered by type, name, and upload date</li>
+                    <li><strong>Large Context Windows:</strong> Supports models with extended context (4K-8K tokens)</li>
+                    <li><strong>Prompt Engineering:</strong> Automatic context injection for enhanced responses</li>
+                  </ul>
+                </Alert>
+
+                <div className="mb-3">
+                  <h6>Knowledge Base Statistics</h6>
+                  <div className="small">
+                    <p className="mb-1">📄 Documents: {knowledgeBase.getStats().documentCount}</p>
+                    <p className="mb-1">💾 Cache Size: {knowledgeBase.getStats().cacheStats.size} / {knowledgeBase.getStats().cacheStats.maxSize}</p>
+                  </div>
+                </div>
+
+                <Button
+                  variant="warning"
+                  onClick={() => {
+                    knowledgeBase.clear();
+                    setUploadedFiles([]);
+                  }}
+                  disabled={uploadedFiles.length === 0}
+                >
+                  🗑️ Clear Knowledge Base
+                </Button>
+              </Tab>
+            </Tabs>
+          </Card.Body>
+        </Card>
 
         {/* Chat Messages */}
         <Card className="mb-3" style={{ height: '500px', display: 'flex', flexDirection: 'column' }}>

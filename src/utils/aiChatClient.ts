@@ -1,6 +1,7 @@
 /**
  * AI Chat Client Utilities
  * Supports OpenAI API and local LLM services like Ollama
+ * Enhanced with knowledge management and default model support
  */
 
 export type AIProvider = 'openai' | 'ollama';
@@ -18,6 +19,7 @@ export interface ChatConfig {
   temperature?: number;
   maxTokens?: number;
   timeout?: number;
+  contextWindow?: number; // Support for large context windows
 }
 
 export interface ChatResponse {
@@ -30,7 +32,33 @@ export interface ChatResponse {
   };
 }
 
+export interface ModelInfo {
+  id: string;
+  name: string;
+  contextWindow: number;
+  provider: AIProvider;
+  isDefault?: boolean;
+}
+
 const DEFAULT_TIMEOUT = 30000; // 30 seconds
+
+// Default models configuration
+const DEFAULT_MODELS: Record<AIProvider, ModelInfo> = {
+  openai: {
+    id: 'gpt-3.5-turbo',
+    name: 'GPT-3.5 Turbo',
+    contextWindow: 4096,
+    provider: 'openai',
+    isDefault: true,
+  },
+  ollama: {
+    id: 'llama2',
+    name: 'Llama 2',
+    contextWindow: 4096,
+    provider: 'ollama',
+    isDefault: true,
+  },
+};
 
 /**
  * Validates the chat configuration
@@ -233,5 +261,78 @@ export async function testConnection(config: ChatConfig): Promise<boolean> {
     return true;
   } catch (error) {
     return false;
+  }
+}
+
+/**
+ * Get default model for a provider
+ */
+export function getDefaultModel(provider: AIProvider): ModelInfo {
+  return DEFAULT_MODELS[provider];
+}
+
+/**
+ * Get all available default models
+ */
+export function getAllDefaultModels(): ModelInfo[] {
+  return Object.values(DEFAULT_MODELS);
+}
+
+/**
+ * Fetch available models from OpenAI
+ */
+export async function fetchOpenAIModels(apiKey: string): Promise<ModelInfo[]> {
+  try {
+    const response = await fetch('https://api.openai.com/v1/models', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch OpenAI models');
+    }
+
+    const data = await response.json();
+    
+    return data.data
+      .filter((model: { id: string }) => model.id.includes('gpt'))
+      .map((model: { id: string }) => ({
+        id: model.id,
+        name: model.id,
+        contextWindow: model.id.includes('gpt-4') ? 8192 : 4096,
+        provider: 'openai' as AIProvider,
+      }));
+  } catch (error) {
+    // Return default models if API call fails
+    return [DEFAULT_MODELS.openai];
+  }
+}
+
+/**
+ * Fetch available models from Ollama
+ */
+export async function fetchOllamaModels(endpoint: string): Promise<ModelInfo[]> {
+  try {
+    const response = await fetch(`${endpoint}/api/tags`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch Ollama models');
+    }
+
+    const data = await response.json();
+    
+    return data.models?.map((model: { name: string }) => ({
+      id: model.name,
+      name: model.name,
+      contextWindow: 4096, // Default, could be different per model
+      provider: 'ollama' as AIProvider,
+    })) || [DEFAULT_MODELS.ollama];
+  } catch (error) {
+    // Return default models if API call fails
+    return [DEFAULT_MODELS.ollama];
   }
 }
