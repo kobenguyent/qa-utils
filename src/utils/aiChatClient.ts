@@ -180,6 +180,10 @@ async function sendToOllama(
     if ((error as Error).name === 'AbortError') {
       throw new Error('Request timeout');
     }
+    // Check if it's a network/CORS error
+    if (error instanceof TypeError && (error.message.includes('fetch') || error.message === 'Failed to fetch')) {
+      throw new Error('Failed to fetch - This is likely a CORS issue. Ensure Ollama is running with OLLAMA_ORIGINS environment variable set.');
+    }
     throw error;
   }
 }

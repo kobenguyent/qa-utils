@@ -94,7 +94,12 @@ export const AIChat: React.FC = () => {
       }
     } catch (err) {
       setConnectionStatus('disconnected');
-      setError((err as Error).message || 'Connection test failed');
+      const errorMessage = (err as Error).message || 'Connection test failed';
+      if (provider === 'ollama' && (errorMessage.includes('fetch') || errorMessage.includes('Failed to fetch'))) {
+        setError('Connection failed. This is likely a CORS issue. Please ensure Ollama is running with OLLAMA_ORIGINS environment variable set. See the setup instructions above.');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -141,7 +146,13 @@ export const AIChat: React.FC = () => {
       setMessages(prev => [...prev, assistantMessage]);
       setConnectionStatus('connected');
     } catch (err) {
-      setError((err as Error).message || 'Failed to send message');
+      const errorMessage = (err as Error).message || 'Failed to send message';
+      // Check if it's a CORS or network error
+      if (provider === 'ollama' && (errorMessage.includes('fetch') || errorMessage.includes('Failed to fetch'))) {
+        setError('Connection failed. This is likely a CORS issue. Please ensure Ollama is running with OLLAMA_ORIGINS environment variable set. See the setup instructions above.');
+      } else {
+        setError(errorMessage);
+      }
       setConnectionStatus('disconnected');
     } finally {
       setLoading(false);
@@ -253,29 +264,75 @@ export const AIChat: React.FC = () => {
               )}
 
               {provider === 'ollama' && (
-                <Form.Group className="mb-3">
-                  <Form.Label>Endpoint</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="http://localhost:11434"
-                    value={endpoint}
-                    onChange={(e) => {
-                      setEndpoint(e.target.value);
-                      setConnectionStatus('unknown');
-                    }}
-                    disabled={loading}
-                  />
-                  <Form.Text className="text-muted">
-                    Ollama API endpoint. Install from{' '}
-                    <a 
-                      href="https://ollama.ai" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                    >
-                      ollama.ai
-                    </a>
-                  </Form.Text>
-                </Form.Group>
+                <>
+                  <Alert variant="warning" className="mb-3">
+                    <Alert.Heading className="h6">⚠️ CORS Configuration Required</Alert.Heading>
+                    <p className="mb-2 small">
+                      To connect from this web app, you need to configure Ollama to allow CORS requests.
+                    </p>
+                    <details className="small">
+                      <summary style={{ cursor: 'pointer' }} className="mb-2">
+                        <strong>Setup Instructions (Click to expand)</strong>
+                      </summary>
+                      <div className="mt-2">
+                        <p className="mb-2"><strong>Set the OLLAMA_ORIGINS environment variable:</strong></p>
+                        <div className="mb-2">
+                          <strong>macOS/Linux:</strong>
+                          <pre className="bg-dark text-light p-2 rounded mb-1">
+                            <code>export OLLAMA_ORIGINS="https://kobenguyent.github.io"</code>
+                          </pre>
+                          <pre className="bg-dark text-light p-2 rounded mb-1">
+                            <code>ollama serve</code>
+                          </pre>
+                        </div>
+                        <div className="mb-2">
+                          <strong>Windows (PowerShell):</strong>
+                          <pre className="bg-dark text-light p-2 rounded mb-1">
+                            <code>$env:OLLAMA_ORIGINS="https://kobenguyent.github.io"</code>
+                          </pre>
+                          <pre className="bg-dark text-light p-2 rounded mb-1">
+                            <code>ollama serve</code>
+                          </pre>
+                        </div>
+                        <div className="mb-2">
+                          <strong>Windows (Command Prompt):</strong>
+                          <pre className="bg-dark text-light p-2 rounded mb-1">
+                            <code>set OLLAMA_ORIGINS=https://kobenguyent.github.io</code>
+                          </pre>
+                          <pre className="bg-dark text-light p-2 rounded mb-1">
+                            <code>ollama serve</code>
+                          </pre>
+                        </div>
+                        <p className="small text-muted mb-0">
+                          Note: You may also use <code>OLLAMA_ORIGINS="*"</code> to allow all origins (less secure).
+                        </p>
+                      </div>
+                    </details>
+                  </Alert>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Endpoint</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="http://localhost:11434"
+                      value={endpoint}
+                      onChange={(e) => {
+                        setEndpoint(e.target.value);
+                        setConnectionStatus('unknown');
+                      }}
+                      disabled={loading}
+                    />
+                    <Form.Text className="text-muted">
+                      Ollama API endpoint. Install from{' '}
+                      <a 
+                        href="https://ollama.ai" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                      >
+                        ollama.ai
+                      </a>
+                    </Form.Text>
+                  </Form.Group>
+                </>
               )}
 
               <Form.Group className="mb-3">
