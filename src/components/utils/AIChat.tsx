@@ -1263,6 +1263,7 @@ export const AIChat: React.FC = () => {
                     key={msg.id}
                     className={`mb-3 d-flex ${msg.role === 'user' ? 'justify-content-end' : 'justify-content-start'}`}
                   >
+                    {/* Increased from 70% to 75% for better readability on wider screens */}
                     <div style={{ maxWidth: '75%' }}>
                       <Badge 
                         bg={msg.role === 'user' ? 'primary' : 'secondary'}
@@ -1298,7 +1299,7 @@ export const AIChat: React.FC = () => {
                   </div>
                 ))}
                 {loading && (
-                  <div className="mb-3 d-flex justify-content-start">
+                  <div className="mb-3 d-flex justify-content-start" role="status" aria-live="polite" aria-label="AI is processing your message">
                     <div style={{ maxWidth: '75%' }}>
                       <Badge bg="secondary" className="mb-1" style={{ fontSize: '0.85rem' }}>
                         🤖 AI
@@ -1312,9 +1313,9 @@ export const AIChat: React.FC = () => {
                       >
                         <Card.Body className="py-2 px-3">
                           <div className="d-flex align-items-center" style={{ fontSize: '1rem' }}>
-                            <Spinner animation="grow" size="sm" variant="secondary" className="me-2" />
-                            <Spinner animation="grow" size="sm" variant="secondary" className="me-2" style={{ animationDelay: '0.2s' }} />
-                            <Spinner animation="grow" size="sm" variant="secondary" style={{ animationDelay: '0.4s' }} />
+                            <Spinner animation="grow" size="sm" variant="secondary" className="me-2" aria-hidden="true" />
+                            <Spinner animation="grow" size="sm" variant="secondary" className="me-2" style={{ animationDelay: '0.2s' }} aria-hidden="true" />
+                            <Spinner animation="grow" size="sm" variant="secondary" style={{ animationDelay: '0.4s' }} aria-hidden="true" />
                             <span className="ms-2 text-muted">AI is thinking...</span>
                           </div>
                         </Card.Body>
@@ -1333,6 +1334,7 @@ export const AIChat: React.FC = () => {
           <Card.Body>
             <Form>
               <InputGroup>
+                {/* Reduced from 3 to 2 rows for more compact UI, with vertical resize enabled for user control */}
                 <Form.Control
                   as="textarea"
                   rows={2}
