@@ -361,16 +361,20 @@ export async function parseFileContent(file: File): Promise<string> {
   }
 
   // Handle text files
-  return new Promise((resolve, reject) => {
+  return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
 
     reader.onload = (event) => {
-      const content = event.target?.result as string;
-      resolve(content);
+      const content = event.target?.result;
+      if (typeof content === 'string') {
+        resolve(content);
+      } else {
+        reject(new Error('File content is not a string'));
+      }
     };
 
-    reader.onerror = () => {
-      reject(new Error('Failed to read file'));
+    reader.onerror = (error) => {
+      reject(new Error(`Failed to read file: ${error}`));
     };
 
     reader.readAsText(file);
