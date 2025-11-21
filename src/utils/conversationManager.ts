@@ -35,6 +35,13 @@ export interface ConversationMetadata {
  */
 export class ConversationManager {
   private storageKey = 'aiChat_conversations';
+  private memoryStorage: Record<string, Conversation> = {};
+  private useMemoryStorage = false;
+
+  constructor() {
+    // Use memory storage if sessionStorage is not available (e.g., in test environments)
+    this.useMemoryStorage = typeof window === 'undefined' || !window.sessionStorage;
+  }
 
   /**
    * Get all conversations (metadata only)
@@ -294,7 +301,9 @@ export class ConversationManager {
    */
   clearAll(): void {
     try {
-      if (typeof window !== 'undefined') {
+      if (this.useMemoryStorage) {
+        this.memoryStorage = {};
+      } else if (typeof window !== 'undefined') {
         window.sessionStorage.removeItem(this.storageKey);
       }
     } catch (error) {
@@ -315,8 +324,8 @@ export class ConversationManager {
    * Load conversations from storage
    */
   private loadFromStorage(): Record<string, Conversation> {
-    if (typeof window === 'undefined') {
-      return {};
+    if (this.useMemoryStorage) {
+      return this.memoryStorage;
     }
 
     try {
@@ -332,7 +341,8 @@ export class ConversationManager {
    * Save conversations to storage
    */
   private saveToStorage(data: Record<string, Conversation>): void {
-    if (typeof window === 'undefined') {
+    if (this.useMemoryStorage) {
+      this.memoryStorage = data;
       return;
     }
 
