@@ -9,6 +9,7 @@ import {
   isJWTExpired,
   formatTimestamp,
   getTimeUntilExpiry,
+  verifyJWTSignature,
 } from '../jwtHelpers';
 
 describe('JWT Helpers', () => {
@@ -172,6 +173,51 @@ describe('JWT Helpers', () => {
       const result = getTimeUntilExpiry(futureTimestamp);
       expect(result).toContain('minute');
       expect(result).not.toContain('hour');
+    });
+  });
+
+  describe('verifyJWTSignature', () => {
+    it('should verify a valid HS256 JWT signature', async () => {
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+      const secret = 'your-256-bit-secret';
+      
+      const result = await verifyJWTSignature(token, secret);
+      expect(result.valid).toBe(true);
+      expect(result.error).toBeUndefined();
+    });
+
+    it('should reject invalid signature', async () => {
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.invalid_signature';
+      const secret = 'your-256-bit-secret';
+      
+      const result = await verifyJWTSignature(token, secret);
+      expect(result.valid).toBe(false);
+    });
+
+    it('should reject with wrong secret', async () => {
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+      const secret = 'wrong-secret';
+      
+      const result = await verifyJWTSignature(token, secret);
+      expect(result.valid).toBe(false);
+    });
+
+    it('should return error for unsupported algorithms', async () => {
+      const token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.signature';
+      const secret = 'secret';
+      
+      const result = await verifyJWTSignature(token, secret);
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('Unsupported algorithm');
+    });
+
+    it('should return error for invalid JWT structure', async () => {
+      const token = 'invalid.token';
+      const secret = 'secret';
+      
+      const result = await verifyJWTSignature(token, secret);
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('Invalid JWT structure');
     });
   });
 });

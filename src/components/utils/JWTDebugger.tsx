@@ -17,12 +17,16 @@ import {
   isJWTExpired,
   formatTimestamp,
   getTimeUntilExpiry,
+  verifyJWTSignature,
 } from '../../utils/jwtHelpers.ts';
 
 export const JWTDebugger = () => {
   const [postContent, setPostContent] = useState('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c');
   const [error, setError] = useState<string>('');
   const [isValidJWT, setIsValidJWT] = useState<boolean>(true);
+  const [secretKey, setSecretKey] = useState<string>('');
+  const [verificationResult, setVerificationResult] = useState<{ verified: boolean; message: string } | null>(null);
+  const [isVerifying, setIsVerifying] = useState<boolean>(false);
 
   const handleJWTChange = useCallback((value: string) => {
     setPostContent(value);
@@ -52,7 +56,45 @@ export const JWTDebugger = () => {
 
   const handleClearInput = useCallback(() => {
     handleJWTChange('');
+    setSecretKey('');
+    setVerificationResult(null);
   }, [handleJWTChange]);
+
+  const handleVerifySignature = useCallback(async () => {
+    if (!postContent || !secretKey) {
+      setVerificationResult({
+        verified: false,
+        message: 'Please enter both JWT token and secret key'
+      });
+      return;
+    }
+
+    setIsVerifying(true);
+    setVerificationResult(null);
+
+    try {
+      const result = await verifyJWTSignature(postContent, secretKey);
+      
+      if (result.valid) {
+        setVerificationResult({
+          verified: true,
+          message: '✅ Signature verified successfully! The token is authentic.'
+        });
+      } else {
+        setVerificationResult({
+          verified: false,
+          message: result.error || '❌ Signature verification failed. The token may have been tampered with or the secret key is incorrect.'
+        });
+      }
+    } catch (err) {
+      setVerificationResult({
+        verified: false,
+        message: `❌ Verification error: ${err instanceof Error ? err.message : 'Unknown error'}`
+      });
+    } finally {
+      setIsVerifying(false);
+    }
+  }, [postContent, secretKey]);
 
   const header = isValidJWT && postContent ? decodeJWTHeader(postContent) : null;
   const payload = isValidJWT && postContent ? decodeJWTPayload(postContent) : null;
@@ -262,13 +304,57 @@ export const JWTDebugger = () => {
                     </code>
                   </div>
                   <CopyWithToast text={signature} />
-                  <div className="mt-3">
-                    <Alert variant="info" className="mb-0">
+                  
+                  {/* Signature Verification Section */}
+                  <div className="mt-4">
+                    <h6 className="mb-3"><strong>🔐 Verify Signature</strong></h6>
+                    <Alert variant="info" className="mb-3">
                       <small>
-                        <strong>ℹ️ Note:</strong> The signature is used to verify that the token hasn't been tampered with. 
-                        To verify the signature, you would need the secret key (for HMAC algorithms) or public key (for RSA/ECDSA algorithms).
+                        Enter your secret key to verify the token signature. Only HMAC algorithms (HS256, HS384, HS512) are supported for browser-based verification.
                       </small>
                     </Alert>
+                    
+                    <Form.Group className="mb-3">
+                      <Form.Label>Secret Key:</Form.Label>
+                      <Form.Control
+                        type="password"
+                        placeholder="Enter your secret key..."
+                        value={secretKey}
+                        onChange={(e) => setSecretKey(e.target.value)}
+                        style={{
+                          fontFamily: 'monospace',
+                          fontSize: '0.875rem'
+                        }}
+                      />
+                      <Form.Text className="text-muted">
+                        Your secret key is used locally in the browser and is never sent to any server.
+                      </Form.Text>
+                    </Form.Group>
+
+                    <Button
+                      variant="primary"
+                      onClick={handleVerifySignature}
+                      disabled={isVerifying || !secretKey || !postContent}
+                      className="mb-3"
+                    >
+                      {isVerifying ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                          Verifying...
+                        </>
+                      ) : (
+                        '🔍 Verify Signature'
+                      )}
+                    </Button>
+
+                    {verificationResult && (
+                      <Alert 
+                        variant={verificationResult.verified ? 'success' : 'danger'}
+                        className="mb-0"
+                      >
+                        {verificationResult.message}
+                      </Alert>
+                    )}
                   </div>
                 </Card.Body>
               </Card>

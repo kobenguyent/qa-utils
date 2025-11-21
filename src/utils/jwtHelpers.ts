@@ -153,3 +153,89 @@ export const getTimeUntilExpiry = (exp: number): string => {
     return `${minutes} minute${minutes !== 1 ? 's' : ''}`;
   }
 };
+
+/**
+ * Convert string to ArrayBuffer for Web Crypto API
+ */
+const stringToArrayBuffer = (str: string): ArrayBuffer => {
+  const encoder = new TextEncoder();
+  return encoder.encode(str).buffer;
+};
+
+/**
+ * Convert base64url to Uint8Array
+ */
+const base64UrlToUint8Array = (base64url: string): Uint8Array => {
+  const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
+  const paddedBase64 = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=');
+  const binaryString = atob(paddedBase64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
+};
+
+/**
+ * Verify JWT signature using HMAC algorithms (HS256, HS384, HS512)
+ */
+export const verifyJWTSignature = async (
+  token: string,
+  secret: string
+): Promise<{ valid: boolean; error?: string }> => {
+  try {
+    const parts = splitJWT(token);
+    if (!parts) {
+      return { valid: false, error: 'Invalid JWT structure' };
+    }
+
+    const header = decodeJWTHeader(token);
+    if (!header || !header.alg) {
+      return { valid: false, error: 'Missing algorithm in header' };
+    }
+
+    // Map algorithm names to Web Crypto API algorithm names
+    const algorithmMap: Record<string, string> = {
+      'HS256': 'SHA-256',
+      'HS384': 'SHA-384',
+      'HS512': 'SHA-512',
+    };
+
+    const algorithm = algorithmMap[header.alg as string];
+    if (!algorithm) {
+      return { valid: false, error: `Unsupported algorithm: ${header.alg}. Only HMAC algorithms (HS256, HS384, HS512) are supported for browser-based verification.` };
+    }
+
+    // Import the secret key
+    const keyData = stringToArrayBuffer(secret);
+    const key = await crypto.subtle.importKey(
+      'raw',
+      keyData,
+      { name: 'HMAC', hash: algorithm },
+      false,
+      ['sign', 'verify']
+    );
+
+    // Create the signature input (header.payload)
+    const signatureInput = `${parts.header}.${parts.payload}`;
+    const signatureInputBuffer = stringToArrayBuffer(signatureInput);
+
+    // Decode the signature from the token
+    const tokenSignature = base64UrlToUint8Array(parts.signature);
+
+    // Verify the signature
+    const isValid = await crypto.subtle.verify(
+      'HMAC',
+      key,
+      tokenSignature,
+      signatureInputBuffer
+    );
+
+    return { valid: isValid };
+  } catch (error) {
+    return { 
+      valid: false, 
+      error: error instanceof Error ? error.message : 'Verification failed' 
+    };
+  }
+};
