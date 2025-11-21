@@ -33,7 +33,8 @@ import {
 import { KnowledgeBase, parseFileContent } from '../../utils/knowledgeManager';
 import { MCPClient, MCPServerConfig } from '../../utils/mcpClient';
 import { ConversationManager, downloadConversation } from '../../utils/conversationManager';
-import { DEFAULT_MCP_TOOLS, getToolsByCategory, getToolCategories } from '../../utils/mcpTools';
+import { DEFAULT_MCP_TOOLS, getToolCategories } from '../../utils/mcpTools';
+import { MCPToolManager, getMCPToolGuide } from '../../utils/mcpToolManager';
 import { useSessionStorage } from '../../utils/useSessionStorage';
 
 interface ConversationMessage extends ChatMessage {
@@ -75,8 +76,9 @@ export const AIChat: React.FC = () => {
   const [, setMcpClient] = useState<MCPClient | null>(null);
   const [mcpServerUrl, setMcpServerUrl] = useSessionStorage<string>('aiChat_mcpServerUrl', '');
   const [mcpConnected, setMcpConnected] = useState(false);
-  const [mcpTools, setMcpTools] = useSessionStorage<Array<{ name: string; description: string }>>('aiChat_mcpTools', []);
-  const [showMcpDefaults, setShowMcpDefaults] = useState(false);
+  const [showMcpGuide, setShowMcpGuide] = useState(false);
+  const [mcpToolManager] = useState(() => new MCPToolManager());
+  const [mcpToolStats, setMcpToolStats] = useState(mcpToolManager.getStats());
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -356,10 +358,11 @@ export const AIChat: React.FC = () => {
       const client = new MCPClient(config);
       await client.connect();
       
-      const tools = await client.listTools();
+      // Load tools via tool manager
+      await mcpToolManager.loadToolsFromServer(client);
       setMcpClient(client);
-      setMcpTools(tools.map(t => ({ name: t.name, description: t.description })));
       setMcpConnected(true);
+      setMcpToolStats(mcpToolManager.getStats());
       setError('');
     } catch (err) {
       setError(`MCP connection failed: ${(err as Error).message}`);
@@ -367,6 +370,75 @@ export const AIChat: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Disconnect from MCP server
+  const handleDisconnectMCP = () => {
+    mcpToolManager.unloadServerTools();
+    setMcpClient(null);
+    setMcpConnected(false);
+    setMcpToolStats(mcpToolManager.getStats());
+  };
+
+  // Initialize default tools
+  const handleInitializeDefaultTools = () => {
+    mcpToolManager.initializeDefaultTools();
+    setMcpToolStats(mcpToolManager.getStats());
+  };
+
+  // Enable all default tools
+  const handleEnableAllDefaultTools = () => {
+    mcpToolManager.enableAllDefaultTools();
+    setMcpToolStats(mcpToolManager.getStats());
+  };
+
+  // Disable all tools
+  const handleDisableAllTools = () => {
+    mcpToolManager.disableAllTools();
+    setMcpToolStats(mcpToolManager.getStats());
+  };
+
+  // Toggle tool enabled state
+  const handleToggleTool = (toolName: string) => {
+    if (mcpToolManager.isToolEnabled(toolName)) {
+      mcpToolManager.disableTool(toolName);
+    } else {
+      mcpToolManager.enableTool(toolName);
+    }
+    setMcpToolStats(mcpToolManager.getStats());
+  };
+
+  // Export tool configuration
+  const handleExportToolConfig = () => {
+    const config = mcpToolManager.exportConfig();
+    const blob = new Blob([config], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `mcp-tools-config-${Date.now()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Import tool configuration
+  const handleImportToolConfig = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      const success = mcpToolManager.importConfig(content);
+      if (success) {
+        setMcpToolStats(mcpToolManager.getStats());
+        setError('');
+      } else {
+        setError('Failed to import tool configuration');
+      }
+    };
+    reader.readAsText(file);
   };
 
   // Enhance message with knowledge base context
@@ -896,83 +968,178 @@ export const AIChat: React.FC = () => {
               </Tab>
 
               <Tab eventKey="mcp" title="🔧 MCP Tools">
-                <div className="mb-3">
-                  <Form.Label>MCP Server URL</Form.Label>
-                  <InputGroup>
-                    <Form.Control
-                      type="text"
-                      placeholder="http://localhost:8080"
-                      value={mcpServerUrl}
-                      onChange={(e) => setMcpServerUrl(e.target.value)}
-                      disabled={loading || mcpConnected}
+                {/* Tool Statistics */}
+                <Alert variant="secondary" className="mb-3">
+                  <Row className="small">
+                    <Col xs={6} sm={3}>
+                      <strong>Total:</strong> {mcpToolStats.total}
+                    </Col>
+                    <Col xs={6} sm={3}>
+                      <strong>Enabled:</strong> {mcpToolStats.enabled}
+                    </Col>
+                    <Col xs={6} sm={3}>
+                      <strong>Default:</strong> {mcpToolStats.defaultTools}
+                    </Col>
+                    <Col xs={6} sm={3}>
+                      <strong>Custom:</strong> {mcpToolStats.customTools}
+                    </Col>
+                  </Row>
+                </Alert>
+
+                {/* Quick Actions */}
+                <div className="mb-3 d-flex flex-wrap gap-2">
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    onClick={handleInitializeDefaultTools}
+                    disabled={loading}
+                  >
+                    📥 Load Default Tools
+                  </Button>
+                  <Button
+                    variant="outline-success"
+                    size="sm"
+                    onClick={handleEnableAllDefaultTools}
+                    disabled={loading || mcpToolStats.defaultTools === 0}
+                  >
+                    ✅ Enable All Default
+                  </Button>
+                  <Button
+                    variant="outline-warning"
+                    size="sm"
+                    onClick={handleDisableAllTools}
+                    disabled={loading || mcpToolStats.enabled === 0}
+                  >
+                    ❌ Disable All
+                  </Button>
+                  <Button
+                    variant="outline-info"
+                    size="sm"
+                    onClick={handleExportToolConfig}
+                    disabled={mcpToolStats.total === 0}
+                  >
+                    💾 Export Config
+                  </Button>
+                  <label className="btn btn-outline-info btn-sm">
+                    📁 Import Config
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={handleImportToolConfig}
+                      style={{ display: 'none' }}
                     />
-                    <Button
-                      variant={mcpConnected ? "success" : "primary"}
-                      onClick={handleConnectMCP}
-                      disabled={loading || !mcpServerUrl || mcpConnected}
-                    >
-                      {mcpConnected ? '✓ Connected' : '🔌 Connect'}
-                    </Button>
-                  </InputGroup>
-                  <Form.Text className="text-muted">
-                    Connect to a Model Context Protocol (MCP) server to access tools and resources
-                  </Form.Text>
+                  </label>
                 </div>
 
-                {mcpConnected && mcpTools.length > 0 && (
+                {/* MCP Server Connection */}
+                <Card className="mb-3">
+                  <Card.Header className="bg-light">
+                    <strong>Custom MCP Server</strong>
+                  </Card.Header>
+                  <Card.Body>
+                    <Form.Label>Server URL</Form.Label>
+                    <InputGroup className="mb-2">
+                      <Form.Control
+                        type="text"
+                        placeholder="http://localhost:8080"
+                        value={mcpServerUrl}
+                        onChange={(e) => setMcpServerUrl(e.target.value)}
+                        disabled={loading || mcpConnected}
+                      />
+                      <Button
+                        variant={mcpConnected ? "success" : "primary"}
+                        onClick={mcpConnected ? handleDisconnectMCP : handleConnectMCP}
+                        disabled={loading || (!mcpConnected && !mcpServerUrl)}
+                      >
+                        {mcpConnected ? '🔌 Disconnect' : '🔌 Connect'}
+                      </Button>
+                    </InputGroup>
+                    <Form.Text className="text-muted">
+                      Connect to load custom tools from an MCP server
+                    </Form.Text>
+                  </Card.Body>
+                </Card>
+
+                {/* Tool List by Category */}
+                {mcpToolStats.total > 0 && (
                   <div>
-                    <h6>Available Tools ({mcpTools.length}):</h6>
-                    <ListGroup>
-                      {mcpTools.map(tool => (
-                        <ListGroup.Item key={tool.name}>
-                          <strong>🔧 {tool.name}</strong>
-                          <br />
-                          <small className="text-muted">{tool.description}</small>
-                        </ListGroup.Item>
-                      ))}
-                    </ListGroup>
+                    <h6 className="mb-3">Tool Management</h6>
+                    {getToolCategories().map(category => {
+                      const categoryTools = mcpToolManager.getToolsByCategory(category);
+                      if (categoryTools.length === 0) return null;
+                      
+                      return (
+                        <Card key={category} className="mb-3">
+                          <Card.Header className="bg-light">
+                            <strong className="text-capitalize">
+                              {category} Tools ({categoryTools.filter(t => t.enabled).length}/{categoryTools.length})
+                            </strong>
+                          </Card.Header>
+                          <ListGroup variant="flush">
+                            {categoryTools.map(tool => (
+                              <ListGroup.Item key={tool.name}>
+                                <div className="d-flex justify-content-between align-items-start">
+                                  <div className="flex-grow-1">
+                                    <Form.Check
+                                      type="checkbox"
+                                      id={`tool-${tool.name}`}
+                                      label={
+                                        <span>
+                                          <strong>🔧 {tool.name}</strong>
+                                          <Badge bg={tool.source === 'default' ? 'primary' : 'info'} className="ms-2 small">
+                                            {tool.source}
+                                          </Badge>
+                                        </span>
+                                      }
+                                      checked={tool.enabled}
+                                      onChange={() => handleToggleTool(tool.name)}
+                                    />
+                                    <small className="text-muted d-block ms-4">
+                                      {tool.definition?.description || 'No description'}
+                                    </small>
+                                  </div>
+                                </div>
+                              </ListGroup.Item>
+                            ))}
+                          </ListGroup>
+                        </Card>
+                      );
+                    })}
                   </div>
                 )}
 
-                {!mcpConnected && (
-                  <>
-                    <Alert variant="info">
-                      MCP (Model Context Protocol) allows the AI to access external tools and data sources. Connect to an MCP server to enhance capabilities.
+                {/* Help & Documentation */}
+                <div className="mt-3">
+                  <Button 
+                    variant="outline-secondary" 
+                    size="sm"
+                    onClick={() => setShowMcpGuide(!showMcpGuide)}
+                  >
+                    {showMcpGuide ? '▼ Hide' : '📖 View'} Complete MCP Tools Guide
+                  </Button>
+                  
+                  {showMcpGuide && (
+                    <Alert variant="light" className="mt-3 small" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                      <pre className="mb-0" style={{ whiteSpace: 'pre-wrap', fontSize: '0.85em' }}>
+                        {getMCPToolGuide()}
+                      </pre>
                     </Alert>
-                    
-                    <div className="mb-3">
-                      <Button 
-                        variant="outline-secondary" 
-                        size="sm"
-                        onClick={() => setShowMcpDefaults(!showMcpDefaults)}
-                      >
-                        {showMcpDefaults ? '▼ Hide' : '▶ View'} Default MCP Tools Documentation
-                      </Button>
-                    </div>
+                  )}
+                </div>
 
-                    {showMcpDefaults && (
-                      <div>
-                        <h6>Common MCP Tools</h6>
-                        {getToolCategories().map(category => (
-                          <div key={category} className="mb-3">
-                            <strong className="text-capitalize">{category} Tools:</strong>
-                            <ListGroup className="mt-2">
-                              {getToolsByCategory(category).slice(0, 2).map(tool => (
-                                <ListGroup.Item key={tool.name}>
-                                  <strong>🔧 {tool.name}</strong>
-                                  <br />
-                                  <small className="text-muted">{tool.description}</small>
-                                </ListGroup.Item>
-                              ))}
-                            </ListGroup>
-                          </div>
-                        ))}
-                        <Alert variant="secondary" className="small">
-                          {DEFAULT_MCP_TOOLS.length} default tools available including file system operations, web requests, calculations, and more.
-                        </Alert>
-                      </div>
-                    )}
-                  </>
+                {mcpToolStats.total === 0 && (
+                  <Alert variant="info" className="mt-3">
+                    <Alert.Heading className="h6">Get Started with MCP Tools</Alert.Heading>
+                    <p className="mb-2 small">
+                      MCP (Model Context Protocol) tools extend AI capabilities. Here's how to start:
+                    </p>
+                    <ol className="mb-0 small">
+                      <li>Click "📥 Load Default Tools" to add {DEFAULT_MCP_TOOLS.length} pre-configured tools</li>
+                      <li>Enable the tools you need</li>
+                      <li>Optionally connect to a custom MCP server for additional tools</li>
+                      <li>Export your configuration to save your tool preferences</li>
+                    </ol>
+                  </Alert>
                 )}
               </Tab>
 

@@ -115,10 +115,14 @@ Advanced AI chat interface with cutting-edge features:
   - Save and load conversation history
   - Export conversations (JSON/Markdown format)
   - Delete or rename conversations
-- **MCP Integration**: Connect to Model Context Protocol servers for tool/resource access
-  - 11+ default tools documented (file system, web, computation, data, utility)
-  - Browse common MCP tools by category
-  - Custom MCP server support
+- **MCP Tool Management**: Comprehensive tool enable/disable/load/unload system
+  - 11 pre-configured default tools (file system, web, computation, data, utility)
+  - Enable/disable individual tools or entire categories
+  - Load custom tools from MCP servers
+  - Import/export tool configurations
+  - Real-time statistics (total, enabled, default, custom tools)
+  - Complete usage guide with code examples
+  - Custom MCP server support with auto-discovery
 - **Knowledge Base & CAG**:
   - File upload support (.txt, .md, .json, .csv, .pdf)
   - Cache-Augmented Generation (CAG) for fast retrieval
@@ -229,6 +233,93 @@ The AI Chat feature supports multiple providers. Here's how to get started with 
 - **Conversation Management**: Save important chats for future reference
 - **Knowledge Base**: Upload relevant documents to provide context to the AI
 - **MCP Tools**: Connect MCP servers to give AI access to external tools and data
+
+## 🔧 MCP Tool Management
+
+The AI Chat includes a comprehensive MCP (Model Context Protocol) tool management system:
+
+### Default Tools (11 Pre-configured)
+
+**Filesystem Tools:**
+- `read_file` - Read file contents
+- `list_directory` - List directory contents
+- `write_file` - Write to files
+
+**Web Tools:**
+- `fetch_url` - Fetch content from URLs
+- `web_search` - Search the web
+
+**Computation Tools:**
+- `calculate` - Perform calculations
+- `execute_code` - Execute code in sandbox
+
+**Data Tools:**
+- `parse_json` - Parse JSON data
+- `query_database` - Query databases
+
+**Utility Tools:**
+- `generate_uuid` - Generate UUIDs
+- `get_timestamp` - Get timestamps
+
+### Tool Management Features
+
+**Quick Actions:**
+- 📥 Load Default Tools - Initialize 11 pre-configured tools
+- ✅ Enable All Default - Enable all default tools at once
+- ❌ Disable All - Disable all tools
+- 💾 Export Config - Save tool configuration as JSON
+- 📁 Import Config - Load tool configuration from file
+
+**Per-Tool Control:**
+- Enable/disable individual tools via checkboxes
+- View tool descriptions and categories
+- Track tool source (default vs custom)
+- Real-time statistics (total, enabled, disabled)
+
+**Custom MCP Servers:**
+- Connect to external MCP servers
+- Auto-discover and load server tools
+- Disconnect to unload server tools
+- Tools loaded from servers marked as "custom"
+
+### Usage Example
+
+```typescript
+import { MCPToolManager } from './utils/mcpToolManager';
+
+// Create manager
+const manager = new MCPToolManager();
+
+// Load default tools
+manager.initializeDefaultTools();
+
+// Enable specific tools
+manager.enableTool('read_file');
+manager.enableTool('web_search');
+
+// Or enable all at once
+manager.enableAllDefaultTools();
+
+// Connect to custom server
+const client = new MCPClient({ 
+  name: 'my-server', 
+  url: 'http://localhost:8080' 
+});
+await manager.loadToolsFromServer(client);
+
+// Export configuration
+const config = manager.exportConfig();
+// Save to file...
+
+// Import configuration
+manager.importConfig(configJson);
+
+// Get statistics
+const stats = manager.getStats();
+// { total: 15, enabled: 8, defaultTools: 11, customTools: 4 }
+```
+
+For the complete MCP Tool Management Guide, click "📖 View Complete MCP Tools Guide" in the AI Chat interface.
 
 ## 🚀 Getting Started
 
