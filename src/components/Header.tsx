@@ -46,8 +46,9 @@ export const Header: React.FC = () => {
               id="nav-dropdown-utils"
               aria-label="Utilities menu"
             >
+              <NavDropdown.Header>🔄 Converters & Formatters</NavDropdown.Header>
               <NavDropdown.Item href="#/jwtDebugger">
-                🌐 JWT Debugger
+                🔑 JWT Debugger
               </NavDropdown.Item>
               <NavDropdown.Item href="#/base64">
                 🛸 Base64 Encode/Decode
@@ -58,24 +59,22 @@ export const Header: React.FC = () => {
               <NavDropdown.Item href="#/jsonFormatter">
                 ﹛ JSON Formatter ﹜
               </NavDropdown.Item>
+              <NavDropdown.Divider />
+              <NavDropdown.Header>🎲 Generators</NavDropdown.Header>
               <NavDropdown.Item href="#/uuid">
-                🌠 UUID Generator
-              </NavDropdown.Item>
-              <NavDropdown.Item href="#/jiraComment">
-                🌠 JIRA Comment Generator
+                🆔 UUID Generator
               </NavDropdown.Item>
               <NavDropdown.Item href="#/otp">
-                🌠 OTP Generator
+                🔐 OTP Generator
               </NavDropdown.Item>
-              <NavDropdown.Item href="#/encryption">
-                🔐 Encryption/Decryption Tool
+              <NavDropdown.Item href="#/jiraComment">
+                📝 JIRA Comment Generator
               </NavDropdown.Item>
-              <NavDropdown.Item href="#/playwright2codecept">
-                🤖 Playwright Tests to CodeceptJS
+              <NavDropdown.Item href="#/character-counter">
+                🔢 Character Counter
               </NavDropdown.Item>
-              <NavDropdown.Item href="#/workflow-generator">
-                🚀 CI/CD Workflow Generator
-              </NavDropdown.Item>
+              <NavDropdown.Divider />
+              <NavDropdown.Header>🌐 API Testing</NavDropdown.Header>
               <NavDropdown.Item href="#/rest-client">
                 🌐 REST Client
               </NavDropdown.Item>
@@ -85,8 +84,16 @@ export const Header: React.FC = () => {
               <NavDropdown.Item href="#/grpc-client">
                 ⚡ gRPC Client
               </NavDropdown.Item>
-              <NavDropdown.Item href="#/character-counter">
-                🔢 Character Counter
+              <NavDropdown.Divider />
+              <NavDropdown.Header>🔧 Developer Tools</NavDropdown.Header>
+              <NavDropdown.Item href="#/encryption">
+                🔒 Encryption/Decryption
+              </NavDropdown.Item>
+              <NavDropdown.Item href="#/playwright2codecept">
+                🤖 Playwright to CodeceptJS
+              </NavDropdown.Item>
+              <NavDropdown.Item href="#/workflow-generator">
+                🚀 CI/CD Workflow Generator
               </NavDropdown.Item>
             </NavDropdown>
             <NavDropdown 

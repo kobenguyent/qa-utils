@@ -1,6 +1,6 @@
 import React from 'react';
 import {Container, Image, Row, Col} from "react-bootstrap";
-import homePhoto from '../assets/img.png'
+import homePhoto from '../assets/img.gif'
 
 export const Home: React.FC = () => {
   return(
