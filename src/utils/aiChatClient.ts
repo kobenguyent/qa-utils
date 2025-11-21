@@ -56,6 +56,7 @@ interface GeminiModelsResponse {
 }
 
 const DEFAULT_TIMEOUT = 30000; // 30 seconds
+const CONNECTION_TEST_TIMEOUT = 10000; // 10 seconds for connection tests
 const DEFAULT_GEMINI_CONTEXT_WINDOW = 32768; // Default context window for Gemini models
 
 // Default models configuration
@@ -608,6 +609,11 @@ export async function sendChatMessage(
 /**
  * Test connection to the AI service by making a minimal API call
  * Returns true if we receive a 2xx HTTP status, regardless of response format
+ * 
+ * Validation criteria that cause early failure:
+ * - Missing API key for providers that require it (OpenAI, Anthropic, Google, Azure)
+ * - Missing endpoint for providers that require it (Azure, Ollama)
+ * - Invalid or missing provider
  */
 export async function testConnection(config: ChatConfig): Promise<boolean> {
   const validation = validateConfig(config);
@@ -615,96 +621,92 @@ export async function testConnection(config: ChatConfig): Promise<boolean> {
     return false;
   }
 
-  try {
-    // Make a direct HTTP request to check connectivity
-    // We only care about HTTP status (2xx = success), not response format
-    let endpoint = '';
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    let body = '';
+  // Make a direct HTTP request to check connectivity
+  // We only care about HTTP status (2xx = success), not response format
+  let endpoint = '';
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  let body = '';
 
-    switch (config.provider) {
-      case 'openai':
-        endpoint = config.endpoint || 'https://api.openai.com/v1/chat/completions';
-        headers['Authorization'] = `Bearer ${config.apiKey}`;
-        body = JSON.stringify({
-          model: config.model || 'gpt-3.5-turbo',
-          messages: [{ role: 'user', content: 'test' }],
-          max_tokens: 5,
-        });
-        break;
-
-      case 'anthropic':
-        endpoint = config.endpoint || 'https://api.anthropic.com/v1/messages';
-        headers['x-api-key'] = config.apiKey || '';
-        headers['anthropic-version'] = '2023-06-01';
-        body = JSON.stringify({
-          model: config.model || 'claude-3-sonnet-20240229',
-          messages: [{ role: 'user', content: 'test' }],
-          max_tokens: 5,
-        });
-        break;
-
-      case 'google':
-        {
-          const model = config.model || 'gemini-pro';
-          endpoint = config.endpoint || `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-          endpoint = `${endpoint}?key=${config.apiKey}`;
-          body = JSON.stringify({
-            contents: [{ role: 'user', parts: [{ text: 'test' }] }],
-            generationConfig: { maxOutputTokens: 5 },
-          });
-        }
-        break;
-
-      case 'azure-openai':
-        {
-          const model = config.model || 'gpt-35-turbo';
-          const apiVersion = config.azureApiVersion || '2024-02-15-preview';
-          endpoint = `${config.endpoint}/openai/deployments/${model}/chat/completions?api-version=${apiVersion}`;
-          headers['api-key'] = config.apiKey || '';
-          body = JSON.stringify({
-            messages: [{ role: 'user', content: 'test' }],
-            max_tokens: 5,
-          });
-        }
-        break;
-
-      case 'ollama':
-        endpoint = `${config.endpoint || 'http://localhost:11434'}/api/chat`;
-        body = JSON.stringify({
-          model: config.model || 'llama2',
-          messages: [{ role: 'user', content: 'test' }],
-          stream: false,
-          options: { num_predict: 5 },
-        });
-        break;
-
-      default:
-        return false;
-    }
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-    try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers,
-        body,
-        signal: controller.signal,
+  switch (config.provider) {
+    case 'openai':
+      endpoint = config.endpoint || 'https://api.openai.com/v1/chat/completions';
+      headers['Authorization'] = `Bearer ${config.apiKey}`;
+      body = JSON.stringify({
+        model: config.model || 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: 'test' }],
+        max_tokens: 5,
       });
+      break;
 
-      clearTimeout(timeoutId);
+    case 'anthropic':
+      endpoint = config.endpoint || 'https://api.anthropic.com/v1/messages';
+      headers['x-api-key'] = config.apiKey || '';
+      headers['anthropic-version'] = '2023-06-01';
+      body = JSON.stringify({
+        model: config.model || 'claude-3-sonnet-20240229',
+        messages: [{ role: 'user', content: 'test' }],
+        max_tokens: 5,
+      });
+      break;
 
-      // Connection is successful if we get a 2xx status code
-      // We don't validate response format here, just HTTP connectivity
-      return response.ok;
-    } catch (error) {
-      clearTimeout(timeoutId);
-      // Network errors, CORS errors, timeouts, etc.
+    case 'google':
+      {
+        const model = config.model || 'gemini-pro';
+        endpoint = config.endpoint || `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+        endpoint = `${endpoint}?key=${config.apiKey}`;
+        body = JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: 'test' }] }],
+          generationConfig: { maxOutputTokens: 5 },
+        });
+      }
+      break;
+
+    case 'azure-openai':
+      {
+        const model = config.model || 'gpt-35-turbo';
+        const apiVersion = config.azureApiVersion || '2024-02-15-preview';
+        endpoint = `${config.endpoint}/openai/deployments/${model}/chat/completions?api-version=${apiVersion}`;
+        headers['api-key'] = config.apiKey || '';
+        body = JSON.stringify({
+          messages: [{ role: 'user', content: 'test' }],
+          max_tokens: 5,
+        });
+      }
+      break;
+
+    case 'ollama':
+      endpoint = `${config.endpoint || 'http://localhost:11434'}/api/chat`;
+      body = JSON.stringify({
+        model: config.model || 'llama2',
+        messages: [{ role: 'user', content: 'test' }],
+        stream: false,
+        options: { num_predict: 5 },
+      });
+      break;
+
+    default:
       return false;
-    }
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), CONNECTION_TEST_TIMEOUT);
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers,
+      body,
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    // Connection is successful if we get a 2xx status code
+    // We don't validate response format here, just HTTP connectivity
+    return response.ok;
   } catch (error) {
+    clearTimeout(timeoutId);
+    // Network errors, CORS errors, timeouts, etc.
     return false;
   }
 }
