@@ -547,23 +547,23 @@ export const AIChat: React.FC = () => {
       <Header />
       <Container className="py-4">
         <div className="text-center mb-4">
-          <h1>🤖 AI Chat</h1>
-          <p className="text-muted">
+          <h1 style={{ fontSize: '2.5rem', fontWeight: '600', color: '#212529' }}>🤖 AI Chat</h1>
+          <p className="text-muted" style={{ fontSize: '1.05rem', lineHeight: '1.6', maxWidth: '800px', margin: '0 auto' }}>
             Advanced AI chat with multi-provider support (OpenAI, Anthropic Claude, Google Gemini, Azure OpenAI, Ollama),
             token optimization, conversation management, file uploads, MCP integration, and Cache-Augmented Generation (CAG)
           </p>
         </div>
 
         {/* Configuration Panel */}
-        <Card className="mb-4">
-          <Card.Header>
-            <h5 className="mb-0">
+        <Card className="mb-4" style={{ border: '1px solid #dee2e6' }}>
+          <Card.Header style={{ backgroundColor: '#f8f9fa', borderBottom: '1px solid #dee2e6' }}>
+            <h5 className="mb-0" style={{ fontSize: '1.25rem', fontWeight: '600', color: '#495057' }}>
               ⚙️ Configuration
               {connectionStatus === 'connected' && (
-                <Badge bg="success" className="ms-2">Connected</Badge>
+                <Badge bg="success" className="ms-2" style={{ fontSize: '0.85rem' }}>Connected</Badge>
               )}
               {connectionStatus === 'disconnected' && (
-                <Badge bg="danger" className="ms-2">Disconnected</Badge>
+                <Badge bg="danger" className="ms-2" style={{ fontSize: '0.85rem' }}>Disconnected</Badge>
               )}
             </h5>
           </Card.Header>
@@ -572,11 +572,12 @@ export const AIChat: React.FC = () => {
               <Row className="mb-3">
                 <Col md={6}>
                   <Form.Group>
-                    <Form.Label>Provider</Form.Label>
+                    <Form.Label style={{ fontWeight: '500', fontSize: '1rem', color: '#495057' }}>Provider</Form.Label>
                     <Form.Select
                       value={provider}
                       onChange={(e) => handleProviderChange(e.target.value as AIProvider)}
                       disabled={loading}
+                      style={{ fontSize: '1rem' }}
                     >
                       <option value="openai">OpenAI</option>
                       <option value="anthropic">Anthropic Claude</option>
@@ -588,13 +589,14 @@ export const AIChat: React.FC = () => {
                 </Col>
                 <Col md={5}>
                   <Form.Group>
-                    <Form.Label>Model</Form.Label>
+                    <Form.Label style={{ fontWeight: '500', fontSize: '1rem', color: '#495057' }}>Model</Form.Label>
                     <InputGroup>
                       {availableModels.length > 0 ? (
                         <Form.Select
                           value={model}
                           onChange={(e) => setModel(e.target.value)}
                           disabled={loading}
+                          style={{ fontSize: '1rem' }}
                         >
                           {availableModels.map(m => (
                             <option key={m.id} value={m.id}>{m.name}</option>
@@ -607,6 +609,7 @@ export const AIChat: React.FC = () => {
                           value={model}
                           onChange={(e) => setModel(e.target.value)}
                           disabled={loading}
+                          style={{ fontSize: '1rem' }}
                         />
                       )}
                       <Button 
@@ -614,11 +617,12 @@ export const AIChat: React.FC = () => {
                         onClick={handleLoadModels}
                         disabled={loading || !isConfigured}
                         title="Load available models"
+                        style={{ fontSize: '1rem' }}
                       >
                         🔄
                       </Button>
                     </InputGroup>
-                    <Form.Text className="text-muted">
+                    <Form.Text className="text-muted" style={{ fontSize: '0.9rem' }}>
                       Click 🔄 to load available models
                     </Form.Text>
                   </Form.Group>
@@ -1232,15 +1236,16 @@ export const AIChat: React.FC = () => {
         </Card>
 
         {/* Chat Messages */}
-        <Card className="mb-3" style={{ height: '500px', display: 'flex', flexDirection: 'column' }}>
-          <Card.Header>
+        <Card className="mb-3" style={{ height: '500px', display: 'flex', flexDirection: 'column', border: '1px solid #dee2e6' }}>
+          <Card.Header style={{ backgroundColor: '#f8f9fa', borderBottom: '1px solid #dee2e6' }}>
             <div className="d-flex justify-content-between align-items-center">
-              <h5 className="mb-0">💬 Chat</h5>
+              <h5 className="mb-0" style={{ fontSize: '1.25rem', fontWeight: '600', color: '#495057' }}>💬 Chat</h5>
               <Button 
                 variant="outline-secondary" 
                 size="sm" 
                 onClick={handleClearChat}
                 disabled={messages.length === 0 || loading}
+                style={{ fontSize: '0.9rem' }}
               >
                 Clear Chat
               </Button>
@@ -1249,35 +1254,75 @@ export const AIChat: React.FC = () => {
           <Card.Body style={{ overflowY: 'auto', flex: 1 }}>
             {messages.length === 0 ? (
               <div className="text-center text-muted mt-5">
-                <p>No messages yet. Start a conversation!</p>
+                <p style={{ fontSize: '1.1rem' }}>No messages yet. Start a conversation!</p>
               </div>
             ) : (
-              messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`mb-3 d-flex ${msg.role === 'user' ? 'justify-content-end' : 'justify-content-start'}`}
-                >
-                  <div style={{ maxWidth: '70%' }}>
-                    <Badge 
-                      bg={msg.role === 'user' ? 'primary' : 'secondary'}
-                      className="mb-1"
-                    >
-                      {msg.role === 'user' ? '👤 You' : '🤖 AI'}
-                      <span className="ms-2 small">{formatTimestamp(msg.timestamp)}</span>
-                    </Badge>
-                    <Card bg={msg.role === 'user' ? 'primary' : 'light'}>
-                      <Card.Body className="py-2">
-                        <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                          {msg.content}
-                        </div>
-                        <div className="mt-2">
-                          <CopyWithToast text={msg.content} />
-                        </div>
-                      </Card.Body>
-                    </Card>
+              <>
+                {messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`mb-3 d-flex ${msg.role === 'user' ? 'justify-content-end' : 'justify-content-start'}`}
+                  >
+                    <div style={{ maxWidth: '75%' }}>
+                      <Badge 
+                        bg={msg.role === 'user' ? 'primary' : 'secondary'}
+                        className="mb-1"
+                        style={{ fontSize: '0.85rem' }}
+                      >
+                        {msg.role === 'user' ? '👤 You' : '🤖 AI'}
+                        <span className="ms-2 small">{formatTimestamp(msg.timestamp)}</span>
+                      </Badge>
+                      <Card 
+                        bg={msg.role === 'user' ? 'primary' : 'light'}
+                        text={msg.role === 'user' ? 'white' : 'dark'}
+                        style={{ 
+                          border: msg.role === 'user' ? 'none' : '1px solid #dee2e6',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                        }}
+                      >
+                        <Card.Body className="py-2 px-3">
+                          <div style={{ 
+                            whiteSpace: 'pre-wrap', 
+                            wordBreak: 'break-word',
+                            fontSize: '1rem',
+                            lineHeight: '1.6'
+                          }}>
+                            {msg.content}
+                          </div>
+                          <div className="mt-2">
+                            <CopyWithToast text={msg.content} />
+                          </div>
+                        </Card.Body>
+                      </Card>
+                    </div>
                   </div>
-                </div>
-              ))
+                ))}
+                {loading && (
+                  <div className="mb-3 d-flex justify-content-start">
+                    <div style={{ maxWidth: '75%' }}>
+                      <Badge bg="secondary" className="mb-1" style={{ fontSize: '0.85rem' }}>
+                        🤖 AI
+                      </Badge>
+                      <Card 
+                        bg="light"
+                        style={{ 
+                          border: '1px solid #dee2e6',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                        }}
+                      >
+                        <Card.Body className="py-2 px-3">
+                          <div className="d-flex align-items-center" style={{ fontSize: '1rem' }}>
+                            <Spinner animation="grow" size="sm" variant="secondary" className="me-2" />
+                            <Spinner animation="grow" size="sm" variant="secondary" className="me-2" style={{ animationDelay: '0.2s' }} />
+                            <Spinner animation="grow" size="sm" variant="secondary" style={{ animationDelay: '0.4s' }} />
+                            <span className="ms-2 text-muted">AI is thinking...</span>
+                          </div>
+                        </Card.Body>
+                      </Card>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
             <div ref={messagesEndRef} />
           </Card.Body>
@@ -1290,24 +1335,34 @@ export const AIChat: React.FC = () => {
               <InputGroup>
                 <Form.Control
                   as="textarea"
-                  rows={3}
+                  rows={2}
                   placeholder="Type your message here... (Press Enter to send, Shift+Enter for new line)"
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
                   disabled={loading || !isConfigured}
+                  style={{
+                    fontSize: '1rem',
+                    lineHeight: '1.5',
+                    resize: 'vertical',
+                    minHeight: '60px'
+                  }}
                 />
                 <Button
                   variant="primary"
                   onClick={handleSendMessage}
                   disabled={loading || !inputMessage.trim() || !isConfigured}
-                  style={{ minWidth: '100px' }}
+                  style={{ 
+                    minWidth: '100px',
+                    fontSize: '1rem',
+                    fontWeight: '500'
+                  }}
                 >
                   {loading ? <Spinner animation="border" size="sm" /> : '📤 Send'}
                 </Button>
               </InputGroup>
               {!isConfigured && (
-                <Form.Text className="text-warning">
+                <Form.Text className="text-warning" style={{ fontSize: '0.95rem' }}>
                   ⚠️ Please configure your {provider === 'openai' ? 'API key' : 'endpoint'} above to start chatting
                 </Form.Text>
               )}
