@@ -780,13 +780,13 @@ export async function fetchGoogleModels(apiKey?: string): Promise<ModelInfo[]> {
     const models: ModelInfo[] = data.models
       .filter((model: GeminiModel) => 
         model.supportedGenerationMethods?.includes('generateContent') &&
-        model.name?.toLowerCase().includes('gemini')
+        model.name && model.name.toLowerCase().includes('gemini')
       )
       .map((model: GeminiModel, index: number) => {
         // Extract model ID from the full name path
         // API returns names like "models/gemini-pro" or "models/gemini-1.5-pro"
         // We extract just the model ID part after the last slash
-        const modelId = model.name?.split('/').pop() || model.name || '';
+        const modelId = model.name?.split('/').pop() || '';
         
         // Get display name, fallback to ID
         const displayName = model.displayName || modelId;
