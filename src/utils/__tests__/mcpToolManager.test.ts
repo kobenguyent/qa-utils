@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { MCPToolManager, getMCPToolGuide } from '../mcpToolManager';
 import { MCPToolDefinition } from '../mcpTools';
+import { MCPClient } from '../mcpClient';
 
 describe('MCPToolManager', () => {
   let manager: MCPToolManager;
@@ -233,7 +234,7 @@ describe('MCPToolManager', () => {
 
   describe('Server Tools', () => {
     it('should load tools from server', async () => {
-      const mockClient = {
+      const mockClient: Pick<MCPClient, 'listTools'> = {
         listTools: vi.fn().mockResolvedValue([
           {
             name: 'server_tool',
@@ -243,7 +244,7 @@ describe('MCPToolManager', () => {
         ]),
       };
 
-      await manager.loadToolsFromServer(mockClient as any);
+      await manager.loadToolsFromServer(mockClient as MCPClient);
       
       const tool = manager.getAllTools().find(t => t.name === 'server_tool');
       expect(tool).toBeDefined();
@@ -251,7 +252,7 @@ describe('MCPToolManager', () => {
     });
 
     it('should unload server tools', async () => {
-      const mockClient = {
+      const mockClient: Pick<MCPClient, 'listTools'> = {
         listTools: vi.fn().mockResolvedValue([
           {
             name: 'server_tool',
@@ -261,7 +262,7 @@ describe('MCPToolManager', () => {
         ]),
       };
 
-      await manager.loadToolsFromServer(mockClient as any);
+      await manager.loadToolsFromServer(mockClient as MCPClient);
       manager.unloadServerTools();
       
       const tool = manager.getAllTools().find(t => t.name === 'server_tool');
