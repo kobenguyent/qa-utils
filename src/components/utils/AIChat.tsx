@@ -291,6 +291,16 @@ export const AIChat: React.FC = () => {
     return new Date(timestamp).toLocaleTimeString();
   };
 
+  // Handle provider change - resets model to provider's default
+  const handleProviderChange = (newProvider: AIProvider) => {
+    setProvider(newProvider);
+    setConnectionStatus('unknown');
+    setAvailableModels([]);
+    // Reset model to the new provider's default
+    const defaultModel = getDefaultModel(newProvider);
+    setModel(defaultModel.id);
+  };
+
   // Load available models when provider changes
   const handleLoadModels = async () => {
     setLoading(true);
@@ -523,15 +533,7 @@ export const AIChat: React.FC = () => {
                     <Form.Label>Provider</Form.Label>
                     <Form.Select
                       value={provider}
-                      onChange={(e) => {
-                        const newProvider = e.target.value as AIProvider;
-                        setProvider(newProvider);
-                        setConnectionStatus('unknown');
-                        setAvailableModels([]);
-                        // Reset model to the new provider's default
-                        const defaultModel = getDefaultModel(newProvider);
-                        setModel(defaultModel.id);
-                      }}
+                      onChange={(e) => handleProviderChange(e.target.value as AIProvider)}
                       disabled={loading}
                     >
                       <option value="openai">OpenAI</option>
