@@ -1,7 +1,6 @@
-import {Container, Button, Alert, ButtonGroup} from "react-bootstrap";
+import {Container, Button, Alert, ButtonGroup, Card, Badge} from "react-bootstrap";
 import {Header} from "../Header.tsx";
 import {Footer} from "../Footer.tsx";
-import { decodeToken } from "react-jwt";
 import { useState, useCallback } from 'react';
 // @ts-ignore
 import {JSONViewer} from 'react-json-editor-viewer';
@@ -10,13 +9,15 @@ import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import CopyWithToast from '../CopyWithToast.tsx';
-
-interface JWTPayload {
-  exp?: number;
-  iat?: number;
-  sub?: string;
-  [key: string]: unknown;
-}
+import {
+  decodeJWTHeader,
+  decodeJWTPayload,
+  getJWTSignature,
+  isValidJWTStructure,
+  isJWTExpired,
+  formatTimestamp,
+  getTimeUntilExpiry,
+} from '../../utils/jwtHelpers.ts';
 
 export const JWTDebugger = () => {
   const [postContent, setPostContent] = useState('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c');
@@ -32,15 +33,11 @@ export const JWTDebugger = () => {
       return;
     }
 
-    try {
-      const decoded = decodeToken(value);
-      setIsValidJWT(!!decoded);
-      if (!decoded) {
-        setError('Invalid JWT format. Please check your token.');
-      }
-    } catch (err) {
-      setIsValidJWT(false);
-      setError('Invalid JWT format. Please check your token.');
+    const valid = isValidJWTStructure(value);
+    setIsValidJWT(valid);
+    
+    if (!valid) {
+      setError('Invalid JWT format. A valid JWT should have three parts separated by dots (header.payload.signature).');
     }
   }, []);
 
@@ -57,8 +54,10 @@ export const JWTDebugger = () => {
     handleJWTChange('');
   }, [handleJWTChange]);
 
-  const decodedData = postContent ? decodeToken<JWTPayload>(postContent) : null;
-  const isExpired = decodedData?.exp ? decodedData.exp * 1000 < Date.now() : false;
+  const header = isValidJWT && postContent ? decodeJWTHeader(postContent) : null;
+  const payload = isValidJWT && postContent ? decodeJWTPayload(postContent) : null;
+  const signature = isValidJWT && postContent ? getJWTSignature(postContent) : null;
+  const isExpired = isJWTExpired(payload);
 
   return(
     <Container>
@@ -68,25 +67,30 @@ export const JWTDebugger = () => {
         <p className="text-muted">Decode and analyze JSON Web Tokens (JWT)</p>
       </div>
 
-      {isValidJWT && decodedData && (
-        <div className="mb-3">
-          <strong>Token Status:</strong>{' '}
-          {isExpired ? (
-            <span className="text-danger">⚠️ Expired</span>
-          ) : (
-            <span className="text-success">✅ Valid</span>
-          )}
-        </div>
-      )}
-
       {error && (
         <Alert variant="danger" className="mb-3">
           {error}
         </Alert>
       )}
 
+      {isValidJWT && payload && (
+        <Alert variant={isExpired ? "warning" : "success"} className="mb-3">
+          <strong>Token Status:</strong>{' '}
+          {isExpired ? (
+            <span>⚠️ Expired</span>
+          ) : (
+            <span>✅ Valid</span>
+          )}
+          {header?.alg && (
+            <span className="ms-3">
+              <strong>Algorithm:</strong> <Badge bg="info">{header.alg}</Badge>
+            </span>
+          )}
+        </Alert>
+      )}
+
       <Form>
-        <Form.Group as={Row} className="mb-3" controlId="input">
+        <Form.Group as={Row} className="mb-4" controlId="input">
           <Form.Label column lg="2" md="3" sm="12">
             JWT Token:
           </Form.Label>
@@ -125,65 +129,151 @@ export const JWTDebugger = () => {
               </ButtonGroup>
             </div>
             <Form.Text className="text-muted">
-              Paste a JWT token to decode its header, payload, and verify its structure.
+              Paste a JWT token to decode its header, payload, and signature parts.
             </Form.Text>
           </Col>
         </Form.Group>
 
-        {isValidJWT && decodedData && (
-          <>
-            <Form.Group as={Row} className="mb-3" controlId="result">
-              <Form.Label column lg="2" md="3" sm="12">
-                Decoded Data:
-              </Form.Label>
-              <Col lg="10" md="9" sm="12">
-                <div 
-                  style={{
-                    maxHeight: '400px',
-                    overflowY: 'auto',
-                    border: '1px solid #dee2e6',
-                    borderRadius: '0.375rem',
-                    padding: '0.5rem'
-                  }}
-                >
-                  <JSONViewer 
-                    data={decodedData} 
-                    collapsible 
-                    styles={jsonStyles}
-                  />
-                </div>
-              </Col>
-            </Form.Group>
-
-            <Form.Group as={Row} className="mb-3" controlId="copy-to-clipboard">
-              <Col lg="10" md="9" sm="12" className="offset-lg-2 offset-md-3">
-                <CopyWithToast 
-                  text={JSON.stringify(decodedData, null, 2) || ''}
-                />
-              </Col>
-            </Form.Group>
-
-            {decodedData.exp && (
-              <Form.Group as={Row} className="mb-3">
-                <Form.Label column lg="2" md="3" sm="12">
-                  Expiration:
-                </Form.Label>
-                <Col lg="10" md="9" sm="12">
-                  <div className="p-2 bg-light rounded">
-                    <div><strong>Expires:</strong> {new Date(decodedData.exp * 1000).toLocaleString()}</div>
-                    <div><strong>Time until expiry:</strong> {
-                      isExpired 
-                        ? <span className="text-danger">Token has expired</span>
-                        : <span className="text-success">
-                            {Math.floor((decodedData.exp * 1000 - Date.now()) / (1000 * 60 * 60 * 24))} days, {' '}
-                            {Math.floor(((decodedData.exp * 1000 - Date.now()) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))} hours
-                          </span>
-                    }</div>
+        {isValidJWT && header && payload && signature && (
+          <Row className="mb-4">
+            <Col lg="12">
+              <h4 className="mb-3">Decoded JWT</h4>
+              
+              {/* Header Section */}
+              <Card className="mb-3 border-primary">
+                <Card.Header className="bg-primary text-white d-flex justify-content-between align-items-center">
+                  <span><strong>📋 Header</strong></span>
+                  {header.alg && (
+                    <Badge bg="light" text="dark">Algorithm: {header.alg}</Badge>
+                  )}
+                </Card.Header>
+                <Card.Body>
+                  <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                    <JSONViewer 
+                      data={header} 
+                      collapsible 
+                      styles={jsonStyles}
+                    />
                   </div>
-                </Col>
-              </Form.Group>
-            )}
-          </>
+                  <div className="mt-2">
+                    <CopyWithToast 
+                      text={JSON.stringify(header, null, 2)}
+                    />
+                  </div>
+                </Card.Body>
+              </Card>
+
+              {/* Payload Section */}
+              <Card className="mb-3 border-success">
+                <Card.Header className="bg-success text-white">
+                  <strong>📦 Payload</strong>
+                </Card.Header>
+                <Card.Body>
+                  <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                    <JSONViewer 
+                      data={payload} 
+                      collapsible 
+                      styles={jsonStyles}
+                    />
+                  </div>
+                  <div className="mt-2">
+                    <CopyWithToast 
+                      text={JSON.stringify(payload, null, 2)}
+                    />
+                  </div>
+
+                  {/* Timestamp Information */}
+                  {(payload.iat || payload.exp || payload.nbf) && (
+                    <div className="mt-3 p-3 bg-light rounded">
+                      <h6 className="mb-2"><strong>⏰ Timestamps</strong></h6>
+                      {payload.iat && (
+                        <div className="mb-1">
+                          <strong>Issued At (iat):</strong> {formatTimestamp(payload.iat)}
+                          <small className="text-muted ms-2">({payload.iat})</small>
+                        </div>
+                      )}
+                      {payload.nbf && (
+                        <div className="mb-1">
+                          <strong>Not Before (nbf):</strong> {formatTimestamp(payload.nbf)}
+                          <small className="text-muted ms-2">({payload.nbf})</small>
+                        </div>
+                      )}
+                      {payload.exp && (
+                        <>
+                          <div className="mb-1">
+                            <strong>Expires At (exp):</strong> {formatTimestamp(payload.exp)}
+                            <small className="text-muted ms-2">({payload.exp})</small>
+                          </div>
+                          <div className={isExpired ? "text-danger" : "text-success"}>
+                            <strong>Time until expiry:</strong>{' '}
+                            {isExpired ? '❌ Token has expired' : `✅ ${getTimeUntilExpiry(payload.exp)}`}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Additional Claims */}
+                  {(payload.iss || payload.sub || payload.aud) && (
+                    <div className="mt-3 p-3 bg-light rounded">
+                      <h6 className="mb-2"><strong>🔐 Claims</strong></h6>
+                      {payload.iss && (
+                        <div className="mb-1">
+                          <strong>Issuer (iss):</strong> <code>{payload.iss}</code>
+                        </div>
+                      )}
+                      {payload.sub && (
+                        <div className="mb-1">
+                          <strong>Subject (sub):</strong> <code>{payload.sub}</code>
+                        </div>
+                      )}
+                      {payload.aud && (
+                        <div className="mb-1">
+                          <strong>Audience (aud):</strong>{' '}
+                          <code>{Array.isArray(payload.aud) ? payload.aud.join(', ') : payload.aud}</code>
+                        </div>
+                      )}
+                      {payload.jti && (
+                        <div className="mb-1">
+                          <strong>JWT ID (jti):</strong> <code>{payload.jti}</code>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </Card.Body>
+              </Card>
+
+              {/* Signature Section */}
+              <Card className="mb-3 border-warning">
+                <Card.Header className="bg-warning text-dark">
+                  <strong>🔏 Signature</strong>
+                </Card.Header>
+                <Card.Body>
+                  <div className="mb-2">
+                    <code style={{
+                      wordBreak: 'break-all',
+                      display: 'block',
+                      padding: '0.5rem',
+                      backgroundColor: '#f8f9fa',
+                      borderRadius: '0.25rem',
+                      fontSize: '0.875rem'
+                    }}>
+                      {signature}
+                    </code>
+                  </div>
+                  <CopyWithToast text={signature} />
+                  <div className="mt-3">
+                    <Alert variant="info" className="mb-0">
+                      <small>
+                        <strong>ℹ️ Note:</strong> The signature is used to verify that the token hasn't been tampered with. 
+                        To verify the signature, you would need the secret key (for HMAC algorithms) or public key (for RSA/ECDSA algorithms).
+                      </small>
+                    </Alert>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
         )}
       </Form>
       <Footer></Footer>
