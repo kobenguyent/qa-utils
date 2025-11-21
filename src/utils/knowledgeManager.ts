@@ -327,8 +327,12 @@ async function parsePDFContent(file: File): Promise<string> {
     // Dynamic import to avoid issues with SSR and reduce bundle size
     const pdfjsLib = await import('pdfjs-dist');
     
-    // Set worker path - using CDN for worker
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+    // Set worker path - using local worker from pdfjs-dist package
+    // This works with Vite's asset handling
+    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+      'pdfjs-dist/build/pdf.worker.min.mjs',
+      import.meta.url
+    ).href;
 
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
