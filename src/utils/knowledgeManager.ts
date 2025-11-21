@@ -36,7 +36,7 @@ export class CAGManager {
   private cache: Map<string, CacheEntry>;
   private maxCacheSize: number;
 
-  constructor(maxCacheSize: number = 100) {
+  constructor(maxCacheSize = 100) {
     this.cache = new Map();
     this.maxCacheSize = maxCacheSize;
   }
@@ -155,7 +155,7 @@ export class KnowledgeBase {
   /**
    * Search documents using keyword search
    */
-  keywordSearch(query: string, limit: number = 5): KnowledgeDocument[] {
+  keywordSearch(query: string, limit = 5): KnowledgeDocument[] {
     const queryKeywords = this.extractKeywords(query);
     const results: Array<{ document: KnowledgeDocument; score: number }> = [];
 
@@ -178,7 +178,7 @@ export class KnowledgeBase {
   /**
    * Search documents by metadata filtering
    */
-  metadataSearch(filters: Record<string, unknown>, limit: number = 5): KnowledgeDocument[] {
+  metadataSearch(filters: Record<string, unknown>, limit = 5): KnowledgeDocument[] {
     const results: KnowledgeDocument[] = [];
 
     for (const document of this.documents.values()) {
@@ -277,7 +277,7 @@ export class KnowledgeBase {
   /**
    * Build context from search results for LLM
    */
-  buildContext(documents: KnowledgeDocument[], maxLength: number = 4000): string {
+  buildContext(documents: KnowledgeDocument[], maxLength = 4000): string {
     let context = 'Relevant information from knowledge base:\n\n';
     let currentLength = context.length;
 
