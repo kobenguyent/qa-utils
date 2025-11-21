@@ -43,6 +43,15 @@ interface ConversationMessage extends ChatMessage {
   timestamp: number;
 }
 
+// Constants
+const DEFAULT_CONTEXT_LENGTH = 2000;
+
+// Helper function to detect if user wants full content
+const detectsFullContentRequest = (message: string): boolean => {
+  return /\b(full|complete|entire|whole|all|untruncated|raw)\b.*\b(data|document|file|content|information)\b/i.test(message) ||
+         /\b(show|display|read|access|see)\b.*\b(full|complete|entire|whole|all)\b/i.test(message);
+};
+
 export const AIChat: React.FC = () => {
   // Configuration state with session storage
   const [provider, setProvider] = useSessionStorage<AIProvider>('aiChat_provider', 'openai');
@@ -491,11 +500,10 @@ export const AIChat: React.FC = () => {
     const relevantDocs = knowledgeBase.search(message, { method: 'keyword', limit: 3 });
     if (relevantDocs.length > 0) {
       // Check if user is asking for full/complete data
-      const wantsFullData = /\b(full|complete|entire|whole|all|untruncated|raw)\b.*\b(data|document|file|content|information)\b/i.test(message) ||
-                           /\b(show|display|read|access|see)\b.*\b(full|complete|entire|whole|all)\b/i.test(message);
+      const wantsFullData = detectsFullContentRequest(message);
       
       // If user wants full data or references specific document, load more content
-      const maxLength = wantsFullData ? 0 : 2000; // 0 means unlimited
+      const maxLength = wantsFullData ? 0 : DEFAULT_CONTEXT_LENGTH; // 0 means unlimited
       const includeFullContent = wantsFullData;
       
       const context = knowledgeBase.buildContext(relevantDocs, maxLength, includeFullContent);

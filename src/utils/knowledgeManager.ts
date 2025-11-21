@@ -282,18 +282,20 @@ export class KnowledgeBase {
    */
   buildContext(documents: KnowledgeDocument[], maxLength = 4000, includeFullContent = false): string {
     let context = 'Relevant information from knowledge base:\n\n';
-    let currentLength = context.length;
 
+    // If full content is requested, simply concatenate all documents
+    if (includeFullContent || maxLength === 0) {
+      for (const doc of documents) {
+        context += `[${doc.metadata.filename || 'Document'}]\n${doc.content}\n\n`;
+      }
+      return context;
+    }
+
+    // Otherwise, apply length constraints
+    let currentLength = context.length;
     for (const doc of documents) {
       const docContext = `[${doc.metadata.filename || 'Document'}]\n${doc.content}\n\n`;
       
-      // If includeFullContent is true or maxLength is 0, include full content
-      if (includeFullContent || maxLength === 0) {
-        context += docContext;
-        currentLength += docContext.length;
-        continue;
-      }
-
       if (currentLength + docContext.length > maxLength) {
         // Truncate if needed
         const remaining = maxLength - currentLength;
