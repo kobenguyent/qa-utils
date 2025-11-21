@@ -129,23 +129,31 @@ describe('knowledgeManager', () => {
       const id1 = kb.addDocument('First document content', { filename: 'doc1.txt' });
       const id2 = kb.addDocument('Second document content', { filename: 'doc2.txt' });
 
-      const doc1 = kb.getDocument(id1)!;
-      const doc2 = kb.getDocument(id2)!;
+      const doc1 = kb.getDocument(id1);
+      const doc2 = kb.getDocument(id2);
 
-      const context = kb.buildContext([doc1, doc2]);
-      expect(context).toContain('doc1.txt');
-      expect(context).toContain('doc2.txt');
-      expect(context).toContain('First document content');
-      expect(context).toContain('Second document content');
+      expect(doc1).toBeDefined();
+      expect(doc2).toBeDefined();
+
+      if (doc1 && doc2) {
+        const context = kb.buildContext([doc1, doc2]);
+        expect(context).toContain('doc1.txt');
+        expect(context).toContain('doc2.txt');
+        expect(context).toContain('First document content');
+        expect(context).toContain('Second document content');
+      }
     });
 
     it('should truncate context when exceeding max length', () => {
       const longContent = 'A'.repeat(5000);
       const id = kb.addDocument(longContent, { filename: 'long.txt' });
-      const doc = kb.getDocument(id)!;
+      const doc = kb.getDocument(id);
 
-      const context = kb.buildContext([doc], 1000);
-      expect(context.length).toBeLessThanOrEqual(1000);
+      expect(doc).toBeDefined();
+      if (doc) {
+        const context = kb.buildContext([doc], 1000);
+        expect(context.length).toBeLessThanOrEqual(1000);
+      }
     });
 
     it('should clear all documents and cache', () => {
@@ -167,12 +175,15 @@ describe('knowledgeManager', () => {
 
     it('should extract keywords from content', () => {
       const id = kb.addDocument('JavaScript is a programming language used for web development');
-      const doc = kb.getDocument(id)!;
+      const doc = kb.getDocument(id);
 
-      expect(doc.metadata.keywords).toBeDefined();
-      expect(doc.metadata.keywords?.length).toBeGreaterThan(0);
-      expect(doc.metadata.keywords).toContain('javascript');
-      expect(doc.metadata.keywords).toContain('programming');
+      expect(doc).toBeDefined();
+      if (doc) {
+        expect(doc.metadata.keywords).toBeDefined();
+        expect(doc.metadata.keywords?.length).toBeGreaterThan(0);
+        expect(doc.metadata.keywords).toContain('javascript');
+        expect(doc.metadata.keywords).toContain('programming');
+      }
     });
 
     it('should handle metadata search with JSON query', () => {

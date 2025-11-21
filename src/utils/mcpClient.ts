@@ -74,7 +74,7 @@ export class MCPClient {
       }
 
       this.capabilities = await response.json();
-      return this.capabilities!;
+      return this.capabilities as MCPServerCapabilities;
     } catch (error) {
       throw new Error(`MCP connection failed: ${(error as Error).message}`);
     }
