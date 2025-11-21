@@ -22,16 +22,22 @@ export function useSessionStorage<T>(key: string, initialValue: T): [T, (value: 
   const setValue = useCallback((value: T | ((prev: T) => T)) => {
     try {
       // Allow value to be a function so we have same API as useState
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      
-      setStoredValue(valueToStore);
-      
-      // Save to sessionStorage
-      window.sessionStorage.setItem(key, JSON.stringify(valueToStore));
+      setStoredValue(prevState => {
+        const valueToStore = value instanceof Function ? value(prevState) : value;
+        
+        // Save to sessionStorage inside a try-catch to handle errors
+        try {
+          window.sessionStorage.setItem(key, JSON.stringify(valueToStore));
+        } catch (storageError) {
+          console.warn(`Error setting sessionStorage key "${key}":`, storageError);
+        }
+        
+        return valueToStore;
+      });
     } catch (error) {
       console.warn(`Error setting sessionStorage key "${key}":`, error);
     }
-  }, [key, storedValue]);
+  }, [key]);
 
   // Sync state with sessionStorage when key changes
   useEffect(() => {

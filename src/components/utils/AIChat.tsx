@@ -90,7 +90,7 @@ export const AIChat: React.FC = () => {
     if (uploadedFiles.length > 0) {
       try {
         const documents = uploadedFiles.map(file => {
-          const doc = knowledgeBase['documents'].get(file.id);
+          const doc = knowledgeBase.getDocument(file.id);
           return doc ? { content: doc.content, metadata: doc.metadata } : null;
         }).filter(Boolean);
         window.sessionStorage.setItem('aiChat_knowledgeBaseDocuments', JSON.stringify(documents));
@@ -98,7 +98,8 @@ export const AIChat: React.FC = () => {
         console.warn('Error saving knowledge base documents:', error);
       }
     }
-  }, [uploadedFiles, knowledgeBase]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uploadedFiles]); // knowledgeBase is intentionally stable and doesn't need to be in deps
 
   // Scroll to bottom when messages change
   useEffect(() => {
