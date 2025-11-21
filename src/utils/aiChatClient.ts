@@ -108,6 +108,9 @@ const SYSTEM_PROMPTS = {
 - Inspire and encourage exploration`,
 };
 
+// Providers that require API keys
+const PROVIDERS_REQUIRING_API_KEY: AIProvider[] = ['openai', 'anthropic', 'google', 'azure-openai'];
+
 /**
  * Validates the chat configuration
  */
@@ -116,7 +119,7 @@ export function validateConfig(config: ChatConfig): { valid: boolean; error?: st
     return { valid: false, error: 'Provider is required' };
   }
 
-  if ((config.provider === 'openai' || config.provider === 'anthropic' || config.provider === 'google' || config.provider === 'azure-openai') && !config.apiKey) {
+  if (PROVIDERS_REQUIRING_API_KEY.includes(config.provider) && !config.apiKey) {
     return { valid: false, error: 'API key is required for this provider' };
   }
 
@@ -133,12 +136,19 @@ export function validateConfig(config: ChatConfig): { valid: boolean; error?: st
 
 /**
  * Simple token estimation (rough approximation: ~4 chars per token for English)
+ * 
+ * This uses a hybrid approach combining word and character counts:
+ * - Words are multiplied by 1.3 (empirical average: English words ~1-2 tokens)
+ * - Characters are divided by 4 (common approximation: 1 token ≈ 4 characters)
+ * - The average of both methods provides a reasonable estimate
+ * 
+ * Note: This is an approximation. Actual token counts vary by model and tokenizer.
+ * For precise counts, use the provider's tokenizer (e.g., tiktoken for OpenAI).
  */
 export function estimateTokenCount(text: string): number {
-  // More accurate estimation: count words and characters
   const words = text.split(/\s+/).length;
   const chars = text.length;
-  // Average of word-based and char-based estimation
+  // Hybrid estimation: average of word-based (words * 1.3) and char-based (chars / 4)
   return Math.ceil((words * 1.3 + chars / 4) / 2);
 }
 

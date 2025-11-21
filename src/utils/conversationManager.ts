@@ -74,8 +74,21 @@ export class ConversationManager {
    * Create a new conversation
    */
   createConversation(name: string, provider?: string, model?: string): Conversation {
+    // Use crypto.randomUUID() if available, fallback to a simple UUID generator
+    const generateId = () => {
+      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return crypto.randomUUID();
+      }
+      // Fallback for environments without crypto.randomUUID
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0;
+        const v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
+    };
+
     const conversation: Conversation = {
-      id: crypto.randomUUID(),
+      id: generateId(),
       name,
       messages: [],
       createdAt: Date.now(),
@@ -126,9 +139,21 @@ export class ConversationManager {
         return null;
       }
 
+      // Use the same UUID generation method as createConversation
+      const generateId = () => {
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+          return crypto.randomUUID();
+        }
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+          const r = (Math.random() * 16) | 0;
+          const v = c === 'x' ? r : (r & 0x3) | 0x8;
+          return v.toString(16);
+        });
+      };
+
       const newMessage: ConversationMessage = {
         ...message,
-        id: crypto.randomUUID(),
+        id: generateId(),
         timestamp: Date.now(),
       };
 
@@ -241,8 +266,19 @@ export class ConversationManager {
         throw new Error('Invalid conversation format');
       }
 
-      // Generate new ID to avoid conflicts
-      conversation.id = crypto.randomUUID();
+      // Generate new ID to avoid conflicts using fallback-safe method
+      const generateId = () => {
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+          return crypto.randomUUID();
+        }
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+          const r = (Math.random() * 16) | 0;
+          const v = c === 'x' ? r : (r & 0x3) | 0x8;
+          return v.toString(16);
+        });
+      };
+
+      conversation.id = generateId();
       conversation.updatedAt = Date.now();
 
       this.saveConversation(conversation);

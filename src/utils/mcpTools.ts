@@ -69,8 +69,8 @@ export const DEFAULT_MCP_TOOLS: MCPToolDefinition[] = [
           description: 'The path to the directory to list',
         },
         recursive: {
-          type: 'string',
-          description: 'Whether to list recursively (true/false)',
+          type: 'boolean',
+          description: 'Whether to list recursively',
         },
       },
       required: ['path'],
@@ -168,7 +168,7 @@ export const DEFAULT_MCP_TOOLS: MCPToolDefinition[] = [
           description: 'The search query',
         },
         limit: {
-          type: 'string',
+          type: 'number',
           description: 'Maximum number of results to return',
         },
       },
