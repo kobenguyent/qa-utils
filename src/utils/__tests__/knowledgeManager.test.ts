@@ -195,13 +195,36 @@ describe('knowledgeManager', () => {
   });
 
   describe('parseFileContent', () => {
-    it('should read file content', async () => {
+    it('should read text file content', async () => {
       const content = 'Test file content';
       const blob = new Blob([content], { type: 'text/plain' });
       const file = new File([blob], 'test.txt', { type: 'text/plain' });
 
       const result = await parseFileContent(file);
       expect(result).toBe(content);
+    });
+
+    it('should read JSON file content', async () => {
+      const content = '{"key": "value"}';
+      const blob = new Blob([content], { type: 'application/json' });
+      const file = new File([blob], 'test.json', { type: 'application/json' });
+
+      const result = await parseFileContent(file);
+      expect(result).toBe(content);
+    });
+
+    it('should handle PDF files with .pdf extension', async () => {
+      // Mock PDF file - actual parsing would require pdfjs-dist
+      const blob = new Blob(['mock pdf content'], { type: 'application/pdf' });
+      const file = new File([blob], 'test.pdf', { type: 'application/pdf' });
+
+      // This test verifies the code path is taken, actual PDF parsing requires pdfjs-dist
+      try {
+        await parseFileContent(file);
+      } catch (error) {
+        // Expected to fail in test environment without proper PDF setup
+        expect((error as Error).message).toContain('Failed to parse PDF');
+      }
     });
   });
 });

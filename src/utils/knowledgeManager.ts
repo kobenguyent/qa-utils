@@ -320,9 +320,47 @@ export class KnowledgeBase {
 }
 
 /**
+ * Parse PDF file content
+ */
+async function parsePDFContent(file: File): Promise<string> {
+  try {
+    // Dynamic import to avoid issues with SSR and reduce bundle size
+    const pdfjsLib = await import('pdfjs-dist');
+    
+    // Set worker path - using CDN for worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    
+    let fullText = '';
+    
+    // Extract text from each page
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items
+        .map((item: any) => ('str' in item ? item.str : ''))
+        .join(' ');
+      fullText += pageText + '\n\n';
+    }
+    
+    return fullText.trim();
+  } catch (error) {
+    throw new Error(`Failed to parse PDF: ${(error as Error).message}`);
+  }
+}
+
+/**
  * Parse uploaded file content
  */
 export async function parseFileContent(file: File): Promise<string> {
+  // Handle PDF files separately
+  if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+    return parsePDFContent(file);
+  }
+
+  // Handle text files
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
@@ -335,7 +373,6 @@ export async function parseFileContent(file: File): Promise<string> {
       reject(new Error('Failed to read file'));
     };
 
-    // Read as text for now (could be extended to handle different file types)
     reader.readAsText(file);
   });
 }

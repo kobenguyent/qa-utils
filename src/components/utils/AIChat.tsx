@@ -532,12 +532,12 @@ export const AIChat: React.FC = () => {
                     ref={fileInputRef}
                     type="file"
                     multiple
-                    accept=".txt,.md,.json,.csv"
+                    accept=".txt,.md,.json,.csv,.pdf"
                     onChange={handleFileUpload}
                     disabled={loading}
                   />
                   <Form.Text className="text-muted">
-                    Upload text files (.txt, .md, .json, .csv) to provide additional context to the AI
+                    Upload files (.txt, .md, .json, .csv, .pdf) to provide additional context to the AI
                   </Form.Text>
                 </div>
 
