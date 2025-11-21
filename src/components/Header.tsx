@@ -85,6 +85,11 @@ export const Header: React.FC = () => {
                 ⚡ gRPC Client
               </NavDropdown.Item>
               <NavDropdown.Divider />
+              <NavDropdown.Header>🤖 AI Tools</NavDropdown.Header>
+              <NavDropdown.Item href="#/ai-chat">
+                🤖 AI Chat
+              </NavDropdown.Item>
+              <NavDropdown.Divider />
               <NavDropdown.Header>🔧 Developer Tools</NavDropdown.Header>
               <NavDropdown.Item href="#/encryption">
                 🔒 Encryption/Decryption
