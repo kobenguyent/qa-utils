@@ -160,6 +160,32 @@ export const AIChat: React.FC = () => {
     setTokenCount({ input: inputTokens, total: conversationTokens + inputTokens });
   }, [inputMessage, messages]);
 
+  // Auto-save conversation when messages change
+  useEffect(() => {
+    if (messages.length > 0 && currentConversationId) {
+      // Update existing conversation with new messages
+      conversationManager.updateConversation(currentConversationId, {
+        messages: messages,
+        provider: provider,
+        model: model,
+      });
+      setConversations(conversationManager.getConversations());
+    } else if (messages.length > 0 && !currentConversationId) {
+      // Auto-create a conversation when user starts chatting without explicitly creating one
+      const conversation = conversationManager.createConversation(
+        `Chat ${new Date().toLocaleString()}`,
+        provider,
+        model
+      );
+      setCurrentConversationId(conversation.id);
+      conversationManager.updateConversation(conversation.id, {
+        messages: messages,
+      });
+      setConversations(conversationManager.getConversations());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages]); // Only depend on messages to avoid infinite loops
+
   const getConfig = (): ChatConfig => {
     const defaultModel = getDefaultModel(provider);
     return {
@@ -289,6 +315,16 @@ export const AIChat: React.FC = () => {
 
   const formatTimestamp = (timestamp: number) => {
     return new Date(timestamp).toLocaleTimeString();
+  };
+
+  // Handle provider change - resets model to provider's default
+  const handleProviderChange = (newProvider: AIProvider) => {
+    setProvider(newProvider);
+    setConnectionStatus('unknown');
+    setAvailableModels([]);
+    // Reset model to the new provider's default
+    const defaultModel = getDefaultModel(newProvider);
+    setModel(defaultModel.id);
   };
 
   // Load available models when provider changes
@@ -469,6 +505,15 @@ export const AIChat: React.FC = () => {
     if (conversation) {
       setCurrentConversationId(id);
       setMessages(conversation.messages as ConversationMessage[]);
+      
+      // Restore AI provider configuration from conversation
+      if (conversation.provider && conversation.provider !== provider) {
+        setProvider(conversation.provider as AIProvider);
+      }
+      if (conversation.model && conversation.model !== model) {
+        setModel(conversation.model);
+      }
+      
       setError('');
     }
   };
@@ -523,11 +568,7 @@ export const AIChat: React.FC = () => {
                     <Form.Label>Provider</Form.Label>
                     <Form.Select
                       value={provider}
-                      onChange={(e) => {
-                        setProvider(e.target.value as AIProvider);
-                        setConnectionStatus('unknown');
-                        setAvailableModels([]);
-                      }}
+                      onChange={(e) => handleProviderChange(e.target.value as AIProvider)}
                       disabled={loading}
                     >
                       <option value="openai">OpenAI</option>

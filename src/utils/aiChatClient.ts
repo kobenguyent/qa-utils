@@ -43,7 +43,20 @@ export interface ModelInfo {
   isDefault?: boolean;
 }
 
+// Google Gemini API response types
+interface GeminiModel {
+  name: string;
+  displayName?: string;
+  supportedGenerationMethods?: string[];
+  inputTokenLimit?: number;
+}
+
+interface GeminiModelsResponse {
+  models?: GeminiModel[];
+}
+
 const DEFAULT_TIMEOUT = 30000; // 30 seconds
+const DEFAULT_GEMINI_CONTEXT_WINDOW = 32768; // Default context window for Gemini models
 
 // Default models configuration
 const DEFAULT_MODELS: Record<AIProvider, ModelInfo> = {
@@ -64,7 +77,7 @@ const DEFAULT_MODELS: Record<AIProvider, ModelInfo> = {
   google: {
     id: 'gemini-pro',
     name: 'Gemini Pro',
-    contextWindow: 32768,
+    contextWindow: DEFAULT_GEMINI_CONTEXT_WINDOW,
     provider: 'google',
     isDefault: true,
   },
@@ -716,15 +729,15 @@ export async function fetchAnthropicModels(): Promise<ModelInfo[]> {
 }
 
 /**
- * Fetch available models from Google (returns predefined models)
+ * Fetch available models from Google Gemini API
  */
-export async function fetchGoogleModels(): Promise<ModelInfo[]> {
-  // Google Gemini API doesn't have a list models endpoint available publicly
-  return [
+export async function fetchGoogleModels(apiKey?: string): Promise<ModelInfo[]> {
+  // Default models to return when API key is not provided or API call fails
+  const defaultModels: ModelInfo[] = [
     {
       id: 'gemini-pro',
       name: 'Gemini Pro',
-      contextWindow: 32768,
+      contextWindow: DEFAULT_GEMINI_CONTEXT_WINDOW,
       provider: 'google',
       isDefault: true,
     },
@@ -741,6 +754,62 @@ export async function fetchGoogleModels(): Promise<ModelInfo[]> {
       provider: 'google',
     },
   ];
+
+  // If no API key provided, return default models
+  if (!apiKey) {
+    return defaultModels;
+  }
+
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch Google Gemini models');
+    }
+
+    const data: GeminiModelsResponse = await response.json();
+    
+    // Parse models from API response
+    if (!data.models || !Array.isArray(data.models)) {
+      return defaultModels;
+    }
+
+    // Filter for generateContent-capable models and map to ModelInfo
+    const models: ModelInfo[] = data.models
+      .filter((model: GeminiModel) => 
+        model.supportedGenerationMethods?.includes('generateContent') &&
+        model.name && model.name.toLowerCase().includes('gemini')
+      )
+      .map((model: GeminiModel, index: number) => {
+        // Extract model ID from the full name path
+        // API returns names like "models/gemini-pro" or "models/gemini-1.5-pro"
+        // We extract just the model ID part after the last slash
+        const modelId = model.name?.split('/').pop() || '';
+        
+        // Get display name, fallback to ID
+        const displayName = model.displayName || modelId;
+        
+        // Extract context window from inputTokenLimit or use default
+        const contextWindow = model.inputTokenLimit || DEFAULT_GEMINI_CONTEXT_WINDOW;
+        
+        return {
+          id: modelId,
+          name: displayName,
+          contextWindow: contextWindow,
+          provider: 'google' as AIProvider,
+          // Mark the first model as default
+          isDefault: index === 0,
+        };
+      });
+
+    // If we got models from API, return them; otherwise return defaults
+    return models.length > 0 ? models : defaultModels;
+  } catch (error) {
+    // Return default models if API call fails
+    return defaultModels;
+  }
 }
 
 /**
@@ -753,7 +822,7 @@ export async function fetchModels(provider: AIProvider, config: { apiKey?: strin
     case 'anthropic':
       return fetchAnthropicModels();
     case 'google':
-      return fetchGoogleModels();
+      return fetchGoogleModels(config.apiKey);
     case 'azure-openai':
       // Azure OpenAI uses deployment names, not model IDs
       return [DEFAULT_MODELS['azure-openai']];

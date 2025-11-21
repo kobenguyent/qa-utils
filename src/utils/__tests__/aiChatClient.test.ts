@@ -9,6 +9,7 @@ import {
   fetchOllamaModels,
   fetchAnthropicModels,
   fetchGoogleModels,
+  fetchModels,
   estimateTokenCount,
   optimizeMessages,
   getSystemPrompt,
@@ -515,11 +516,212 @@ describe('aiChatClient', () => {
       expect(models.some(m => m.id.includes('claude'))).toBe(true);
     });
 
-    it('should fetch Google models', async () => {
+    it('should fetch Google models without API key (returns defaults)', async () => {
       const models = await fetchGoogleModels();
       expect(models.length).toBeGreaterThan(0);
       expect(models.every(m => m.provider === 'google')).toBe(true);
       expect(models.some(m => m.id.includes('gemini'))).toBe(true);
+    });
+
+    it('should fetch Google models from API with valid API key', async () => {
+      const mockModelsResponse = {
+        models: [
+          {
+            name: 'models/gemini-1.5-flash',
+            displayName: 'Gemini 1.5 Flash',
+            supportedGenerationMethods: ['generateContent'],
+            inputTokenLimit: 1048576,
+          },
+          {
+            name: 'models/gemini-1.5-pro',
+            displayName: 'Gemini 1.5 Pro',
+            supportedGenerationMethods: ['generateContent'],
+            inputTokenLimit: 2097152,
+          },
+          {
+            name: 'models/gemini-pro',
+            displayName: 'Gemini Pro',
+            supportedGenerationMethods: ['generateContent'],
+            inputTokenLimit: 32768,
+          },
+        ],
+      };
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockModelsResponse,
+      });
+
+      const models = await fetchGoogleModels('test-api-key');
+      expect(models.length).toBe(3);
+      expect(models[0].id).toBe('gemini-1.5-flash');
+      expect(models[0].name).toBe('Gemini 1.5 Flash');
+      expect(models[0].contextWindow).toBe(1048576);
+      expect(models[0].isDefault).toBe(true);
+      expect(models[1].id).toBe('gemini-1.5-pro');
+      expect(models[2].id).toBe('gemini-pro');
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://generativelanguage.googleapis.com/v1beta/models?key=test-api-key',
+        expect.objectContaining({
+          method: 'GET',
+        })
+      );
+    });
+
+    it('should filter out non-generateContent models from Google API', async () => {
+      const mockModelsResponse = {
+        models: [
+          {
+            name: 'models/gemini-pro',
+            displayName: 'Gemini Pro',
+            supportedGenerationMethods: ['generateContent'],
+            inputTokenLimit: 32768,
+          },
+          {
+            name: 'models/embedding-001',
+            displayName: 'Embedding Model',
+            supportedGenerationMethods: ['embedContent'],
+            inputTokenLimit: 2048,
+          },
+        ],
+      };
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockModelsResponse,
+      });
+
+      const models = await fetchGoogleModels('test-api-key');
+      expect(models.length).toBe(1);
+      expect(models[0].id).toBe('gemini-pro');
+    });
+
+    it('should return default models when Google API call fails', async () => {
+      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+
+      const models = await fetchGoogleModels('test-api-key');
+      expect(models.length).toBeGreaterThan(0);
+      expect(models.every(m => m.provider === 'google')).toBe(true);
+      expect(models.some(m => m.id === 'gemini-pro')).toBe(true);
+    });
+
+    it('should return default models when Google API returns invalid data', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ invalid: 'data' }),
+      });
+
+      const models = await fetchGoogleModels('test-api-key');
+      expect(models.length).toBeGreaterThan(0);
+      expect(models.some(m => m.id === 'gemini-pro')).toBe(true);
+    });
+
+    it('should return default models when Google API returns non-ok response', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 403,
+        statusText: 'Forbidden',
+      });
+
+      const models = await fetchGoogleModels('invalid-api-key');
+      expect(models.length).toBeGreaterThan(0);
+      expect(models.some(m => m.id === 'gemini-pro')).toBe(true);
+    });
+
+    describe('fetchModels integration', () => {
+      it('should fetch OpenAI models with API key', async () => {
+        const mockModels = {
+          data: [
+            { id: 'gpt-3.5-turbo' },
+            { id: 'gpt-4' },
+          ],
+        };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockModels,
+        });
+
+        const models = await fetchModels('openai', { apiKey: 'sk-test123' });
+        expect(models.length).toBe(2);
+        expect(models.every(m => m.provider === 'openai')).toBe(true);
+      });
+
+      it('should return default model for OpenAI without API key', async () => {
+        const models = await fetchModels('openai', {});
+        expect(models.length).toBe(1);
+        expect(models[0].id).toBe('gpt-3.5-turbo');
+        expect(models[0].provider).toBe('openai');
+      });
+
+      it('should fetch Anthropic models (predefined list)', async () => {
+        const models = await fetchModels('anthropic', {});
+        expect(models.length).toBeGreaterThan(0);
+        expect(models.every(m => m.provider === 'anthropic')).toBe(true);
+        expect(models.some(m => m.id.includes('claude'))).toBe(true);
+      });
+
+      it('should fetch Google models with API key', async () => {
+        const mockModelsResponse = {
+          models: [
+            {
+              name: 'models/gemini-pro',
+              displayName: 'Gemini Pro',
+              supportedGenerationMethods: ['generateContent'],
+              inputTokenLimit: 32768,
+            },
+          ],
+        };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockModelsResponse,
+        });
+
+        const models = await fetchModels('google', { apiKey: 'test-api-key' });
+        expect(models.length).toBe(1);
+        expect(models[0].provider).toBe('google');
+        expect(models[0].id).toBe('gemini-pro');
+      });
+
+      it('should return default models for Google without API key', async () => {
+        const models = await fetchModels('google', {});
+        expect(models.length).toBeGreaterThan(0);
+        expect(models.every(m => m.provider === 'google')).toBe(true);
+        expect(models.some(m => m.id === 'gemini-pro')).toBe(true);
+      });
+
+      it('should return default model for Azure OpenAI', async () => {
+        const models = await fetchModels('azure-openai', { apiKey: 'test-key', endpoint: 'https://test.openai.azure.com' });
+        expect(models.length).toBe(1);
+        expect(models[0].provider).toBe('azure-openai');
+        expect(models[0].id).toBe('gpt-35-turbo');
+      });
+
+      it('should fetch Ollama models with endpoint', async () => {
+        const mockModels = {
+          models: [
+            { name: 'llama2' },
+            { name: 'mistral' },
+          ],
+        };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockModels,
+        });
+
+        const models = await fetchModels('ollama', { endpoint: 'http://localhost:11434' });
+        expect(models.length).toBe(2);
+        expect(models.every(m => m.provider === 'ollama')).toBe(true);
+      });
+
+      it('should return default model for Ollama without endpoint', async () => {
+        const models = await fetchModels('ollama', {});
+        expect(models.length).toBe(1);
+        expect(models[0].id).toBe('llama2');
+        expect(models[0].provider).toBe('ollama');
+      });
     });
   });
 
