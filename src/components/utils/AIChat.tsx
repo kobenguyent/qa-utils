@@ -76,6 +76,15 @@ export const AIChat: React.FC = () => {
     };
   };
 
+  const formatErrorMessage = (err: Error): string => {
+    const errorMessage = err.message || 'Connection failed';
+    // Check if it's a CORS or network error for Ollama
+    if (provider === 'ollama' && (errorMessage.includes('fetch') || errorMessage.includes('Failed to fetch') || errorMessage.includes('CORS'))) {
+      return 'Connection failed. This is likely a CORS issue. Please ensure Ollama is running with OLLAMA_ORIGINS environment variable set. See the setup instructions above.';
+    }
+    return errorMessage;
+  };
+
   const handleTestConnection = async () => {
     setError('');
     setLoading(true);
@@ -94,12 +103,7 @@ export const AIChat: React.FC = () => {
       }
     } catch (err) {
       setConnectionStatus('disconnected');
-      const errorMessage = (err as Error).message || 'Connection test failed';
-      if (provider === 'ollama' && (errorMessage.includes('fetch') || errorMessage.includes('Failed to fetch'))) {
-        setError('Connection failed. This is likely a CORS issue. Please ensure Ollama is running with OLLAMA_ORIGINS environment variable set. See the setup instructions above.');
-      } else {
-        setError(errorMessage);
-      }
+      setError(formatErrorMessage(err as Error));
     } finally {
       setLoading(false);
     }
@@ -146,13 +150,7 @@ export const AIChat: React.FC = () => {
       setMessages(prev => [...prev, assistantMessage]);
       setConnectionStatus('connected');
     } catch (err) {
-      const errorMessage = (err as Error).message || 'Failed to send message';
-      // Check if it's a CORS or network error
-      if (provider === 'ollama' && (errorMessage.includes('fetch') || errorMessage.includes('Failed to fetch'))) {
-        setError('Connection failed. This is likely a CORS issue. Please ensure Ollama is running with OLLAMA_ORIGINS environment variable set. See the setup instructions above.');
-      } else {
-        setError(errorMessage);
-      }
+      setError(formatErrorMessage(err as Error));
       setConnectionStatus('disconnected');
     } finally {
       setLoading(false);
