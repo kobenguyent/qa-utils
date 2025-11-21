@@ -54,10 +54,14 @@ export const AIChat: React.FC = () => {
   useEffect(() => {
     if (provider === 'openai') {
       setIsConfigured(!!apiKey);
-      setModel(model || 'gpt-3.5-turbo');
+      if (!model) {
+        setModel('gpt-3.5-turbo');
+      }
     } else if (provider === 'ollama') {
       setIsConfigured(!!endpoint);
-      setModel(model || 'llama2');
+      if (!model) {
+        setModel('llama2');
+      }
     }
   }, [provider, apiKey, endpoint, model]);
 
@@ -107,7 +111,7 @@ export const AIChat: React.FC = () => {
     }
 
     const userMessage: ConversationMessage = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       role: 'user',
       content: inputMessage.trim(),
       timestamp: Date.now(),
@@ -128,7 +132,7 @@ export const AIChat: React.FC = () => {
       const response = await sendChatMessage(chatHistory, config);
 
       const assistantMessage: ConversationMessage = {
-        id: (Date.now() + 1).toString(),
+        id: crypto.randomUUID(),
         role: 'assistant',
         content: response.message,
         timestamp: Date.now(),
