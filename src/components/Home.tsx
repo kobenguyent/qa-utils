@@ -11,23 +11,13 @@ export const Home: React.FC = () => {
             <Image 
               src={homePhoto} 
               alt="QA Utils - Quality Assurance Tools"
-              className="img-fluid shadow-sm rounded animated-home-image"
-              style={{ 
-                marginBottom: '2rem',
-                maxHeight: '400px',
-                objectFit: 'contain'
-              }}
+              className="img-fluid shadow-sm rounded animated-home-image home-image"
             />
             <div className="mt-4">
-              <h1 className="h2 glass-text" style={{ color: '#2d3748', fontWeight: 700 }}>
+              <h1 className="h2 glass-text home-title">
                 Welcome to QA Utils
               </h1>
-              <p className="lead glass-text" style={{ 
-                fontSize: '1.25rem', 
-                color: '#4a5568',
-                lineHeight: 1.8,
-                marginTop: '1rem'
-              }}>
+              <p className="lead glass-text home-description">
                 A comprehensive collection of quality assurance tools and utilities 
                 to enhance your testing workflow.
               </p>

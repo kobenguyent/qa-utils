@@ -30,14 +30,19 @@
 /* Smooth gradient background */
 body {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  background-attachment: fixed;
   min-height: 100vh;
+}
+
+/* Fixed background for desktop only to avoid mobile performance issues */
+@media (min-width: 769px) {
+  body {
+    background-attachment: fixed;
+  }
 }
 
 /* Alternative lighter gradient for better readability */
 body.light-theme {
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  background-attachment: fixed;
 }
 
 /* Animated image with subtle pulse effect */
@@ -118,4 +123,23 @@ footer.glass-footer {
   -webkit-backdrop-filter: blur(8px);
   border-radius: 12px;
   padding: 1rem;
+}
+
+/* Home page specific styles */
+.home-title {
+  color: #2d3748;
+  font-weight: 700;
+}
+
+.home-description {
+  font-size: 1.25rem;
+  color: #4a5568;
+  line-height: 1.8;
+  margin-top: 1rem;
+}
+
+.home-image {
+  margin-bottom: 2rem;
+  max-height: 400px;
+  object-fit: contain;
 }
