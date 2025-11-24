@@ -1,5 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import './App.css'
+import './styles/glassmorphism.css'
 import {Header} from "./components/Header.tsx";
 import {Container} from "react-bootstrap";
 import {Footer} from "./components/Footer.tsx";
