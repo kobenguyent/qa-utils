@@ -1,4 +1,23 @@
 /* Global styles */
+:root {
+    /* Accessible color tokens — adjust if you want a different theme */
+    --bg: #ffffff;
+    --text: #1e293b;        /* slate-800 - default readable body text */
+    --muted: #6c757d;       /* muted text */
+    --primary: #0d6efd;     /* bootstrap primary (good contrast for links) */
+    --success: #198754;     /* green (accessible) */
+    --danger: #dc3545;      /* red (accessible) */
+    --card-bg: rgba(255, 255, 255, 0.95); /* glass card background fallback */
+    --glass-border: rgba(255,255,255,0.35);
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
 .question {
     white-space: pre-line;
     margin-bottom: 1rem;
@@ -12,26 +31,26 @@
         padding: 0.75rem 1rem; /* Increased touch target size */
         min-height: 44px; /* Apple's recommended minimum touch target */
     }
-    
+
     .navbar-brand {
         font-size: 20px; /* Increased from 18px */
     }
-    
+
     .container {
         padding-left: 15px;
         padding-right: 15px;
     }
-    
+
     h1.h3 {
         font-size: 1.75rem; /* Increased from 1.5rem */
         line-height: 1.3;
     }
-    
+
     .lead {
         font-size: 1.125rem; /* Increased from 1rem */
         line-height: 1.6;
     }
-    
+
     /* Improved button sizes on mobile */
     .btn {
         min-height: 44px;
@@ -46,23 +65,23 @@
         padding: 0.75rem 1rem; /* Better touch targets */
         min-height: 44px;
     }
-    
+
     .navbar-brand {
         font-size: 20px; /* Increased from 18px */
     }
-    
+
     .navbar-toggler {
         padding: 0.5rem 0.75rem; /* Larger touch target */
         font-size: 1.25rem;
         min-height: 44px;
         min-width: 44px;
     }
-    
+
     /* Better spacing for mobile dropdowns */
     .dropdown-menu {
         font-size: 16px;
     }
-    
+
     .dropdown-item {
         padding: 0.75rem 1.25rem;
         min-height: 44px;
@@ -76,7 +95,7 @@
 
 .navbar-brand {
     font-weight: 600;
-    color: #0d6efd !important;
+    color: var(--primary) !important;
     transition: transform 0.2s ease;
 }
 
@@ -87,28 +106,31 @@
 .nav-link {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     font-weight: 500;
+    color: var(--text);
 }
 
 .nav-link:hover {
-    color: #0d6efd !important;
+    color: var(--primary) !important;
     transform: translateY(-1px);
 }
 
 /* Improved dropdown styles with glass effect */
 .dropdown-menu {
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid var(--glass-border);
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
     margin-top: 0.5rem;
-    background: rgba(255, 255, 255, 0.85) !important;
+    background: var(--card-bg) !important;
     backdrop-filter: blur(16px) saturate(180%);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
+    color: var(--text);
 }
 
 .dropdown-item {
     transition: all 0.2s ease;
     border-radius: 8px;
-    margin: 0.25rem 0.5rem;
+    margin: 0.1rem 0.1rem 0.1rem 0.1rem;
+    color: var(--text);
 }
 
 .dropdown-item:hover {
@@ -143,13 +165,14 @@
 .nav-link:focus,
 .navbar-brand:focus,
 .btn:focus {
-    outline: 2px solid #0d6efd;
+    outline: 3px solid rgba(13,110,253,0.18);
     outline-offset: 2px;
 }
 
 /* Improved text readability */
 .text-muted {
-    opacity: 0.8;
+    color: var(--muted) !important;
+    opacity: 1;
 }
 
 /* Footer improvements */
