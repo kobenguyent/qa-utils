@@ -1,0 +1,145 @@
+/* Apple-inspired Liquid Glass / Glassmorphism Theme */
+
+/* Glass effect for navbar */
+.navbar.glass-navbar {
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Glass card effect for content containers */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  padding: 2rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  box-shadow: 0 12px 48px 0 rgba(31, 38, 135, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Smooth gradient background */
+body {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+/* Fixed background for desktop only to avoid mobile performance issues */
+@media (min-width: 769px) {
+  body {
+    background-attachment: fixed;
+  }
+}
+
+/* Alternative lighter gradient for better readability */
+body.light-theme {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* Animated image with subtle pulse effect */
+.animated-home-image {
+  animation: subtlePulse 3s ease-in-out infinite;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animated-home-image:hover {
+  transform: scale(1.02);
+}
+
+@keyframes subtlePulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.01);
+  }
+}
+
+/* Glass effect for dropdowns */
+.dropdown-menu.glass-dropdown {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+  border-radius: 12px;
+}
+
+/* Enhanced nav links with glass effect */
+.nav-link.glass-link {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 8px;
+  padding: 0.5rem 1rem !important;
+}
+
+.nav-link.glass-link:hover {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Footer glass effect */
+footer.glass-footer {
+  background: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 -4px 24px 0 rgba(31, 38, 135, 0.1);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .glass-card {
+    padding: 1.5rem;
+    border-radius: 12px;
+  }
+  
+  .glass-navbar {
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+  }
+}
+
+/* Improved readability on glass backgrounds */
+.glass-text {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading state with glass effect */
+.glass-loading {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+/* Home page specific styles */
+.home-title {
+  color: #2d3748;
+  font-weight: 700;
+}
+
+.home-description {
+  font-size: 1.25rem;
+  color: #4a5568;
+  line-height: 1.8;
+  margin-top: 1rem;
+}
+
+.home-image {
+  margin-bottom: 2rem;
+  max-height: 400px;
+  object-fit: contain;
+}

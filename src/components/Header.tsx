@@ -3,7 +3,7 @@ import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
 
 export const Header: React.FC = () => {
   return (
-    <Navbar bg="light" expand="lg" className="shadow-sm">
+    <Navbar bg="light" expand="lg" className="glass-navbar shadow-sm">
       <Container>
         <Navbar.Brand href='#' data-testid="logo" className="fw-bold">
           QA Utils
@@ -14,7 +14,7 @@ export const Header: React.FC = () => {
         />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            <Nav.Link href="#/" aria-label="Go to home page">
+            <Nav.Link href="#/" aria-label="Go to home page" className="glass-link">
               🏠 Home
             </Nav.Link>
             <NavDropdown 
