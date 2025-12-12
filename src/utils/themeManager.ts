@@ -8,7 +8,11 @@ const THEME_KEY = 'qa-utils-theme';
 
 export const getStoredTheme = (): Theme => {
   const stored = localStorage.getItem(THEME_KEY);
-  return (stored as Theme) || 'auto';
+  // Validate stored value against allowed themes
+  if (stored === 'light' || stored === 'dark' || stored === 'auto') {
+    return stored;
+  }
+  return 'auto';
 };
 
 export const setStoredTheme = (theme: Theme): void => {
@@ -17,7 +21,11 @@ export const setStoredTheme = (theme: Theme): void => {
 
 export const getEffectiveTheme = (theme: Theme): 'light' | 'dark' => {
   if (theme === 'auto') {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    // Feature detection for environments without window.matchMedia
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    return 'light'; // Default to light if matchMedia not available
   }
   return theme;
 };

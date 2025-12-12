@@ -17,15 +17,19 @@ export const Header: React.FC = () => {
     applyTheme(storedTheme);
 
     // Listen for system theme changes when in auto mode
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = () => {
-      if (theme === 'auto') {
+      const currentTheme = getStoredTheme();
+      if (currentTheme === 'auto') {
         applyTheme('auto');
       }
     };
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [theme]);
+
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+  }, []); // Empty dependency array - only run once on mount
 
   // Handle search
   useEffect(() => {
@@ -170,7 +174,7 @@ export const Header: React.FC = () => {
             <Form.Control
               id="navbar-search"
               type="search"
-              placeholder="Search tools... (⌘K)"
+              placeholder={`Search tools... (${navigator.platform.includes('Mac') ? '⌘' : 'Ctrl+'}K)`}
               className="search-input"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
