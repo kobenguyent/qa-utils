@@ -1,11 +1,8 @@
 import {Container, Table} from "react-bootstrap";
-import {Header} from "../Header.tsx";
-import {Footer} from "../Footer.tsx";
 
 export const CodeceptJS = () => {
   return(
     <Container>
-      <Header></Header>
       <h1>CodeceptJS useful commands</h1>
       <Table striped bordered hover>
         <thead>
@@ -33,7 +30,6 @@ export const CodeceptJS = () => {
         </tr>
         </tbody>
       </Table>
-      <Footer></Footer>
     </Container>
   )
 }

@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { Button, Container, Toast, Table, Form, Row, Col } from "react-bootstrap";
-import { Header } from "../Header.tsx";
-import { Footer } from "../Footer.tsx";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
@@ -98,9 +96,7 @@ export const OtpGenerator = () => {
   };
 
   return (
-    <Container>
-      <Header />
-      <div className="text-center">
+    <Container>      <div className="text-center">
         <h1>OTP Generator</h1>
       </div>
 
@@ -225,9 +221,6 @@ export const OtpGenerator = () => {
             <Toast.Body>Woohoo, your OTP is copied!</Toast.Body>
           </Toast>
         </Col>
-      </Row>
-
-      <Footer />
-    </Container>
+      </Row>    </Container>
   );
 };

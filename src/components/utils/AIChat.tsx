@@ -16,8 +16,6 @@ import {
   ProgressBar,
   Collapse,
 } from 'react-bootstrap';
-import { Header } from '../Header';
-import { Footer } from '../Footer';
 import CopyWithToast from '../CopyWithToast';
 import {
   sendChatMessage,
@@ -568,7 +566,6 @@ export const AIChat: React.FC = () => {
 
   return (
     <Container fluid>
-      <Header />
       <Container className="py-4">
         <div className="text-center mb-4">
           <h1 style={{ fontSize: '2.5rem', fontWeight: '600', color: '#212529' }}>🤖 AI Chat</h1>
@@ -1407,7 +1404,6 @@ export const AIChat: React.FC = () => {
           </Card.Body>
         </Card>
       </Container>
-      <Footer />
     </Container>
   );
 };

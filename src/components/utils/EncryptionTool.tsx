@@ -1,6 +1,4 @@
 import { Button, Container, Alert } from "react-bootstrap";
-import { Header } from "../Header.tsx";
-import { Footer } from "../Footer.tsx";
 import CopyWithToast from '../CopyWithToast.tsx';
 import { useState } from 'react';
 import Form from 'react-bootstrap/Form';
@@ -170,9 +168,7 @@ export const EncryptionTool = () => {
   };
 
   return (
-    <Container>
-      <Header />
-      <div className="text-center">
+    <Container>      <div className="text-center">
         <h1>🔐 Encryption/Decryption Tool</h1>
         <p className="text-muted">Secure AES-256-GCM encryption and decryption</p>
       </div>
@@ -273,9 +269,6 @@ export const EncryptionTool = () => {
           <li><strong>Security:</strong> Uses AES-256-GCM with PBKDF2 key derivation (100,000 iterations).</li>
           <li><strong>Note:</strong> Keep your passphrase safe. Without it, encrypted data cannot be recovered.</li>
         </ul>
-      </div>
-
-      <Footer />
-    </Container>
+      </div>    </Container>
   );
 };

@@ -1,6 +1,4 @@
 import { Container } from "react-bootstrap";
-import { Header } from "../Header";
-import { Footer } from "../Footer";
 import { useState } from "react";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
@@ -30,9 +28,7 @@ export const UnixTimestamp = () => {
   const { gmt, local } = convertTimestamp(postContent);
 
   return (
-    <Container>
-      <Header />
-      <div className="text-center">
+    <Container>      <div className="text-center">
         <h1>Unix Timestamp Converter</h1>
       </div>
       <Form>
@@ -67,8 +63,6 @@ export const UnixTimestamp = () => {
             <Form.Control plaintext readOnly value={local} />
           </Col>
         </Form.Group>
-      </Form>
-      <Footer />
-    </Container>
+      </Form>    </Container>
   );
 };

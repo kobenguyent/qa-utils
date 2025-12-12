@@ -1,6 +1,4 @@
 import {Container, Button, Alert, ButtonGroup, Card, Badge} from "react-bootstrap";
-import {Header} from "../Header.tsx";
-import {Footer} from "../Footer.tsx";
 import { useState, useCallback } from 'react';
 // @ts-ignore
 import {JSONViewer} from 'react-json-editor-viewer';
@@ -103,7 +101,6 @@ export const JWTDebugger = () => {
 
   return(
     <Container>
-      <Header></Header>
       <div className="text-center mb-4">
         <h1>JWT Debugger</h1>
         <p className="text-muted">Decode and analyze JSON Web Tokens (JWT)</p>
@@ -362,7 +359,6 @@ export const JWTDebugger = () => {
           </Row>
         )}
       </Form>
-      <Footer></Footer>
     </Container>
   )
 }

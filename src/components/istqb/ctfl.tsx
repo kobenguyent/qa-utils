@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Header } from "../Header.tsx";
-import { Footer } from "../Footer.tsx";
 import { Button, Container, Table, Dropdown, Image } from 'react-bootstrap';
 import { QuestionBanks } from './questionBanks.ts';
 
@@ -146,7 +144,6 @@ export const Ctfl = () => {
 
   return (
     <Container>
-      <Header />
       <div className="text-center">
         <h1>CTFL v4 Practice Exam - { selectedQuestionBank }</h1>
         <div>Time Remaining: {formatTime(timer)}</div>
@@ -224,7 +221,6 @@ export const Ctfl = () => {
           <Button onClick={handleRestart}>Restart Test</Button>
         </div>
       )}
-      <Footer />
     </Container>
   );
 };

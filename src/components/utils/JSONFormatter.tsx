@@ -1,6 +1,4 @@
 import {Container} from "react-bootstrap";
-import {Header} from "../Header.tsx";
-import {Footer} from "../Footer.tsx";
 import { useState } from 'react';
 // @ts-ignore
 import {JSONViewer} from 'react-json-editor-viewer';
@@ -26,9 +24,7 @@ export const JSONFormatter = () => {
   }
 
   return(
-    <Container>
-      <Header></Header>
-      <div className="text-center">
+    <Container>      <div className="text-center">
         <h1>JSON Formatter</h1>
       </div>
 
@@ -58,8 +54,6 @@ export const JSONFormatter = () => {
             <CopyWithToast text={JSON.stringify(jsonParse(postContent), null, 2) || ''}></CopyWithToast>
           </Col>
         </Form.Group>
-      </Form>
-      <Footer></Footer>
-    </Container>
+      </Form>    </Container>
   )
 }

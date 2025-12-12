@@ -1,6 +1,4 @@
 import { Button, Container } from "react-bootstrap";
-import {Header} from "../Header.tsx";
-import {Footer} from "../Footer.tsx";
 import { useState } from 'react';
 import { countCharacters } from '../../utils/helpers.ts';
 import Form from 'react-bootstrap/Form';
@@ -17,9 +15,7 @@ export const CharacterCounter = () => {
   };
 
   return(
-    <Container>
-      <Header></Header>
-      <div className="text-center">
+    <Container>      <div className="text-center">
         <h1>Character Counter</h1>
       </div>
 
@@ -58,9 +54,6 @@ export const CharacterCounter = () => {
           setText('');
           setCount(0);
         }}>Clear</Button>
-      </Form>
-
-      <Footer></Footer>
-    </Container>
+      </Form>    </Container>
   )
 }

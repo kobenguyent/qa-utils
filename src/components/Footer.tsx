@@ -30,6 +30,32 @@ export const Footer: React.FC = () => {
               </small>
             </div>
           </div>
+          <div className="row mt-2 align-items-center">
+            <div className="col-12 text-center">
+              <small className="text-muted">
+                Support this project:{' '}
+                <a 
+                  href="https://github.com/sponsors/kobenguyent" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="btn btn-link btn-sm p-0 text-decoration-none"
+                  style={{ fontSize: 'inherit' }}
+                >
+                  💖 GitHub Sponsors
+                </a>
+                {' | '}
+                <a 
+                  href="https://www.buymeacoffee.com/peternguyew" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="btn btn-link btn-sm p-0 text-decoration-none"
+                  style={{ fontSize: 'inherit' }}
+                >
+                  ☕ Buy Me a Coffee
+                </a>
+              </small>
+            </div>
+          </div>
         </div>
       </footer>
 

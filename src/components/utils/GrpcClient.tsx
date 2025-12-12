@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { Button, Container, Form, Row, Col, Alert, Badge, Card, Tab, Tabs } from 'react-bootstrap';
-import { Header } from '../Header';
-import { Footer } from '../Footer';
 import CopyWithToast from '../CopyWithToast';
 import {
   GrpcClient,
@@ -253,10 +251,7 @@ export const GrpcClientComponent: React.FC = () => {
   };
 
   return (
-    <Container fluid className="mt-3">
-      <Header />
-      
-      <div className="text-center mb-4">
+    <Container fluid className="mt-3">      <div className="text-center mb-4">
         <h1>⚡ gRPC Client</h1>
         <p className="text-muted">Test gRPC services with gRPC-Web support</p>
       </div>
@@ -546,9 +541,6 @@ message GetUserResponse {
             ))}
           </Card.Body>
         </Card>
-      )}
-
-      <Footer />
-    </Container>
+      )}    </Container>
   );
 };

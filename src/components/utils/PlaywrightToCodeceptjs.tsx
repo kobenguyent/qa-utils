@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import { Header } from "../Header.tsx";
-import { Footer } from "../Footer.tsx";
 import { Button, Container } from 'react-bootstrap';
 import CopyWithToast from '../CopyWithToast.tsx';
 
@@ -146,9 +144,7 @@ const TestConverter = () => {
   }
 
   return (
-    <Container>
-      <Header />
-      <div style={{padding: '20px', fontFamily: 'Arial, sans-serif'}}>
+    <Container>      <div style={{padding: '20px', fontFamily: 'Arial, sans-serif'}}>
         <h2>Playwright to CodeceptJS Test Converter</h2>
 
         <textarea
@@ -175,9 +171,7 @@ const TestConverter = () => {
           </SyntaxHighlighter>
         </div>
         <CopyWithToast text={codeceptjsCode}></CopyWithToast>
-      </div>
-      <Footer/>
-    </Container>
+      </div>    </Container>
   );
 };
 

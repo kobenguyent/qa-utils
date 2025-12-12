@@ -264,16 +264,6 @@ footer {
     box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
 
-.search-results {
-    z-index: 1050; /* Higher than navbar dropdowns */
-}
-
-.search-results .dropdown-menu {
-    border-radius: 12px;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.3);
-    z-index: 1051;
-}
-
 .search-results .dropdown-item {
     padding: 0.75rem 1rem;
     border-radius: 8px;
@@ -325,4 +315,22 @@ footer {
 .dropdown-item.active {
     background-color: var(--primary);
     color: white !important;
+}
+
+/* Modal z-index fix to prevent cutoff */
+.modal-backdrop {
+    z-index: 1040 !important;
+}
+
+.modal {
+    z-index: 1050 !important;
+}
+
+/* Ensure search results dropdown is below modals but above navbar */
+.search-results {
+    z-index: 1030 !important;
+}
+
+.search-results .dropdown-menu {
+    z-index: 1031 !important;
 }

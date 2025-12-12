@@ -4,7 +4,7 @@ import App from './App.tsx'
 import './index.css'
 import {createHashRouter, RouterProvider} from "react-router-dom";
 import { LoadingSpinner } from './components/LoadingSpinner.tsx';
-import { ErrorBoundary } from './components/ErrorBoundary.tsx';
+import { Layout } from './components/Layout.tsx';
 
 // Lazy load components for better performance
 const InteractiveVoiceResponse = lazy(() => import('./components/terms/InteractiveVoiceResponse.tsx').then(module => ({default: module.InteractiveVoiceResponse})));
@@ -32,13 +32,13 @@ const Ctfl = lazy(() => import('./components/istqb/ctfl.tsx').then(module => ({d
 const CharacterCounter = lazy(() => import('./components/utils/CharacterCounter.tsx').then(module => ({default: module.CharacterCounter})));
 const AIChat = lazy(() => import('./components/utils/AIChat.tsx').then(module => ({default: module.AIChat})));
 
-// Component wrapper with error boundary and suspense
+// Component wrapper with suspense for lazy loaded routes
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <ErrorBoundary>
+  <Layout>
     <Suspense fallback={<LoadingSpinner />}>
       {children}
     </Suspense>
-  </ErrorBoundary>
+  </Layout>
 );
 
 const router = createHashRouter([
