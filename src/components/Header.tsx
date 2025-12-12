@@ -128,6 +128,7 @@ export const Header: React.FC = () => {
               <NavDropdown.Item href="#/otp">🔐 OTP</NavDropdown.Item>
               <NavDropdown.Item href="#/password">🔑 Password</NavDropdown.Item>
               <NavDropdown.Item href="#/hash">🔐 Hash</NavDropdown.Item>
+              <NavDropdown.Item href="#/htpasswd">🔒 HTPasswd</NavDropdown.Item>
               <NavDropdown.Item href="#/lorem-ipsum">📝 Lorem Ipsum</NavDropdown.Item>
               <NavDropdown.Item href="#/jiraComment">📋 JIRA</NavDropdown.Item>
               <NavDropdown.Item href="#/character-counter">🔢 Counter</NavDropdown.Item>

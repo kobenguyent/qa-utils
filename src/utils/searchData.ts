@@ -126,6 +126,14 @@ export const searchData: SearchItem[] = [
     icon: '🔐'
   },
   {
+    title: 'HTPasswd Generator',
+    description: 'Generate htpasswd entries for HTTP basic authentication',
+    path: '#/htpasswd',
+    category: 'Generators',
+    keywords: ['htpasswd', 'apache', 'nginx', 'http', 'basic', 'auth', 'authentication', 'password'],
+    icon: '🔒'
+  },
+  {
     title: 'Lorem Ipsum Generator',
     description: 'Generate placeholder text for designs and mockups',
     path: '#/lorem-ipsum',

@@ -21,6 +21,7 @@ const OtpGenerator = lazy(() => import('./components/utils/OtpGenerator.tsx').th
 const PasswordGenerator = lazy(() => import('./components/utils/PasswordGenerator.tsx').then(module => ({default: module.PasswordGenerator})));
 const LoremIpsumGenerator = lazy(() => import('./components/utils/LoremIpsumGenerator.tsx').then(module => ({default: module.LoremIpsumGenerator})));
 const HashGenerator = lazy(() => import('./components/utils/HashGenerator.tsx').then(module => ({default: module.HashGenerator})));
+const HTPasswdGenerator = lazy(() => import('./components/utils/HTPasswdGenerator.tsx').then(module => ({default: module.HTPasswdGenerator})));
 const PlaywrightToCodeceptjs = lazy(() => import('./components/utils/PlaywrightToCodeceptjs.tsx'));
 const EncryptionTool = lazy(() => import('./components/utils/EncryptionTool.tsx').then(module => ({default: module.EncryptionTool})));
 const WorkflowGenerator = lazy(() => import('./components/utils/WorkflowGenerator.tsx').then(module => ({default: module.WorkflowGenerator})));
@@ -100,6 +101,10 @@ const router = createHashRouter([
   {
     path: 'hash',
     element: <RouteWrapper><HashGenerator /></RouteWrapper>
+  },
+  {
+    path: 'htpasswd',
+    element: <RouteWrapper><HTPasswdGenerator /></RouteWrapper>
   },
   {
     path: 'playwright2codecept',
