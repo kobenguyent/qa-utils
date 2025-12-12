@@ -1,6 +1,6 @@
 /* Global styles */
 :root {
-    /* Accessible color tokens — adjust if you want a different theme */
+    /* Light theme colors */
     --bg: #ffffff;
     --text: #1e293b;        /* slate-800 - default readable body text */
     --muted: #6c757d;       /* muted text */
@@ -9,6 +9,32 @@
     --danger: #dc3545;      /* red (accessible) */
     --card-bg: rgba(255, 255, 255, 0.95); /* glass card background fallback */
     --glass-border: rgba(255,255,255,0.35);
+    --navbar-bg: #f8f9fa;
+    --dropdown-bg: rgba(255, 255, 255, 0.95);
+    --dropdown-hover: rgba(13, 110, 253, 0.15);
+    --border-color: rgba(0, 0, 0, 0.1);
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --input-bg: #ffffff;
+    --input-border: #ced4da;
+}
+
+/* Dark theme colors */
+[data-theme="dark"] {
+    --bg: #0f172a;          /* slate-900 */
+    --text: #e2e8f0;        /* slate-200 */
+    --muted: #94a3b8;       /* slate-400 */
+    --primary: #3b82f6;     /* blue-500 */
+    --success: #10b981;     /* green-500 */
+    --danger: #ef4444;      /* red-500 */
+    --card-bg: rgba(30, 41, 59, 0.95);  /* slate-800 with opacity */
+    --glass-border: rgba(100, 116, 139, 0.3);  /* slate-500 */
+    --navbar-bg: #1e293b;   /* slate-800 */
+    --dropdown-bg: rgba(30, 41, 59, 0.98);
+    --dropdown-hover: rgba(59, 130, 246, 0.2);
+    --border-color: rgba(100, 116, 139, 0.3);
+    --shadow-color: rgba(0, 0, 0, 0.5);
+    --input-bg: #1e293b;
+    --input-border: #475569;
 }
 
 body {
@@ -16,6 +42,46 @@ body {
     color: var(--text);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dark theme adjustments for Bootstrap components */
+[data-theme="dark"] .navbar {
+    background-color: var(--navbar-bg) !important;
+}
+
+[data-theme="dark"] .dropdown-menu {
+    background-color: var(--dropdown-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .dropdown-item {
+    color: var(--text) !important;
+}
+
+[data-theme="dark"] .dropdown-item:hover {
+    background-color: var(--dropdown-hover) !important;
+    color: var(--text) !important;
+}
+
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--text);
+}
+
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus {
+    background-color: var(--input-bg);
+    border-color: var(--primary);
+    color: var(--text);
+}
+
+[data-theme="dark"] .card {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+    color: var(--text);
 }
 
 .question {
@@ -185,4 +251,73 @@ footer {
         text-align: center !important;
         margin-top: 0.5rem;
     }
+}
+
+/* Search input styles */
+.search-input {
+    border-radius: 20px;
+    padding-left: 1rem;
+    font-size: 14px;
+}
+
+.search-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.search-results .dropdown-menu {
+    border-radius: 12px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.3);
+}
+
+.search-results .dropdown-item {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin: 0.25rem 0.5rem;
+}
+
+.search-results .dropdown-item:hover {
+    background-color: var(--dropdown-hover) !important;
+}
+
+.search-results .dropdown-item strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--text);
+}
+
+.search-results .dropdown-item .small {
+    color: var(--muted);
+}
+
+/* Theme toggle button */
+.dropdown-toggle::after {
+    display: none;
+}
+
+/* Navbar improvements for better organization */
+.navbar .nav-link,
+.navbar .dropdown-toggle {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+/* Ensure dropdowns are readable in both themes */
+.dropdown-menu {
+    background-color: var(--dropdown-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+.dropdown-item {
+    color: var(--text) !important;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: var(--dropdown-hover) !important;
+    color: var(--text) !important;
+}
+
+.dropdown-item.active {
+    background-color: var(--primary);
+    color: white !important;
 }
