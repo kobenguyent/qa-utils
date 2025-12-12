@@ -110,12 +110,36 @@ export const searchData: SearchItem[] = [
     icon: '🔐'
   },
   {
+    title: 'Password Generator',
+    description: 'Generate secure random passwords with customizable options',
+    path: '#/password',
+    category: 'Generators',
+    keywords: ['password', 'generate', 'random', 'secure', 'strength', 'credentials'],
+    icon: '🔑'
+  },
+  {
+    title: 'Hash Generator',
+    description: 'Generate cryptographic hashes (SHA-256, SHA-512, SHA-1)',
+    path: '#/hash',
+    category: 'Generators',
+    keywords: ['hash', 'sha', 'sha256', 'sha512', 'sha1', 'md5', 'crypto', 'checksum'],
+    icon: '🔐'
+  },
+  {
+    title: 'Lorem Ipsum Generator',
+    description: 'Generate placeholder text for designs and mockups',
+    path: '#/lorem-ipsum',
+    category: 'Generators',
+    keywords: ['lorem', 'ipsum', 'placeholder', 'text', 'dummy', 'filler', 'generator'],
+    icon: '📝'
+  },
+  {
     title: 'JIRA Comment Generator',
     description: 'Format comments for JIRA with markdown',
     path: '#/jiraComment',
     category: 'Generators',
     keywords: ['jira', 'comment', 'generator', 'markdown', 'format', 'atlassian'],
-    icon: '📝'
+    icon: '📋'
   },
   {
     title: 'Character Counter',

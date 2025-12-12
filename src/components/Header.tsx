@@ -126,7 +126,10 @@ export const Header: React.FC = () => {
             >
               <NavDropdown.Item href="#/uuid">🆔 UUID</NavDropdown.Item>
               <NavDropdown.Item href="#/otp">🔐 OTP</NavDropdown.Item>
-              <NavDropdown.Item href="#/jiraComment">📝 JIRA</NavDropdown.Item>
+              <NavDropdown.Item href="#/password">🔑 Password</NavDropdown.Item>
+              <NavDropdown.Item href="#/hash">🔐 Hash</NavDropdown.Item>
+              <NavDropdown.Item href="#/lorem-ipsum">📝 Lorem Ipsum</NavDropdown.Item>
+              <NavDropdown.Item href="#/jiraComment">📋 JIRA</NavDropdown.Item>
               <NavDropdown.Item href="#/character-counter">🔢 Counter</NavDropdown.Item>
             </NavDropdown>
 
@@ -187,12 +190,13 @@ export const Header: React.FC = () => {
               }}
             />
             {showSearchResults && searchResults.length > 0 && (
-              <div className="search-results position-absolute w-100 mt-1">
+              <div className="search-results position-absolute w-100 mt-1" style={{ zIndex: 1050 }}>
                 <Dropdown.Menu show className="w-100" style={{ 
                   maxHeight: '400px', 
                   overflowY: 'auto',
                   backgroundColor: 'var(--dropdown-bg)',
-                  borderColor: 'var(--border-color)'
+                  borderColor: 'var(--border-color)',
+                  zIndex: 1051
                 }}>
                   {searchResults.map((result, index) => (
                     <Dropdown.Item
