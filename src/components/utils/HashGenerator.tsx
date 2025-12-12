@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Container, Form, Button, Card, Row, Col, Tabs, Tab } from 'react-bootstrap';
-import { CopyWithToast } from '../CopyWithToast';
+import CopyWithToast from '../CopyWithToast';
 
 export const HashGenerator: React.FC = () => {
   const [input, setInput] = useState('');
@@ -107,7 +107,7 @@ export const HashGenerator: React.FC = () => {
                         className="font-monospace small"
                       />
                       <div className="mt-2">
-                        <CopyWithToast textToCopy={sha256Hash} />
+                        <CopyWithToast text={sha256Hash} />
                       </div>
                     </Form.Group>
                   </Tab>
@@ -123,7 +123,7 @@ export const HashGenerator: React.FC = () => {
                         className="font-monospace small"
                       />
                       <div className="mt-2">
-                        <CopyWithToast textToCopy={sha512Hash} />
+                        <CopyWithToast text={sha512Hash} />
                       </div>
                     </Form.Group>
                   </Tab>
@@ -139,7 +139,7 @@ export const HashGenerator: React.FC = () => {
                         className="font-monospace small"
                       />
                       <div className="mt-2">
-                        <CopyWithToast textToCopy={sha1Hash} />
+                        <CopyWithToast text={sha1Hash} />
                       </div>
                       <small className="text-warning">
                         ⚠️ SHA-1 is deprecated for security purposes. Use SHA-256 or SHA-512 instead.

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Container, Form, Button, Card, Row, Col } from 'react-bootstrap';
-import { CopyWithToast } from '../CopyWithToast';
+import CopyWithToast from '../CopyWithToast';
 
 export const LoremIpsumGenerator: React.FC = () => {
   const [text, setText] = useState('');
@@ -122,7 +122,7 @@ export const LoremIpsumGenerator: React.FC = () => {
                     <small className="text-muted">
                       {text.split(/\s+/).length} words, {text.length} characters
                     </small>
-                    <CopyWithToast textToCopy={text} />
+                    <CopyWithToast text={text} />
                   </div>
                 </>
               )}

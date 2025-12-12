@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Container, Form, Button, Card, Row, Col, Badge } from 'react-bootstrap';
-import { CopyWithToast } from '../CopyWithToast';
+import CopyWithToast from '../CopyWithToast';
 
 export const PasswordGenerator: React.FC = () => {
   const [password, setPassword] = useState('');
@@ -139,7 +139,7 @@ export const PasswordGenerator: React.FC = () => {
                     </div>
                   )}
 
-                  <CopyWithToast textToCopy={password} />
+                  <CopyWithToast text={password} />
                 </>
               )}
 
