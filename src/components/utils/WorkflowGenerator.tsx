@@ -1,7 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Container, Form, Row, Col, Button, Card, Alert, Modal, Badge, ButtonGroup } from 'react-bootstrap';
-import { Header } from '../Header.tsx';
-import { Footer } from '../Footer.tsx';
 import { 
   getAvailableTemplates, 
   generateWorkflowContent, 
@@ -99,25 +97,19 @@ export const WorkflowGenerator: React.FC = () => {
 
   if (!templates) {
     return (
-      <>
-        <Header />
-        <Container className="py-4">
+      <>        <Container className="py-4">
           <div className="text-center">
             <div className="spinner-border text-primary" role="status">
               <span className="visually-hidden">Loading...</span>
             </div>
             <p className="mt-2">Loading templates...</p>
           </div>
-        </Container>
-        <Footer />
-      </>
+        </Container>      </>
     );
   }
 
   return (
-    <>
-      <Header />
-      <Container className="py-4">
+    <>      <Container className="py-4">
         <Row className="justify-content-center">
           <Col xs={12} lg={10}>
             <div className="text-center mb-4">
@@ -408,8 +400,6 @@ export const WorkflowGenerator: React.FC = () => {
             </Button>
           </Modal.Footer>
         </Modal>
-      </Container>
-      <Footer />
-    </>
+      </Container>    </>
   );
 };

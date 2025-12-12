@@ -1,6 +1,4 @@
 import { Button, Container } from "react-bootstrap";
-import {Header} from "../Header.tsx";
-import {Footer} from "../Footer.tsx";
 import { useState } from 'react';
 import { encode, decode } from 'js-base64';
 import Form from 'react-bootstrap/Form';
@@ -13,7 +11,6 @@ export const Base64 = () => {
 
   return(
     <Container>
-      <Header></Header>
       <div className="text-center">
         <h1>Base64 Decode/Encode</h1>
       </div>
@@ -44,7 +41,6 @@ export const Base64 = () => {
       </Form>
 
 
-      <Footer></Footer>
     </Container>
   )
 }

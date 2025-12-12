@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { Button, Container, Form, Row, Col, Alert, Spinner, Tab, Tabs, Badge } from 'react-bootstrap';
-import { Header } from '../Header';
-import { Footer } from '../Footer';
 import CopyWithToast from '../CopyWithToast';
 import {
   makeRequest,
@@ -158,9 +156,7 @@ export const RestClient: React.FC = () => {
   };
 
   return (
-    <Container>
-      <Header />
-      <div className="text-center mb-4">
+    <Container>      <div className="text-center mb-4">
         <h1>🌐 REST Client</h1>
         <p className="text-muted">Make RESTful requests and import curl commands</p>
       </div>
@@ -377,9 +373,6 @@ export const RestClient: React.FC = () => {
             </Tabs>
           </div>
         </div>
-      )}
-
-      <Footer />
-    </Container>
+      )}    </Container>
   );
 };

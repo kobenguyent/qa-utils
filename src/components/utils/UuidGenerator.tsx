@@ -1,6 +1,4 @@
 import { Button, Container, Toast } from "react-bootstrap";
-import {Header} from "../Header.tsx";
-import {Footer} from "../Footer.tsx";
 import { v4 as uuidv4 } from 'uuid';
 // @ts-ignore
 import {CopyToClipboard} from 'react-copy-to-clipboard';
@@ -14,9 +12,7 @@ export const UuidGenerator = () => {
   const [show, setShow] = useState(false);
 
   return(
-    <Container>
-      <Header></Header>
-      <div className="text-center">
+    <Container>      <div className="text-center">
         <h1>UUID Generator</h1>
       </div>
 
@@ -50,8 +46,6 @@ export const UuidGenerator = () => {
             <Toast.Body>Woohoo, your UUID is copied!</Toast.Body>
           </Toast>
         </Col>
-      </Row>
-      <Footer></Footer>
-    </Container>
+      </Row>    </Container>
   )
 }

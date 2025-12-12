@@ -1,6 +1,4 @@
 import { Container } from "react-bootstrap";
-import { Header } from "../Header.tsx";
-import { Footer } from "../Footer.tsx";
 import { useState } from 'react';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
@@ -46,9 +44,7 @@ Ticket will be marked as Done. 🎉`;
   const postContent = selectedContent === 'frontend' ? postContentFE : postContentBE;
 
   return (
-    <Container>
-      <Header></Header>
-      <div className="text-center">
+    <Container>      <div className="text-center">
         <h1>Test Setup Generator for JIRA</h1>
       </div>
 
@@ -86,9 +82,6 @@ Ticket will be marked as Done. 🎉`;
             <CopyWithToast text={postContent}></CopyWithToast>
           </Col>
         </Form.Group>
-      </Form>
-
-      <Footer></Footer>
-    </Container>
+      </Form>    </Container>
   );
 };
