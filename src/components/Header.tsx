@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Container, Nav, Navbar, NavDropdown, Form, Button, Dropdown } from "react-bootstrap";
+import { Container, Nav, Navbar, NavDropdown, Form, Dropdown } from "react-bootstrap";
 import { searchItems, SearchItem } from '../utils/searchData';
 import { Theme, getStoredTheme, setStoredTheme, applyTheme } from '../utils/themeManager';
 
