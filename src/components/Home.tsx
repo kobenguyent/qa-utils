@@ -1,6 +1,6 @@
 import React from 'react';
 import {Container, Image, Row, Col} from "react-bootstrap";
-import homePhoto from '../assets/img.gif'
+import qaHeroImage from '../assets/qa-hero.svg'
 
 export const Home: React.FC = () => {
   return(
@@ -9,7 +9,7 @@ export const Home: React.FC = () => {
         <Col xs={12} md={10} lg={8} className="text-center">
           <div className="glass-card">
             <Image 
-              src={homePhoto} 
+              src={qaHeroImage} 
               alt="QA Utils - Quality Assurance Tools"
               className="img-fluid shadow-sm rounded animated-home-image home-image"
             />

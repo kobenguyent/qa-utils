@@ -18,6 +18,10 @@ const JSONFormatter = lazy(() => import('./components/utils/JSONFormatter.tsx').
 const UuidGenerator = lazy(() => import('./components/utils/UuidGenerator.tsx').then(module => ({default: module.UuidGenerator})));
 const JiraComment = lazy(() => import('./components/utils/JiraComment.tsx').then(module => ({default: module.JiraComment})));
 const OtpGenerator = lazy(() => import('./components/utils/OtpGenerator.tsx').then(module => ({default: module.OtpGenerator})));
+const PasswordGenerator = lazy(() => import('./components/utils/PasswordGenerator.tsx').then(module => ({default: module.PasswordGenerator})));
+const LoremIpsumGenerator = lazy(() => import('./components/utils/LoremIpsumGenerator.tsx').then(module => ({default: module.LoremIpsumGenerator})));
+const HashGenerator = lazy(() => import('./components/utils/HashGenerator.tsx').then(module => ({default: module.HashGenerator})));
+const HTPasswdGenerator = lazy(() => import('./components/utils/HTPasswdGenerator.tsx').then(module => ({default: module.HTPasswdGenerator})));
 const PlaywrightToCodeceptjs = lazy(() => import('./components/utils/PlaywrightToCodeceptjs.tsx'));
 const EncryptionTool = lazy(() => import('./components/utils/EncryptionTool.tsx').then(module => ({default: module.EncryptionTool})));
 const WorkflowGenerator = lazy(() => import('./components/utils/WorkflowGenerator.tsx').then(module => ({default: module.WorkflowGenerator})));
@@ -85,6 +89,22 @@ const router = createHashRouter([
   {
     path: 'otp',
     element: <RouteWrapper><OtpGenerator /></RouteWrapper>
+  },
+  {
+    path: 'password',
+    element: <RouteWrapper><PasswordGenerator /></RouteWrapper>
+  },
+  {
+    path: 'lorem-ipsum',
+    element: <RouteWrapper><LoremIpsumGenerator /></RouteWrapper>
+  },
+  {
+    path: 'hash',
+    element: <RouteWrapper><HashGenerator /></RouteWrapper>
+  },
+  {
+    path: 'htpasswd',
+    element: <RouteWrapper><HTPasswdGenerator /></RouteWrapper>
   },
   {
     path: 'playwright2codecept',
