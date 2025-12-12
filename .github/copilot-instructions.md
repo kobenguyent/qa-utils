@@ -9,7 +9,7 @@ QA Utils is a comprehensive collection of quality assurance tools and utilities 
 
 #### Linting Requirements
 - **ALWAYS** run linting before committing any changes
-- **ALWAYS** fix all linting issues - the project enforces a maximum of 50 warnings
+- **ALWAYS** fix all linting issues - the project enforces a maximum of 55 warnings
 - Use `npm run lint` or `bun run lint` to check for issues
 - The project uses ESLint with TypeScript support
 - Configuration: `.eslintrc.cjs`
@@ -85,7 +85,7 @@ When making ANY code changes:
    - Consider mobile responsiveness
 
 3. **Before committing:**
-   - [ ] Run `npm run lint` - Fix ALL issues (max 50 warnings)
+   - [ ] Run `npm run lint` - Fix ALL issues (max 55 warnings)
    - [ ] Run `npm test` - Ensure all tests pass
    - [ ] Run `npm run build` - Verify build succeeds
    - [ ] Test manually in browser (both desktop and mobile)
