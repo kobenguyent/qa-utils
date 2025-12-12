@@ -97,19 +97,19 @@ export const WorkflowGenerator: React.FC = () => {
 
   if (!templates) {
     return (
-      <>        <Container className="py-4">
-          <div className="text-center">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-            <p className="mt-2">Loading templates...</p>
+      <Container className="py-4">
+        <div className="text-center">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
           </div>
-        </Container>      </>
+          <p className="mt-2">Loading templates...</p>
+        </div>
+      </Container>
     );
   }
 
   return (
-    <>      <Container className="py-4">
+    <Container className="py-4">
         <Row className="justify-content-center">
           <Col xs={12} lg={10}>
             <div className="text-center mb-4">
@@ -400,6 +400,6 @@ export const WorkflowGenerator: React.FC = () => {
             </Button>
           </Modal.Footer>
         </Modal>
-      </Container>    </>
+      </Container>
   );
 };
