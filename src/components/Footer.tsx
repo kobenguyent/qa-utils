@@ -45,23 +45,13 @@ export const Footer: React.FC = () => {
                 </a>
                 {' | '}
                 <a 
-                  href="https://www.buymeacoffee.com/kobenguyent" 
+                  href="https://www.buymeacoffee.com/peternguyew" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="btn btn-link btn-sm p-0 text-decoration-none"
                   style={{ fontSize: 'inherit' }}
                 >
                   ☕ Buy Me a Coffee
-                </a>
-                {' | '}
-                <a 
-                  href="https://ko-fi.com/kobenguyent" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="btn btn-link btn-sm p-0 text-decoration-none"
-                  style={{ fontSize: 'inherit' }}
-                >
-                  🎁 Ko-fi
                 </a>
               </small>
             </div>
