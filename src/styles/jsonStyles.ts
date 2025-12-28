@@ -3,93 +3,93 @@ export const jsonStyles = {
     display: "flex",
   },
   jsonViewer: {
-    borderLeft: "1px dashed #e9ecef",
+    borderLeft: "1px dashed var(--border-color)",
     lineHeight: 1.25,
     width: "50%",
     margin: 10,
-    color: "#1e293b", // readable default text
+    color: "var(--text)", // theme-aware text
   },
   jsonEditor: {
     width: "50%",
     fontSize: 18,
     fontFamily: "Lucida Console, monospace",
     lineHeight: 1.25,
-    color: "#1e293b",
+    color: "var(--text)",
   },
   root: {
     fontSize: 18,
     fontFamily: "Lucida Console, monospace",
     lineHeight: 1.25,
-    color: "#1e293b",
+    color: "var(--text)",
     /*color: "#3E3D32"*/
   },
   label: {
-    color: "#0d6efd", // primary blue for labels/properties
+    color: "var(--primary)", // primary blue for labels/properties
     marginTop: 3,
   },
   value: {
     marginLeft: 10,
-    color: "#1e293b",
+    color: "var(--text)",
   },
   row: {
     display: "flex",
   },
   withChildrenLabel: {
-    color: "#0d6efd",
+    color: "var(--primary)",
   },
   select: {
     borderRadius: 3,
-    borderColor: "#ced4da",
-    backgroundColor: "#ffffff",
-    color: "#1e293b",
+    borderColor: "var(--border-color)",
+    backgroundColor: "var(--input-bg)",
+    color: "var(--text)",
   },
   input: {
     borderRadius: 3,
-    border: "1px solid #ced4da",
+    border: "1px solid var(--border-color)",
     padding: 6,
     fontFamily: "Lucida Console, monospace",
     fontSize: 14,
-    backgroundColor: "#ffffff",
-    color: "#1e293b",
+    backgroundColor: "var(--input-bg)",
+    color: "var(--text)",
     width: "200%",
   },
   addButton: {
     cursor: "pointer",
-    color: "#198754", // success green
+    color: "var(--success)", // success green
     marginLeft: 15,
     fontSize: 12,
   },
   removeButton: {
     cursor: "pointer",
-    color: "#d63384", // accessible magenta
+    color: "var(--danger)", // use danger for remove
     marginLeft: 15,
     fontSize: 12,
   },
   saveButton: {
     cursor: "pointer",
-    color: "#0d6efd", // primary
+    color: "var(--primary)", // primary
     marginLeft: 15,
     fontSize: 12,
   },
   builtin: {
-    color: "#6c757d", // muted
+    color: "var(--muted)", // muted
     fontSize: 12,
   },
   text: {
-    color: "#1e293b", // black-ish text
+    color: "var(--text)", // theme-aware text
     fontSize: 12,
   },
   number: {
-    color: "#6f42c1", // purple with good contrast
+    color: "var(--primary)", // use primary for numbers
     fontSize: 12,
   },
   property: {
-    color: "#0d6efd", // blue for property names
+    color: "var(--primary)", // blue for property names
     fontSize: 12,
   },
   collapseIcon: {
     cursor: "pointer",
     fontSize: 10,
-    color: "#0d6efd",
+    color: "var(--primary)",
   },
 };

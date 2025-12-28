@@ -293,7 +293,7 @@ export const JWTDebugger = () => {
                       wordBreak: 'break-all',
                       display: 'block',
                       padding: '0.5rem',
-                      backgroundColor: '#f8f9fa',
+                      backgroundColor: 'var(--card-bg)',
                       borderRadius: '0.25rem',
                       fontSize: '0.875rem'
                     }}>

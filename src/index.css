@@ -206,7 +206,7 @@ body {
 
 .dropdown-header {
     font-weight: 600;
-    color: #495057;
+    color: var(--text);
     padding: 0.5rem 1rem;
 }
 
