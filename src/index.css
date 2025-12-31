@@ -2,13 +2,23 @@
 :root {
     /* Light theme colors */
     --bg: #ffffff;
-    --text: #1e293b;        /* slate-800 - default readable body text */
-    --muted: #6c757d;       /* muted text */
-    --primary: #0d6efd;     /* bootstrap primary (good contrast for links) */
-    --success: #198754;     /* green (accessible) */
-    --danger: #dc3545;      /* red (accessible) */
-    --card-bg: rgba(255, 255, 255, 0.95); /* glass card background fallback */
-    --glass-border: rgba(255,255,255,0.35);
+    --text: #1e293b;
+    /* slate-800 - default readable body text */
+    --muted: #6c757d;
+    /* muted text */
+    --primary: #0d6efd;
+    /* bootstrap primary (good contrast for links) */
+    --success: #198754;
+    /* green (accessible) */
+    --danger: #dc3545;
+    /* red (accessible) */
+    --warning: #ffc107;
+    /* yellow/orange */
+    --info: #0dcaf0;
+    /* cyan */
+    --card-bg: rgba(255, 255, 255, 0.95);
+    /* glass card background fallback */
+    --glass-border: rgba(255, 255, 255, 0.35);
     --navbar-bg: #f8f9fa;
     --dropdown-bg: rgba(255, 255, 255, 0.95);
     --dropdown-hover: rgba(13, 110, 253, 0.15);
@@ -16,25 +26,44 @@
     --shadow-color: rgba(0, 0, 0, 0.1);
     --input-bg: #ffffff;
     --input-border: #ced4da;
+    --table-color: #212529;
+    --table-bg: transparent;
+    --table-striped-bg: rgba(0, 0, 0, 0.05);
 }
 
 /* Dark theme colors */
 [data-theme="dark"] {
-    --bg: #0f172a;          /* slate-900 */
-    --text: #e2e8f0;        /* slate-200 */
-    --muted: #94a3b8;       /* slate-400 */
-    --primary: #3b82f6;     /* blue-500 */
-    --success: #10b981;     /* green-500 */
-    --danger: #ef4444;      /* red-500 */
-    --card-bg: rgba(30, 41, 59, 0.95);  /* slate-800 with opacity */
-    --glass-border: rgba(100, 116, 139, 0.3);  /* slate-500 */
-    --navbar-bg: #1e293b;   /* slate-800 */
+    --bg: #0f172a;
+    /* slate-900 */
+    --text: #e2e8f0;
+    /* slate-200 */
+    --muted: #94a3b8;
+    /* slate-400 */
+    --primary: #3b82f6;
+    /* blue-500 */
+    --success: #10b981;
+    /* green-500 */
+    --danger: #ef4444;
+    /* red-500 */
+    --warning: #f59e0b;
+    /* amber-500 */
+    --info: #3b82f6;
+    /* blue-500 */
+    --card-bg: rgba(30, 41, 59, 0.95);
+    /* slate-800 with opacity */
+    --glass-border: rgba(100, 116, 139, 0.3);
+    /* slate-500 */
+    --navbar-bg: #1e293b;
+    /* slate-800 */
     --dropdown-bg: rgba(30, 41, 59, 0.98);
     --dropdown-hover: rgba(59, 130, 246, 0.2);
     --border-color: rgba(100, 116, 139, 0.3);
     --shadow-color: rgba(0, 0, 0, 0.5);
     --input-bg: #1e293b;
     --input-border: #475569;
+    --table-color: #e2e8f0;
+    --table-bg: transparent;
+    --table-striped-bg: rgba(255, 255, 255, 0.05);
 }
 
 body {
@@ -84,6 +113,24 @@ body {
     color: var(--text);
 }
 
+[data-theme="dark"] .table {
+    color: var(--table-color);
+    background-color: var(--table-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .table-striped>tbody>tr:nth-of-type(odd)>* {
+    background-color: var(--table-striped-bg);
+    color: var(--table-color);
+}
+
+[data-theme="dark"] .table> :not(caption)>*>* {
+    background-color: transparent;
+    /* Fix for bootstrap 5 overriding bg */
+    color: var(--table-color);
+    border-color: var(--border-color);
+}
+
 .question {
     white-space: pre-line;
     margin-bottom: 1rem;
@@ -92,14 +139,20 @@ body {
 
 /* Mobile-first responsive design - Enhanced */
 @media (max-width: 576px) {
-    .navbar-nav .nav-link, .navbar-nav .dropdown-toggle {
-        font-size: 16px; /* Increased from 14px for better readability */
-        padding: 0.75rem 1rem; /* Increased touch target size */
-        min-height: 44px; /* Apple's recommended minimum touch target */
+
+    .navbar-nav .nav-link,
+    .navbar-nav .dropdown-toggle {
+        font-size: 16px;
+        /* Increased from 14px for better readability */
+        padding: 0.75rem 1rem;
+        /* Increased touch target size */
+        min-height: 44px;
+        /* Apple's recommended minimum touch target */
     }
 
     .navbar-brand {
-        font-size: 20px; /* Increased from 18px */
+        font-size: 20px;
+        /* Increased from 18px */
     }
 
     .container {
@@ -108,12 +161,14 @@ body {
     }
 
     h1.h3 {
-        font-size: 1.75rem; /* Increased from 1.5rem */
+        font-size: 1.75rem;
+        /* Increased from 1.5rem */
         line-height: 1.3;
     }
 
     .lead {
-        font-size: 1.125rem; /* Increased from 1rem */
+        font-size: 1.125rem;
+        /* Increased from 1rem */
         line-height: 1.6;
     }
 
@@ -126,18 +181,24 @@ body {
 }
 
 @media (max-width: 768px) {
-    .navbar-nav .nav-link, .navbar-nav .dropdown-toggle {
-        font-size: 16px; /* Increased for better readability */
-        padding: 0.75rem 1rem; /* Better touch targets */
+
+    .navbar-nav .nav-link,
+    .navbar-nav .dropdown-toggle {
+        font-size: 16px;
+        /* Increased for better readability */
+        padding: 0.75rem 1rem;
+        /* Better touch targets */
         min-height: 44px;
     }
 
     .navbar-brand {
-        font-size: 20px; /* Increased from 18px */
+        font-size: 20px;
+        /* Increased from 18px */
     }
 
     .navbar-toggler {
-        padding: 0.5rem 0.75rem; /* Larger touch target */
+        padding: 0.5rem 0.75rem;
+        /* Larger touch target */
         font-size: 1.25rem;
         min-height: 44px;
         min-width: 44px;
@@ -231,7 +292,7 @@ body {
 .nav-link:focus,
 .navbar-brand:focus,
 .btn:focus {
-    outline: 3px solid rgba(13,110,253,0.18);
+    outline: 3px solid rgba(13, 110, 253, 0.18);
     outline-offset: 2px;
 }
 
