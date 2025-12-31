@@ -16,15 +16,6 @@
     /* yellow/orange */
     --info: #0dcaf0;
     /* cyan */
-
-    /* Map to Bootstrap variables */
-    --bs-primary: var(--primary);
-    --bs-success: var(--success);
-    --bs-danger: var(--danger);
-    --bs-warning: var(--warning);
-    --bs-info: var(--info);
-    --bs-body-bg: var(--bg);
-    --bs-body-color: var(--text);
     --card-bg: rgba(255, 255, 255, 0.95);
     /* glass card background fallback */
     --glass-border: rgba(255, 255, 255, 0.35);
@@ -35,6 +26,9 @@
     --shadow-color: rgba(0, 0, 0, 0.1);
     --input-bg: #ffffff;
     --input-border: #ced4da;
+    --table-color: #212529;
+    --table-bg: transparent;
+    --table-striped-bg: rgba(0, 0, 0, 0.05);
 }
 
 /* Dark theme colors */
@@ -51,6 +45,10 @@
     /* green-500 */
     --danger: #ef4444;
     /* red-500 */
+    --warning: #f59e0b;
+    /* amber-500 */
+    --info: #3b82f6;
+    /* blue-500 */
     --card-bg: rgba(30, 41, 59, 0.95);
     /* slate-800 with opacity */
     --glass-border: rgba(100, 116, 139, 0.3);
@@ -63,6 +61,9 @@
     --shadow-color: rgba(0, 0, 0, 0.5);
     --input-bg: #1e293b;
     --input-border: #475569;
+    --table-color: #e2e8f0;
+    --table-bg: transparent;
+    --table-striped-bg: rgba(255, 255, 255, 0.05);
 }
 
 body {
@@ -110,6 +111,24 @@ body {
     background-color: var(--card-bg);
     border-color: var(--border-color);
     color: var(--text);
+}
+
+[data-theme="dark"] .table {
+    color: var(--table-color);
+    background-color: var(--table-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .table-striped>tbody>tr:nth-of-type(odd)>* {
+    background-color: var(--table-striped-bg);
+    color: var(--table-color);
+}
+
+[data-theme="dark"] .table> :not(caption)>*>* {
+    background-color: transparent;
+    /* Fix for bootstrap 5 overriding bg */
+    color: var(--table-color);
+    border-color: var(--border-color);
 }
 
 .question {

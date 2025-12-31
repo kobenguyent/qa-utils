@@ -577,7 +577,7 @@ export const AIChat: React.FC = () => {
 
         {/* Configuration Panel */}
         <Card className="mb-4" style={{ border: '1px solid var(--border-color)' }}>
-          <Card.Header
+          <Card.Header 
             style={{ backgroundColor: 'var(--card-bg)', borderBottom: '1px solid var(--border-color)', cursor: 'pointer' }}
             onClick={() => setConfigExpanded(!configExpanded)}
             role="button"
@@ -599,15 +599,55 @@ export const AIChat: React.FC = () => {
           </Card.Header>
           <Collapse in={configExpanded}>
             <Card.Body id="config-collapse">
-              <Form>
-                <Row className="mb-3">
-                  <Col md={6}>
-                    <Form.Group>
-                      <Form.Label style={{ fontWeight: '500', fontSize: '1rem', color: 'var(--text)' }}>Provider</Form.Label>
-                      <Form.Select
-                        value={provider}
-                        onChange={(e) => handleProviderChange(e.target.value as AIProvider)}
-                        disabled={loading}
+            <Form>
+              <Row className="mb-3">
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label style={{ fontWeight: '500', fontSize: '1rem', color: 'var(--text)' }}>Provider</Form.Label>
+                    <Form.Select
+                      value={provider}
+                      onChange={(e) => handleProviderChange(e.target.value as AIProvider)}
+                      disabled={loading}
+                      style={{ fontSize: '1rem' }}
+                    >
+                      <option value="openai">OpenAI</option>
+                      <option value="anthropic">Anthropic Claude</option>
+                      <option value="google">Google Gemini</option>
+                      <option value="azure-openai">Azure OpenAI</option>
+                      <option value="ollama">Ollama (Local)</option>
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+                <Col md={5}>
+                  <Form.Group>
+                    <Form.Label style={{ fontWeight: '500', fontSize: '1rem', color: 'var(--text)' }}>Model</Form.Label>
+                    <InputGroup>
+                      {availableModels.length > 0 ? (
+                        <Form.Select
+                          value={model}
+                          onChange={(e) => setModel(e.target.value)}
+                          disabled={loading}
+                          style={{ fontSize: '1rem' }}
+                        >
+                          {availableModels.map(m => (
+                            <option key={m.id} value={m.id}>{m.name}</option>
+                          ))}
+                        </Form.Select>
+                      ) : (
+                        <Form.Control
+                          type="text"
+                          placeholder={provider === 'openai' ? 'gpt-3.5-turbo' : 'llama2'}
+                          value={model}
+                          onChange={(e) => setModel(e.target.value)}
+                          disabled={loading}
+                          style={{ fontSize: '1rem' }}
+                        />
+                      )}
+                      <Button 
+                        variant="outline-secondary"
+                        onClick={handleLoadModels}
+                        disabled={loading || !isConfigured}
+                        title="Load available models"
                         style={{ fontSize: '1rem' }}
                       >
                         <option value="openai">OpenAI</option>
@@ -1272,9 +1312,9 @@ export const AIChat: React.FC = () => {
           <Card.Header style={{ backgroundColor: 'var(--card-bg)', borderBottom: '1px solid var(--border-color)' }}>
             <div className="d-flex justify-content-between align-items-center">
               <h5 className="mb-0" style={{ fontSize: '1.25rem', fontWeight: '600', color: 'var(--text)' }}>💬 Chat</h5>
-              <Button
-                variant="outline-secondary"
-                size="sm"
+              <Button 
+                variant="outline-secondary" 
+                size="sm" 
                 onClick={handleClearChat}
                 disabled={messages.length === 0 || loading}
                 style={{ fontSize: '0.9rem' }}
@@ -1305,10 +1345,10 @@ export const AIChat: React.FC = () => {
                         {msg.role === 'user' ? '👤 You' : '🤖 AI'}
                         <span className="ms-2 small">{formatTimestamp(msg.timestamp)}</span>
                       </Badge>
-                      <Card
-                        style={{
-                          backgroundColor: msg.role === 'user' ? 'var(--primary)' : 'var(--card-bg)',
-                          color: msg.role === 'user' ? 'white' : 'var(--text)',
+                      <Card 
+                        bg={msg.role === 'user' ? 'primary' : 'light'}
+                        text={msg.role === 'user' ? 'white' : 'dark'}
+                        style={{ 
                           border: msg.role === 'user' ? 'none' : '1px solid var(--border-color)',
                           boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                         }}
@@ -1336,10 +1376,9 @@ export const AIChat: React.FC = () => {
                       <Badge bg="secondary" className="mb-1" style={{ fontSize: '0.85rem' }}>
                         🤖 AI
                       </Badge>
-                      <Card
-                        style={{
-                          backgroundColor: 'var(--card-bg)',
-                          color: 'var(--text)',
+                      <Card 
+                        bg="light"
+                        style={{ 
                           border: '1px solid var(--border-color)',
                           boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                         }}

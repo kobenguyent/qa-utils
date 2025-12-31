@@ -161,7 +161,7 @@ export const Ctfl = () => {
       {showScore ? (
         <div className="score-section">
           <h2>You scored {score} out of {questions.length}</h2>
-          { (score / questions.length) * 100 >= 65 ? (<h3 style={ {'color': 'green'} }>You passed the exam</h3>) : (<h3 style={ {'color': 'red'} }>Please practice more</h3>) }
+          { (score / questions.length) * 100 >= 65 ? (<h3 style={ {'color': 'var(--success)'} }>You passed the exam</h3>) : (<h3 style={ {'color': 'var(--danger)'} }>Please practice more</h3>) }
           <h3>Review Incorrect Answers:</h3>
           {results.map ((result: any, index) => (
             !result.isCorrect && (
