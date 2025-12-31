@@ -9,10 +9,13 @@
 }
 
 @keyframes subtlePulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
+
   50% {
     opacity: 0.95;
     transform: scale(1.01);
@@ -21,10 +24,10 @@
 
 /* Glass effect for dropdowns */
 .dropdown-menu.glass-dropdown {
-  background: rgba(255, 255, 255, 0.85) !important;
+  background: var(--card-bg) !important;
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid var(--glass-border);
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.12);
   border-radius: 12px;
   color: var(--text);
@@ -39,7 +42,7 @@
 }
 
 .nav-link.glass-link:hover {
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--dropdown-hover);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   color: var(--text);
@@ -50,7 +53,7 @@ footer.glass-footer {
   background: var(--card-bg) !important;
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  border-top: 1px solid var(--glass-border);
   box-shadow: 0 -4px 24px 0 rgba(31, 38, 135, 0.08);
   color: var(--text);
 }
@@ -76,7 +79,7 @@ footer.glass-footer {
 
 /* Loading state with glass effect */
 .glass-loading {
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--card-bg);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border-radius: 12px;

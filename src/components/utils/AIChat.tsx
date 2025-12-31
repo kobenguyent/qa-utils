@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Button, 
-  Container, 
-  Form, 
-  Row, 
-  Col, 
-  Alert, 
+import {
+  Button,
+  Container,
+  Form,
+  Row,
+  Col,
+  Alert,
   Card,
   Badge,
   Spinner,
@@ -47,7 +47,7 @@ const DEFAULT_CONTEXT_LENGTH = 2000;
 // Helper function to detect if user wants full content
 const detectsFullContentRequest = (message: string): boolean => {
   return /\b(full|complete|entire|whole|all|untruncated|raw)\b.*\b(data|document|file|content|information)\b/i.test(message) ||
-         /\b(show|display|read|access|see)\b.*\b(full|complete|entire|whole|all)\b/i.test(message);
+    /\b(show|display|read|access|see)\b.*\b(full|complete|entire|whole|all)\b/i.test(message);
 };
 
 export const AIChat: React.FC = () => {
@@ -61,12 +61,12 @@ export const AIChat: React.FC = () => {
   const [optimizeTokens, setOptimizeTokens] = useSessionStorage<boolean>('aiChat_optimizeTokens', true);
   const [systemPromptType, setSystemPromptType] = useSessionStorage<'default' | 'technical' | 'creative'>('aiChat_systemPromptType', 'default');
   const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
-  
+
   // Conversation management
   const [conversationManager] = useState(() => new ConversationManager());
   const [currentConversationId, setCurrentConversationId] = useSessionStorage<string | null>('aiChat_currentConversationId', null);
   const [conversations, setConversations] = useState(conversationManager.getConversations());
-  
+
   // Chat state with session storage
   const [messages, setMessages] = useSessionStorage<ConversationMessage[]>('aiChat_messages', []);
   const [inputMessage, setInputMessage] = useState('');
@@ -74,12 +74,12 @@ export const AIChat: React.FC = () => {
   const [error, setError] = useState('');
   const [connectionStatus, setConnectionStatus] = useState<'unknown' | 'connected' | 'disconnected'>('unknown');
   const [tokenCount, setTokenCount] = useState({ input: 0, total: 0 });
-  
+
   // Knowledge base state with session storage
   const [knowledgeBase] = useState(() => new KnowledgeBase());
   const [uploadedFiles, setUploadedFiles] = useSessionStorage<Array<{ id: string; name: string }>>('aiChat_uploadedFiles', []);
   const [uploadProgress, setUploadProgress] = useState(0);
-  
+
   // MCP state with session storage
   const [, setMcpClient] = useState<MCPClient | null>(null);
   const [mcpServerUrl, setMcpServerUrl] = useSessionStorage<string>('aiChat_mcpServerUrl', '');
@@ -87,7 +87,7 @@ export const AIChat: React.FC = () => {
   const [showMcpGuide, setShowMcpGuide] = useState(false);
   const [mcpToolManager] = useState(() => new MCPToolManager());
   const [mcpToolStats, setMcpToolStats] = useState(mcpToolManager.getStats());
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isConfigured, setIsConfigured] = useState(false);
@@ -99,7 +99,7 @@ export const AIChat: React.FC = () => {
     if (typeof window === 'undefined') {
       return;
     }
-    
+
     try {
       const storedDocuments = window.sessionStorage.getItem('aiChat_knowledgeBaseDocuments');
       if (storedDocuments) {
@@ -120,7 +120,7 @@ export const AIChat: React.FC = () => {
     if (typeof window === 'undefined') {
       return;
     }
-    
+
     if (uploadedFiles.length > 0) {
       try {
         const documents = uploadedFiles.map(file => {
@@ -227,7 +227,7 @@ export const AIChat: React.FC = () => {
     try {
       const config = getConfig();
       const isConnected = await testConnection(config);
-      
+
       if (isConnected) {
         setConnectionStatus('connected');
         setError('');
@@ -254,9 +254,9 @@ export const AIChat: React.FC = () => {
     }
 
     const originalMessage = inputMessage.trim();
-    
+
     // Enhance message with knowledge base context if available
-    const enhancedMessage = uploadedFiles.length > 0 
+    const enhancedMessage = uploadedFiles.length > 0
       ? await enhanceMessageWithContext(originalMessage)
       : originalMessage;
 
@@ -274,7 +274,7 @@ export const AIChat: React.FC = () => {
 
     try {
       const config = getConfig();
-      
+
       // Build chat history with enhanced last message
       const chatHistory: ChatMessage[] = [
         ...messages.map(msg => ({
@@ -382,7 +382,7 @@ export const AIChat: React.FC = () => {
 
     setUploadedFiles(prev => [...prev, ...uploadedFilesList]);
     setUploadProgress(0);
-    
+
     // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -409,7 +409,7 @@ export const AIChat: React.FC = () => {
 
       const client = new MCPClient(config);
       await client.connect();
-      
+
       // Load tools via tool manager
       await mcpToolManager.loadToolsFromServer(client);
       setMcpClient(client);
@@ -499,18 +499,18 @@ export const AIChat: React.FC = () => {
     if (relevantDocs.length > 0) {
       // Check if user is asking for full/complete data
       const wantsFullData = detectsFullContentRequest(message);
-      
+
       // If user wants full data or references specific document, load more content
       const maxLength = wantsFullData ? 0 : DEFAULT_CONTEXT_LENGTH; // 0 means unlimited
       const includeFullContent = wantsFullData;
-      
+
       const context = knowledgeBase.buildContext(relevantDocs, maxLength, includeFullContent);
-      
+
       // Add a note to help AI understand the context
-      const contextNote = uploadedFiles.length > 0 
+      const contextNote = uploadedFiles.length > 0
         ? `\n[Context: The following information is from uploaded knowledge base documents. Use this information to answer the user's question, but also apply your general knowledge when relevant.]\n\n`
         : '';
-      
+
       return `${contextNote}${context}\n\nUser question: ${message}`;
     }
     return message;
@@ -534,7 +534,7 @@ export const AIChat: React.FC = () => {
     if (conversation) {
       setCurrentConversationId(id);
       setMessages(conversation.messages as ConversationMessage[]);
-      
+
       // Restore AI provider configuration from conversation
       if (conversation.provider && conversation.provider !== provider) {
         setProvider(conversation.provider as AIProvider);
@@ -542,7 +542,7 @@ export const AIChat: React.FC = () => {
       if (conversation.model && conversation.model !== model) {
         setModel(conversation.model);
       }
-      
+
       setError('');
     }
   };
@@ -577,7 +577,7 @@ export const AIChat: React.FC = () => {
 
         {/* Configuration Panel */}
         <Card className="mb-4" style={{ border: '1px solid var(--border-color)' }}>
-          <Card.Header 
+          <Card.Header
             style={{ backgroundColor: 'var(--card-bg)', borderBottom: '1px solid var(--border-color)', cursor: 'pointer' }}
             onClick={() => setConfigExpanded(!configExpanded)}
             role="button"
@@ -599,152 +599,73 @@ export const AIChat: React.FC = () => {
           </Card.Header>
           <Collapse in={configExpanded}>
             <Card.Body id="config-collapse">
-            <Form>
-              <Row className="mb-3">
-                <Col md={6}>
-                  <Form.Group>
-                    <Form.Label style={{ fontWeight: '500', fontSize: '1rem', color: 'var(--text)' }}>Provider</Form.Label>
-                    <Form.Select
-                      value={provider}
-                      onChange={(e) => handleProviderChange(e.target.value as AIProvider)}
-                      disabled={loading}
-                      style={{ fontSize: '1rem' }}
-                    >
-                      <option value="openai">OpenAI</option>
-                      <option value="anthropic">Anthropic Claude</option>
-                      <option value="google">Google Gemini</option>
-                      <option value="azure-openai">Azure OpenAI</option>
-                      <option value="ollama">Ollama (Local)</option>
-                    </Form.Select>
-                  </Form.Group>
-                </Col>
-                <Col md={5}>
-                  <Form.Group>
-                    <Form.Label style={{ fontWeight: '500', fontSize: '1rem', color: 'var(--text)' }}>Model</Form.Label>
-                    <InputGroup>
-                      {availableModels.length > 0 ? (
-                        <Form.Select
-                          value={model}
-                          onChange={(e) => setModel(e.target.value)}
-                          disabled={loading}
-                          style={{ fontSize: '1rem' }}
-                        >
-                          {availableModels.map(m => (
-                            <option key={m.id} value={m.id}>{m.name}</option>
-                          ))}
-                        </Form.Select>
-                      ) : (
-                        <Form.Control
-                          type="text"
-                          placeholder={provider === 'openai' ? 'gpt-3.5-turbo' : 'llama2'}
-                          value={model}
-                          onChange={(e) => setModel(e.target.value)}
-                          disabled={loading}
-                          style={{ fontSize: '1rem' }}
-                        />
-                      )}
-                      <Button 
-                        variant="outline-secondary"
-                        onClick={handleLoadModels}
-                        disabled={loading || !isConfigured}
-                        title="Load available models"
+              <Form>
+                <Row className="mb-3">
+                  <Col md={6}>
+                    <Form.Group>
+                      <Form.Label style={{ fontWeight: '500', fontSize: '1rem', color: 'var(--text)' }}>Provider</Form.Label>
+                      <Form.Select
+                        value={provider}
+                        onChange={(e) => handleProviderChange(e.target.value as AIProvider)}
+                        disabled={loading}
                         style={{ fontSize: '1rem' }}
                       >
-                        🔄
-                      </Button>
-                    </InputGroup>
-                    <Form.Text className="text-muted" style={{ fontSize: '0.9rem' }}>
-                      Click 🔄 to load available models
-                    </Form.Text>
-                  </Form.Group>
-                </Col>
-              </Row>
+                        <option value="openai">OpenAI</option>
+                        <option value="anthropic">Anthropic Claude</option>
+                        <option value="google">Google Gemini</option>
+                        <option value="azure-openai">Azure OpenAI</option>
+                        <option value="ollama">Ollama (Local)</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                  <Col md={5}>
+                    <Form.Group>
+                      <Form.Label style={{ fontWeight: '500', fontSize: '1rem', color: 'var(--text)' }}>Model</Form.Label>
+                      <InputGroup>
+                        {availableModels.length > 0 ? (
+                          <Form.Select
+                            value={model}
+                            onChange={(e) => setModel(e.target.value)}
+                            disabled={loading}
+                            style={{ fontSize: '1rem' }}
+                          >
+                            {availableModels.map(m => (
+                              <option key={m.id} value={m.id}>{m.name}</option>
+                            ))}
+                          </Form.Select>
+                        ) : (
+                          <Form.Control
+                            type="text"
+                            placeholder={provider === 'openai' ? 'gpt-3.5-turbo' : 'llama2'}
+                            value={model}
+                            onChange={(e) => setModel(e.target.value)}
+                            disabled={loading}
+                            style={{ fontSize: '1rem' }}
+                          />
+                        )}
+                        <Button
+                          variant="outline-secondary"
+                          onClick={handleLoadModels}
+                          disabled={loading || !isConfigured}
+                          title="Load available models"
+                          style={{ fontSize: '1rem' }}
+                        >
+                          🔄
+                        </Button>
+                      </InputGroup>
+                      <Form.Text className="text-muted" style={{ fontSize: '0.9rem' }}>
+                        Click 🔄 to load available models
+                      </Form.Text>
+                    </Form.Group>
+                  </Col>
+                </Row>
 
-              {provider === 'openai' && (
-                <Form.Group className="mb-3">
-                  <Form.Label>API Key</Form.Label>
-                  <Form.Control
-                    type="password"
-                    placeholder="sk-..."
-                    value={apiKey}
-                    onChange={(e) => {
-                      setApiKey(e.target.value);
-                      setConnectionStatus('unknown');
-                    }}
-                    disabled={loading}
-                  />
-                  <Form.Text className="text-muted">
-                    Your OpenAI API key. Get it from{' '}
-                    <a 
-                      href="https://platform.openai.com/api-keys" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                    >
-                      OpenAI Dashboard
-                    </a>
-                  </Form.Text>
-                </Form.Group>
-              )}
-
-              {provider === 'anthropic' && (
-                <Form.Group className="mb-3">
-                  <Form.Label>API Key</Form.Label>
-                  <Form.Control
-                    type="password"
-                    placeholder="sk-ant-..."
-                    value={apiKey}
-                    onChange={(e) => {
-                      setApiKey(e.target.value);
-                      setConnectionStatus('unknown');
-                    }}
-                    disabled={loading}
-                  />
-                  <Form.Text className="text-muted">
-                    Your Anthropic API key. Get it from{' '}
-                    <a 
-                      href="https://console.anthropic.com/" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                    >
-                      Anthropic Console
-                    </a>
-                  </Form.Text>
-                </Form.Group>
-              )}
-
-              {provider === 'google' && (
-                <Form.Group className="mb-3">
-                  <Form.Label>API Key</Form.Label>
-                  <Form.Control
-                    type="password"
-                    placeholder="AIza..."
-                    value={apiKey}
-                    onChange={(e) => {
-                      setApiKey(e.target.value);
-                      setConnectionStatus('unknown');
-                    }}
-                    disabled={loading}
-                  />
-                  <Form.Text className="text-muted">
-                    Your Google API key. Get it from{' '}
-                    <a 
-                      href="https://makersuite.google.com/app/apikey" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                    >
-                      Google AI Studio
-                    </a>
-                  </Form.Text>
-                </Form.Group>
-              )}
-
-              {provider === 'azure-openai' && (
-                <>
+                {provider === 'openai' && (
                   <Form.Group className="mb-3">
                     <Form.Label>API Key</Form.Label>
                     <Form.Control
                       type="password"
-                      placeholder="Your Azure OpenAI API key"
+                      placeholder="sk-..."
                       value={apiKey}
                       onChange={(e) => {
                         setApiKey(e.target.value);
@@ -752,173 +673,252 @@ export const AIChat: React.FC = () => {
                       }}
                       disabled={loading}
                     />
-                  </Form.Group>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Endpoint</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="https://your-resource.openai.azure.com"
-                      value={endpoint}
-                      onChange={(e) => {
-                        setEndpoint(e.target.value);
-                        setConnectionStatus('unknown');
-                      }}
-                      disabled={loading}
-                    />
                     <Form.Text className="text-muted">
-                      Your Azure OpenAI resource endpoint
-                    </Form.Text>
-                  </Form.Group>
-                  <Form.Group className="mb-3">
-                    <Form.Label>API Version</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="2024-02-15-preview"
-                      value={azureApiVersion}
-                      onChange={(e) => setAzureApiVersion(e.target.value)}
-                      disabled={loading}
-                    />
-                  </Form.Group>
-                </>
-              )}
-
-              {provider === 'ollama' && (
-                <>
-                  <Alert variant="warning" className="mb-3">
-                    <Alert.Heading className="h6">⚠️ CORS Configuration Required</Alert.Heading>
-                    <p className="mb-2 small">
-                      To connect from this web app, you need to configure Ollama to allow CORS requests.
-                    </p>
-                    <details className="small">
-                      <summary style={{ cursor: 'pointer' }} className="mb-2">
-                        <strong>Setup Instructions (Click to expand)</strong>
-                      </summary>
-                      <div className="mt-2">
-                        <p className="mb-2"><strong>Set the OLLAMA_ORIGINS environment variable:</strong></p>
-                        <div className="mb-2">
-                          <strong>macOS/Linux:</strong>
-                          <pre className="bg-dark text-light p-2 rounded mb-1">
-                            <code>export OLLAMA_ORIGINS="https://kobenguyent.github.io"</code>
-                          </pre>
-                          <pre className="bg-dark text-light p-2 rounded mb-1">
-                            <code>ollama serve</code>
-                          </pre>
-                        </div>
-                        <div className="mb-2">
-                          <strong>Windows (PowerShell):</strong>
-                          <pre className="bg-dark text-light p-2 rounded mb-1">
-                            <code>$env:OLLAMA_ORIGINS="https://kobenguyent.github.io"</code>
-                          </pre>
-                          <pre className="bg-dark text-light p-2 rounded mb-1">
-                            <code>ollama serve</code>
-                          </pre>
-                        </div>
-                        <div className="mb-2">
-                          <strong>Windows (Command Prompt):</strong>
-                          <pre className="bg-dark text-light p-2 rounded mb-1">
-                            <code>set OLLAMA_ORIGINS=https://kobenguyent.github.io</code>
-                          </pre>
-                          <pre className="bg-dark text-light p-2 rounded mb-1">
-                            <code>ollama serve</code>
-                          </pre>
-                        </div>
-                        <p className="small text-muted mb-0">
-                          Note: You may also use <code>OLLAMA_ORIGINS="*"</code> to allow all origins (less secure).
-                        </p>
-                      </div>
-                    </details>
-                  </Alert>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Endpoint</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="http://localhost:11434"
-                      value={endpoint}
-                      onChange={(e) => {
-                        setEndpoint(e.target.value);
-                        setConnectionStatus('unknown');
-                      }}
-                      disabled={loading}
-                    />
-                    <Form.Text className="text-muted">
-                      Ollama API endpoint. Install from{' '}
-                      <a 
-                        href="https://ollama.ai" 
-                        target="_blank" 
+                      Your OpenAI API key. Get it from{' '}
+                      <a
+                        href="https://platform.openai.com/api-keys"
+                        target="_blank"
                         rel="noopener noreferrer"
                       >
-                        ollama.ai
+                        OpenAI Dashboard
                       </a>
                     </Form.Text>
                   </Form.Group>
-                </>
-              )}
+                )}
 
-              <Row className="mb-3">
-                <Col md={6}>
-                  <Form.Group>
-                    <Form.Label>Temperature: {temperature.toFixed(1)}</Form.Label>
-                    <Form.Range
-                      min={0}
-                      max={2}
-                      step={0.1}
-                      value={temperature}
-                      onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                {provider === 'anthropic' && (
+                  <Form.Group className="mb-3">
+                    <Form.Label>API Key</Form.Label>
+                    <Form.Control
+                      type="password"
+                      placeholder="sk-ant-..."
+                      value={apiKey}
+                      onChange={(e) => {
+                        setApiKey(e.target.value);
+                        setConnectionStatus('unknown');
+                      }}
                       disabled={loading}
                     />
                     <Form.Text className="text-muted">
-                      Higher values make output more random, lower values more focused
+                      Your Anthropic API key. Get it from{' '}
+                      <a
+                        href="https://console.anthropic.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Anthropic Console
+                      </a>
                     </Form.Text>
                   </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group>
-                    <Form.Label>System Prompt Type</Form.Label>
-                    <Form.Select
-                      value={systemPromptType}
-                      onChange={(e) => setSystemPromptType(e.target.value as 'default' | 'technical' | 'creative')}
+                )}
+
+                {provider === 'google' && (
+                  <Form.Group className="mb-3">
+                    <Form.Label>API Key</Form.Label>
+                    <Form.Control
+                      type="password"
+                      placeholder="AIza..."
+                      value={apiKey}
+                      onChange={(e) => {
+                        setApiKey(e.target.value);
+                        setConnectionStatus('unknown');
+                      }}
                       disabled={loading}
-                    >
-                      <option value="default">Default (Balanced)</option>
-                      <option value="technical">Technical (Precise)</option>
-                      <option value="creative">Creative (Innovative)</option>
-                    </Form.Select>
+                    />
                     <Form.Text className="text-muted">
-                      Choose the AI's response style and approach
+                      Your Google API key. Get it from{' '}
+                      <a
+                        href="https://makersuite.google.com/app/apikey"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Google AI Studio
+                      </a>
                     </Form.Text>
                   </Form.Group>
-                </Col>
-              </Row>
+                )}
 
-              <Form.Group className="mb-3">
-                <Form.Check 
-                  type="checkbox"
-                  id="optimize-tokens"
-                  label="Enable token optimization (reduces API costs)"
-                  checked={optimizeTokens}
-                  onChange={(e) => setOptimizeTokens(e.target.checked)}
-                  disabled={loading}
-                />
-                <Form.Text className="text-muted d-block">
-                  Automatically removes redundant whitespace and compresses messages
-                </Form.Text>
-              </Form.Group>
+                {provider === 'azure-openai' && (
+                  <>
+                    <Form.Group className="mb-3">
+                      <Form.Label>API Key</Form.Label>
+                      <Form.Control
+                        type="password"
+                        placeholder="Your Azure OpenAI API key"
+                        value={apiKey}
+                        onChange={(e) => {
+                          setApiKey(e.target.value);
+                          setConnectionStatus('unknown');
+                        }}
+                        disabled={loading}
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Endpoint</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="https://your-resource.openai.azure.com"
+                        value={endpoint}
+                        onChange={(e) => {
+                          setEndpoint(e.target.value);
+                          setConnectionStatus('unknown');
+                        }}
+                        disabled={loading}
+                      />
+                      <Form.Text className="text-muted">
+                        Your Azure OpenAI resource endpoint
+                      </Form.Text>
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>API Version</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="2024-02-15-preview"
+                        value={azureApiVersion}
+                        onChange={(e) => setAzureApiVersion(e.target.value)}
+                        disabled={loading}
+                      />
+                    </Form.Group>
+                  </>
+                )}
 
-              <div className="d-flex gap-2 align-items-center">
-                <Button 
-                  variant="primary" 
-                  onClick={handleTestConnection}
-                  disabled={loading || !isConfigured}
-                >
-                {loading ? <Spinner animation="border" size="sm" /> : '🔌 Test Connection'}
-              </Button>
-              {tokenCount.total > 0 && (
-                <Badge bg="info" className="ms-2">
-                  📊 Tokens: {tokenCount.input} input / ~{tokenCount.total} total
-                </Badge>
-              )}
-            </div>
-            </Form>
+                {provider === 'ollama' && (
+                  <>
+                    <Alert variant="warning" className="mb-3">
+                      <Alert.Heading className="h6">⚠️ CORS Configuration Required</Alert.Heading>
+                      <p className="mb-2 small">
+                        To connect from this web app, you need to configure Ollama to allow CORS requests.
+                      </p>
+                      <details className="small">
+                        <summary style={{ cursor: 'pointer' }} className="mb-2">
+                          <strong>Setup Instructions (Click to expand)</strong>
+                        </summary>
+                        <div className="mt-2">
+                          <p className="mb-2"><strong>Set the OLLAMA_ORIGINS environment variable:</strong></p>
+                          <div className="mb-2">
+                            <strong>macOS/Linux:</strong>
+                            <pre className="bg-dark text-light p-2 rounded mb-1">
+                              <code>export OLLAMA_ORIGINS="https://kobenguyent.github.io"</code>
+                            </pre>
+                            <pre className="bg-dark text-light p-2 rounded mb-1">
+                              <code>ollama serve</code>
+                            </pre>
+                          </div>
+                          <div className="mb-2">
+                            <strong>Windows (PowerShell):</strong>
+                            <pre className="bg-dark text-light p-2 rounded mb-1">
+                              <code>$env:OLLAMA_ORIGINS="https://kobenguyent.github.io"</code>
+                            </pre>
+                            <pre className="bg-dark text-light p-2 rounded mb-1">
+                              <code>ollama serve</code>
+                            </pre>
+                          </div>
+                          <div className="mb-2">
+                            <strong>Windows (Command Prompt):</strong>
+                            <pre className="bg-dark text-light p-2 rounded mb-1">
+                              <code>set OLLAMA_ORIGINS=https://kobenguyent.github.io</code>
+                            </pre>
+                            <pre className="bg-dark text-light p-2 rounded mb-1">
+                              <code>ollama serve</code>
+                            </pre>
+                          </div>
+                          <p className="small text-muted mb-0">
+                            Note: You may also use <code>OLLAMA_ORIGINS="*"</code> to allow all origins (less secure).
+                          </p>
+                        </div>
+                      </details>
+                    </Alert>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Endpoint</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="http://localhost:11434"
+                        value={endpoint}
+                        onChange={(e) => {
+                          setEndpoint(e.target.value);
+                          setConnectionStatus('unknown');
+                        }}
+                        disabled={loading}
+                      />
+                      <Form.Text className="text-muted">
+                        Ollama API endpoint. Install from{' '}
+                        <a
+                          href="https://ollama.ai"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          ollama.ai
+                        </a>
+                      </Form.Text>
+                    </Form.Group>
+                  </>
+                )}
+
+                <Row className="mb-3">
+                  <Col md={6}>
+                    <Form.Group>
+                      <Form.Label>Temperature: {temperature.toFixed(1)}</Form.Label>
+                      <Form.Range
+                        min={0}
+                        max={2}
+                        step={0.1}
+                        value={temperature}
+                        onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                        disabled={loading}
+                      />
+                      <Form.Text className="text-muted">
+                        Higher values make output more random, lower values more focused
+                      </Form.Text>
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group>
+                      <Form.Label>System Prompt Type</Form.Label>
+                      <Form.Select
+                        value={systemPromptType}
+                        onChange={(e) => setSystemPromptType(e.target.value as 'default' | 'technical' | 'creative')}
+                        disabled={loading}
+                      >
+                        <option value="default">Default (Balanced)</option>
+                        <option value="technical">Technical (Precise)</option>
+                        <option value="creative">Creative (Innovative)</option>
+                      </Form.Select>
+                      <Form.Text className="text-muted">
+                        Choose the AI's response style and approach
+                      </Form.Text>
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Form.Group className="mb-3">
+                  <Form.Check
+                    type="checkbox"
+                    id="optimize-tokens"
+                    label="Enable token optimization (reduces API costs)"
+                    checked={optimizeTokens}
+                    onChange={(e) => setOptimizeTokens(e.target.checked)}
+                    disabled={loading}
+                  />
+                  <Form.Text className="text-muted d-block">
+                    Automatically removes redundant whitespace and compresses messages
+                  </Form.Text>
+                </Form.Group>
+
+                <div className="d-flex gap-2 align-items-center">
+                  <Button
+                    variant="primary"
+                    onClick={handleTestConnection}
+                    disabled={loading || !isConfigured}
+                  >
+                    {loading ? <Spinner animation="border" size="sm" /> : '🔌 Test Connection'}
+                  </Button>
+                  {tokenCount.total > 0 && (
+                    <Badge bg="info" className="ms-2">
+                      📊 Tokens: {tokenCount.input} input / ~{tokenCount.total} total
+                    </Badge>
+                  )}
+                </div>
+              </Form>
             </Card.Body>
           </Collapse>
         </Card>
@@ -947,16 +947,16 @@ export const AIChat: React.FC = () => {
                       ➕ New Conversation
                     </Button>
                   </div>
-                  
+
                   {conversations.length > 0 ? (
                     <ListGroup>
                       {conversations.map(conv => (
-                        <ListGroup.Item 
+                        <ListGroup.Item
                           key={conv.id}
                           active={conv.id === currentConversationId}
                           className="d-flex justify-content-between align-items-center"
                         >
-                          <div 
+                          <div
                             style={{ cursor: 'pointer', flex: 1 }}
                             onClick={() => handleLoadConversation(conv.id)}
                           >
@@ -1117,7 +1117,7 @@ export const AIChat: React.FC = () => {
 
                 {/* MCP Server Connection */}
                 <Card className="mb-3">
-                  <Card.Header className="bg-light">
+                  <Card.Header style={{ backgroundColor: 'var(--card-bg)', color: 'var(--text)', borderBottom: '1px solid var(--border-color)' }}>
                     <strong>Custom MCP Server</strong>
                   </Card.Header>
                   <Card.Body>
@@ -1151,10 +1151,10 @@ export const AIChat: React.FC = () => {
                     {getToolCategories().map(category => {
                       const categoryTools = mcpToolManager.getToolsByCategory(category);
                       if (categoryTools.length === 0) return null;
-                      
+
                       return (
                         <Card key={category} className="mb-3">
-                          <Card.Header className="bg-light">
+                          <Card.Header style={{ backgroundColor: 'var(--card-bg)', color: 'var(--text)', borderBottom: '1px solid var(--border-color)' }}>
                             <strong className="text-capitalize">
                               {category} Tools ({categoryTools.filter(t => t.enabled).length}/{categoryTools.length})
                             </strong>
@@ -1194,14 +1194,14 @@ export const AIChat: React.FC = () => {
 
                 {/* Help & Documentation */}
                 <div className="mt-3">
-                  <Button 
-                    variant="outline-secondary" 
+                  <Button
+                    variant="outline-secondary"
                     size="sm"
                     onClick={() => setShowMcpGuide(!showMcpGuide)}
                   >
                     {showMcpGuide ? '▼ Hide' : '📖 View'} Complete MCP Tools Guide
                   </Button>
-                  
+
                   {showMcpGuide && (
                     <Alert variant="light" className="mt-3 small" style={{ maxHeight: '400px', overflowY: 'auto' }}>
                       <pre className="mb-0" style={{ whiteSpace: 'pre-wrap', fontSize: '0.85em' }}>
@@ -1272,9 +1272,9 @@ export const AIChat: React.FC = () => {
           <Card.Header style={{ backgroundColor: 'var(--card-bg)', borderBottom: '1px solid var(--border-color)' }}>
             <div className="d-flex justify-content-between align-items-center">
               <h5 className="mb-0" style={{ fontSize: '1.25rem', fontWeight: '600', color: 'var(--text)' }}>💬 Chat</h5>
-              <Button 
-                variant="outline-secondary" 
-                size="sm" 
+              <Button
+                variant="outline-secondary"
+                size="sm"
                 onClick={handleClearChat}
                 disabled={messages.length === 0 || loading}
                 style={{ fontSize: '0.9rem' }}
@@ -1297,7 +1297,7 @@ export const AIChat: React.FC = () => {
                   >
                     {/* Increased from 70% to 75% for better readability on wider screens */}
                     <div style={{ maxWidth: '75%' }}>
-                      <Badge 
+                      <Badge
                         bg={msg.role === 'user' ? 'primary' : 'secondary'}
                         className="mb-1"
                         style={{ fontSize: '0.85rem' }}
@@ -1305,17 +1305,17 @@ export const AIChat: React.FC = () => {
                         {msg.role === 'user' ? '👤 You' : '🤖 AI'}
                         <span className="ms-2 small">{formatTimestamp(msg.timestamp)}</span>
                       </Badge>
-                      <Card 
-                        bg={msg.role === 'user' ? 'primary' : 'light'}
-                        text={msg.role === 'user' ? 'white' : 'dark'}
-                        style={{ 
+                      <Card
+                        style={{
+                          backgroundColor: msg.role === 'user' ? 'var(--primary)' : 'var(--card-bg)',
+                          color: msg.role === 'user' ? 'white' : 'var(--text)',
                           border: msg.role === 'user' ? 'none' : '1px solid var(--border-color)',
                           boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                         }}
                       >
                         <Card.Body className="py-2 px-3">
-                          <div style={{ 
-                            whiteSpace: 'pre-wrap', 
+                          <div style={{
+                            whiteSpace: 'pre-wrap',
                             wordBreak: 'break-word',
                             fontSize: '1rem',
                             lineHeight: '1.6'
@@ -1336,9 +1336,10 @@ export const AIChat: React.FC = () => {
                       <Badge bg="secondary" className="mb-1" style={{ fontSize: '0.85rem' }}>
                         🤖 AI
                       </Badge>
-                      <Card 
-                        bg="light"
-                        style={{ 
+                      <Card
+                        style={{
+                          backgroundColor: 'var(--card-bg)',
+                          color: 'var(--text)',
                           border: '1px solid var(--border-color)',
                           boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                         }}
@@ -1386,7 +1387,7 @@ export const AIChat: React.FC = () => {
                   variant="primary"
                   onClick={handleSendMessage}
                   disabled={loading || !inputMessage.trim() || !isConfigured}
-                  style={{ 
+                  style={{
                     minWidth: '100px',
                     fontSize: '1rem',
                     fontWeight: '500'

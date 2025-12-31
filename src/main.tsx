@@ -2,35 +2,36 @@ import React, { Suspense, lazy } from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import {createHashRouter, RouterProvider} from "react-router-dom";
+import './styles/glassmorphism.css'
+import { createHashRouter, RouterProvider } from "react-router-dom";
 import { LoadingSpinner } from './components/LoadingSpinner.tsx';
 import { Layout } from './components/Layout.tsx';
 
 // Lazy load components for better performance
-const InteractiveVoiceResponse = lazy(() => import('./components/terms/InteractiveVoiceResponse.tsx').then(module => ({default: module.InteractiveVoiceResponse})));
-const CodeceptJS = lazy(() => import('./components/hints/CodeceptJS.tsx').then(module => ({default: module.CodeceptJS})));
-const BusyLampField = lazy(() => import('./components/terms/BusyLampField.tsx').then(module => ({default: module.BusyLampField})));
-const SIP = lazy(() => import('./components/terms/SIP.tsx').then(module => ({default: module.SIP})));
-const JWTDebugger = lazy(() => import('./components/utils/JWTDebugger.tsx').then(module => ({default: module.JWTDebugger})));
-const Base64 = lazy(() => import('./components/utils/Base64.tsx').then(module => ({default: module.Base64})));
-const UnixTimestamp = lazy(() => import('./components/utils/UnixTimestamp.tsx').then(module => ({default: module.UnixTimestamp})));
-const JSONFormatter = lazy(() => import('./components/utils/JSONFormatter.tsx').then(module => ({default: module.JSONFormatter})));
-const UuidGenerator = lazy(() => import('./components/utils/UuidGenerator.tsx').then(module => ({default: module.UuidGenerator})));
-const JiraComment = lazy(() => import('./components/utils/JiraComment.tsx').then(module => ({default: module.JiraComment})));
-const OtpGenerator = lazy(() => import('./components/utils/OtpGenerator.tsx').then(module => ({default: module.OtpGenerator})));
-const PasswordGenerator = lazy(() => import('./components/utils/PasswordGenerator.tsx').then(module => ({default: module.PasswordGenerator})));
-const LoremIpsumGenerator = lazy(() => import('./components/utils/LoremIpsumGenerator.tsx').then(module => ({default: module.LoremIpsumGenerator})));
-const HashGenerator = lazy(() => import('./components/utils/HashGenerator.tsx').then(module => ({default: module.HashGenerator})));
-const HTPasswdGenerator = lazy(() => import('./components/utils/HTPasswdGenerator.tsx').then(module => ({default: module.HTPasswdGenerator})));
+const InteractiveVoiceResponse = lazy(() => import('./components/terms/InteractiveVoiceResponse.tsx').then(module => ({ default: module.InteractiveVoiceResponse })));
+const CodeceptJS = lazy(() => import('./components/hints/CodeceptJS.tsx').then(module => ({ default: module.CodeceptJS })));
+const BusyLampField = lazy(() => import('./components/terms/BusyLampField.tsx').then(module => ({ default: module.BusyLampField })));
+const SIP = lazy(() => import('./components/terms/SIP.tsx').then(module => ({ default: module.SIP })));
+const JWTDebugger = lazy(() => import('./components/utils/JWTDebugger.tsx').then(module => ({ default: module.JWTDebugger })));
+const Base64 = lazy(() => import('./components/utils/Base64.tsx').then(module => ({ default: module.Base64 })));
+const UnixTimestamp = lazy(() => import('./components/utils/UnixTimestamp.tsx').then(module => ({ default: module.UnixTimestamp })));
+const JSONFormatter = lazy(() => import('./components/utils/JSONFormatter.tsx').then(module => ({ default: module.JSONFormatter })));
+const UuidGenerator = lazy(() => import('./components/utils/UuidGenerator.tsx').then(module => ({ default: module.UuidGenerator })));
+const JiraComment = lazy(() => import('./components/utils/JiraComment.tsx').then(module => ({ default: module.JiraComment })));
+const OtpGenerator = lazy(() => import('./components/utils/OtpGenerator.tsx').then(module => ({ default: module.OtpGenerator })));
+const PasswordGenerator = lazy(() => import('./components/utils/PasswordGenerator.tsx').then(module => ({ default: module.PasswordGenerator })));
+const LoremIpsumGenerator = lazy(() => import('./components/utils/LoremIpsumGenerator.tsx').then(module => ({ default: module.LoremIpsumGenerator })));
+const HashGenerator = lazy(() => import('./components/utils/HashGenerator.tsx').then(module => ({ default: module.HashGenerator })));
+const HTPasswdGenerator = lazy(() => import('./components/utils/HTPasswdGenerator.tsx').then(module => ({ default: module.HTPasswdGenerator })));
 const PlaywrightToCodeceptjs = lazy(() => import('./components/utils/PlaywrightToCodeceptjs.tsx'));
-const EncryptionTool = lazy(() => import('./components/utils/EncryptionTool.tsx').then(module => ({default: module.EncryptionTool})));
-const WorkflowGenerator = lazy(() => import('./components/utils/WorkflowGenerator.tsx').then(module => ({default: module.WorkflowGenerator})));
-const RestClient = lazy(() => import('./components/utils/RestClient.tsx').then(module => ({default: module.RestClient})));
-const WebSocketClient = lazy(() => import('./components/utils/WebSocketClient.tsx').then(module => ({default: module.WebSocketClientComponent})));
-const GrpcClient = lazy(() => import('./components/utils/GrpcClient.tsx').then(module => ({default: module.GrpcClientComponent})));
-const Ctfl = lazy(() => import('./components/istqb/ctfl.tsx').then(module => ({default: module.Ctfl})));
-const CharacterCounter = lazy(() => import('./components/utils/CharacterCounter.tsx').then(module => ({default: module.CharacterCounter})));
-const AIChat = lazy(() => import('./components/utils/AIChat.tsx').then(module => ({default: module.AIChat})));
+const EncryptionTool = lazy(() => import('./components/utils/EncryptionTool.tsx').then(module => ({ default: module.EncryptionTool })));
+const WorkflowGenerator = lazy(() => import('./components/utils/WorkflowGenerator.tsx').then(module => ({ default: module.WorkflowGenerator })));
+const RestClient = lazy(() => import('./components/utils/RestClient.tsx').then(module => ({ default: module.RestClient })));
+const WebSocketClient = lazy(() => import('./components/utils/WebSocketClient.tsx').then(module => ({ default: module.WebSocketClientComponent })));
+const GrpcClient = lazy(() => import('./components/utils/GrpcClient.tsx').then(module => ({ default: module.GrpcClientComponent })));
+const Ctfl = lazy(() => import('./components/istqb/ctfl.tsx').then(module => ({ default: module.Ctfl })));
+const CharacterCounter = lazy(() => import('./components/utils/CharacterCounter.tsx').then(module => ({ default: module.CharacterCounter })));
+const AIChat = lazy(() => import('./components/utils/AIChat.tsx').then(module => ({ default: module.AIChat })));
 
 // Component wrapper with suspense for lazy loaded routes
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (

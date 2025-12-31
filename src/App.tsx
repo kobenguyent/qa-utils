@@ -1,7 +1,6 @@
 import './App.css'
-import './styles/glassmorphism.css'
-import {Layout} from "./components/Layout.tsx";
-import {Home} from "./components/Home.tsx";
+import { Layout } from "./components/Layout.tsx";
+import { Home } from "./components/Home.tsx";
 
 function App() {
   return (
