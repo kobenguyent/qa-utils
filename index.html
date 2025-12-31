@@ -34,6 +34,21 @@
     <title>QA Utils - Quality Assurance Tools & Utilities</title>
   </head>
   <body>
+    <script>
+      (function() {
+        try {
+          const theme = localStorage.getItem('qa-utils-theme');
+          const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+          if (!theme || theme === 'auto') {
+            document.documentElement.setAttribute('data-theme', supportDarkMode ? 'dark' : 'light');
+          } else {
+            document.documentElement.setAttribute('data-theme', theme);
+          }
+        } catch (e) {
+          console.error('Failed to initialize theme:', e);
+        }
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

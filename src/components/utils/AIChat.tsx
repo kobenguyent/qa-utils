@@ -568,7 +568,7 @@ export const AIChat: React.FC = () => {
     <Container fluid>
       <Container className="py-4">
         <div className="text-center mb-4">
-          <h1 style={{ fontSize: '2.5rem', fontWeight: '600', color: '#212529' }}>🤖 AI Chat</h1>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: '600', color: 'var(--text)' }}>🤖 AI Chat</h1>
           <p className="text-muted" style={{ fontSize: '1.05rem', lineHeight: '1.6', maxWidth: '800px', margin: '0 auto' }}>
             Advanced AI chat with multi-provider support (OpenAI, Anthropic Claude, Google Gemini, Azure OpenAI, Ollama),
             token optimization, conversation management, file uploads, MCP integration, and Cache-Augmented Generation (CAG)
@@ -576,16 +576,16 @@ export const AIChat: React.FC = () => {
         </div>
 
         {/* Configuration Panel */}
-        <Card className="mb-4" style={{ border: '1px solid #dee2e6' }}>
+        <Card className="mb-4" style={{ border: '1px solid var(--border-color)' }}>
           <Card.Header 
-            style={{ backgroundColor: '#f8f9fa', borderBottom: '1px solid #dee2e6', cursor: 'pointer' }}
+            style={{ backgroundColor: 'var(--card-bg)', borderBottom: '1px solid var(--border-color)', cursor: 'pointer' }}
             onClick={() => setConfigExpanded(!configExpanded)}
             role="button"
             aria-expanded={configExpanded}
             aria-controls="config-collapse"
           >
             <div className="d-flex justify-content-between align-items-center">
-              <h5 className="mb-0" style={{ fontSize: '1.25rem', fontWeight: '600', color: '#495057' }}>
+              <h5 className="mb-0" style={{ fontSize: '1.25rem', fontWeight: '600', color: 'var(--text)' }}>
                 {configExpanded ? '▼' : '▶'} ⚙️ Configuration
                 {connectionStatus === 'connected' && (
                   <Badge bg="success" className="ms-2" style={{ fontSize: '0.85rem' }}>Connected</Badge>
@@ -603,7 +603,7 @@ export const AIChat: React.FC = () => {
               <Row className="mb-3">
                 <Col md={6}>
                   <Form.Group>
-                    <Form.Label style={{ fontWeight: '500', fontSize: '1rem', color: '#495057' }}>Provider</Form.Label>
+                    <Form.Label style={{ fontWeight: '500', fontSize: '1rem', color: 'var(--text)' }}>Provider</Form.Label>
                     <Form.Select
                       value={provider}
                       onChange={(e) => handleProviderChange(e.target.value as AIProvider)}
@@ -620,7 +620,7 @@ export const AIChat: React.FC = () => {
                 </Col>
                 <Col md={5}>
                   <Form.Group>
-                    <Form.Label style={{ fontWeight: '500', fontSize: '1rem', color: '#495057' }}>Model</Form.Label>
+                    <Form.Label style={{ fontWeight: '500', fontSize: '1rem', color: 'var(--text)' }}>Model</Form.Label>
                     <InputGroup>
                       {availableModels.length > 0 ? (
                         <Form.Select
@@ -960,9 +960,9 @@ export const AIChat: React.FC = () => {
                             style={{ cursor: 'pointer', flex: 1 }}
                             onClick={() => handleLoadConversation(conv.id)}
                           >
-                            <strong style={{ color: conv.id === currentConversationId ? 'inherit' : '#212529' }}>{conv.name}</strong>
+                            <strong style={{ color: conv.id === currentConversationId ? 'inherit' : 'var(--text)' }}>{conv.name}</strong>
                             <br />
-                            <small style={{ color: conv.id === currentConversationId ? 'rgba(255,255,255,0.8)' : '#6c757d' }}>
+                            <small style={{ color: conv.id === currentConversationId ? 'var(--text)' : 'var(--muted)', opacity: conv.id === currentConversationId ? 0.85 : 1 }}>
                               {conv.messageCount} messages • {new Date(conv.createdAt).toLocaleDateString()}
                               {conv.provider && ` • ${conv.provider}`}
                             </small>
@@ -1268,10 +1268,10 @@ export const AIChat: React.FC = () => {
         </Card>
 
         {/* Chat Messages */}
-        <Card className="mb-3" style={{ height: '500px', display: 'flex', flexDirection: 'column', border: '1px solid #dee2e6' }}>
-          <Card.Header style={{ backgroundColor: '#f8f9fa', borderBottom: '1px solid #dee2e6' }}>
+        <Card className="mb-3" style={{ height: '500px', display: 'flex', flexDirection: 'column', border: '1px solid var(--border-color)' }}>
+          <Card.Header style={{ backgroundColor: 'var(--card-bg)', borderBottom: '1px solid var(--border-color)' }}>
             <div className="d-flex justify-content-between align-items-center">
-              <h5 className="mb-0" style={{ fontSize: '1.25rem', fontWeight: '600', color: '#495057' }}>💬 Chat</h5>
+              <h5 className="mb-0" style={{ fontSize: '1.25rem', fontWeight: '600', color: 'var(--text)' }}>💬 Chat</h5>
               <Button 
                 variant="outline-secondary" 
                 size="sm" 
@@ -1309,7 +1309,7 @@ export const AIChat: React.FC = () => {
                         bg={msg.role === 'user' ? 'primary' : 'light'}
                         text={msg.role === 'user' ? 'white' : 'dark'}
                         style={{ 
-                          border: msg.role === 'user' ? 'none' : '1px solid #dee2e6',
+                          border: msg.role === 'user' ? 'none' : '1px solid var(--border-color)',
                           boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                         }}
                       >
@@ -1339,7 +1339,7 @@ export const AIChat: React.FC = () => {
                       <Card 
                         bg="light"
                         style={{ 
-                          border: '1px solid #dee2e6',
+                          border: '1px solid var(--border-color)',
                           boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                         }}
                       >
