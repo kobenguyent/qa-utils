@@ -1117,7 +1117,7 @@ export const AIChat: React.FC = () => {
 
                 {/* MCP Server Connection */}
                 <Card className="mb-3">
-                  <Card.Header style={{ backgroundColor: 'var(--card-bg)', borderBottom: '1px solid var(--border-color)' }}>
+                  <Card.Header className="theme-card-header">
                     <strong>Custom MCP Server</strong>
                   </Card.Header>
                   <Card.Body>
@@ -1154,7 +1154,7 @@ export const AIChat: React.FC = () => {
                       
                       return (
                         <Card key={category} className="mb-3">
-                          <Card.Header style={{ backgroundColor: 'var(--card-bg)', borderBottom: '1px solid var(--border-color)' }}>
+                          <Card.Header className="theme-card-header">
                             <strong className="text-capitalize">
                               {category} Tools ({categoryTools.filter(t => t.enabled).length}/{categoryTools.length})
                             </strong>

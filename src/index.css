@@ -446,6 +446,13 @@ code.theme-code-block {
     color: var(--code-text) !important;
 }
 
+/* Theme-aware card header */
+.theme-card-header {
+    background-color: var(--card-bg) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    color: var(--text) !important;
+}
+
 /* Alert overrides for better theme compatibility */
 [data-theme="dark"] .alert-info {
     background-color: var(--info-bg);
