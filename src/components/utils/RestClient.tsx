@@ -316,7 +316,7 @@ export const RestClient: React.FC = () => {
       {(config.url && isValidUrl(config.url)) && (
         <div className="mb-3">
           <h5>Generated Curl Command:</h5>
-          <div className="bg-light p-2 rounded">
+          <div className="theme-code-block p-2 rounded">
             <code className="text-break">
               {requestConfigToCurl({
                 ...config,
@@ -352,17 +352,17 @@ export const RestClient: React.FC = () => {
 
             <Tabs defaultActiveKey="formatted" className="mb-3">
               <Tab eventKey="formatted" title="Formatted">
-                <pre className="bg-light p-2 rounded text-wrap" style={{ maxHeight: '400px', overflow: 'auto' }}>
+                <pre className="theme-code-block p-2 rounded text-wrap" style={{ maxHeight: '400px', overflow: 'auto' }}>
                   <code>{formatJsonResponse(response.data)}</code>
                 </pre>
               </Tab>
               <Tab eventKey="raw" title="Raw">
-                <pre className="bg-light p-2 rounded text-wrap" style={{ maxHeight: '400px', overflow: 'auto' }}>
+                <pre className="theme-code-block p-2 rounded text-wrap" style={{ maxHeight: '400px', overflow: 'auto' }}>
                   <code>{response.data}</code>
                 </pre>
               </Tab>
               <Tab eventKey="headers" title="Response Headers">
-                <pre className="bg-light p-2 rounded">
+                <pre className="theme-code-block p-2 rounded">
                   <code>
                     {Object.entries(response.headers)
                       .map(([key, value]) => `${key}: ${value}`)
