@@ -41,6 +41,14 @@
     /* light yellow for warnings */
     --warning-text: #856404;
     /* dark yellow-brown text */
+    --success-bg: #d1e7dd;
+    /* light green for success */
+    --success-text: #0f5132;
+    /* dark green text */
+    --danger-bg: #f8d7da;
+    /* light red for danger */
+    --danger-text: #842029;
+    /* dark red text */
 }
 
 /* Dark theme colors */
@@ -88,6 +96,14 @@
     /* dark amber for warnings */
     --warning-text: #fde68a;
     /* light yellow text */
+    --success-bg: #064e3b;
+    /* dark green for success */
+    --success-text: #6ee7b7;
+    /* light green text */
+    --danger-bg: #7f1d1d;
+    /* dark red for danger */
+    --danger-text: #fca5a5;
+    /* light red text */
 }
 
 body {
@@ -467,15 +483,15 @@ code.theme-code-block {
 }
 
 [data-theme="dark"] .alert-success {
-    background-color: rgba(16, 185, 129, 0.15);
-    color: #6ee7b7;
-    border-color: rgba(16, 185, 129, 0.3);
+    background-color: var(--success-bg);
+    color: var(--success-text);
+    border-color: var(--border-color);
 }
 
 [data-theme="dark"] .alert-danger {
-    background-color: rgba(239, 68, 68, 0.15);
-    color: #fca5a5;
-    border-color: rgba(239, 68, 68, 0.3);
+    background-color: var(--danger-bg);
+    color: var(--danger-text);
+    border-color: var(--border-color);
 }
 
 /* Badge improvements for dark mode */
@@ -484,13 +500,13 @@ code.theme-code-block {
 }
 
 [data-theme="dark"] .bg-warning {
-    background-color: var(--warning) !important;
-    color: #000 !important;
+    background-color: var(--warning-bg) !important;
+    color: var(--warning-text) !important;
 }
 
 [data-theme="dark"] .bg-info {
-    background-color: var(--info) !important;
-    color: #000 !important;
+    background-color: var(--info-bg) !important;
+    color: var(--info-text) !important;
 }
 
 /* Text color overrides for better readability */
