@@ -329,7 +329,7 @@ export const WorkflowGenerator: React.FC = () => {
                           </Button>
                         </ButtonGroup>
                       </div>
-                      <pre className="bg-light p-3 rounded border overflow-auto" style={{ maxHeight: '400px' }}>
+                      <pre className="theme-code-block p-3 rounded border overflow-auto" style={{ maxHeight: '400px' }}>
                         <code>{file.content}</code>
                       </pre>
                     </div>

@@ -223,7 +223,7 @@ export const JWTDebugger = () => {
 
                   {/* Timestamp Information */}
                   {(payload.iat || payload.exp || payload.nbf) && (
-                    <div className="mt-3 p-3 bg-light rounded">
+                    <div className="mt-3 p-3 theme-info-section rounded">
                       <h6 className="mb-2"><strong>⏰ Timestamps</strong></h6>
                       {payload.iat && (
                         <div className="mb-1">
@@ -254,7 +254,7 @@ export const JWTDebugger = () => {
 
                   {/* Additional Claims */}
                   {(payload.iss || payload.sub || payload.aud) && (
-                    <div className="mt-3 p-3 bg-light rounded">
+                    <div className="mt-3 p-3 theme-info-section rounded">
                       <h6 className="mb-2"><strong>🔐 Claims</strong></h6>
                       {payload.iss && (
                         <div className="mb-1">
@@ -284,7 +284,7 @@ export const JWTDebugger = () => {
 
               {/* Signature Section */}
               <Card className="mb-3 border-warning">
-                <Card.Header className="bg-warning text-dark">
+                <Card.Header className="theme-warning-section">
                   <strong>🔏 Signature</strong>
                 </Card.Header>
                 <Card.Body>

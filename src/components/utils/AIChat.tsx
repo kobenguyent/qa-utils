@@ -797,28 +797,28 @@ export const AIChat: React.FC = () => {
                         <p className="mb-2"><strong>Set the OLLAMA_ORIGINS environment variable:</strong></p>
                         <div className="mb-2">
                           <strong>macOS/Linux:</strong>
-                          <pre className="bg-dark text-light p-2 rounded mb-1">
+                          <pre className="theme-code-block p-2 rounded mb-1">
                             <code>export OLLAMA_ORIGINS="https://kobenguyent.github.io"</code>
                           </pre>
-                          <pre className="bg-dark text-light p-2 rounded mb-1">
+                          <pre className="theme-code-block p-2 rounded mb-1">
                             <code>ollama serve</code>
                           </pre>
                         </div>
                         <div className="mb-2">
                           <strong>Windows (PowerShell):</strong>
-                          <pre className="bg-dark text-light p-2 rounded mb-1">
+                          <pre className="theme-code-block p-2 rounded mb-1">
                             <code>$env:OLLAMA_ORIGINS="https://kobenguyent.github.io"</code>
                           </pre>
-                          <pre className="bg-dark text-light p-2 rounded mb-1">
+                          <pre className="theme-code-block p-2 rounded mb-1">
                             <code>ollama serve</code>
                           </pre>
                         </div>
                         <div className="mb-2">
                           <strong>Windows (Command Prompt):</strong>
-                          <pre className="bg-dark text-light p-2 rounded mb-1">
+                          <pre className="theme-code-block p-2 rounded mb-1">
                             <code>set OLLAMA_ORIGINS=https://kobenguyent.github.io</code>
                           </pre>
-                          <pre className="bg-dark text-light p-2 rounded mb-1">
+                          <pre className="theme-code-block p-2 rounded mb-1">
                             <code>ollama serve</code>
                           </pre>
                         </div>
@@ -1117,7 +1117,7 @@ export const AIChat: React.FC = () => {
 
                 {/* MCP Server Connection */}
                 <Card className="mb-3">
-                  <Card.Header className="bg-light">
+                  <Card.Header className="theme-card-header">
                     <strong>Custom MCP Server</strong>
                   </Card.Header>
                   <Card.Body>
@@ -1154,7 +1154,7 @@ export const AIChat: React.FC = () => {
                       
                       return (
                         <Card key={category} className="mb-3">
-                          <Card.Header className="bg-light">
+                          <Card.Header className="theme-card-header">
                             <strong className="text-capitalize">
                               {category} Tools ({categoryTools.filter(t => t.enabled).length}/{categoryTools.length})
                             </strong>

@@ -325,7 +325,7 @@ export const WebSocketClientComponent: React.FC = () => {
                     text={formatWebSocketMessage(message)}
                   />
                 </div>
-                <pre className="bg-light p-2 rounded small mb-0" style={{ whiteSpace: 'pre-wrap' }}>
+                <pre className="theme-code-block p-2 rounded small mb-0" style={{ whiteSpace: 'pre-wrap' }}>
                   <code>{message.data}</code>
                 </pre>
               </div>

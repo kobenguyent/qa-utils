@@ -459,7 +459,7 @@ message GetUserResponse {
                         text={formatGrpcMessage(message)}
                       />
                     </div>
-                    <pre className="bg-light p-2 rounded small">
+                    <pre className="theme-code-block p-2 rounded small">
                       <code>{message.data}</code>
                     </pre>
                   </div>
@@ -494,7 +494,7 @@ message GetUserResponse {
                     {new Date(message.timestamp).toLocaleTimeString()}
                   </span>
                 </div>
-                <pre className="bg-light p-1 rounded small mb-0">
+                <pre className="theme-code-block p-1 rounded small mb-0">
                   <code>{message.data}</code>
                 </pre>
               </div>

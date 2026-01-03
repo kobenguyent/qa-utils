@@ -29,6 +29,26 @@
     --table-color: #212529;
     --table-bg: transparent;
     --table-striped-bg: rgba(0, 0, 0, 0.05);
+    --code-bg: #f8f9fa;
+    /* light gray for code blocks */
+    --code-text: #1e293b;
+    /* dark text for code in light mode */
+    --info-bg: #e7f3ff;
+    /* light blue for info sections */
+    --info-text: #004085;
+    /* dark blue text */
+    --warning-bg: #fff3cd;
+    /* light yellow for warnings */
+    --warning-text: #856404;
+    /* dark yellow-brown text */
+    --success-bg: #d1e7dd;
+    /* light green for success */
+    --success-text: #0f5132;
+    /* dark green text */
+    --danger-bg: #f8d7da;
+    /* light red for danger */
+    --danger-text: #842029;
+    /* dark red text */
 }
 
 /* Dark theme colors */
@@ -64,6 +84,26 @@
     --table-color: #e2e8f0;
     --table-bg: transparent;
     --table-striped-bg: rgba(255, 255, 255, 0.05);
+    --code-bg: #1e293b;
+    /* slate-800 for code blocks in dark mode */
+    --code-text: #e2e8f0;
+    /* light text for code in dark mode */
+    --info-bg: #1e3a5f;
+    /* dark blue for info sections */
+    --info-text: #93c5fd;
+    /* light blue text with good contrast */
+    --warning-bg: #78350f;
+    /* dark amber for warnings */
+    --warning-text: #fde68a;
+    /* light yellow text */
+    --success-bg: #064e3b;
+    /* dark green for success */
+    --success-text: #6ee7b7;
+    /* light green text */
+    --danger-bg: #7f1d1d;
+    /* dark red for danger */
+    --danger-text: #fca5a5;
+    /* light red text */
 }
 
 body {
@@ -394,4 +434,86 @@ footer {
 
 .search-results .dropdown-menu {
     z-index: 1031 !important;
+}
+
+/* Theme-aware utility classes for better contrast */
+.theme-code-block {
+    background-color: var(--code-bg) !important;
+    color: var(--code-text) !important;
+    border: 1px solid var(--border-color);
+}
+
+.theme-info-section {
+    background-color: var(--info-bg) !important;
+    color: var(--info-text) !important;
+    border: 1px solid var(--border-color);
+}
+
+.theme-warning-section {
+    background-color: var(--warning-bg) !important;
+    color: var(--warning-text) !important;
+    border: 1px solid var(--border-color);
+}
+
+/* Ensure pre and code elements have good contrast */
+pre.theme-code-block,
+code.theme-code-block {
+    background-color: var(--code-bg) !important;
+    color: var(--code-text) !important;
+}
+
+/* Theme-aware card header */
+.theme-card-header {
+    background-color: var(--card-bg) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    color: var(--text) !important;
+}
+
+/* Alert overrides for better theme compatibility */
+[data-theme="dark"] .alert-info {
+    background-color: var(--info-bg);
+    color: var(--info-text);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .alert-warning {
+    background-color: var(--warning-bg);
+    color: var(--warning-text);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .alert-success {
+    background-color: var(--success-bg);
+    color: var(--success-text);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .alert-danger {
+    background-color: var(--danger-bg);
+    color: var(--danger-text);
+    border-color: var(--border-color);
+}
+
+/* Badge improvements for dark mode */
+[data-theme="dark"] .badge {
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .bg-warning {
+    background-color: var(--warning-bg) !important;
+    color: var(--warning-text) !important;
+}
+
+[data-theme="dark"] .bg-info {
+    background-color: var(--info-bg) !important;
+    color: var(--info-text) !important;
+}
+
+/* Text color overrides for better readability */
+[data-theme="dark"] .text-dark {
+    color: var(--text) !important;
+}
+
+[data-theme="light"] .text-light {
+    color: var(--text) !important;
 }

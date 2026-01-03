@@ -179,11 +179,11 @@ export const HTPasswdGenerator: React.FC = () => {
                 </ol>
                 <hr />
                 <h6>Server-Side Command (Recommended):</h6>
-                <pre className="bg-light p-2 rounded small mb-2">
+                <pre className="theme-code-block p-2 rounded small mb-2">
 {`htpasswd -c .htpasswd ${username || 'username'}`}
                 </pre>
                 <h6>Example Apache Configuration:</h6>
-                <pre className="bg-light p-2 rounded small">
+                <pre className="theme-code-block p-2 rounded small">
 {`<Directory "/var/www/html">
     AuthType Basic
     AuthName "Restricted Area"
