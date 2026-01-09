@@ -174,7 +174,7 @@ export const Header: React.FC = () => {
           </Nav>
 
           {/* Search */}
-          <div className="position-relative me-2" ref={searchRef} style={{ minWidth: '200px' }}>
+          <div className="position-relative me-2" ref={searchRef} style={{ minWidth: '300px' }}>
             <Form.Control
               id="navbar-search"
               type="search"
@@ -191,19 +191,21 @@ export const Header: React.FC = () => {
               }}
             />
             {showSearchResults && searchResults.length > 0 && (
-              <div className="search-results position-absolute w-100 mt-1" style={{ zIndex: 1050 }}>
-                <Dropdown.Menu show className="w-100" style={{ 
+              <div className="search-results position-absolute mt-1" style={{ zIndex: 1050, top: '100%', left: 0, minWidth: '300px' }}>
+                <Dropdown.Menu show style={{ 
                   maxHeight: '400px', 
                   overflowY: 'auto',
                   backgroundColor: 'var(--dropdown-bg)',
                   borderColor: 'var(--border-color)',
-                  zIndex: 1051
+                  zIndex: 1051,
+                  position: 'static',
+                  width: '100%'
                 }}>
                   {searchResults.map((result, index) => (
                     <Dropdown.Item
                       key={index}
                       onClick={() => handleSearchResultClick(result.path)}
-                      style={{ cursor: 'pointer' }}
+                      style={{ cursor: 'pointer', whiteSpace: 'normal' }}
                     >
                       <div>
                         <strong>{result.icon} {result.title}</strong>

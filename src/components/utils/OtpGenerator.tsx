@@ -7,8 +7,8 @@ import "react-circular-progressbar/dist/styles.css";
 export const OtpGenerator = () => {
   const [otp, setOtp] = useState("");
   const [show, setShow] = useState(false);
-  const [secret, setSecret] = useState("");
-  const [isSecretValid, setIsSecretValid] = useState(true);
+  const [secret, setSecret] = useState('');
+  const [isSecretValid, setIsSecretValid] = useState(false);
   const [secretKeys, setSecretKeys] = useState(() => {
     const storedKeys = localStorage.getItem("secretKeys");
     return storedKeys ? JSON.parse(storedKeys) : [];
@@ -18,18 +18,19 @@ export const OtpGenerator = () => {
   const [showTableSecrets, setShowTableSecrets] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(30);
 
-  const generateOtp = () => {
-    if (secret) {
+  const generateOtp = (secretKey?: string) => {
+    const keyToUse = secretKey || secret;
+    if (keyToUse) {
       // @ts-ignore
-      const newOtp = window.otplib.authenticator.generate(secret.trim());
+      const newOtp = window.otplib.authenticator.generate(keyToUse.trim());
       setOtp(newOtp);
       setIsSecretValid(true);
 
-      const keyExists = secretKeys.some((key: any) => key.key === secret.trim());
+      const keyExists = secretKeys.some((key: any) => key.key === keyToUse.trim());
       if (!keyExists) {
         const newSecret = {
           name: name.trim() || "Unnamed",
-          key: secret.trim(),
+          key: keyToUse.trim(),
           timestamp: new Date().toLocaleString()
         };
         const updatedKeys = [...secretKeys, newSecret];
@@ -42,21 +43,25 @@ export const OtpGenerator = () => {
     }
   };
 
+  const validateSecretKey = (key: string) => {
+    const formattedSecret = key.replace(/\s/g, "");
+    return formattedSecret.length === 16 || formattedSecret.length === 32;
+  };
+
   const handleSecretChange = (e: any) => {
     const cleanedSecret = e.target.value.replace(/\s/g, "");
     setSecret(cleanedSecret);
-  };
-
-  const validateSecretKey = () => {
-    const formattedSecret = secret.replace(/\s/g, "");
-    return formattedSecret.length === 16 || formattedSecret.length === 32;
+    setIsSecretValid(validateSecretKey(cleanedSecret));
+    if (!validateSecretKey(cleanedSecret)) {
+      setOtp("");
+    }
   };
 
   useEffect(() => {
     const timerId = setInterval(() => {
       setTimeRemaining((prevTime) => {
         if (prevTime <= 0) {
-          if (validateSecretKey() && secret) {
+          if (isSecretValid && secret) {
             generateOtp();
             return 30;
           } else {
@@ -68,10 +73,10 @@ export const OtpGenerator = () => {
       });
     }, 1000);
     return () => clearInterval(timerId);
-  }, [secret, validateSecretKey]);
+  }, [secret, isSecretValid]);
 
   const handleRegenerateClick = () => {
-    if (validateSecretKey() && secret) {
+    if (isSecretValid && secret) {
       generateOtp();
     }
   };
@@ -80,6 +85,7 @@ export const OtpGenerator = () => {
     setSecret("");
     setName("");
     setOtp("");
+    setIsSecretValid(false);
   };
 
   const handleClearAll = () => {
@@ -88,11 +94,15 @@ export const OtpGenerator = () => {
   };
 
   const handleSetCurrentSecret = (key: any, name: string) => {
+    const isValid = validateSecretKey(key);
     setSecret(key);
+    setIsSecretValid(isValid);
     setName(name);
-    setOtp(""); // Clear OTP when switching secrets
-    setTimeRemaining(30); // Reset timer
-    generateOtp(); // Generate OTP immediately for the selected secret
+    setOtp("");
+    setTimeRemaining(30);
+    if (isValid) {
+      generateOtp(key);
+    }
   };
 
   return (
@@ -125,7 +135,7 @@ export const OtpGenerator = () => {
               placeholder="Enter your secret key"
               value={secret}
               onChange={handleSecretChange}
-              isInvalid={!isSecretValid}
+              isInvalid={secret.length > 0 && !isSecretValid}
             />
             <Form.Control.Feedback type="invalid">
               Secret key must be 16 or 32 characters long.
@@ -167,7 +177,7 @@ export const OtpGenerator = () => {
         </Form.Group>
       </Form>
 
-      {secret && (
+      {secret && isSecretValid && (
         <Row className="justify-content-center mt-4">
           <Col xs="auto">
             <div style={{ width: 100, height: 100 }}>
