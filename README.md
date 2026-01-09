@@ -7,7 +7,7 @@ A comprehensive collection of quality assurance tools and utilities designed to 
 
 🌐 **[Live Demo](https://kobenguyent.github.io/qa-utils/#/)** | 📊 **219 Tests** | 🎯 **Mobile-First Design** | 🤖 **AI-Powered**
 
-![QA Utils Homepage](https://github.com/user-attachments/assets/ba5c6fd8-efe8-4dc3-921a-9accbe53690b)
+<img width="1310" height="780" alt="Screenshot 1" src="https://github.com/user-attachments/assets/667bf71d-84cc-4d30-bb1c-7b95fe37ceab" />
 
 ## ✨ Features
 
