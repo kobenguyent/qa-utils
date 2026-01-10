@@ -157,6 +157,14 @@ export const searchData: SearchItem[] = [
     keywords: ['character', 'counter', 'word', 'count', 'text', 'length'],
     icon: '🔢'
   },
+  {
+    title: 'Test File Generator',
+    description: 'Generate test files like images, documents, and audio files for testing',
+    path: '#/test-file-generator',
+    category: 'Generators',
+    keywords: ['test', 'file', 'generator', 'image', 'document', 'audio', 'png', 'jpg', 'pdf', 'wav', 'download'],
+    icon: '📁'
+  },
   
   // API Testing
   {

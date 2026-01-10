@@ -132,6 +132,7 @@ export const Header: React.FC = () => {
               <NavDropdown.Item href="#/lorem-ipsum">📝 Lorem Ipsum</NavDropdown.Item>
               <NavDropdown.Item href="#/jiraComment">📋 JIRA</NavDropdown.Item>
               <NavDropdown.Item href="#/character-counter">🔢 Counter</NavDropdown.Item>
+              <NavDropdown.Item href="#/test-file-generator">📁 Test Files</NavDropdown.Item>
             </NavDropdown>
 
             {/* API Testing */}
