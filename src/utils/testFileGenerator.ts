@@ -109,8 +109,22 @@ ${content},400,Custom content`;
     
     case 'pdf': {
       // Generate a proper PDF with correct structure
+      // Sanitize content to ASCII only (PDF with Type1 fonts only supports ASCII)
+      // Remove or replace non-ASCII characters to prevent btoa errors
+      const sanitizedContent = content
+        .split('')
+        .map(char => {
+          const code = char.charCodeAt(0);
+          return code >= 0 && code <= 127 ? char : '?';
+        })
+        .join('')
+        .substring(0, 200); // Limit to 200 chars to keep PDF small
+      
       // Escape special characters in content for PDF
-      const escapedContent = content.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
+      const escapedContent = sanitizedContent
+        .replace(/\\/g, '\\\\')
+        .replace(/\(/g, '\\(')
+        .replace(/\)/g, '\\)');
       
       // Create the stream content
       const streamContent = `BT
@@ -146,7 +160,14 @@ ET
       // Assemble the complete PDF
       const pdfContent = header + obj1 + obj2 + obj3 + obj4 + obj5 + xref + trailer;
       
-      return `data:application/pdf;base64,${btoa(pdfContent)}`;
+      // Use btoa safely - all content is now ASCII-safe
+      try {
+        return `data:application/pdf;base64,${btoa(pdfContent)}`;
+      } catch (error) {
+        console.error('PDF generation error:', error);
+        // Fallback: return empty data URL if btoa fails
+        return '';
+      }
     }
     
     default:
