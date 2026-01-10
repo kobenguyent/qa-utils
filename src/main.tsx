@@ -31,6 +31,7 @@ const GrpcClient = lazy(() => import('./components/utils/GrpcClient.tsx').then(m
 const Ctfl = lazy(() => import('./components/istqb/ctfl.tsx').then(module => ({default: module.Ctfl})));
 const CharacterCounter = lazy(() => import('./components/utils/CharacterCounter.tsx').then(module => ({default: module.CharacterCounter})));
 const AIChat = lazy(() => import('./components/utils/AIChat.tsx').then(module => ({default: module.AIChat})));
+const TestFileGenerator = lazy(() => import('./components/utils/TestFileGenerator.tsx').then(module => ({default: module.TestFileGenerator})));
 
 // Component wrapper with suspense for lazy loaded routes
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -141,6 +142,10 @@ const router = createHashRouter([
   {
     path: 'ai-chat',
     element: <RouteWrapper><AIChat /></RouteWrapper>
+  },
+  {
+    path: 'test-file-generator',
+    element: <RouteWrapper><TestFileGenerator /></RouteWrapper>
   },
 ]);
 
