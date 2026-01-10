@@ -215,7 +215,7 @@ export const generateAudio = (format: AudioFormat, config: FileConfig): string =
 /**
  * Get the file extension based on format
  */
-export const getFileExtension = (type: FileType, format: string): string => {
+export const getFileExtension = (_type: FileType, format: string): string => {
   return format;
 };
 
