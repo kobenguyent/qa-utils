@@ -108,43 +108,44 @@ ${content},400,Custom content`;
     }
     
     case 'pdf': {
-      // Simple PDF structure (very basic, not a full PDF implementation)
-      const pdfContent = `%PDF-1.4
-1 0 obj
-<< /Type /Catalog /Pages 2 0 R >>
-endobj
-2 0 obj
-<< /Type /Pages /Kids [3 0 R] /Count 1 >>
-endobj
-3 0 obj
-<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 5 0 R >>
-endobj
-4 0 obj
-<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
-endobj
-5 0 obj
-<< /Length 44 >>
-stream
-BT
-/F1 24 Tf
-100 700 Td
-(${content}) Tj
+      // Generate a proper PDF with correct structure
+      // Escape special characters in content for PDF
+      const escapedContent = content.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
+      
+      // Create the stream content
+      const streamContent = `BT
+/F1 12 Tf
+50 750 Td
+(${escapedContent}) Tj
 ET
-endstream
-endobj
-xref
-0 6
-0000000000 65535 f 
-0000000009 00000 n 
-0000000058 00000 n 
-0000000115 00000 n 
-0000000262 00000 n 
-0000000341 00000 n 
-trailer
-<< /Size 6 /Root 1 0 R >>
-startxref
-435
-%%EOF`;
+`;
+      const streamLength = streamContent.length;
+      
+      // Build PDF objects with proper line endings
+      const obj1 = '1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n';
+      const obj2 = '2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n';
+      const obj3 = '3 0 obj\n<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 5 0 R >>\nendobj\n';
+      const obj4 = '4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n';
+      const obj5 = `5 0 obj\n<< /Length ${streamLength} >>\nstream\n${streamContent}endstream\nendobj\n`;
+      
+      // Calculate byte offsets
+      const header = '%PDF-1.4\n';
+      const offset1 = header.length;
+      const offset2 = offset1 + obj1.length;
+      const offset3 = offset2 + obj2.length;
+      const offset4 = offset3 + obj3.length;
+      const offset5 = offset4 + obj4.length;
+      const xrefOffset = offset5 + obj5.length;
+      
+      // Build xref table
+      const xref = `xref\n0 6\n0000000000 65535 f \n${String(offset1).padStart(10, '0')} 00000 n \n${String(offset2).padStart(10, '0')} 00000 n \n${String(offset3).padStart(10, '0')} 00000 n \n${String(offset4).padStart(10, '0')} 00000 n \n${String(offset5).padStart(10, '0')} 00000 n \n`;
+      
+      // Build trailer
+      const trailer = `trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+      
+      // Assemble the complete PDF
+      const pdfContent = header + obj1 + obj2 + obj3 + obj4 + obj5 + xref + trailer;
+      
       return `data:application/pdf;base64,${btoa(pdfContent)}`;
     }
     
