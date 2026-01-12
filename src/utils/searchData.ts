@@ -31,6 +31,30 @@ export const searchData: SearchItem[] = [
     keywords: ['codeceptjs', 'hints', 'tips', 'best practices', 'testing'],
     icon: '🔥💡'
   },
+  {
+    title: 'Web Testing Checklist',
+    description: 'Comprehensive checklist for web application testing',
+    path: '#/web-testing-checklist',
+    category: 'Checklists',
+    keywords: ['web', 'testing', 'checklist', 'qa', 'browser', 'ui', 'functional', 'accessibility', 'security', 'performance'],
+    icon: '✅'
+  },
+  {
+    title: 'API Testing Checklist',
+    description: 'Complete checklist for REST API and GraphQL testing',
+    path: '#/api-testing-checklist',
+    category: 'Checklists',
+    keywords: ['api', 'testing', 'checklist', 'rest', 'graphql', 'http', 'security', 'performance', 'integration'],
+    icon: '✅'
+  },
+  {
+    title: 'Mobile Testing Checklist',
+    description: 'Comprehensive checklist for iOS and Android mobile testing',
+    path: '#/mobile-testing-checklist',
+    category: 'Checklists',
+    keywords: ['mobile', 'testing', 'checklist', 'ios', 'android', 'app', 'device', 'performance', 'accessibility'],
+    icon: '✅'
+  },
   
   // Terms
   {

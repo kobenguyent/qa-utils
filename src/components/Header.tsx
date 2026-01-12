@@ -166,6 +166,10 @@ export const Header: React.FC = () => {
             >
               <NavDropdown.Item href="#/codeceptjs">🔥 CodeceptJS Hints</NavDropdown.Item>
               <NavDropdown.Divider />
+              <NavDropdown.Item href="#/web-testing-checklist">✅ Web Testing</NavDropdown.Item>
+              <NavDropdown.Item href="#/api-testing-checklist">✅ API Testing</NavDropdown.Item>
+              <NavDropdown.Item href="#/mobile-testing-checklist">✅ Mobile Testing</NavDropdown.Item>
+              <NavDropdown.Divider />
               <NavDropdown.Item href="#/ivr">📞 IVR</NavDropdown.Item>
               <NavDropdown.Item href="#/blf">💡 BLF</NavDropdown.Item>
               <NavDropdown.Item href="#/sip">📡 SIP</NavDropdown.Item>
