@@ -32,6 +32,9 @@ const Ctfl = lazy(() => import('./components/istqb/ctfl.tsx').then(module => ({d
 const CharacterCounter = lazy(() => import('./components/utils/CharacterCounter.tsx').then(module => ({default: module.CharacterCounter})));
 const AIChat = lazy(() => import('./components/utils/AIChat.tsx').then(module => ({default: module.AIChat})));
 const TestFileGenerator = lazy(() => import('./components/utils/TestFileGenerator.tsx').then(module => ({default: module.TestFileGenerator})));
+const WebTestingChecklist = lazy(() => import('./components/hints/WebTestingChecklist.tsx').then(module => ({default: module.WebTestingChecklist})));
+const ApiTestingChecklist = lazy(() => import('./components/hints/ApiTestingChecklist.tsx').then(module => ({default: module.ApiTestingChecklist})));
+const MobileTestingChecklist = lazy(() => import('./components/hints/MobileTestingChecklist.tsx').then(module => ({default: module.MobileTestingChecklist})));
 
 // Component wrapper with suspense for lazy loaded routes
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -146,6 +149,18 @@ const router = createHashRouter([
   {
     path: 'test-file-generator',
     element: <RouteWrapper><TestFileGenerator /></RouteWrapper>
+  },
+  {
+    path: 'web-testing-checklist',
+    element: <RouteWrapper><WebTestingChecklist /></RouteWrapper>
+  },
+  {
+    path: 'api-testing-checklist',
+    element: <RouteWrapper><ApiTestingChecklist /></RouteWrapper>
+  },
+  {
+    path: 'mobile-testing-checklist',
+    element: <RouteWrapper><MobileTestingChecklist /></RouteWrapper>
   },
 ]);
 
