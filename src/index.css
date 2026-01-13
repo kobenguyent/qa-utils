@@ -302,7 +302,6 @@ body {
 
 .dropdown-item:hover {
     background-color: rgba(13, 110, 253, 0.15) !important;
-    transform: translateX(4px);
 }
 
 .dropdown-header {
