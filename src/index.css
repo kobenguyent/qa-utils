@@ -24,6 +24,8 @@
     --dropdown-hover: rgba(13, 110, 253, 0.15);
     --border-color: rgba(0, 0, 0, 0.1);
     --shadow-color: rgba(0, 0, 0, 0.1);
+    --glass-nav-hover: rgba(255, 255, 255, 0.6);
+    --glass-nav-active: rgba(13, 110, 253, 0.1);
     --input-bg: #ffffff;
     --input-border: #ced4da;
     --table-color: #212529;
@@ -79,6 +81,8 @@
     --dropdown-hover: rgba(59, 130, 246, 0.2);
     --border-color: rgba(100, 116, 139, 0.3);
     --shadow-color: rgba(0, 0, 0, 0.5);
+    --glass-nav-hover: rgba(255, 255, 255, 0.05);
+    --glass-nav-active: rgba(59, 130, 246, 0.2);
     --input-bg: #1e293b;
     --input-border: #475569;
     --table-color: #e2e8f0;
@@ -137,6 +141,10 @@ body {
 [data-theme="dark"] .form-select {
     background-color: var(--input-bg);
     border-color: var(--input-border);
+    color: var(--text);
+}
+
+[data-theme="dark"] .form-control-plaintext {
     color: var(--text);
 }
 
@@ -279,6 +287,12 @@ body {
 .nav-link:hover {
     color: var(--primary) !important;
     transform: translateY(-1px);
+}
+
+/* Fix for dropdown text color when active/open */
+.navbar-nav .nav-link.show,
+.navbar-nav .show>.nav-link {
+    color: var(--primary) !important;
 }
 
 /* Improved dropdown styles with glass effect */
@@ -515,4 +529,16 @@ code.theme-code-block {
 
 [data-theme="light"] .text-light {
     color: var(--text) !important;
+}
+
+/* Usage tips block */
+.usage-tips-block {
+    background-color: #f8f9fa;
+    color: var(--text);
+    border-radius: 4px;
+}
+
+[data-theme="dark"] .usage-tips-block {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
 }

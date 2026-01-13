@@ -9,10 +9,13 @@
 }
 
 @keyframes subtlePulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
+
   50% {
     opacity: 0.95;
     transform: scale(1.01);
@@ -31,15 +34,18 @@
 }
 
 /* Enhanced nav links with glass effect */
-.nav-link.glass-link {
+.nav-link.glass-link,
+.nav-link.glass-link:visited {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 8px;
   padding: 0.5rem 1rem !important;
-  color: var(--text);
+  color: var(--text) !important;
 }
 
-.nav-link.glass-link:hover {
-  background: rgba(255, 255, 255, 0.6);
+.nav-link.glass-link:hover,
+.nav-link.glass-link:focus,
+.nav-link.glass-link:active {
+  background: var(--glass-nav-hover);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   color: var(--text);
