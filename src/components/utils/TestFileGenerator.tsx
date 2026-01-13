@@ -18,16 +18,16 @@ export const TestFileGenerator: React.FC = () => {
   const [documentFormat, setDocumentFormat] = useState<DocumentFormat>('txt');
   const [audioFormat, setAudioFormat] = useState<AudioFormat>('wav');
   const [fileName, setFileName] = useState('test-file');
-  
+
   // Image options
   const [imageWidth, setImageWidth] = useState(800);
   const [imageHeight, setImageHeight] = useState(600);
   const [backgroundColor, setBackgroundColor] = useState('#4A90E2');
   const [imageText, setImageText] = useState('Test Image');
-  
+
   // Document options
   const [documentContent, setDocumentContent] = useState('Sample test document content');
-  
+
   // Audio options
   const [audioDuration, setAudioDuration] = useState(1);
   const [audioFrequency, setAudioFrequency] = useState(440);
@@ -48,7 +48,7 @@ export const TestFileGenerator: React.FC = () => {
 
     let dataUrl = '';
     let extension = '';
-    
+
     if (fileType === 'image') {
       dataUrl = generateImage(imageFormat, config);
       extension = getFileExtension(fileType, imageFormat);
@@ -59,7 +59,7 @@ export const TestFileGenerator: React.FC = () => {
       dataUrl = generateAudio(audioFormat, config);
       extension = getFileExtension(fileType, audioFormat);
     }
-    
+
     // Trigger download
     const link = document.createElement('a');
     link.href = dataUrl;
@@ -67,7 +67,7 @@ export const TestFileGenerator: React.FC = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     // Cleanup object URLs for audio
     if (fileType === 'audio' && dataUrl.startsWith('blob:')) {
       setTimeout(() => URL.revokeObjectURL(dataUrl), 100);
@@ -84,7 +84,7 @@ export const TestFileGenerator: React.FC = () => {
           <Card className="mb-4">
             <Card.Body>
               <h5 className="mb-3">File Settings</h5>
-              
+
               <Form.Group className="mb-3">
                 <Form.Label>File Type</Form.Label>
                 <ButtonGroup className="d-flex">
@@ -252,11 +252,11 @@ export const TestFileGenerator: React.FC = () => {
           <Card>
             <Card.Body>
               <h5 className="mb-3">Preview & Information</h5>
-              
+
               <div className="mb-3">
                 <strong>Selected Type:</strong> {fileType === 'image' ? '🖼️ Image' : fileType === 'document' ? '📄 Document' : '🔊 Audio'}
               </div>
-              
+
               {fileType === 'image' && (
                 <div>
                   <p><strong>Format:</strong> {imageFormat.toUpperCase()}</p>
@@ -265,17 +265,25 @@ export const TestFileGenerator: React.FC = () => {
                   <p><strong>Text:</strong> {imageText}</p>
                 </div>
               )}
-              
+
               {fileType === 'document' && (
                 <div>
                   <p><strong>Format:</strong> {documentFormat.toUpperCase()}</p>
                   <p><strong>Content Preview:</strong></p>
-                  <pre style={{ background: '#f5f5f5', padding: '10px', borderRadius: '4px', maxHeight: '200px', overflow: 'auto' }}>
+                  <pre
+                    className="theme-code-block"
+                    style={{
+                      padding: '10px',
+                      borderRadius: '4px',
+                      maxHeight: '200px',
+                      overflow: 'auto'
+                    }}
+                  >
                     {documentContent}
                   </pre>
                 </div>
               )}
-              
+
               {fileType === 'audio' && (
                 <div>
                   <p><strong>Format:</strong> {audioFormat.toUpperCase()}</p>
@@ -285,7 +293,7 @@ export const TestFileGenerator: React.FC = () => {
                 </div>
               )}
 
-              <div className="mt-4 p-3" style={{ background: '#f8f9fa', borderRadius: '4px' }}>
+              <div className="mt-4 p-3 usage-tips-block">
                 <h6>📝 Usage Tips:</h6>
                 <ul className="small mb-0">
                   <li>Generated files can be used for testing file uploads</li>
