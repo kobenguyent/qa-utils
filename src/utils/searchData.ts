@@ -123,6 +123,14 @@ export const searchData: SearchItem[] = [
     keywords: ['sql', 'query', 'generator', 'database', 'select', 'insert', 'update', 'delete', 'create', 'table'],
     icon: '🗄️'
   },
+  {
+    title: 'HTML Renderer',
+    description: 'Preview and render HTML code in real-time',
+    path: '#/html-renderer',
+    category: 'Converters & Formatters',
+    keywords: ['html', 'render', 'preview', 'viewer', 'markup', 'web', 'display'],
+    icon: '🌐'
+  },
   
   // Generators
   {

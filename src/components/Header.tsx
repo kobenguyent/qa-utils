@@ -117,6 +117,7 @@ export const Header: React.FC = () => {
               <NavDropdown.Item href="#/timestamp">⏰ Timestamp</NavDropdown.Item>
               <NavDropdown.Item href="#/jsonFormatter">﹛﹜ JSON</NavDropdown.Item>
               <NavDropdown.Item href="#/sql-generator">🗄️ SQL Generator</NavDropdown.Item>
+              <NavDropdown.Item href="#/html-renderer">🌐 HTML Renderer</NavDropdown.Item>
             </NavDropdown>
 
             {/* Generators */}
