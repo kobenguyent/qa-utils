@@ -55,6 +55,30 @@ export const searchData: SearchItem[] = [
     keywords: ['mobile', 'testing', 'checklist', 'ios', 'android', 'app', 'device', 'performance', 'accessibility'],
     icon: '✅'
   },
+  {
+    title: 'CI/CD Infographic',
+    description: 'Visual guide to Continuous Integration and Continuous Deployment',
+    path: '#/cicd-infographic',
+    category: 'Hints',
+    keywords: ['cicd', 'ci', 'cd', 'continuous', 'integration', 'deployment', 'pipeline', 'devops', 'automation'],
+    icon: '🔄'
+  },
+  {
+    title: 'AI Agents & MCP Infographic',
+    description: 'Visual guide to AI Agents and Model Context Protocol',
+    path: '#/ai-agents-infographic',
+    category: 'Hints',
+    keywords: ['ai', 'agents', 'mcp', 'model', 'context', 'protocol', 'llm', 'tools', 'langchain', 'autonomous'],
+    icon: '🤖'
+  },
+  {
+    title: 'Test Frameworks Comparison',
+    description: 'Compare test automation frameworks and choose the right one',
+    path: '#/test-frameworks-comparison',
+    category: 'Hints',
+    keywords: ['test', 'framework', 'comparison', 'playwright', 'cypress', 'selenium', 'jest', 'automation', 'e2e', 'unit'],
+    icon: '⚖️'
+  },
   
   // Terms
   {

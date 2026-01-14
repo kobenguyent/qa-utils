@@ -35,6 +35,9 @@ const TestFileGenerator = lazy(() => import('./components/utils/TestFileGenerato
 const WebTestingChecklist = lazy(() => import('./components/hints/WebTestingChecklist.tsx').then(module => ({default: module.WebTestingChecklist})));
 const ApiTestingChecklist = lazy(() => import('./components/hints/ApiTestingChecklist.tsx').then(module => ({default: module.ApiTestingChecklist})));
 const MobileTestingChecklist = lazy(() => import('./components/hints/MobileTestingChecklist.tsx').then(module => ({default: module.MobileTestingChecklist})));
+const CiCdInfographic = lazy(() => import('./components/hints/CiCdInfographic.tsx').then(module => ({default: module.CiCdInfographic})));
+const AiAgentsInfographic = lazy(() => import('./components/hints/AiAgentsInfographic.tsx').then(module => ({default: module.AiAgentsInfographic})));
+const TestFrameworksComparison = lazy(() => import('./components/hints/TestFrameworksComparison.tsx').then(module => ({default: module.TestFrameworksComparison})));
 const SqlGenerator = lazy(() => import('./components/utils/SqlGenerator.tsx').then(module => ({default: module.SqlGenerator})));
 const HtmlRenderer = lazy(() => import('./components/utils/HtmlRenderer.tsx').then(module => ({default: module.HtmlRenderer})));
 
@@ -163,6 +166,18 @@ const router = createHashRouter([
   {
     path: 'mobile-testing-checklist',
     element: <RouteWrapper><MobileTestingChecklist /></RouteWrapper>
+  },
+  {
+    path: 'cicd-infographic',
+    element: <RouteWrapper><CiCdInfographic /></RouteWrapper>
+  },
+  {
+    path: 'ai-agents-infographic',
+    element: <RouteWrapper><AiAgentsInfographic /></RouteWrapper>
+  },
+  {
+    path: 'test-frameworks-comparison',
+    element: <RouteWrapper><TestFrameworksComparison /></RouteWrapper>
   },
   {
     path: 'sql-generator',

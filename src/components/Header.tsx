@@ -167,6 +167,9 @@ export const Header: React.FC = () => {
               aria-label="Learning menu"
             >
               <NavDropdown.Item href="#/codeceptjs">🔥 CodeceptJS Hints</NavDropdown.Item>
+              <NavDropdown.Item href="#/cicd-infographic">🔄 CI/CD Infographic</NavDropdown.Item>
+              <NavDropdown.Item href="#/ai-agents-infographic">🤖 AI Agents & MCP</NavDropdown.Item>
+              <NavDropdown.Item href="#/test-frameworks-comparison">⚖️ Test Frameworks</NavDropdown.Item>
               <NavDropdown.Divider />
               <NavDropdown.Item href="#/web-testing-checklist">✅ Web Testing</NavDropdown.Item>
               <NavDropdown.Item href="#/api-testing-checklist">✅ API Testing</NavDropdown.Item>

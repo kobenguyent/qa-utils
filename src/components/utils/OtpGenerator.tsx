@@ -106,9 +106,55 @@ export const OtpGenerator = () => {
   };
 
   return (
-    <Container>      <div className="text-center">
+    <Container>
+      <div className="text-center mb-4">
         <h1>OTP Generator</h1>
+        <p className="text-muted">Generate Time-based One-Time Passwords (TOTP) for 2FA authentication</p>
       </div>
+
+      {/* Explanation Section */}
+      <Row className="mb-4">
+        <Col>
+          <div className="alert alert-info">
+            <h5 className="alert-heading">📖 How to Use This Tool</h5>
+            <hr />
+            
+            <h6 className="mt-3">🔑 What is OTP?</h6>
+            <p className="mb-2">
+              <strong>OTP (One-Time Password)</strong> is a temporary code that changes every 30 seconds, 
+              used for two-factor authentication (2FA) to secure your accounts.
+            </p>
+
+            <h6 className="mt-3">📝 Step-by-Step Guide:</h6>
+            <ol className="mb-2">
+              <li><strong>Get Your Secret Key:</strong> When enabling 2FA on a service (Google, GitHub, etc.), 
+                  you'll receive a secret key (usually 16 or 32 characters)</li>
+              <li><strong>Enter Name:</strong> Give it a recognizable name (e.g., "GitHub Account", "Google Work")</li>
+              <li><strong>Enter Secret Key:</strong> Paste your 16 or 32 character secret key</li>
+              <li><strong>Generate OTP:</strong> The tool automatically generates a 6-digit code</li>
+              <li><strong>Use the Code:</strong> Copy and paste the OTP into the service's 2FA prompt</li>
+              <li><strong>Auto-Refresh:</strong> The code refreshes every 30 seconds (watch the timer)</li>
+            </ol>
+
+            <h6 className="mt-3">💡 Key Features:</h6>
+            <ul className="mb-2">
+              <li><strong>Auto-Save:</strong> Secret keys are saved locally in your browser</li>
+              <li><strong>Multiple Accounts:</strong> Store and manage multiple 2FA accounts</li>
+              <li><strong>Timer:</strong> Visual countdown shows when the code expires</li>
+              <li><strong>Quick Switch:</strong> Click "Set as Current" to switch between accounts</li>
+              <li><strong>Privacy:</strong> All data stays in your browser (localStorage)</li>
+            </ul>
+
+            <h6 className="mt-3">⚠️ Important Notes:</h6>
+            <ul className="mb-0">
+              <li><strong>Secret Key Format:</strong> Must be exactly 16 or 32 characters (spaces are removed automatically)</li>
+              <li><strong>Keep Secrets Safe:</strong> Your secret keys are sensitive - don't share them</li>
+              <li><strong>Backup:</strong> Save your secret keys somewhere safe in case you clear browser data</li>
+              <li><strong>Time Sync:</strong> Ensure your device time is accurate for codes to work</li>
+            </ul>
+          </div>
+        </Col>
+      </Row>
 
       <Form>
         <Form.Group as={Row} className="mb-3">
