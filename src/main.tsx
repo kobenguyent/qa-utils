@@ -35,6 +35,7 @@ const TestFileGenerator = lazy(() => import('./components/utils/TestFileGenerato
 const WebTestingChecklist = lazy(() => import('./components/hints/WebTestingChecklist.tsx').then(module => ({default: module.WebTestingChecklist})));
 const ApiTestingChecklist = lazy(() => import('./components/hints/ApiTestingChecklist.tsx').then(module => ({default: module.ApiTestingChecklist})));
 const MobileTestingChecklist = lazy(() => import('./components/hints/MobileTestingChecklist.tsx').then(module => ({default: module.MobileTestingChecklist})));
+const SqlGenerator = lazy(() => import('./components/utils/SqlGenerator.tsx').then(module => ({default: module.SqlGenerator})));
 
 // Component wrapper with suspense for lazy loaded routes
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -161,6 +162,10 @@ const router = createHashRouter([
   {
     path: 'mobile-testing-checklist',
     element: <RouteWrapper><MobileTestingChecklist /></RouteWrapper>
+  },
+  {
+    path: 'sql-generator',
+    element: <RouteWrapper><SqlGenerator /></RouteWrapper>
   },
 ]);
 

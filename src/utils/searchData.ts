@@ -115,6 +115,14 @@ export const searchData: SearchItem[] = [
     keywords: ['json', 'format', 'formatter', 'validate', 'pretty', 'beautify'],
     icon: '﹛﹜'
   },
+  {
+    title: 'SQL Command Generator',
+    description: 'Generate SQL commands with a visual interface',
+    path: '#/sql-generator',
+    category: 'Converters & Formatters',
+    keywords: ['sql', 'query', 'generator', 'database', 'select', 'insert', 'update', 'delete', 'create', 'table'],
+    icon: '🗄️'
+  },
   
   // Generators
   {
