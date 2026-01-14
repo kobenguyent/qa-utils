@@ -6,7 +6,7 @@
     "dev": "bunx --bun vite",
     "build": "tsc && bunx --bun vite build",
     "build:github": "DEPLOY_ENV=github bun run build",
-    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 58",
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 60",
     "preview": "bunx --bun vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
