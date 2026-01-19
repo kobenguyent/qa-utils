@@ -198,6 +198,14 @@ export const searchData: SearchItem[] = [
     icon: '🔒'
   },
   {
+    title: 'GitHub PR Script Generator',
+    description: 'Generate bash scripts for creating GitHub pull requests with full git workflow',
+    path: '#/github-pr-generator',
+    category: 'Generators',
+    keywords: ['github', 'pull request', 'pr', 'git', 'bash', 'script', 'workflow', 'automation', 'cli'],
+    icon: '🚀'
+  },
+  {
     title: 'Lorem Ipsum Generator',
     description: 'Generate placeholder text for designs and mockups',
     path: '#/lorem-ipsum',

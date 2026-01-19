@@ -40,6 +40,7 @@ const AiAgentsInfographic = lazy(() => import('./components/hints/AiAgentsInfogr
 const TestFrameworksComparison = lazy(() => import('./components/hints/TestFrameworksComparison.tsx').then(module => ({default: module.TestFrameworksComparison})));
 const SqlGenerator = lazy(() => import('./components/utils/SqlGenerator.tsx').then(module => ({default: module.SqlGenerator})));
 const HtmlRenderer = lazy(() => import('./components/utils/HtmlRenderer.tsx').then(module => ({default: module.HtmlRenderer})));
+const GithubPrScriptGenerator = lazy(() => import('./components/utils/GithubPrScriptGenerator.tsx').then(module => ({default: module.GithubPrScriptGenerator})));
 
 // Component wrapper with suspense for lazy loaded routes
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -186,6 +187,10 @@ const router = createHashRouter([
   {
     path: 'html-renderer',
     element: <RouteWrapper><HtmlRenderer /></RouteWrapper>
+  },
+  {
+    path: 'github-pr-generator',
+    element: <RouteWrapper><GithubPrScriptGenerator /></RouteWrapper>
   },
 ]);
 
