@@ -76,9 +76,9 @@ const DEFAULT_MODELS: Record<AIProvider, ModelInfo> = {
     isDefault: true,
   },
   google: {
-    id: 'gemini-pro',
-    name: 'Gemini Pro',
-    contextWindow: DEFAULT_GEMINI_CONTEXT_WINDOW,
+    id: 'gemini-1.5-flash',
+    name: 'Gemini 1.5 Flash',
+    contextWindow: 1048576,
     provider: 'google',
     isDefault: true,
   },
@@ -422,7 +422,7 @@ async function sendToGoogle(
   config: ChatConfig
 ): Promise<ChatResponse> {
   const apiKey = config.apiKey;
-  const model = config.model || 'gemini-pro';
+  const model = config.model || 'gemini-1.5-flash';
   const endpoint = config.endpoint || `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
   // Convert messages to Gemini format
@@ -657,7 +657,7 @@ export async function testConnection(config: ChatConfig): Promise<boolean> {
 
     case 'google':
       {
-        const model = config.model || 'gemini-pro';
+        const model = config.model || 'gemini-1.5-flash';
         endpoint = config.endpoint || `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
         endpoint = `${endpoint}?key=${config.apiKey}`;
         body = JSON.stringify({
@@ -825,21 +825,21 @@ export async function fetchGoogleModels(apiKey?: string): Promise<ModelInfo[]> {
   // Default models to return when API key is not provided or API call fails
   const defaultModels: ModelInfo[] = [
     {
-      id: 'gemini-pro',
-      name: 'Gemini Pro',
-      contextWindow: DEFAULT_GEMINI_CONTEXT_WINDOW,
+      id: 'gemini-1.5-flash',
+      name: 'Gemini 1.5 Flash',
+      contextWindow: 1048576,
       provider: 'google',
       isDefault: true,
     },
     {
-      id: 'gemini-pro-vision',
-      name: 'Gemini Pro Vision',
-      contextWindow: 16384,
+      id: 'gemini-1.5-pro',
+      name: 'Gemini 1.5 Pro',
+      contextWindow: 2097152,
       provider: 'google',
     },
     {
-      id: 'gemini-1.5-pro',
-      name: 'Gemini 1.5 Pro',
+      id: 'gemini-2.0-flash-exp',
+      name: 'Gemini 2.0 Flash (Experimental)',
       contextWindow: 1048576,
       provider: 'google',
     },

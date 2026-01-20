@@ -208,7 +208,7 @@ The AI Chat feature supports multiple providers. Here's how to get started with 
 1. Sign up at [Google AI Studio](https://makersuite.google.com/)
 2. Generate an API key from the [API Keys page](https://makersuite.google.com/app/apikey)
 3. Select "Google Gemini" provider and enter your API key
-4. Available models: Gemini Pro, Gemini Pro Vision, Gemini 1.5 Pro (up to 1M tokens)
+4. Available models: Gemini 1.5 Flash, Gemini 1.5 Pro, Gemini 2.0 Flash (up to 2M tokens)
 
 ### Azure OpenAI
 1. Create an Azure OpenAI resource in Azure Portal
