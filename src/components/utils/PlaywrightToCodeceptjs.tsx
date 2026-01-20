@@ -7,7 +7,8 @@ import {
   ChatConfig, 
   AIProvider,
   testConnection,
-  getDefaultModel 
+  getDefaultModel,
+  fetchModels
 } from '../../utils/aiChatClient';
 
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -147,20 +148,46 @@ const TestConverter = () => {
   const [endpoint, setEndpoint] = useState('http://localhost:11434');
   const [model, setModel] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingModels, setLoadingModels] = useState(false);
   const [error, setError] = useState('');
   const [connectionStatus, setConnectionStatus] = useState<'unknown' | 'connected' | 'disconnected'>('unknown');
 
-  // Load saved API key from localStorage
+  // Load saved API key from localStorage and fetch available models
   useEffect(() => {
-    const savedApiKey = localStorage.getItem(`playwright_converter_${provider}_apiKey`);
-    if (savedApiKey) {
-      setApiKey(savedApiKey);
-    }
+    const loadModelsAndKey = async () => {
+      const savedApiKey = localStorage.getItem(`playwright_converter_${provider}_apiKey`);
+      if (savedApiKey) {
+        setApiKey(savedApiKey);
+      }
+      
+      // Fetch available models from API if possible
+      setLoadingModels(true);
+      try {
+        const models = await fetchModels(provider, { 
+          apiKey: savedApiKey || undefined, 
+          endpoint: provider === 'ollama' || provider === 'azure-openai' ? endpoint : undefined 
+        });
+        
+        // Set the first available model (should be the default/latest)
+        if (models.length > 0) {
+          const defaultModel = models.find(m => m.isDefault) || models[0];
+          setModel(defaultModel.id);
+        } else {
+          // Fallback to hardcoded default if API fetch fails
+          const defaultModel = getDefaultModel(provider);
+          setModel(defaultModel.id);
+        }
+      } catch (err) {
+        // Fallback to hardcoded default if API fetch fails
+        const defaultModel = getDefaultModel(provider);
+        setModel(defaultModel.id);
+      } finally {
+        setLoadingModels(false);
+      }
+    };
     
-    // Set default model based on provider
-    const defaultModel = getDefaultModel(provider);
-    setModel(defaultModel.id);
-  }, [provider]);
+    loadModelsAndKey();
+  }, [provider, endpoint]);
 
   // Test connection when API key changes
   useEffect(() => {
@@ -401,7 +428,7 @@ Return ONLY the converted CodeceptJS code without any explanations or markdown f
         <Button 
           onClick={handleConversion} 
           style={{marginRight: '10px'}} 
-          disabled={playwrightCode === "" || loading || (conversionMethod === 'ai' && connectionStatus === 'disconnected')}
+          disabled={playwrightCode === "" || loading || loadingModels || (conversionMethod === 'ai' && connectionStatus === 'disconnected')}
         >
           {loading ? (
             <>
@@ -414,6 +441,18 @@ Return ONLY the converted CodeceptJS code without any explanations or markdown f
                 className="me-2"
               />
               Converting...
+            </>
+          ) : loadingModels ? (
+            <>
+              <Spinner
+                as="span"
+                animation="border"
+                size="sm"
+                role="status"
+                aria-hidden="true"
+                className="me-2"
+              />
+              Loading models...
             </>
           ) : (
             'Convert'

@@ -9,6 +9,9 @@ vi.mock('../../utils/aiChatClient', () => ({
   sendChatMessage: vi.fn(),
   testConnection: vi.fn(),
   getDefaultModel: vi.fn(() => ({ id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', contextWindow: 4096, provider: 'openai' })),
+  fetchModels: vi.fn(() => Promise.resolve([
+    { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', contextWindow: 4096, provider: 'openai', isDefault: true }
+  ])),
 }));
 
 describe('PlaywrightToCodeceptjs', () => {
@@ -47,6 +50,11 @@ describe('PlaywrightToCodeceptjs', () => {
 
   it('should perform default conversion without AI', async () => {
     render(<PlaywrightToCodeceptjs />);
+    
+    // Wait for models to load
+    await waitFor(() => {
+      expect(screen.queryByText('Loading models...')).not.toBeInTheDocument();
+    });
     
     const textarea = screen.getByPlaceholderText('Paste your Playwright test code here');
     const convertButton = screen.getByText('Convert');
@@ -240,8 +248,13 @@ describe('PlaywrightToCodeceptjs', () => {
     expect(textarea.value).toContain('basic interaction');
   });
 
-  it('should disable convert button when no code is entered', () => {
+  it('should disable convert button when no code is entered', async () => {
     render(<PlaywrightToCodeceptjs />);
+    
+    // Wait for models to load
+    await waitFor(() => {
+      expect(screen.queryByText('Loading models...')).not.toBeInTheDocument();
+    });
     
     const convertButton = screen.getByText('Convert');
     
