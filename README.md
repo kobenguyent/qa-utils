@@ -136,7 +136,11 @@ Advanced AI chat interface with cutting-edge features:
 - **JIRA Comment Generator**: Format comments for JIRA with markdown support
 - **🌠 OTP Generator**: Generate time-based and counter-based OTP codes
 - **🔐 Encryption/Decryption**: Multiple encryption algorithms support
-- **🤖 Playwright to CodeceptJS**: Convert Playwright tests to CodeceptJS format
+- **🤖 Playwright to CodeceptJS Converter**: Convert Playwright tests to CodeceptJS format with dual conversion methods:
+  - **Default Mode**: Fast regex-based conversion for common patterns
+  - **AI-Powered Mode**: Context-aware conversion using AI providers (OpenAI, Anthropic, Google Gemini, Azure OpenAI, Ollama)
+  - **Features**: API key persistence, connection testing, automatic fallback on errors
+  - **Smart Conversion**: AI mode provides better handling of complex test scenarios
 
 ### 📚 Educational Resources
 
@@ -204,7 +208,7 @@ The AI Chat feature supports multiple providers. Here's how to get started with 
 1. Sign up at [Google AI Studio](https://makersuite.google.com/)
 2. Generate an API key from the [API Keys page](https://makersuite.google.com/app/apikey)
 3. Select "Google Gemini" provider and enter your API key
-4. Available models: Gemini Pro, Gemini Pro Vision, Gemini 1.5 Pro (up to 1M tokens)
+4. Available models: Gemini 1.5 Flash, Gemini 1.5 Pro, Gemini 2.0 Flash (up to 2M tokens)
 
 ### Azure OpenAI
 1. Create an Azure OpenAI resource in Azure Portal
@@ -324,18 +328,10 @@ For the complete MCP Tool Management Guide, click "📖 View Complete MCP Tools 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- **Bun** (recommended) or **Node.js 16+**
+- **Node.js 16+**
 - Modern web browser with ES6+ support
 
 ### Installation & Development
-
-#### With Bun (Recommended)
-
-```bash
-bun install && bun run dev
-```
-
-#### Alternative: With Node.js
 
 ```bash
 npm install && npm run dev
@@ -347,20 +343,20 @@ The application will be available at: **http://localhost:5173/**
 
 ```bash
 # Development server
-bun run dev          # Start development server with hot reload
+npm run dev          # Start development server with hot reload
 
 # Building
-bun run build        # Build for production
-bun run build:github # Build for GitHub Pages deployment
+npm run build        # Build for production
+npm run build:github # Build for GitHub Pages deployment
 
 # Testing
-bun test            # Run all tests
-bun run test:ui     # Run tests with UI
-bun run test:coverage # Generate coverage report
+npm test            # Run all tests
+npm run test:ui     # Run tests with UI
+npm run test:coverage # Generate coverage report
 
 # Code Quality
-bun run lint        # Run ESLint with TypeScript support
-bun run preview     # Preview production build
+npm run lint        # Run ESLint with TypeScript support
+npm run preview     # Preview production build
 ```
 
 ## 🏗️ Technology Stack
@@ -368,7 +364,7 @@ bun run preview     # Preview production build
 - **Frontend**: React 18, TypeScript, Bootstrap 5
 - **Build System**: Vite with SWC for fast builds
 - **Testing**: Vitest + React Testing Library (62 tests)
-- **Package Manager**: Bun (with npm fallback)
+- **Package Manager**: npm
 - **Code Quality**: ESLint, TypeScript strict mode
 - **CI/CD**: GitHub Actions with automated testing
 - **Deployment**: GitHub Pages with automated workflows

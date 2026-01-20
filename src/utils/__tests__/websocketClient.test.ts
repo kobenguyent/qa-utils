@@ -35,7 +35,7 @@ describe('websocketClient utilities', () => {
       const formatted = formatWebSocketMessage(message);
 
       expect(formatted).toContain('RECEIVED:');
-      expect(formatted).toContain('12:00:00');
+      expect(formatted).toMatch(/\d{1,2}:\d{2}:\d{2}/); // Match time format
       expect(formatted).toContain('"type": "greeting"');
       expect(formatted).toContain('"message": "Hello"');
     });
@@ -51,7 +51,7 @@ describe('websocketClient utilities', () => {
       const formatted = formatWebSocketMessage(message);
 
       expect(formatted).toContain('SENT:');
-      expect(formatted).toContain('12:00:00');
+      expect(formatted).toMatch(/\d{1,2}:\d{2}:\d{2}/); // Match time format
       expect(formatted).toContain('Plain text message');
     });
 

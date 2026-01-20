@@ -3,14 +3,15 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "bunx --bun vite",
-    "build": "tsc && bunx --bun vite build",
-    "build:github": "DEPLOY_ENV=github bun run build",
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "build:github": "DEPLOY_ENV=github npm run build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 100",
-    "preview": "bunx --bun vite preview",
-    "test": "vitest",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@ngneat/falso": "6.4.0",

@@ -691,10 +691,10 @@ describe('aiChatClient', () => {
       const mockModelsResponse = {
         models: [
           {
-            name: 'models/gemini-pro',
-            displayName: 'Gemini Pro',
+            name: 'models/gemini-1.5-flash',
+            displayName: 'Gemini 1.5 Flash',
             supportedGenerationMethods: ['generateContent'],
-            inputTokenLimit: 32768,
+            inputTokenLimit: 1048576,
           },
           {
             name: 'models/embedding-001',
@@ -712,7 +712,7 @@ describe('aiChatClient', () => {
 
       const models = await fetchGoogleModels('test-api-key');
       expect(models.length).toBe(1);
-      expect(models[0].id).toBe('gemini-pro');
+      expect(models[0].id).toBe('gemini-1.5-flash');
     });
 
     it('should return default models when Google API call fails', async () => {
@@ -721,7 +721,7 @@ describe('aiChatClient', () => {
       const models = await fetchGoogleModels('test-api-key');
       expect(models.length).toBeGreaterThan(0);
       expect(models.every(m => m.provider === 'google')).toBe(true);
-      expect(models.some(m => m.id === 'gemini-pro')).toBe(true);
+      expect(models.some(m => m.id === 'gemini-1.5-flash')).toBe(true);
     });
 
     it('should return default models when Google API returns invalid data', async () => {
@@ -732,7 +732,7 @@ describe('aiChatClient', () => {
 
       const models = await fetchGoogleModels('test-api-key');
       expect(models.length).toBeGreaterThan(0);
-      expect(models.some(m => m.id === 'gemini-pro')).toBe(true);
+      expect(models.some(m => m.id === 'gemini-1.5-flash')).toBe(true);
     });
 
     it('should return default models when Google API returns non-ok response', async () => {
@@ -744,7 +744,7 @@ describe('aiChatClient', () => {
 
       const models = await fetchGoogleModels('invalid-api-key');
       expect(models.length).toBeGreaterThan(0);
-      expect(models.some(m => m.id === 'gemini-pro')).toBe(true);
+      expect(models.some(m => m.id === 'gemini-1.5-flash')).toBe(true);
     });
 
     describe('fetchModels integration', () => {
@@ -807,7 +807,7 @@ describe('aiChatClient', () => {
         const models = await fetchModels('google', {});
         expect(models.length).toBeGreaterThan(0);
         expect(models.every(m => m.provider === 'google')).toBe(true);
-        expect(models.some(m => m.id === 'gemini-pro')).toBe(true);
+        expect(models.some(m => m.id === 'gemini-1.5-flash')).toBe(true);
       });
 
       it('should return default model for Azure OpenAI', async () => {
