@@ -136,7 +136,11 @@ Advanced AI chat interface with cutting-edge features:
 - **JIRA Comment Generator**: Format comments for JIRA with markdown support
 - **🌠 OTP Generator**: Generate time-based and counter-based OTP codes
 - **🔐 Encryption/Decryption**: Multiple encryption algorithms support
-- **🤖 Playwright to CodeceptJS**: Convert Playwright tests to CodeceptJS format
+- **🤖 Playwright to CodeceptJS Converter**: Convert Playwright tests to CodeceptJS format with dual conversion methods:
+  - **Default Mode**: Fast regex-based conversion for common patterns
+  - **AI-Powered Mode**: Context-aware conversion using AI providers (OpenAI, Anthropic, Google Gemini, Azure OpenAI, Ollama)
+  - **Features**: API key persistence, connection testing, automatic fallback on errors
+  - **Smart Conversion**: AI mode provides better handling of complex test scenarios
 
 ### 📚 Educational Resources
 
