@@ -25,8 +25,11 @@ jobs:
     - name: Run linter
       run: bun run lint
 
-    - name: Run tests
+    - name: Run utils tests
       run: bun test
+
+    - name: Run React component tests
+      run: bun test --config vitest.react.config.ts
 
     - name: Build project
       run: bun run build
@@ -48,7 +51,7 @@ jobs:
       run: bun install
 
     - name: Run tests with coverage
-      run: bun run test:coverage
+      run: bun run test:coverage && bun test --config vitest.react.config.ts --coverage
 
     - name: Upload coverage reports
       uses: codecov/codecov-action@v4
