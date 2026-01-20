@@ -69,18 +69,21 @@ export const simulateColorBlindness = (input: ColorInput, type: 'protanopia' | '
   const color = chroma(convertColor(input).hex);
   let simulatedColor: chroma.Color;
   
+  // Get RGB values
+  const [r, g, b] = color.rgb();
+  
   switch (type) {
     case 'protanopia':
-      // Simulate red-blind (remove red channel influence)
-      simulatedColor = chroma.rgb(0, color.get('rgb.g'), color.get('rgb.b'));
+      // Protanopia: red-blind, merge red into green
+      simulatedColor = chroma.rgb(0.567 * r + 0.433 * g, 0.558 * r + 0.442 * g, b);
       break;
     case 'deuteranopia':
-      // Simulate green-blind (remove green channel influence)
-      simulatedColor = chroma.rgb(color.get('rgb.r'), 0, color.get('rgb.b'));
+      // Deuteranopia: green-blind, merge green into red
+      simulatedColor = chroma.rgb(0.625 * r + 0.375 * g, 0.7 * r + 0.3 * g, b);
       break;
     case 'tritanopia':
-      // Simulate blue-blind (remove blue channel influence)
-      simulatedColor = chroma.rgb(color.get('rgb.r'), color.get('rgb.g'), 0);
+      // Tritanopia: blue-blind, merge blue into green
+      simulatedColor = chroma.rgb(r, 0.95 * g + 0.05 * b, 0.433 * g + 0.567 * b);
       break;
     default:
       simulatedColor = color;
