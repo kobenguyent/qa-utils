@@ -16,9 +16,11 @@
   },
   "dependencies": {
     "@ngneat/falso": "6.4.0",
+    "@types/chroma-js": "^3.1.2",
     "@types/react-copy-to-clipboard": "^5.0.7",
     "axios": "1.4.0",
     "bootstrap": "5.2.3",
+    "chroma-js": "^3.2.0",
     "date-fns": "2.30.0",
     "humps": "2.0.1",
     "js-base64": "3.7.5",

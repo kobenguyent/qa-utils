@@ -140,6 +140,14 @@ export const searchData: SearchItem[] = [
     icon: '﹛﹜'
   },
   {
+    title: 'Color Converter',
+    description: 'Convert between color formats (HEX, RGB, HSL, HSV, CMYK, LAB) with palette generation and accessibility analysis',
+    path: '#/color-converter',
+    category: 'Converters & Formatters',
+    keywords: ['color', 'converter', 'hex', 'rgb', 'hsl', 'hsv', 'cmyk', 'lab', 'palette', 'accessibility', 'contrast', 'wcag', 'colorblind'],
+    icon: '🎨'
+  },
+  {
     title: 'SQL Command Generator',
     description: 'Generate SQL commands with a visual interface',
     path: '#/sql-generator',
