@@ -328,18 +328,10 @@ For the complete MCP Tool Management Guide, click "📖 View Complete MCP Tools 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- **Bun** (recommended) or **Node.js 16+**
+- **Node.js 16+**
 - Modern web browser with ES6+ support
 
 ### Installation & Development
-
-#### With Bun (Recommended)
-
-```bash
-bun install && bun run dev
-```
-
-#### Alternative: With Node.js
 
 ```bash
 npm install && npm run dev
@@ -351,20 +343,20 @@ The application will be available at: **http://localhost:5173/**
 
 ```bash
 # Development server
-bun run dev          # Start development server with hot reload
+npm run dev          # Start development server with hot reload
 
 # Building
-bun run build        # Build for production
-bun run build:github # Build for GitHub Pages deployment
+npm run build        # Build for production
+npm run build:github # Build for GitHub Pages deployment
 
 # Testing
-bun test            # Run all tests
-bun run test:ui     # Run tests with UI
-bun run test:coverage # Generate coverage report
+npm test            # Run all tests
+npm run test:ui     # Run tests with UI
+npm run test:coverage # Generate coverage report
 
 # Code Quality
-bun run lint        # Run ESLint with TypeScript support
-bun run preview     # Preview production build
+npm run lint        # Run ESLint with TypeScript support
+npm run preview     # Preview production build
 ```
 
 ## 🏗️ Technology Stack
@@ -372,7 +364,7 @@ bun run preview     # Preview production build
 - **Frontend**: React 18, TypeScript, Bootstrap 5
 - **Build System**: Vite with SWC for fast builds
 - **Testing**: Vitest + React Testing Library (62 tests)
-- **Package Manager**: Bun (with npm fallback)
+- **Package Manager**: npm
 - **Code Quality**: ESLint, TypeScript strict mode
 - **CI/CD**: GitHub Actions with automated testing
 - **Deployment**: GitHub Pages with automated workflows
