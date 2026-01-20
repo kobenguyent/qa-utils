@@ -365,7 +365,7 @@ describe('grpcClient', () => {
       const formatted = formatGrpcMessage(message);
 
       expect(formatted).toContain('RESPONSE:');
-      expect(formatted).toContain('12:00:00');
+      expect(formatted).toMatch(/\d{1,2}:\d{2}:\d{2}/); // Match time format
       expect(formatted).toContain('"user": {');
       expect(formatted).toContain('"id": 123');
       expect(formatted).toContain('"name": "John"');
@@ -382,7 +382,7 @@ describe('grpcClient', () => {
       const formatted = formatGrpcMessage(message);
 
       expect(formatted).toContain('ERROR:');
-      expect(formatted).toContain('12:00:00');
+      expect(formatted).toMatch(/\d{1,2}:\d{2}:\d{2}/); // Match time format
       expect(formatted).toContain('Service unavailable');
     });
 

@@ -1,16 +1,37 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, beforeAll } from 'vitest';
 import { MCPToolManager, getMCPToolGuide } from '../mcpToolManager';
 import { MCPToolDefinition } from '../mcpTools';
 import { MCPClient } from '../mcpClient';
+
+// Setup storage mocks before all tests
+beforeAll(() => {
+  const createStorageMock = () => {
+    let store: Record<string, string> = {}
+    return {
+      getItem: (key: string) => store[key] || null,
+      setItem: (key: string, value: string) => { store[key] = value },
+      removeItem: (key: string) => { delete store[key] },
+      clear: () => { store = {} },
+      get length() { return Object.keys(store).length },
+      key: (index: number) => Object.keys(store)[index] || null,
+    }
+  }
+
+  const sessionStorageMock = createStorageMock()
+  
+  Object.defineProperty(globalThis, 'sessionStorage', {
+    value: sessionStorageMock,
+    writable: true,
+    configurable: true,
+  })
+})
 
 describe('MCPToolManager', () => {
   let manager: MCPToolManager;
 
   beforeEach(() => {
     // Clear storage before each test
-    if (typeof window !== 'undefined') {
-      window.sessionStorage.clear();
-    }
+    globalThis.sessionStorage.clear();
     manager = new MCPToolManager({ autoSave: false });
   });
 

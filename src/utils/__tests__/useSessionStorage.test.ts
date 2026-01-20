@@ -1,19 +1,39 @@
 import { renderHook, act } from '@testing-library/react';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi, beforeAll } from 'vitest';
 import { useSessionStorage, clearSessionStorage, clearAllSessionStorage } from '../useSessionStorage';
 
-// Skip these tests if window is not defined (Node environment)
-const describeOrSkip = typeof window !== 'undefined' ? describe : describe.skip;
+// Setup storage mocks before all tests
+beforeAll(() => {
+  const createStorageMock = () => {
+    let store: Record<string, string> = {}
+    return {
+      getItem: (key: string) => store[key] || null,
+      setItem: (key: string, value: string) => { store[key] = value },
+      removeItem: (key: string) => { delete store[key] },
+      clear: () => { store = {} },
+      get length() { return Object.keys(store).length },
+      key: (index: number) => Object.keys(store)[index] || null,
+    }
+  }
 
-describeOrSkip('useSessionStorage', () => {
+  const sessionStorageMock = createStorageMock()
+  
+  Object.defineProperty(globalThis, 'sessionStorage', {
+    value: sessionStorageMock,
+    writable: true,
+    configurable: true,
+  })
+})
+
+describe('useSessionStorage', () => {
   beforeEach(() => {
     // Clear sessionStorage before each test
-    window.sessionStorage.clear();
+    globalThis.sessionStorage.clear();
   });
 
   afterEach(() => {
     // Clean up after each test
-    window.sessionStorage.clear();
+    globalThis.sessionStorage.clear();
   });
 
   it('should initialize with initial value when no stored value exists', () => {
@@ -23,7 +43,7 @@ describeOrSkip('useSessionStorage', () => {
   });
 
   it('should initialize with stored value when it exists', () => {
-    window.sessionStorage.setItem('test-key', JSON.stringify('stored-value'));
+    globalThis.sessionStorage.setItem('test-key', JSON.stringify('stored-value'));
     
     const { result } = renderHook(() => useSessionStorage('test-key', 'initial-value'));
     
@@ -38,7 +58,7 @@ describeOrSkip('useSessionStorage', () => {
     });
     
     expect(result.current[0]).toBe('new-value');
-    expect(window.sessionStorage.getItem('test-key')).toBe(JSON.stringify('new-value'));
+    expect(globalThis.sessionStorage.getItem('test-key')).toBe(JSON.stringify('new-value'));
   });
 
   it('should support functional updates', () => {
@@ -49,7 +69,7 @@ describeOrSkip('useSessionStorage', () => {
     });
     
     expect(result.current[0]).toBe(15);
-    expect(window.sessionStorage.getItem('test-key')).toBe(JSON.stringify(15));
+    expect(globalThis.sessionStorage.getItem('test-key')).toBe(JSON.stringify(15));
   });
 
   it('should handle complex objects', () => {
@@ -62,7 +82,7 @@ describeOrSkip('useSessionStorage', () => {
     });
     
     expect(result.current[0]).toEqual(updatedObject);
-    expect(JSON.parse(window.sessionStorage.getItem('test-key') || '{}')).toEqual(updatedObject);
+    expect(JSON.parse(globalThis.sessionStorage.getItem('test-key') || '{}')).toEqual(updatedObject);
   });
 
   it('should handle arrays', () => {
@@ -86,7 +106,7 @@ describeOrSkip('useSessionStorage', () => {
 
   it('should handle errors gracefully when reading invalid JSON', () => {
     const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-    window.sessionStorage.setItem('test-key', 'invalid-json{');
+    globalThis.sessionStorage.setItem('test-key', 'invalid-json{');
     
     const { result } = renderHook(() => useSessionStorage('test-key', 'fallback-value'));
     
@@ -98,7 +118,7 @@ describeOrSkip('useSessionStorage', () => {
 
   it('should handle errors gracefully when writing to sessionStorage fails', () => {
     const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-    const setItemSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+    const setItemSpy = vi.spyOn(globalThis.sessionStorage, 'setItem').mockImplementation(() => {
       throw new Error('Storage quota exceeded');
     });
     
@@ -115,8 +135,8 @@ describeOrSkip('useSessionStorage', () => {
   });
 
   it('should sync state when key changes', () => {
-    window.sessionStorage.setItem('key-1', JSON.stringify('value-1'));
-    window.sessionStorage.setItem('key-2', JSON.stringify('value-2'));
+    globalThis.sessionStorage.setItem('key-1', JSON.stringify('value-1'));
+    globalThis.sessionStorage.setItem('key-2', JSON.stringify('value-2'));
     
     const { result, rerender } = renderHook(
       ({ key }) => useSessionStorage(key, 'default'),
@@ -131,26 +151,26 @@ describeOrSkip('useSessionStorage', () => {
   });
 });
 
-describeOrSkip('clearSessionStorage', () => {
+describe('clearSessionStorage', () => {
   beforeEach(() => {
-    window.sessionStorage.clear();
+    globalThis.sessionStorage.clear();
   });
 
   it('should clear specific keys from sessionStorage', () => {
-    window.sessionStorage.setItem('key1', 'value1');
-    window.sessionStorage.setItem('key2', 'value2');
-    window.sessionStorage.setItem('key3', 'value3');
+    globalThis.sessionStorage.setItem('key1', 'value1');
+    globalThis.sessionStorage.setItem('key2', 'value2');
+    globalThis.sessionStorage.setItem('key3', 'value3');
     
     clearSessionStorage(['key1', 'key2']);
     
-    expect(window.sessionStorage.getItem('key1')).toBe(null);
-    expect(window.sessionStorage.getItem('key2')).toBe(null);
-    expect(window.sessionStorage.getItem('key3')).toBe('value3');
+    expect(globalThis.sessionStorage.getItem('key1')).toBe(null);
+    expect(globalThis.sessionStorage.getItem('key2')).toBe(null);
+    expect(globalThis.sessionStorage.getItem('key3')).toBe('value3');
   });
 
   it('should handle errors gracefully', () => {
     const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-    const removeItemSpy = vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {
+    const removeItemSpy = vi.spyOn(globalThis.sessionStorage, 'removeItem').mockImplementation(() => {
       throw new Error('Storage error');
     });
     
@@ -163,23 +183,23 @@ describeOrSkip('clearSessionStorage', () => {
   });
 });
 
-describeOrSkip('clearAllSessionStorage', () => {
+describe('clearAllSessionStorage', () => {
   beforeEach(() => {
-    window.sessionStorage.clear();
+    globalThis.sessionStorage.clear();
   });
 
   it('should clear all sessionStorage', () => {
-    window.sessionStorage.setItem('key1', 'value1');
-    window.sessionStorage.setItem('key2', 'value2');
+    globalThis.sessionStorage.setItem('key1', 'value1');
+    globalThis.sessionStorage.setItem('key2', 'value2');
     
     clearAllSessionStorage();
     
-    expect(window.sessionStorage.length).toBe(0);
+    expect(globalThis.sessionStorage.length).toBe(0);
   });
 
   it('should handle errors gracefully', () => {
     const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-    const clearSpy = vi.spyOn(Storage.prototype, 'clear').mockImplementation(() => {
+    const clearSpy = vi.spyOn(globalThis.sessionStorage, 'clear').mockImplementation(() => {
       throw new Error('Storage error');
     });
     

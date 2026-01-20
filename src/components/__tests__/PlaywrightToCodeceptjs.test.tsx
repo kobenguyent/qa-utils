@@ -1,8 +1,31 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import PlaywrightToCodeceptjs from '../utils/PlaywrightToCodeceptjs';
 import * as aiChatClient from '../../utils/aiChatClient';
+
+// Setup storage mocks before all tests
+beforeAll(() => {
+  const createStorageMock = () => {
+    let store: Record<string, string> = {}
+    return {
+      getItem: (key: string) => store[key] || null,
+      setItem: (key: string, value: string) => { store[key] = value },
+      removeItem: (key: string) => { delete store[key] },
+      clear: () => { store = {} },
+      get length() { return Object.keys(store).length },
+      key: (index: number) => Object.keys(store)[index] || null,
+    }
+  }
+
+  const localStorageMock = createStorageMock()
+  
+  Object.defineProperty(globalThis, 'localStorage', {
+    value: localStorageMock,
+    writable: true,
+    configurable: true,
+  })
+})
 
 // Mock the aiChatClient module
 vi.mock('../../utils/aiChatClient', () => ({
@@ -17,7 +40,7 @@ vi.mock('../../utils/aiChatClient', () => ({
 describe('PlaywrightToCodeceptjs', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.clear();
+    globalThis.localStorage.clear();
   });
 
   it('should render the component with default mode selected', () => {
@@ -74,7 +97,7 @@ describe('PlaywrightToCodeceptjs', () => {
     });
   });
 
-  it('should save API key to localStorage', () => {
+  it('should save API key to globalThis.localStorage', () => {
     render(<PlaywrightToCodeceptjs />);
     
     const aiButton = screen.getByText('AI-Powered');
@@ -92,7 +115,7 @@ describe('PlaywrightToCodeceptjs', () => {
     
     fireEvent.click(saveButton);
     
-    expect(localStorage.getItem('playwright_converter_openai_apiKey')).toBe('test-api-key');
+    expect(globalThis.localStorage.getItem('playwright_converter_openai_apiKey')).toBe('test-api-key');
     expect(alertMock).toHaveBeenCalledWith('API key saved successfully!');
     
     alertMock.mockRestore();
