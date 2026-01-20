@@ -156,6 +156,14 @@ export const searchData: SearchItem[] = [
     icon: '🔍'
   },
   {
+    title: 'File Processor',
+    description: 'Resize, compress, and convert images and documents with smart optimization',
+    path: '#/file-processor',
+    category: 'Utilities',
+    keywords: ['file', 'processor', 'image', 'resize', 'compress', 'convert', 'document', 'pdf', 'optimization', 'batch'],
+    icon: '📁'
+  },
+  {
     title: 'SQL Command Generator',
     description: 'Generate SQL commands with a visual interface',
     path: '#/sql-generator',
