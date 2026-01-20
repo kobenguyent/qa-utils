@@ -42,6 +42,7 @@ const SqlGenerator = lazy(() => import('./components/utils/SqlGenerator.tsx').th
 const HtmlRenderer = lazy(() => import('./components/utils/HtmlRenderer.tsx').then(module => ({default: module.HtmlRenderer})));
 const GithubPrScriptGenerator = lazy(() => import('./components/utils/GithubPrScriptGenerator.tsx').then(module => ({default: module.GithubPrScriptGenerator})));
 const ColorConverter = lazy(() => import('./components/utils/ColorConverter.tsx').then(module => ({default: module.ColorConverter})));
+const WebsiteScanner = lazy(() => import('./components/utils/WebsiteScanner.tsx').then(module => ({default: module.WebsiteScanner})));
 
 // Component wrapper with suspense for lazy loaded routes
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -196,6 +197,10 @@ const router = createHashRouter([
   {
     path: 'color-converter',
     element: <RouteWrapper><ColorConverter /></RouteWrapper>
+  },
+  {
+    path: 'website-scanner',
+    element: <RouteWrapper><WebsiteScanner /></RouteWrapper>
   },
 ]);
 
