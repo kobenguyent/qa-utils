@@ -78,7 +78,9 @@ describe('PlaywrightToCodeceptjs', () => {
     const saveButton = screen.getByText('Save API Key');
     
     // Mock window.alert
-    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {
+      // Mock implementation - do nothing
+    });
     
     fireEvent.click(saveButton);
     
