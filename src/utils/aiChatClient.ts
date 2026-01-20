@@ -422,8 +422,27 @@ async function sendToGoogle(
   config: ChatConfig
 ): Promise<ChatResponse> {
   const apiKey = config.apiKey;
-  const model = config.model || 'gemini-1.5-flash';
-  const endpoint = config.endpoint || `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+  let model = config.model;
+  
+  // If no model specified, fetch available models dynamically
+  if (!model) {
+    try {
+      const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+      if (modelsResponse.ok) {
+        const modelsData = await modelsResponse.json();
+        // Find first model that supports generateContent
+        const availableModel = modelsData.models?.find((m: any) => 
+          m.supportedGenerationMethods?.includes('generateContent')
+        );
+        model = availableModel ? availableModel.name.replace('models/', '') : 'gemini-1.5-flash';
+      } else {
+        model = 'gemini-1.5-flash'; // fallback
+      }
+    } catch (error) {
+      model = 'gemini-1.5-flash'; // fallback
+    }
+  }
+  const endpoint = config.endpoint || `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   // Convert messages to Gemini format
   const contents = messages.filter(m => m.role !== 'system').map(msg => ({
@@ -450,7 +469,7 @@ async function sendToGoogle(
   );
 
   try {
-    const response = await fetch(`${endpoint}?key=${apiKey}`, {
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -478,7 +497,7 @@ async function sendToGoogle(
 
     return {
       message: messageText,
-      model: model,
+      model: model || 'gemini-1.5-flash',
       usage: {
         promptTokens: data.usageMetadata?.promptTokenCount,
         completionTokens: data.usageMetadata?.candidatesTokenCount,
@@ -657,9 +676,26 @@ export async function testConnection(config: ChatConfig): Promise<boolean> {
 
     case 'google':
       {
-        const model = config.model || 'gemini-1.5-flash';
-        endpoint = config.endpoint || `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-        endpoint = `${endpoint}?key=${config.apiKey}`;
+        let model = config.model;
+        
+        // If no model specified, fetch available models dynamically
+        if (!model) {
+          try {
+            const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${config.apiKey}`);
+            if (modelsResponse.ok) {
+              const modelsData = await modelsResponse.json();
+              const availableModel = modelsData.models?.find((m: any) => 
+                m.supportedGenerationMethods?.includes('generateContent')
+              );
+              model = availableModel ? availableModel.name.replace('models/', '') : 'gemini-1.5-flash';
+            } else {
+              model = 'gemini-1.5-flash';
+            }
+          } catch (error) {
+            model = 'gemini-1.5-flash';
+          }
+        }
+        endpoint = config.endpoint || `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${config.apiKey}`;
         body = JSON.stringify({
           contents: [{ role: 'user', parts: [{ text: 'test' }] }],
           generationConfig: { maxOutputTokens: 5 },

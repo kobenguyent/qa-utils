@@ -43,6 +43,7 @@ const HtmlRenderer = lazy(() => import('./components/utils/HtmlRenderer.tsx').th
 const GithubPrScriptGenerator = lazy(() => import('./components/utils/GithubPrScriptGenerator.tsx').then(module => ({default: module.GithubPrScriptGenerator})));
 const ColorConverter = lazy(() => import('./components/utils/ColorConverter.tsx').then(module => ({default: module.ColorConverter})));
 const WebsiteScanner = lazy(() => import('./components/utils/WebsiteScanner.tsx').then(module => ({default: module.WebsiteScanner})));
+const AIWebsiteTester = lazy(() => import('./components/utils/AIWebsiteTester.tsx').then(module => ({default: module.AIWebsiteTester})));
 const FileProcessor = lazy(() => import('./components/utils/FileProcessor.tsx'));
 
 // Component wrapper with suspense for lazy loaded routes
@@ -202,6 +203,10 @@ const router = createHashRouter([
   {
     path: 'website-scanner',
     element: <RouteWrapper><WebsiteScanner /></RouteWrapper>
+  },
+  {
+    path: 'ai-website-tester',
+    element: <RouteWrapper><AIWebsiteTester /></RouteWrapper>
   },
   {
     path: 'file-processor',
