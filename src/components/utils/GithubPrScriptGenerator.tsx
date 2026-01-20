@@ -32,7 +32,7 @@ export const GithubPrScriptGenerator: React.FC = () => {
 
   const handleDownload = () => {
     if (!generatedScript) return;
-    
+
     const blob = new Blob([generatedScript.content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -199,7 +199,7 @@ export const GithubPrScriptGenerator: React.FC = () => {
               <div>
                 {generatedScript && generatedScript.errors.length === 0 && (
                   <>
-                    <CopyToClipboard 
+                    <CopyToClipboard
                       text={generatedScript.content}
                       onCopy={handleCopy}
                     >
@@ -207,8 +207,8 @@ export const GithubPrScriptGenerator: React.FC = () => {
                         📋 {copySuccess ? 'Copied!' : 'Copy'}
                       </Button>
                     </CopyToClipboard>
-                    <Button 
-                      variant="primary" 
+                    <Button
+                      variant="primary"
                       size="sm"
                       onClick={handleDownload}
                     >
@@ -247,7 +247,7 @@ export const GithubPrScriptGenerator: React.FC = () => {
                     <Badge bg="success">✓ Script Ready</Badge>
                     <Badge bg="info" className="ms-2">{generatedScript.filename}</Badge>
                   </div>
-                  <pre className="bg-light p-3 rounded" style={{ fontSize: '0.85rem', maxHeight: '400px', overflow: 'auto' }}>
+                  <pre className="theme-code-block p-3 rounded" style={{ fontSize: '0.85rem', maxHeight: '400px', overflow: 'auto' }}>
                     <code>{generatedScript.content}</code>
                   </pre>
                 </div>
@@ -275,10 +275,10 @@ export const GithubPrScriptGenerator: React.FC = () => {
                 <li><strong>Generate:</strong> The script will be generated automatically as you type</li>
                 <li><strong>Download:</strong> Click "Download" to save the script as a .sh file</li>
                 <li><strong>Execute:</strong> Make the script executable and run it:
-                  <pre className="bg-light p-2 mt-2 rounded"><code>chmod +x {generatedScript?.filename || 'create-pr.sh'}{'\n'}./{generatedScript?.filename || 'create-pr.sh'}</code></pre>
+                  <pre className="theme-code-block p-2 mt-2 rounded"><code>chmod +x {generatedScript?.filename || 'create-pr.sh'}{'\n'}./{generatedScript?.filename || 'create-pr.sh'}</code></pre>
                 </li>
               </ol>
-              
+
               <Alert variant="info" className="mt-3">
                 <strong>💡 Tips:</strong>
                 <ul className="mb-0 mt-2">
