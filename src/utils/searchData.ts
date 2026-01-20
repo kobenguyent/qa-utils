@@ -148,6 +148,14 @@ export const searchData: SearchItem[] = [
     icon: '🎨'
   },
   {
+    title: 'Website Scanner',
+    description: 'Comprehensive website analysis for broken links, accessibility, performance, SEO, and security issues',
+    path: '#/website-scanner',
+    category: 'Testing Tools',
+    keywords: ['website', 'scanner', 'audit', 'broken', 'links', 'accessibility', 'performance', 'seo', 'security', 'lighthouse', 'wcag', 'crawl'],
+    icon: '🔍'
+  },
+  {
     title: 'SQL Command Generator',
     description: 'Generate SQL commands with a visual interface',
     path: '#/sql-generator',
