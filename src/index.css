@@ -161,6 +161,25 @@ body {
     color: var(--text);
 }
 
+[data-theme="dark"] .btn-outline-secondary {
+    color: var(--text);
+    border-color: var(--muted);
+}
+
+[data-theme="dark"] .btn-outline-secondary:hover,
+[data-theme="dark"] .btn-outline-secondary:focus {
+    background-color: var(--muted);
+    border-color: var(--muted);
+    color: var(--bg);
+}
+
+[data-theme="dark"] .btn-outline-secondary:disabled,
+[data-theme="dark"] .btn-outline-secondary.disabled {
+    color: var(--muted);
+    border-color: var(--input-border);
+    opacity: 0.6;
+}
+
 [data-theme="dark"] .table {
     color: var(--table-color);
     background-color: var(--table-bg);
