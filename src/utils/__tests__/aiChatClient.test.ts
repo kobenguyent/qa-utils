@@ -458,10 +458,20 @@ describe('aiChatClient', () => {
     });
 
     it('should test connection for Google provider', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ candidates: [{ content: { parts: [{ text: 'test' }] } }] }),
-      });
+      mockFetch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ 
+            models: [{ 
+              name: 'models/gemini-1.5-flash', 
+              supportedGenerationMethods: ['generateContent'] 
+            }] 
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ candidates: [{ content: { parts: [{ text: 'test' }] } }] }),
+        });
 
       const config: ChatConfig = {
         provider: 'google',
