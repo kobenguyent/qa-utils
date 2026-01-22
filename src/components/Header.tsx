@@ -96,8 +96,8 @@ export const Header: React.FC = () => {
         <Navbar.Brand href='#' data-testid="logo" className="fw-bold">
           QA Utils
         </Navbar.Brand>
-        <Navbar.Toggle 
-          aria-controls="basic-navbar-nav" 
+        <Navbar.Toggle
+          aria-controls="basic-navbar-nav"
           aria-label="Toggle navigation"
         />
         <Navbar.Collapse id="basic-navbar-nav">
@@ -105,10 +105,10 @@ export const Header: React.FC = () => {
             <Nav.Link href="#/" aria-label="Go to home page" className="glass-link">
               🏠 Home
             </Nav.Link>
-            
+
             {/* Converters & Formatters */}
-            <NavDropdown 
-              title="🔄 Converters" 
+            <NavDropdown
+              title="🔄 Converters"
               id="nav-dropdown-converters"
               aria-label="Converters menu"
             >
@@ -122,8 +122,8 @@ export const Header: React.FC = () => {
             </NavDropdown>
 
             {/* Generators */}
-            <NavDropdown 
-              title="🎲 Generators" 
+            <NavDropdown
+              title="🎲 Generators"
               id="nav-dropdown-generators"
               aria-label="Generators menu"
             >
@@ -140,8 +140,8 @@ export const Header: React.FC = () => {
             </NavDropdown>
 
             {/* API Testing */}
-            <NavDropdown 
-              title="🌐 API" 
+            <NavDropdown
+              title="🌐 API"
               id="nav-dropdown-api"
               aria-label="API Testing menu"
             >
@@ -152,12 +152,13 @@ export const Header: React.FC = () => {
             </NavDropdown>
 
             {/* Developer Tools */}
-            <NavDropdown 
-              title="🔧 Tools" 
+            <NavDropdown
+              title="🔧 Tools"
               id="nav-dropdown-tools"
               aria-label="Developer Tools menu"
             >
               <NavDropdown.Item href="#/ai-chat">🤖 AI Chat</NavDropdown.Item>
+              <NavDropdown.Item href="#/prompt-enhancer">✨ Prompt Enhancer</NavDropdown.Item>
               <NavDropdown.Item href="#/website-scanner">🔍 Website Scanner</NavDropdown.Item>
               <NavDropdown.Item href="#/ai-website-tester">🤖 AI Website Tester</NavDropdown.Item>
               <NavDropdown.Item href="#/file-processor">📁 File Processor</NavDropdown.Item>
@@ -167,8 +168,8 @@ export const Header: React.FC = () => {
             </NavDropdown>
 
             {/* Learning */}
-            <NavDropdown 
-              title="📚 Learn" 
+            <NavDropdown
+              title="📚 Learn"
               id="nav-dropdown-learn"
               aria-label="Learning menu"
             >
@@ -208,8 +209,8 @@ export const Header: React.FC = () => {
             />
             {showSearchResults && searchResults.length > 0 && (
               <div className="search-results position-absolute mt-1" style={{ zIndex: 1050, top: '100%', left: 0, minWidth: '300px' }}>
-                <Dropdown.Menu show style={{ 
-                  maxHeight: '400px', 
+                <Dropdown.Menu show style={{
+                  maxHeight: '400px',
                   overflowY: 'auto',
                   backgroundColor: 'var(--dropdown-bg)',
                   borderColor: 'var(--border-color)',
@@ -236,8 +237,8 @@ export const Header: React.FC = () => {
 
           {/* Theme Switcher */}
           <Dropdown align="end">
-            <Dropdown.Toggle 
-              variant="link" 
+            <Dropdown.Toggle
+              variant="link"
               id="theme-dropdown"
               className="text-decoration-none"
               style={{ color: 'var(--text)' }}
@@ -245,23 +246,23 @@ export const Header: React.FC = () => {
             >
               {getThemeIcon()}
             </Dropdown.Toggle>
-            <Dropdown.Menu style={{ 
+            <Dropdown.Menu style={{
               backgroundColor: 'var(--dropdown-bg)',
               borderColor: 'var(--border-color)'
             }}>
-              <Dropdown.Item 
+              <Dropdown.Item
                 onClick={() => handleThemeChange('light')}
                 active={theme === 'light'}
               >
                 ☀️ Light
               </Dropdown.Item>
-              <Dropdown.Item 
+              <Dropdown.Item
                 onClick={() => handleThemeChange('dark')}
                 active={theme === 'dark'}
               >
                 🌙 Dark
               </Dropdown.Item>
-              <Dropdown.Item 
+              <Dropdown.Item
                 onClick={() => handleThemeChange('auto')}
                 active={theme === 'auto'}
               >

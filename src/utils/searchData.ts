@@ -21,7 +21,7 @@ export const searchData: SearchItem[] = [
     keywords: ['home', 'start', 'main', 'index'],
     icon: '🏠'
   },
-  
+
   // Hints
   {
     title: 'CodeceptJS Hints',
@@ -79,7 +79,7 @@ export const searchData: SearchItem[] = [
     keywords: ['test', 'framework', 'comparison', 'playwright', 'cypress', 'selenium', 'jest', 'automation', 'e2e', 'unit'],
     icon: '⚖️'
   },
-  
+
   // Terms
   {
     title: 'Interactive Voice Response (IVR)',
@@ -105,7 +105,7 @@ export const searchData: SearchItem[] = [
     keywords: ['sip', 'session', 'initiation', 'protocol', 'voip', 'telephony'],
     icon: '📚'
   },
-  
+
   // Converters & Formatters
   {
     title: 'JWT Debugger',
@@ -179,7 +179,7 @@ export const searchData: SearchItem[] = [
     keywords: ['html', 'render', 'preview', 'viewer', 'markup', 'web', 'display'],
     icon: '🌐'
   },
-  
+
   // Generators
   {
     title: 'UUID Generator',
@@ -261,7 +261,7 @@ export const searchData: SearchItem[] = [
     keywords: ['test', 'file', 'generator', 'image', 'document', 'audio', 'png', 'jpg', 'pdf', 'wav', 'download'],
     icon: '📁'
   },
-  
+
   // API Testing
   {
     title: 'REST Client',
@@ -295,7 +295,6 @@ export const searchData: SearchItem[] = [
     keywords: ['collection', 'postman', 'insomnia', 'thunder', 'client', 'api', 'convert', 'import', 'export', 'variables', 'environment', 'bulk', 'edit'],
     icon: '📦'
   },
-  
   // AI Tools
   {
     title: 'AI Chat',
@@ -305,7 +304,15 @@ export const searchData: SearchItem[] = [
     keywords: ['ai', 'chat', 'gpt', 'openai', 'claude', 'gemini', 'llm', 'chatbot', 'assistant'],
     icon: '🤖'
   },
-  
+  {
+    title: 'Prompt Enhancer',
+    description: 'Transform basic prompts into detailed, structured versions for AI models',
+    path: '#/prompt-enhancer',
+    category: 'AI Tools',
+    keywords: ['prompt', 'enhancer', 'ai', 'chatgpt', 'claude', 'gemini', 'llm', 'text', 'json', 'toon', 'format', 'enhance'],
+    icon: '✨'
+  },
+
   // Developer Tools
   {
     title: 'Encryption/Decryption',
@@ -331,7 +338,7 @@ export const searchData: SearchItem[] = [
     keywords: ['ci', 'cd', 'workflow', 'github', 'actions', 'gitlab', 'jenkins', 'pipeline', 'automation'],
     icon: '🚀'
   },
-  
+
   // ISTQB
   {
     title: 'CTFL v4 Practice Exams',
@@ -350,47 +357,47 @@ export const searchItems = (query: string): SearchItem[] => {
   if (!query.trim()) {
     return [];
   }
-  
+
   const lowerQuery = query.toLowerCase();
   const tokens = lowerQuery.split(/\s+/);
-  
+
   return searchData
     .map(item => {
       let score = 0;
-      
+
       // Exact title match - highest priority
       if (item.title.toLowerCase() === lowerQuery) {
         score += 100;
       }
-      
+
       // Title starts with query
       if (item.title.toLowerCase().startsWith(lowerQuery)) {
         score += 50;
       }
-      
+
       // Title contains query
       if (item.title.toLowerCase().includes(lowerQuery)) {
         score += 30;
       }
-      
+
       // Check each token
       tokens.forEach(token => {
         // Category match
         if (item.category.toLowerCase().includes(token)) {
           score += 10;
         }
-        
+
         // Keyword match
         if (item.keywords.some(kw => kw.includes(token))) {
           score += 15;
         }
-        
+
         // Description match
         if (item.description.toLowerCase().includes(token)) {
           score += 5;
         }
       });
-      
+
       return { item, score };
     })
     .filter(({ score }) => score > 0)
