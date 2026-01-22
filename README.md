@@ -70,6 +70,31 @@ Test gRPC services with browser-compatible gRPC-Web support:
 - **JSON Interface**: User-friendly JSON input for protobuf messages
 - **Response Analysis**: Detailed response inspection with status codes
 
+#### 📦 Collection Manager
+Unified API collection management tool supporting multiple formats:
+- **Multi-Format Support**: Postman, Insomnia, Thunder Client, .env, CSV, generic JSON
+- **Multi-Collection Support**: Import and manage multiple collections and environments simultaneously
+- **Auto-Detection**: Automatically detect collection format and type (collection vs environment)
+- **Persistent Storage**: Auto-saves to IndexedDB - resume work after page refresh
+- **Inline Editor**: Edit requests directly - method, URL, headers, body, scripts with real-time updates
+- **Rename Items**: Double-click to rename collections, environments, folders, and requests
+- **Script Support**: Full support for pre-request and test scripts from Postman collections
+- **Script Preservation**: Scripts are preserved when converting between formats (Postman ↔ Insomnia ↔ Thunder Client)
+- **Script Translation**: Automatically translates script syntax between formats (pm.* ↔ insomnia.* ↔ tc.*)
+- **Folder Scripts**: Pre-request and test scripts at folder and collection level
+- **Variable Rendering**: Visual badges show variable references with values on hover
+- **Autocomplete**: Type `{{` in URL/headers to see variable suggestions
+- **Syntax Highlighting**: JavaScript syntax highlighting for scripts with edit/preview toggle
+- **Bulk Operations**: Find & replace across entire collection (variables, URLs, headers, body)
+- **Variable Management**: Add/edit/delete variables with types, descriptions, enabled/disabled state
+- **Format Conversion**: Convert between any supported format with live preview
+- **Import/Export**: Bulk import/export variables as JSON or CSV
+- **Hierarchical View**: Collapsible tree view for folders and requests
+- **Drag & Drop Reordering**: Reorder requests and folders by dragging
+- **Search & Filter**: Real-time search across all collection elements
+- **Request Search**: Filter requests/folders by name, URL, method, headers, or body content
+- **Collection Switching**: Easy switching between loaded collections and environments with tabs
+
 #### 🛸 Base64 Encode/Decode
 Simple and efficient Base64 operations:
 - **Bidirectional conversion** (encode/decode)
