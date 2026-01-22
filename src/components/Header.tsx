@@ -148,6 +148,7 @@ export const Header: React.FC = () => {
               <NavDropdown.Item href="#/rest-client">🌐 REST</NavDropdown.Item>
               <NavDropdown.Item href="#/websocket-client">🔌 WebSocket</NavDropdown.Item>
               <NavDropdown.Item href="#/grpc-client">⚡ gRPC</NavDropdown.Item>
+              <NavDropdown.Item href="#/collection-manager">📦 Collection Manager</NavDropdown.Item>
             </NavDropdown>
 
             {/* Developer Tools */}

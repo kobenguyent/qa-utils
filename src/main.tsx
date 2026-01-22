@@ -45,6 +45,7 @@ const ColorConverter = lazy(() => import('./components/utils/ColorConverter.tsx'
 const WebsiteScanner = lazy(() => import('./components/utils/WebsiteScanner.tsx').then(module => ({ default: module.WebsiteScanner })));
 const AIWebsiteTester = lazy(() => import('./components/utils/AIWebsiteTester.tsx').then(module => ({ default: module.AIWebsiteTester })));
 const FileProcessor = lazy(() => import('./components/utils/FileProcessor.tsx'));
+const CollectionManager = lazy(() => import('./components/utils/CollectionManager.tsx'));
 const PromptEnhancer = lazy(() => import('./components/utils/PromptEnhancer.tsx').then(module => ({ default: module.PromptEnhancer })));
 
 // Component wrapper with suspense for lazy loaded routes
@@ -212,6 +213,10 @@ const router = createHashRouter([
   {
     path: 'file-processor',
     element: <RouteWrapper><FileProcessor /></RouteWrapper>
+  },
+  {
+    path: 'collection-manager',
+    element: <RouteWrapper><CollectionManager /></RouteWrapper>
   },
   {
     path: 'prompt-enhancer',

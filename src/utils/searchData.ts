@@ -287,7 +287,14 @@ export const searchData: SearchItem[] = [
     keywords: ['grpc', 'protobuf', 'rpc', 'client', 'api', 'testing'],
     icon: '⚡'
   },
-
+  {
+    title: 'Collection Manager',
+    description: 'Parse, edit, and convert API collections between Postman, Insomnia, Thunder Client, and more',
+    path: '#/collection-manager',
+    category: 'API Testing',
+    keywords: ['collection', 'postman', 'insomnia', 'thunder', 'client', 'api', 'convert', 'import', 'export', 'variables', 'environment', 'bulk', 'edit'],
+    icon: '📦'
+  },
   // AI Tools
   {
     title: 'AI Chat',
