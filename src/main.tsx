@@ -217,6 +217,8 @@ const router = createHashRouter([
   {
     path: 'collection-manager',
     element: <RouteWrapper><CollectionManager /></RouteWrapper>
+  },
+  {
     path: 'prompt-enhancer',
     element: <RouteWrapper><PromptEnhancer /></RouteWrapper>
   },
