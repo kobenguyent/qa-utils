@@ -179,6 +179,14 @@ export const searchData: SearchItem[] = [
     keywords: ['html', 'render', 'preview', 'viewer', 'markup', 'web', 'display'],
     icon: '🌐'
   },
+  {
+    title: 'Media Converter',
+    description: 'Convert between image formats and PDF documents (Image ↔ PDF, PNG ↔ JPEG), remove backgrounds',
+    path: '#/media-converter',
+    category: 'Converters & Formatters',
+    keywords: ['media', 'converter', 'image', 'pdf', 'png', 'jpeg', 'webp', 'gif', 'convert', 'format', 'photo', 'background', 'remove', 'transparent', 'cutout'],
+    icon: '🔄'
+  },
 
   // Generators
   {
