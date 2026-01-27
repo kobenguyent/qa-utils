@@ -258,7 +258,7 @@ export function clearDynamicQRHistory(): void {
 /**
  * Download QR code as image file
  */
-export function downloadQRCode(dataUrl: string, filename: string = 'qrcode'): void {
+export function downloadQRCode(dataUrl: string, filename = 'qrcode'): void {
     const link = document.createElement('a');
     link.href = dataUrl;
     link.download = `${filename}.png`;
@@ -270,7 +270,7 @@ export function downloadQRCode(dataUrl: string, filename: string = 'qrcode'): vo
 /**
  * Download QR code as SVG file
  */
-export function downloadQRCodeSVG(svgString: string, filename: string = 'qrcode'): void {
+export function downloadQRCodeSVG(svgString: string, filename = 'qrcode'): void {
     const blob = new Blob([svgString], { type: 'image/svg+xml' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
