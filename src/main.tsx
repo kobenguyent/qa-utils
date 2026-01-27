@@ -47,6 +47,7 @@ const AIWebsiteTester = lazy(() => import('./components/utils/AIWebsiteTester.ts
 const FileProcessor = lazy(() => import('./components/utils/FileProcessor.tsx'));
 const CollectionManager = lazy(() => import('./components/utils/CollectionManager.tsx'));
 const PromptEnhancer = lazy(() => import('./components/utils/PromptEnhancer.tsx').then(module => ({ default: module.PromptEnhancer })));
+const MediaConverter = lazy(() => import('./components/utils/MediaConverter.tsx'));
 
 // Component wrapper with suspense for lazy loaded routes
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -221,6 +222,10 @@ const router = createHashRouter([
   {
     path: 'prompt-enhancer',
     element: <RouteWrapper><PromptEnhancer /></RouteWrapper>
+  },
+  {
+    path: 'media-converter',
+    element: <RouteWrapper><MediaConverter /></RouteWrapper>
   },
 ]);
 

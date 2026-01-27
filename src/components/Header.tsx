@@ -119,6 +119,7 @@ export const Header: React.FC = () => {
               <NavDropdown.Item href="#/color-converter">🎨 Color Converter</NavDropdown.Item>
               <NavDropdown.Item href="#/sql-generator">🗄️ SQL Generator</NavDropdown.Item>
               <NavDropdown.Item href="#/html-renderer">🌐 HTML Renderer</NavDropdown.Item>
+              <NavDropdown.Item href="#/media-converter">🔄 Media Converter</NavDropdown.Item>
             </NavDropdown>
 
             {/* Generators */}
