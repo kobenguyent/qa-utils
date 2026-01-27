@@ -48,6 +48,7 @@ const FileProcessor = lazy(() => import('./components/utils/FileProcessor.tsx'))
 const CollectionManager = lazy(() => import('./components/utils/CollectionManager.tsx'));
 const PromptEnhancer = lazy(() => import('./components/utils/PromptEnhancer.tsx').then(module => ({ default: module.PromptEnhancer })));
 const MediaConverter = lazy(() => import('./components/utils/MediaConverter.tsx'));
+const QRCodeGenerator = lazy(() => import('./components/utils/QRCodeGenerator.tsx'));
 
 // Component wrapper with suspense for lazy loaded routes
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -226,6 +227,10 @@ const router = createHashRouter([
   {
     path: 'media-converter',
     element: <RouteWrapper><MediaConverter /></RouteWrapper>
+  },
+  {
+    path: 'qr-code',
+    element: <RouteWrapper><QRCodeGenerator /></RouteWrapper>
   },
 ]);
 

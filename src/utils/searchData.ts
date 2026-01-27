@@ -269,6 +269,14 @@ export const searchData: SearchItem[] = [
     keywords: ['test', 'file', 'generator', 'image', 'document', 'audio', 'png', 'jpg', 'pdf', 'wav', 'download'],
     icon: '📁'
   },
+  {
+    title: 'QR Code Generator',
+    description: 'Generate static and dynamic QR codes for URLs, WiFi, vCards, email, SMS, and more',
+    path: '#/qr-code',
+    category: 'Generators',
+    keywords: ['qr', 'qrcode', 'barcode', 'generator', 'url', 'wifi', 'vcard', 'contact', 'email', 'sms', 'phone', 'static', 'dynamic'],
+    icon: '📱'
+  },
 
   // API Testing
   {
