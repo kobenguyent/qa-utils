@@ -2,9 +2,13 @@ import { PDFDocument } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
 import { removeBackground as imglyRemoveBackground, Config as ImglyConfig } from '@imgly/background-removal';
 
-// Initialize PDF.js worker
+// Initialize PDF.js worker using local worker from pdfjs-dist package
+// This works with Vite's asset handling and avoids CDN issues
 if (typeof window !== 'undefined') {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+    pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+        'pdfjs-dist/build/pdf.worker.min.mjs',
+        import.meta.url
+    ).href;
 }
 
 export type ImageFormat = 'png' | 'jpeg' | 'webp' | 'gif' | 'bmp';
