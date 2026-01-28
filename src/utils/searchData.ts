@@ -277,6 +277,14 @@ export const searchData: SearchItem[] = [
     keywords: ['qr', 'qrcode', 'barcode', 'generator', 'url', 'wifi', 'vcard', 'contact', 'email', 'sms', 'phone', 'static', 'dynamic'],
     icon: '📱'
   },
+  {
+    title: 'Dummy Data Generator',
+    description: 'Generate fake data for testing: names, emails, addresses, phone numbers, and more',
+    path: '#/dummy-data',
+    category: 'Generators',
+    keywords: ['dummy', 'fake', 'data', 'generator', 'mock', 'test', 'name', 'email', 'address', 'phone', 'person', 'company', 'falso', 'faker'],
+    icon: '🎭'
+  },
 
   // API Testing
   {
