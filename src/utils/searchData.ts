@@ -285,6 +285,14 @@ export const searchData: SearchItem[] = [
     keywords: ['dummy', 'fake', 'data', 'generator', 'mock', 'test', 'name', 'email', 'address', 'phone', 'person', 'company', 'falso', 'faker'],
     icon: '🎭'
   },
+  {
+    title: 'Kanban Board',
+    description: 'Visual task management with drag-and-drop columns for organizing projects',
+    path: '#/kanban',
+    category: 'Developer Tools',
+    keywords: ['kanban', 'board', 'task', 'project', 'management', 'todo', 'agile', 'scrum', 'drag', 'drop', 'cards', 'columns'],
+    icon: '📋'
+  },
 
   // API Testing
   {
