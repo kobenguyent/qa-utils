@@ -50,6 +50,7 @@ const PromptEnhancer = lazy(() => import('./components/utils/PromptEnhancer.tsx'
 const MediaConverter = lazy(() => import('./components/utils/MediaConverter.tsx'));
 const QRCodeGenerator = lazy(() => import('./components/utils/QRCodeGenerator.tsx'));
 const DummyDataGenerator = lazy(() => import('./components/utils/DummyDataGenerator.tsx').then(module => ({ default: module.DummyDataGenerator })));
+const KanbanBoard = lazy(() => import('./components/utils/KanbanBoard.tsx').then(module => ({ default: module.KanbanBoard })));
 
 // Component wrapper with suspense for lazy loaded routes
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -236,6 +237,10 @@ const router = createHashRouter([
   {
     path: 'dummy-data',
     element: <RouteWrapper><DummyDataGenerator /></RouteWrapper>
+  },
+  {
+    path: 'kanban',
+    element: <RouteWrapper><KanbanBoard /></RouteWrapper>
   },
 ]);
 
