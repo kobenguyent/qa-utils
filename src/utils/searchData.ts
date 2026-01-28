@@ -293,6 +293,14 @@ export const searchData: SearchItem[] = [
     keywords: ['kanban', 'board', 'task', 'project', 'management', 'todo', 'agile', 'scrum', 'drag', 'drop', 'cards', 'columns'],
     icon: '📋'
   },
+  {
+    title: 'Command Book',
+    description: 'Hands-on reference for Git, Docker, Bash, and CodeceptJS commands',
+    path: '#/command-book',
+    category: 'Developer Tools',
+    keywords: ['command', 'book', 'git', 'github', 'cli', 'docker', 'bash', 'script', 'codeceptjs', 'reference', 'cheatsheet', 'snippet'],
+    icon: '📖'
+  },
 
   // API Testing
   {
