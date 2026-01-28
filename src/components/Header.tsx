@@ -177,6 +177,7 @@ export const Header: React.FC = () => {
               id="nav-dropdown-learn"
               aria-label="Learning menu"
             >
+              <NavDropdown.Item href="#/command-book">📖 Command Book</NavDropdown.Item>
               <NavDropdown.Item href="#/codeceptjs">🔥 CodeceptJS Hints</NavDropdown.Item>
               <NavDropdown.Item href="#/cicd-infographic">🔄 CI/CD Infographic</NavDropdown.Item>
               <NavDropdown.Item href="#/ai-agents-infographic">🤖 AI Agents & MCP</NavDropdown.Item>
