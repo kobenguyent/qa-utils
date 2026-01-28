@@ -15,7 +15,28 @@ const MediaConverter: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState('image-to-pdf');
-    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Separate refs for each tab to avoid conflicts
+    const imageToPdfInputRef = useRef<HTMLInputElement>(null);
+    const pdfToImageInputRef = useRef<HTMLInputElement>(null);
+    const formatConvertInputRef = useRef<HTMLInputElement>(null);
+    const bgRemovalInputRef = useRef<HTMLInputElement>(null);
+
+    // Get the correct ref based on active tab
+    const getActiveInputRef = () => {
+        switch (activeTab) {
+            case 'image-to-pdf':
+                return imageToPdfInputRef;
+            case 'pdf-to-image':
+                return pdfToImageInputRef;
+            case 'format-convert':
+                return formatConvertInputRef;
+            case 'bg-removal':
+                return bgRemovalInputRef;
+            default:
+                return imageToPdfInputRef;
+        }
+    };
 
     // Image to PDF options
     const [pdfOptions, setPdfOptions] = useState({
@@ -102,8 +123,10 @@ const MediaConverter: React.FC = () => {
         setConvertedFiles([]);
         setError(null);
         setSuccess(null);
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
+        // Clear the active input ref based on current tab
+        const activeRef = getActiveInputRef();
+        if (activeRef.current) {
+            activeRef.current.value = '';
         }
     }, [selectedFiles]);
 
@@ -194,20 +217,7 @@ const MediaConverter: React.FC = () => {
         MC.downloadMultipleFiles(convertedFiles);
     };
 
-    const getAcceptedFormats = () => {
-        switch (activeTab) {
-            case 'image-to-pdf':
-                return 'image/*';
-            case 'pdf-to-image':
-                return '.pdf';
-            case 'format-convert':
-                return 'image/*';
-            case 'bg-removal':
-                return 'image/*';
-            default:
-                return '*';
-        }
-    };
+
 
     // Background removal
     const removeBackground = async () => {
@@ -286,16 +296,16 @@ const MediaConverter: React.FC = () => {
                                             borderColor: 'var(--border-color)',
                                             cursor: 'pointer'
                                         }}
-                                        onClick={() => fileInputRef.current?.click()}
+                                        onClick={() => imageToPdfInputRef.current?.click()}
                                     >
                                         <div className="mb-2">📁</div>
                                         <p className="mb-1">Drag & drop images here, or click to select</p>
                                         <small className="text-muted">Supports PNG, JPEG, WebP, GIF</small>
                                         <Form.Control
-                                            ref={fileInputRef}
+                                            ref={imageToPdfInputRef}
                                             type="file"
                                             multiple
-                                            accept={getAcceptedFormats()}
+                                            accept="image/*"
                                             onChange={handleFileSelect}
                                             style={{ display: 'none' }}
                                         />
@@ -421,15 +431,15 @@ const MediaConverter: React.FC = () => {
                                             borderColor: 'var(--border-color)',
                                             cursor: 'pointer'
                                         }}
-                                        onClick={() => fileInputRef.current?.click()}
+                                        onClick={() => pdfToImageInputRef.current?.click()}
                                     >
                                         <div className="mb-2">📄</div>
                                         <p className="mb-1">Drag & drop a PDF file here, or click to select</p>
                                         <small className="text-muted">Only PDF files supported</small>
                                         <Form.Control
-                                            ref={fileInputRef}
+                                            ref={pdfToImageInputRef}
                                             type="file"
-                                            accept=".pdf"
+                                            accept=".pdf,application/pdf"
                                             onChange={handleFileSelect}
                                             style={{ display: 'none' }}
                                         />
@@ -539,13 +549,13 @@ const MediaConverter: React.FC = () => {
                                             borderColor: 'var(--border-color)',
                                             cursor: 'pointer'
                                         }}
-                                        onClick={() => fileInputRef.current?.click()}
+                                        onClick={() => formatConvertInputRef.current?.click()}
                                     >
                                         <div className="mb-2">🖼️</div>
                                         <p className="mb-1">Drag & drop images here, or click to select</p>
                                         <small className="text-muted">Convert between PNG, JPEG, WebP, GIF, BMP</small>
                                         <Form.Control
-                                            ref={fileInputRef}
+                                            ref={formatConvertInputRef}
                                             type="file"
                                             multiple
                                             accept="image/*"
@@ -699,13 +709,13 @@ const MediaConverter: React.FC = () => {
                                             borderColor: 'var(--border-color)',
                                             cursor: 'pointer'
                                         }}
-                                        onClick={() => fileInputRef.current?.click()}
+                                        onClick={() => bgRemovalInputRef.current?.click()}
                                     >
                                         <div className="mb-2">✨</div>
                                         <p className="mb-1">Drag & drop images here, or click to select</p>
                                         <small className="text-muted">AI-powered background removal</small>
                                         <Form.Control
-                                            ref={fileInputRef}
+                                            ref={bgRemovalInputRef}
                                             type="file"
                                             multiple
                                             accept="image/*"
