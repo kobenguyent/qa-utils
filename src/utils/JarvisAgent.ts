@@ -3,7 +3,7 @@
  * Combines natural language understanding with tool execution
  */
 
-import { ToolRegistry, ToolInvocationResult, ToolResult } from './toolRegistry';
+import { ToolRegistry, ToolInvocationResult } from './toolRegistry';
 import { parseIntent, ParsedIntent, isHelpRequest, getSuggestions } from './intentParser';
 import { registerDefaultTools, getAllTools } from './defaultTools';
 import { sendChatMessage, ChatMessage, ChatConfig } from './aiChatClient';
@@ -190,7 +190,7 @@ export class JarvisAgent {
      * Generate help response listing available tools
      */
     private generateHelpResponse(): JarvisResponse {
-        const tools = getAllTools();
+        // Get categories for help response
         const categories = ToolRegistry.getCategories();
 
         let helpText = `👋 Hello! I'm Jarvis, your AI assistant. I can help you with:\n\n`;
