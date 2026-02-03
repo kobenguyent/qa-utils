@@ -53,6 +53,7 @@ const DummyDataGenerator = lazy(() => import('./components/utils/DummyDataGenera
 const KanbanBoard = lazy(() => import('./components/utils/KanbanBoard.tsx').then(module => ({ default: module.KanbanBoard })));
 const CommandBook = lazy(() => import('./components/utils/CommandBook.tsx').then(module => ({ default: module.CommandBook })));
 const JarvisAssistant = lazy(() => import('./components/utils/JarvisAssistant.tsx').then(module => ({ default: module.JarvisAssistant })));
+const ImageEditor = lazy(() => import('./components/utils/ImageEditor.tsx').then(module => ({ default: module.ImageEditor })));
 
 // Component wrapper with suspense for lazy loaded routes
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -251,6 +252,10 @@ const router = createHashRouter([
   {
     path: 'jarvis',
     element: <RouteWrapper><JarvisAssistant /></RouteWrapper>
+  },
+  {
+    path: 'image-editor',
+    element: <RouteWrapper><ImageEditor /></RouteWrapper>
   },
 ]);
 

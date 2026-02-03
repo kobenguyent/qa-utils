@@ -3,17 +3,24 @@ import {Container, Image, Row, Col, Button} from "react-bootstrap";
 import qaHeroImage from '../assets/qa-hero.svg'
 import { getRandomTool } from '../utils/randomTool';
 import { SearchItem } from '../utils/searchData';
+import { getRandomQuote, Quote } from '../utils/quotes';
 
 export const Home: React.FC = () => {
   const [randomTool, setRandomTool] = useState<SearchItem | null>(null);
+  const [quote, setQuote] = useState<Quote | null>(null);
 
   useEffect(() => {
-    // Get a random tool on component mount
+    // Get a random tool and quote on component mount
     setRandomTool(getRandomTool());
+    setQuote(getRandomQuote());
   }, []);
 
   const handleNewRandomTool = () => {
     setRandomTool(getRandomTool());
+  };
+
+  const handleNewRandomQuote = () => {
+    setQuote(getRandomQuote());
   };
 
   return(
@@ -34,6 +41,32 @@ export const Home: React.FC = () => {
                 A comprehensive collection of quality assurance tools and utilities 
                 to enhance your testing workflow.
               </p>
+
+              {quote && (
+                <div className="mt-4 p-4" style={{ 
+                  backgroundColor: 'var(--card-bg)', 
+                  borderRadius: '12px',
+                  border: '1px solid var(--border-color)',
+                  borderLeft: '4px solid var(--bs-primary)'
+                }}>
+                  <div className="d-flex flex-column align-items-center gap-2">
+                    <div className="text-center">
+                      <p className="mb-2 fs-5 fst-italic" style={{ lineHeight: '1.6' }}>
+                        "{quote.text}"
+                      </p>
+                      <p className="text-muted mb-2">— {quote.author}</p>
+                    </div>
+                    <Button
+                      onClick={handleNewRandomQuote}
+                      variant="outline-secondary"
+                      size="sm"
+                      aria-label="Get another random quote"
+                    >
+                      🔄 New Quote
+                    </Button>
+                  </div>
+                </div>
+              )}
               
               {randomTool && (
                 <div className="mt-4 p-3" style={{ 

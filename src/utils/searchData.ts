@@ -187,6 +187,14 @@ export const searchData: SearchItem[] = [
     keywords: ['media', 'converter', 'image', 'pdf', 'png', 'jpeg', 'webp', 'gif', 'convert', 'format', 'photo', 'background', 'remove', 'transparent', 'cutout'],
     icon: '🔄'
   },
+  {
+    title: 'Image Editor',
+    description: 'Edit photos with filters, rotation, brightness, contrast, and more',
+    path: '#/image-editor',
+    category: 'Converters & Formatters',
+    keywords: ['image', 'editor', 'photo', 'edit', 'filter', 'rotate', 'brightness', 'contrast', 'saturation', 'blur', 'grayscale', 'sepia', 'flip', 'transform', 'compress'],
+    icon: '🎨'
+  },
 
   // Generators
   {
