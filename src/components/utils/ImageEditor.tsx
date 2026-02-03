@@ -758,7 +758,6 @@ export const ImageEditor: React.FC = () => {
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           setRegionalIntensity((prev) => ({ ...prev, blur: parseInt(e.target.value) }))
                         }
-                        size="sm"
                       />
                     </Form.Group>
                     
@@ -773,7 +772,6 @@ export const ImageEditor: React.FC = () => {
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           setRegionalIntensity((prev) => ({ ...prev, pixelate: parseInt(e.target.value) }))
                         }
-                        size="sm"
                       />
                     </Form.Group>
                     
@@ -789,7 +787,6 @@ export const ImageEditor: React.FC = () => {
                           const val = parseInt(e.target.value);
                           setRegionalIntensity((prev) => ({ ...prev, brighten: val, darken: val }));
                         }}
-                        size="sm"
                       />
                     </Form.Group>
                   </div>
