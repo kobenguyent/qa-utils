@@ -29,9 +29,7 @@ const applyPixelation = (ctx: CanvasRenderingContext2D, width: number, height: n
 // Helper function to apply regional effects
 const applyRegionalEffect = (
   ctx: CanvasRenderingContext2D, 
-  effect: RegionalEffect, 
-  canvasWidth: number, 
-  canvasHeight: number
+  effect: RegionalEffect
 ) => {
   const { x, y, width, height, type, intensity } = effect;
   
@@ -204,7 +202,7 @@ export const ImageEditor: React.FC = () => {
 
       // Apply regional effects
       imageState.regionalEffects.forEach(effect => {
-        applyRegionalEffect(ctx, effect, canvas.width, canvas.height);
+        applyRegionalEffect(ctx, effect);
       });
 
       // Update edited preview
@@ -548,7 +546,7 @@ export const ImageEditor: React.FC = () => {
                         style={{
                           maxWidth: '100%',
                           maxHeight: '500px',
-                          cursor: drawingMode !== 'none' ? 'crosshair' : 'default',
+                          cursor: (drawingMode === 'blur' || drawingMode === 'pixelate' || drawingMode === 'brighten' || drawingMode === 'darken') ? 'crosshair' : 'default',
                           border: '2px solid #007bff'
                         }}
                       />
