@@ -145,10 +145,10 @@ export const ImageEditor: React.FC = () => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [startPoint, setStartPoint] = useState<{ x: number; y: number } | null>(null);
   const [regionalIntensity, setRegionalIntensity] = useState({
-    blur: '10',
-    pixelate: '10',
-    brighten: '50',
-    darken: '50',
+    blur: 10,
+    pixelate: 10,
+    brighten: 50,
+    darken: 50,
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
