@@ -207,12 +207,12 @@ export const ImageEditor: React.FC = () => {
       }
 
       // Apply regional effects
-      imageState.regionalEffects.forEach(effect => {
+      imageState.regionalEffects.forEach((effect: RegionalEffect) => {
         applyRegionalEffect(ctx, effect);
       });
 
       // Update edited preview
-      setImageState(prev => ({ ...prev, edited: canvas.toDataURL('image/png') }));
+      setImageState((prev: ImageState) => ({ ...prev, edited: canvas.toDataURL('image/png') }));
     };
     img.src = imageState.preview;
   }, [
@@ -269,19 +269,19 @@ export const ImageEditor: React.FC = () => {
   };
 
   const handleRotate = (degrees: number) => {
-    setImageState(prev => ({ ...prev, rotation: (prev.rotation + degrees) % 360 }));
+    setImageState((prev: ImageState) => ({ ...prev, rotation: (prev.rotation + degrees) % 360 }));
   };
 
   const handleFlip = (direction: 'horizontal' | 'vertical') => {
     if (direction === 'horizontal') {
-      setImageState(prev => ({ ...prev, flipH: !prev.flipH }));
+      setImageState((prev: ImageState) => ({ ...prev, flipH: !prev.flipH }));
     } else {
-      setImageState(prev => ({ ...prev, flipV: !prev.flipV }));
+      setImageState((prev: ImageState) => ({ ...prev, flipV: !prev.flipV }));
     }
   };
 
   const handleReset = () => {
-    setImageState(prev => ({
+    setImageState((prev: ImageState) => ({
       ...prev,
       rotation: 0,
       brightness: 100,
@@ -382,7 +382,7 @@ export const ImageEditor: React.FC = () => {
         intensity: regionalIntensity[drawingMode as 'blur' | 'pixelate' | 'brighten' | 'darken'],
       };
       
-      setImageState(prev => ({
+      setImageState((prev: ImageState) => ({
         ...prev,
         regionalEffects: [...prev.regionalEffects, newEffect],
       }));
@@ -393,14 +393,14 @@ export const ImageEditor: React.FC = () => {
   };
 
   const handleClearRegionalEffects = () => {
-    setImageState(prev => ({ ...prev, regionalEffects: [] }));
+    setImageState((prev: ImageState) => ({ ...prev, regionalEffects: [] }));
   };
 
   const handleDownload = async () => {
     if (!canvasRef.current) return;
 
     const canvas = canvasRef.current;
-    canvas.toBlob((blob) => {
+    canvas.toBlob((blob: Blob | null) => {
       if (blob) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -428,7 +428,7 @@ export const ImageEditor: React.FC = () => {
       const reader = new FileReader();
       reader.onload = (event) => {
         const preview = event.target?.result as string;
-        setImageState(prev => ({
+        setImageState((prev: ImageState) => ({
           ...prev,
           file: compressedFile,
           preview,
@@ -642,8 +642,8 @@ export const ImageEditor: React.FC = () => {
                         min="0"
                         max="200"
                         value={imageState.brightness}
-                        onChange={(e) =>
-                          setImageState(prev => ({ ...prev, brightness: parseInt(e.target.value) }))
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setImageState((prev: ImageState) => ({ ...prev, brightness: parseInt(e.target.value) }))
                         }
                       />
                     </Form.Group>
@@ -656,8 +656,8 @@ export const ImageEditor: React.FC = () => {
                         min="0"
                         max="200"
                         value={imageState.contrast}
-                        onChange={(e) =>
-                          setImageState(prev => ({ ...prev, contrast: parseInt(e.target.value) }))
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setImageState((prev: ImageState) => ({ ...prev, contrast: parseInt(e.target.value) }))
                         }
                       />
                     </Form.Group>
@@ -670,8 +670,8 @@ export const ImageEditor: React.FC = () => {
                         min="0"
                         max="200"
                         value={imageState.saturation}
-                        onChange={(e) =>
-                          setImageState(prev => ({ ...prev, saturation: parseInt(e.target.value) }))
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setImageState((prev: ImageState) => ({ ...prev, saturation: parseInt(e.target.value) }))
                         }
                       />
                     </Form.Group>
@@ -684,8 +684,8 @@ export const ImageEditor: React.FC = () => {
                         min="0"
                         max="10"
                         value={imageState.blur}
-                        onChange={(e) =>
-                          setImageState(prev => ({ ...prev, blur: parseInt(e.target.value) }))
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setImageState((prev: ImageState) => ({ ...prev, blur: parseInt(e.target.value) }))
                         }
                       />
                     </Form.Group>
@@ -698,8 +698,8 @@ export const ImageEditor: React.FC = () => {
                         min="0"
                         max="100"
                         value={imageState.grayscale}
-                        onChange={(e) =>
-                          setImageState(prev => ({ ...prev, grayscale: parseInt(e.target.value) }))
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setImageState((prev: ImageState) => ({ ...prev, grayscale: parseInt(e.target.value) }))
                         }
                       />
                     </Form.Group>
@@ -712,8 +712,8 @@ export const ImageEditor: React.FC = () => {
                         min="0"
                         max="100"
                         value={imageState.sepia}
-                        onChange={(e) =>
-                          setImageState(prev => ({ ...prev, sepia: parseInt(e.target.value) }))
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setImageState((prev: ImageState) => ({ ...prev, sepia: parseInt(e.target.value) }))
                         }
                       />
                     </Form.Group>
@@ -726,8 +726,8 @@ export const ImageEditor: React.FC = () => {
                         min="0"
                         max="20"
                         value={imageState.pixelate}
-                        onChange={(e) =>
-                          setImageState(prev => ({ ...prev, pixelate: parseInt(e.target.value) }))
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setImageState((prev: ImageState) => ({ ...prev, pixelate: parseInt(e.target.value) }))
                         }
                       />
                     </Form.Group>
@@ -755,8 +755,8 @@ export const ImageEditor: React.FC = () => {
                         min="1"
                         max="30"
                         value={regionalIntensity.blur}
-                        onChange={(e) =>
-                          setRegionalIntensity(prev => ({ ...prev, blur: parseInt(e.target.value) }))
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setRegionalIntensity((prev) => ({ ...prev, blur: parseInt(e.target.value) }))
                         }
                         size="sm"
                       />
@@ -770,8 +770,8 @@ export const ImageEditor: React.FC = () => {
                         min="2"
                         max="30"
                         value={regionalIntensity.pixelate}
-                        onChange={(e) =>
-                          setRegionalIntensity(prev => ({ ...prev, pixelate: parseInt(e.target.value) }))
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setRegionalIntensity((prev) => ({ ...prev, pixelate: parseInt(e.target.value) }))
                         }
                         size="sm"
                       />
@@ -785,9 +785,9 @@ export const ImageEditor: React.FC = () => {
                         min="10"
                         max="100"
                         value={regionalIntensity.brighten}
-                        onChange={(e) => {
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           const val = parseInt(e.target.value);
-                          setRegionalIntensity(prev => ({ ...prev, brighten: val, darken: val }));
+                          setRegionalIntensity((prev) => ({ ...prev, brighten: val, darken: val }));
                         }}
                         size="sm"
                       />
