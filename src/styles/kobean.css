@@ -1,16 +1,16 @@
-/* Jarvis AI Assistant - Simple Clean Styles */
+/* Kobean AI Assistant - Simple Clean Styles */
 
-.jarvis-simple {
+.kobean-simple {
     min-height: calc(100vh - 100px);
 }
 
-.jarvis-simple-title {
+.kobean-simple-title {
     font-size: 1.8rem;
     font-weight: 600;
     color: var(--text);
 }
 
-.jarvis-simple-messages {
+.kobean-simple-messages {
     min-height: 400px;
     max-height: 60vh;
     overflow-y: auto;
@@ -20,27 +20,27 @@
     border: 1px solid var(--border-color);
 }
 
-.jarvis-simple-msg {
+.kobean-simple-msg {
     margin-bottom: 0.75rem;
     padding: 0.75rem 1rem;
     border-radius: 12px;
     max-width: 85%;
 }
 
-.jarvis-simple-msg.user {
+.kobean-simple-msg.user {
     background: var(--primary);
     color: white;
     margin-left: auto;
     text-align: right;
 }
 
-.jarvis-simple-msg.assistant {
+.kobean-simple-msg.assistant {
     background: var(--input-bg);
     color: var(--text);
     border: 1px solid var(--border-color);
 }
 
-.jarvis-simple-msg .msg-content {
+.kobean-simple-msg .msg-content {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -48,21 +48,21 @@
     white-space: pre-wrap;
 }
 
-.jarvis-simple-msg.user .msg-content {
+.kobean-simple-msg.user .msg-content {
     justify-content: flex-end;
 }
 
-.jarvis-simple-msg .copy-btn {
+.kobean-simple-msg .copy-btn {
     padding: 0;
     font-size: 0.9rem;
     text-decoration: none;
 }
 
-.jarvis-simple-input {
+.kobean-simple-input {
     border-radius: 8px 0 0 8px !important;
 }
 
-.jarvis-simple-input:focus {
+.kobean-simple-input:focus {
     box-shadow: none;
     border-color: var(--primary);
 }

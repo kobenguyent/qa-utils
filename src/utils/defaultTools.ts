@@ -1,5 +1,5 @@
 /**
- * Default Tools Configuration for Jarvis AI Assistant
+ * Default Tools Configuration for Kobean AI Assistant
  * Registers all available QA Utils tools with metadata
  */
 

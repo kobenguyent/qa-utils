@@ -1,5 +1,5 @@
 /**
- * Jarvis AI Agent - Main Orchestrator
+ * Kobean AI Agent - Main Orchestrator
  * Combines natural language understanding with tool execution
  */
 
@@ -8,7 +8,7 @@ import { parseIntent, ParsedIntent, isHelpRequest, getSuggestions } from './inte
 import { registerDefaultTools, getAllTools } from './defaultTools';
 import { sendChatMessage, ChatMessage, ChatConfig } from './aiChatClient';
 
-export interface JarvisConfig {
+export interface KobeanConfig {
     aiProvider?: 'ollama' | 'openai' | 'anthropic' | 'google';
     aiEndpoint?: string;
     aiModel?: string;
@@ -17,7 +17,7 @@ export interface JarvisConfig {
     systemPrompt?: string;
 }
 
-export interface JarvisResponse {
+export interface KobeanResponse {
     text: string;
     toolResult?: ToolInvocationResult;
     intent?: ParsedIntent;
@@ -26,7 +26,7 @@ export interface JarvisResponse {
     error?: string;
 }
 
-export interface JarvisMessage {
+export interface KobeanMessage {
     id: string;
     role: 'user' | 'assistant';
     content: string;
@@ -35,14 +35,14 @@ export interface JarvisMessage {
 }
 
 /**
- * Jarvis AI Agent Class
+ * Kobean AI Agent Class
  */
-export class JarvisAgent {
-    private config: JarvisConfig;
-    private conversationHistory: JarvisMessage[] = [];
+export class KobeanAgent {
+    private config: KobeanConfig;
+    private conversationHistory: KobeanMessage[] = [];
     private initialized = false;
 
-    constructor(config: JarvisConfig = {}) {
+    constructor(config: KobeanConfig = {}) {
         this.config = {
             aiProvider: config.aiProvider || 'ollama',
             aiEndpoint: config.aiEndpoint || 'http://localhost:11434',
@@ -67,11 +67,11 @@ export class JarvisAgent {
     /**
      * Process a user message and generate a response
      */
-    async processMessage(userMessage: string): Promise<JarvisResponse> {
+    async processMessage(userMessage: string): Promise<KobeanResponse> {
         await this.initialize();
 
         // Add user message to history
-        const userMsg: JarvisMessage = {
+        const userMsg: KobeanMessage = {
             id: crypto.randomUUID?.() || Date.now().toString(),
             role: 'user',
             content: userMessage,
@@ -104,7 +104,7 @@ export class JarvisAgent {
             const toolResult = await this.executeFromIntent(intent);
 
             if (toolResult.success) {
-                const response: JarvisResponse = {
+                const response: KobeanResponse = {
                     text: toolResult.message || `Successfully executed ${toolResult.toolName}`,
                     toolResult,
                     intent,
@@ -189,11 +189,11 @@ export class JarvisAgent {
     /**
      * Generate help response listing available tools
      */
-    private generateHelpResponse(): JarvisResponse {
+    private generateHelpResponse(): KobeanResponse {
         // Get categories for help response
         const categories = ToolRegistry.getCategories();
 
-        let helpText = `👋 Hello! I'm Jarvis, your AI assistant. I can help you with:\n\n`;
+        let helpText = `👋 Hello! I'm Kobean, your AI assistant. I can help you with:\n\n`;
 
         for (const { category, count } of categories) {
             const categoryTools = ToolRegistry.getByCategory(category);
@@ -227,7 +227,7 @@ export class JarvisAgent {
     private async generateAIResponse(
         userMessage: string,
         intent: ParsedIntent
-    ): Promise<JarvisResponse> {
+    ): Promise<KobeanResponse> {
         // Check if AI is configured
         if (this.config.aiProvider === 'ollama' && !this.config.aiEndpoint) {
             return {
@@ -309,10 +309,10 @@ export class JarvisAgent {
     }
 
     /**
-     * Get default system prompt for Jarvis
+     * Get default system prompt for Kobean
      */
     private getDefaultSystemPrompt(): string {
-        return `You are Jarvis, an intelligent AI assistant inspired by Iron Man's AI. You are integrated into the QA Utils application, a developer toolkit.
+        return `You are Kobean, an intelligent AI assistant inspired by Iron Man's AI. You are integrated into the QA Utils application, a developer toolkit.
 
 Your capabilities include:
 - Generating UUIDs, passwords, OTPs, and dummy data
@@ -343,21 +343,21 @@ You are running locally and have access to the user's development environment.`;
     /**
      * Get conversation history
      */
-    getHistory(): JarvisMessage[] {
+    getHistory(): KobeanMessage[] {
         return [...this.conversationHistory];
     }
 
     /**
      * Update configuration
      */
-    updateConfig(config: Partial<JarvisConfig>): void {
+    updateConfig(config: Partial<KobeanConfig>): void {
         this.config = { ...this.config, ...config };
     }
 
     /**
      * Get current configuration
      */
-    getConfig(): JarvisConfig {
+    getConfig(): KobeanConfig {
         return { ...this.config };
     }
 
@@ -377,17 +377,17 @@ You are running locally and have access to the user's development environment.`;
 }
 
 // Export singleton instance
-let jarvisInstance: JarvisAgent | null = null;
+let kobeanInstance: KobeanAgent | null = null;
 
-export function getJarvis(config?: JarvisConfig): JarvisAgent {
-    if (!jarvisInstance) {
-        jarvisInstance = new JarvisAgent(config);
+export function getKobean(config?: KobeanConfig): KobeanAgent {
+    if (!kobeanInstance) {
+        kobeanInstance = new KobeanAgent(config);
     } else if (config) {
-        jarvisInstance.updateConfig(config);
+        kobeanInstance.updateConfig(config);
     }
-    return jarvisInstance;
+    return kobeanInstance;
 }
 
-export function resetJarvis(): void {
-    jarvisInstance = null;
+export function resetKobean(): void {
+    kobeanInstance = null;
 }

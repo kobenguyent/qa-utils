@@ -1,5 +1,5 @@
 /**
- * Tool Registry for Jarvis AI Assistant
+ * Tool Registry for Kobean AI Assistant
  * Unified registry that catalogs all available tools and their metadata
  */
 

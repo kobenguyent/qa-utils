@@ -5,7 +5,7 @@ import { Footer } from "./Footer.tsx";
 import { trackPageView } from '../utils/umami.ts';
 import { ErrorBoundary } from './ErrorBoundary.tsx';
 import { CommandPalette } from './CommandPalette.tsx';
-import { JarvisWidget } from './JarvisWidget.tsx';
+import { KobeanWidget } from './KobeanWidget.tsx';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -59,7 +59,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         show={showCommandPalette}
         onHide={() => setShowCommandPalette(false)}
       />
-      <JarvisWidget />
+      <KobeanWidget />
     </ErrorBoundary>
   );
 };

@@ -52,7 +52,7 @@ const QRCodeGenerator = lazy(() => import('./components/utils/QRCodeGenerator.ts
 const DummyDataGenerator = lazy(() => import('./components/utils/DummyDataGenerator.tsx').then(module => ({ default: module.DummyDataGenerator })));
 const KanbanBoard = lazy(() => import('./components/utils/KanbanBoard.tsx').then(module => ({ default: module.KanbanBoard })));
 const CommandBook = lazy(() => import('./components/utils/CommandBook.tsx').then(module => ({ default: module.CommandBook })));
-const JarvisAssistant = lazy(() => import('./components/utils/JarvisAssistant.tsx').then(module => ({ default: module.JarvisAssistant })));
+const KobeanAssistant = lazy(() => import('./components/utils/KobeanAssistant.tsx').then(module => ({ default: module.KobeanAssistant })));
 const ImageEditor = lazy(() => import('./components/utils/ImageEditor.tsx').then(module => ({ default: module.ImageEditor })));
 
 // Component wrapper with suspense for lazy loaded routes
@@ -250,8 +250,12 @@ const router = createHashRouter([
     element: <RouteWrapper><CommandBook /></RouteWrapper>
   },
   {
+    path: 'kobean',
+    element: <RouteWrapper><KobeanAssistant /></RouteWrapper>
+  },
+  {
     path: 'jarvis',
-    element: <RouteWrapper><JarvisAssistant /></RouteWrapper>
+    element: <RouteWrapper><KobeanAssistant /></RouteWrapper>
   },
   {
     path: 'image-editor',

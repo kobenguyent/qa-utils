@@ -1,5 +1,5 @@
 /**
- * Intent Parser for Jarvis AI Assistant
+ * Intent Parser for Kobean AI Assistant
  * Parses natural language commands into structured intents and entities
  */
 
