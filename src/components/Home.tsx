@@ -9,6 +9,13 @@ export const Home: React.FC = () => {
   const [randomTool, setRandomTool] = useState<SearchItem | null>(null);
   const [quote, setQuote] = useState<Quote | null>(null);
 
+  // Common card style for quote and random tool sections
+  const cardStyle = {
+    backgroundColor: 'var(--card-bg)', 
+    borderRadius: '12px',
+    border: '1px solid var(--border-color)'
+  };
+
   useEffect(() => {
     // Get a random tool and quote on component mount
     setRandomTool(getRandomTool());
@@ -44,9 +51,7 @@ export const Home: React.FC = () => {
 
               {quote && (
                 <div className="mt-4 p-4" style={{ 
-                  backgroundColor: 'var(--card-bg)', 
-                  borderRadius: '12px',
-                  border: '1px solid var(--border-color)',
+                  ...cardStyle,
                   borderLeft: '4px solid var(--bs-primary)'
                 }}>
                   <div className="d-flex flex-column align-items-center gap-2">
@@ -69,11 +74,7 @@ export const Home: React.FC = () => {
               )}
               
               {randomTool && (
-                <div className="mt-4 p-3" style={{ 
-                  backgroundColor: 'var(--card-bg)', 
-                  borderRadius: '12px',
-                  border: '1px solid var(--border-color)'
-                }}>
+                <div className="mt-4 p-3" style={cardStyle}>
                   <h3 className="h5 mb-2">
                     🎲 Try a Random Tool
                   </h3>

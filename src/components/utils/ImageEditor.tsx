@@ -38,41 +38,7 @@ export const ImageEditor: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Apply filters to canvas
-  useEffect(() => {
-    if (imageState.preview && canvasRef.current) {
-      applyFilters();
-    }
-  }, [
-    imageState.preview,
-    imageState.rotation,
-    imageState.brightness,
-    imageState.contrast,
-    imageState.saturation,
-    imageState.blur,
-    imageState.grayscale,
-    imageState.sepia,
-    imageState.flipH,
-    imageState.flipV,
-  ]);
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const preview = event.target?.result as string;
-        setImageState({
-          ...imageState,
-          file,
-          preview,
-          edited: null,
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const applyFilters = () => {
+  const applyFilters = React.useCallback(() => {
     if (!imageState.preview || !canvasRef.current) return;
 
     const canvas = canvasRef.current;
@@ -121,6 +87,38 @@ export const ImageEditor: React.FC = () => {
       setImageState(prev => ({ ...prev, edited: canvas.toDataURL('image/png') }));
     };
     img.src = imageState.preview;
+  }, [
+    imageState.preview,
+    imageState.rotation,
+    imageState.brightness,
+    imageState.contrast,
+    imageState.saturation,
+    imageState.blur,
+    imageState.grayscale,
+    imageState.sepia,
+    imageState.flipH,
+    imageState.flipV,
+  ]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const preview = event.target?.result as string;
+        setImageState({
+          ...imageState,
+          file,
+          preview,
+          edited: null,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleRotate = (degrees: number) => {
