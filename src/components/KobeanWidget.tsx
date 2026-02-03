@@ -1,21 +1,21 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Form, Button, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { getJarvis, JarvisMessage } from '../utils/JarvisAgent';
+import { getKobean, KobeanMessage } from '../utils/KobeanAgent';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import './JarvisWidget.css';
+import './KobeanWidget.css';
 
-export function JarvisWidget() {
+export function KobeanWidget() {
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const [input, setInput] = useState('');
-    const [messages, setMessages] = useState<JarvisMessage[]>([]);
+    const [messages, setMessages] = useState<KobeanMessage[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
     const [copied, setCopied] = useState<string | null>(null);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
-    const agentRef = useRef(getJarvis({
+    const agentRef = useRef(getKobean({
         aiProvider: 'ollama',
         aiEndpoint: 'http://localhost:11434',
         aiModel: 'mistral',
@@ -46,7 +46,7 @@ export function JarvisWidget() {
         setInput('');
         setIsProcessing(true);
 
-        const userMessage: JarvisMessage = {
+        const userMessage: KobeanMessage = {
             id: Date.now().toString(),
             role: 'user',
             content: message,
@@ -57,7 +57,7 @@ export function JarvisWidget() {
         try {
             const response = await agentRef.current?.processMessage(message);
             if (response) {
-                const assistantMessage: JarvisMessage = {
+                const assistantMessage: KobeanMessage = {
                     id: (Date.now() + 1).toString(),
                     role: 'assistant',
                     content: response.text,
@@ -91,31 +91,31 @@ export function JarvisWidget() {
     };
 
     return (
-        <div className="jarvis-widget">
+        <div className="kobean-widget">
             {/* Floating Button */}
             <button
-                className={`jarvis-fab ${isOpen ? 'open' : ''}`}
+                className={`kobean-fab ${isOpen ? 'open' : ''}`}
                 onClick={() => setIsOpen(!isOpen)}
-                title="Open Jarvis (AI Assistant)"
+                title="Open Kobean (AI Assistant)"
             >
                 {isOpen ? '✕' : '🤖'}
             </button>
 
             {/* Chat Window */}
             {isOpen && (
-                <div className="jarvis-window">
+                <div className="kobean-window">
                     {/* Header */}
-                    <div className="jarvis-header">
-                        <span>🤖 Jarvis</span>
-                        <button className="jarvis-clear" onClick={handleClear} title="Clear chat">
+                    <div className="kobean-header">
+                        <span>🤖 Kobean</span>
+                        <button className="kobean-clear" onClick={handleClear} title="Clear chat">
                             🗑️
                         </button>
                     </div>
 
                     {/* Messages */}
-                    <div className="jarvis-messages">
+                    <div className="kobean-messages">
                         {messages.length === 0 ? (
-                            <div className="jarvis-empty">
+                            <div className="kobean-empty">
                                 <p>Hi! I can help with:</p>
                                 <ul>
                                     <li>Generate UUID, passwords</li>
@@ -125,14 +125,14 @@ export function JarvisWidget() {
                             </div>
                         ) : (
                             messages.map((msg) => (
-                                <div key={msg.id} className={`jarvis-msg ${msg.role}`}>
+                                <div key={msg.id} className={`kobean-msg ${msg.role}`}>
                                     {msg.content}
                                     {msg.toolResult?.copyable && (
                                         <CopyToClipboard
                                             text={msg.toolResult.copyable}
                                             onCopy={() => setCopied(msg.id)}
                                         >
-                                            <button className="jarvis-copy">
+                                            <button className="kobean-copy">
                                                 {copied === msg.id ? '✓' : '📋'}
                                             </button>
                                         </CopyToClipboard>
@@ -141,7 +141,7 @@ export function JarvisWidget() {
                             ))
                         )}
                         {isProcessing && (
-                            <div className="jarvis-msg assistant">
+                            <div className="kobean-msg assistant">
                                 <Spinner animation="border" size="sm" />
                             </div>
                         )}
@@ -149,20 +149,20 @@ export function JarvisWidget() {
                     </div>
 
                     {/* Input */}
-                    <Form onSubmit={handleSubmit} className="jarvis-input-form">
+                    <Form onSubmit={handleSubmit} className="kobean-input-form">
                         <Form.Control
                             ref={inputRef}
                             type="text"
-                            placeholder="Ask Jarvis..."
+                            placeholder="Ask Kobean..."
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             disabled={isProcessing}
-                            className="jarvis-input"
+                            className="kobean-input"
                         />
                         <Button
                             type="submit"
                             disabled={!input.trim() || isProcessing}
-                            className="jarvis-send"
+                            className="kobean-send"
                         >
                             →
                         </Button>
@@ -173,4 +173,4 @@ export function JarvisWidget() {
     );
 }
 
-export default JarvisWidget;
+export default KobeanWidget;

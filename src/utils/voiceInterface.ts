@@ -1,5 +1,5 @@
 /**
- * Voice Interface for Jarvis AI Assistant
+ * Voice Interface for Kobean AI Assistant
  * Uses Web Speech API for voice input/output
  */
 
@@ -74,7 +74,7 @@ export class VoiceInterface {
             language: config.language || 'en-US',
             continuous: config.continuous ?? false,
             interimResults: config.interimResults ?? true,
-            wakeWord: config.wakeWord || 'jarvis',
+            wakeWord: config.wakeWord || 'kobean',
             voiceName: config.voiceName,
             rate: config.rate ?? 1.0,
             pitch: config.pitch ?? 1.0,
@@ -186,7 +186,7 @@ export class VoiceInterface {
         const cleaned = transcript.trim().toLowerCase();
 
         // Check for wake word
-        const wakeWord = this.config.wakeWord?.toLowerCase() || 'jarvis';
+        const wakeWord = this.config.wakeWord?.toLowerCase() || 'kobean';
 
         if (cleaned.startsWith(wakeWord)) {
             // Remove wake word and return the rest

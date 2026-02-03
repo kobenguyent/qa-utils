@@ -1,20 +1,20 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Container, Form, Button, InputGroup, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { JarvisMessage, getJarvis } from '../../utils/JarvisAgent';
+import { KobeanMessage, getKobean } from '../../utils/KobeanAgent';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import '../../styles/jarvis.css';
+import '../../styles/kobean.css';
 
-export function JarvisAssistant() {
+export function KobeanAssistant() {
     const navigate = useNavigate();
     const [input, setInput] = useState('');
-    const [messages, setMessages] = useState<JarvisMessage[]>([]);
+    const [messages, setMessages] = useState<KobeanMessage[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
     const [copied, setCopied] = useState<string | null>(null);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
-    const agentRef = useRef(getJarvis({
+    const agentRef = useRef(getKobean({
         aiProvider: 'ollama',
         aiEndpoint: 'http://localhost:11434',
         aiModel: 'mistral',
@@ -39,7 +39,7 @@ export function JarvisAssistant() {
         setInput('');
         setIsProcessing(true);
 
-        const userMessage: JarvisMessage = {
+        const userMessage: KobeanMessage = {
             id: Date.now().toString(),
             role: 'user',
             content: message,
@@ -50,7 +50,7 @@ export function JarvisAssistant() {
         try {
             const response = await agentRef.current?.processMessage(message);
             if (response) {
-                const assistantMessage: JarvisMessage = {
+                const assistantMessage: KobeanMessage = {
                     id: (Date.now() + 1).toString(),
                     role: 'assistant',
                     content: response.text,
@@ -81,22 +81,22 @@ export function JarvisAssistant() {
     };
 
     return (
-        <Container className="jarvis-simple py-4" style={{ maxWidth: '700px' }}>
+        <Container className="kobean-simple py-4" style={{ maxWidth: '700px' }}>
             {/* Simple Header */}
             <div className="text-center mb-4">
-                <h2 className="jarvis-simple-title">🤖 Jarvis</h2>
+                <h2 className="kobean-simple-title">🤖 Kobean</h2>
                 <p className="text-muted small">Ask anything or try: "generate uuid", "password", "timestamp"</p>
             </div>
 
             {/* Messages */}
-            <div className="jarvis-simple-messages mb-3">
+            <div className="kobean-simple-messages mb-3">
                 {messages.length === 0 ? (
                     <div className="text-center text-muted py-4">
                         <p>Type a command below</p>
                     </div>
                 ) : (
                     messages.map((msg) => (
-                        <div key={msg.id} className={`jarvis-simple-msg ${msg.role}`}>
+                        <div key={msg.id} className={`kobean-simple-msg ${msg.role}`}>
                             <div className="msg-content">
                                 {msg.content}
                                 {msg.toolResult?.copyable && (
@@ -114,7 +114,7 @@ export function JarvisAssistant() {
                     ))
                 )}
                 {isProcessing && (
-                    <div className="jarvis-simple-msg assistant">
+                    <div className="kobean-simple-msg assistant">
                         <Spinner animation="border" size="sm" />
                     </div>
                 )}
@@ -127,11 +127,11 @@ export function JarvisAssistant() {
                     <Form.Control
                         ref={inputRef}
                         type="text"
-                        placeholder="Ask Jarvis..."
+                        placeholder="Ask Kobean..."
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         disabled={isProcessing}
-                        className="jarvis-simple-input"
+                        className="kobean-simple-input"
                     />
                     <Button type="submit" disabled={!input.trim() || isProcessing}>
                         {isProcessing ? <Spinner animation="border" size="sm" /> : '→'}
@@ -147,4 +147,4 @@ export function JarvisAssistant() {
     );
 }
 
-export default JarvisAssistant;
+export default KobeanAssistant;
