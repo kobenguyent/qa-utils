@@ -144,6 +144,12 @@ export const ImageEditor: React.FC = () => {
   const [drawingMode, setDrawingMode] = useState<'none' | 'blur' | 'pixelate' | 'brighten' | 'darken'>('none');
   const [isDrawing, setIsDrawing] = useState(false);
   const [startPoint, setStartPoint] = useState<{ x: number; y: number } | null>(null);
+  const [regionalIntensity, setRegionalIntensity] = useState({
+    blur: 10,
+    pixelate: 10,
+    brighten: 50,
+    darken: 50,
+  });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -373,7 +379,7 @@ export const ImageEditor: React.FC = () => {
         width,
         height,
         type: drawingMode as 'blur' | 'pixelate' | 'brighten' | 'darken',
-        intensity: drawingMode === 'blur' ? 10 : drawingMode === 'pixelate' ? 10 : 50,
+        intensity: regionalIntensity[drawingMode as 'blur' | 'pixelate' | 'brighten' | 'darken'],
       };
       
       setImageState(prev => ({
@@ -734,9 +740,61 @@ export const ImageEditor: React.FC = () => {
                   <strong>Censorship & Regional Effects</strong>
                 </Card.Header>
                 <Card.Body>
-                  <p className="small text-muted mb-2">
+                  <p className="small text-muted mb-3">
                     Select a tool and draw on the image to apply effects to specific regions
                   </p>
+                  
+                  {/* Intensity Controls */}
+                  <div className="mb-3">
+                    <h6 className="small mb-2">Intensity Settings</h6>
+                    <Form.Group className="mb-2">
+                      <Form.Label className="small">
+                        Blur Intensity: {regionalIntensity.blur}px
+                      </Form.Label>
+                      <Form.Range
+                        min="1"
+                        max="30"
+                        value={regionalIntensity.blur}
+                        onChange={(e) =>
+                          setRegionalIntensity(prev => ({ ...prev, blur: parseInt(e.target.value) }))
+                        }
+                        size="sm"
+                      />
+                    </Form.Group>
+                    
+                    <Form.Group className="mb-2">
+                      <Form.Label className="small">
+                        Pixelate Intensity: {regionalIntensity.pixelate}px
+                      </Form.Label>
+                      <Form.Range
+                        min="2"
+                        max="30"
+                        value={regionalIntensity.pixelate}
+                        onChange={(e) =>
+                          setRegionalIntensity(prev => ({ ...prev, pixelate: parseInt(e.target.value) }))
+                        }
+                        size="sm"
+                      />
+                    </Form.Group>
+                    
+                    <Form.Group className="mb-2">
+                      <Form.Label className="small">
+                        Brighten/Darken Intensity: {regionalIntensity.brighten}
+                      </Form.Label>
+                      <Form.Range
+                        min="10"
+                        max="100"
+                        value={regionalIntensity.brighten}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value);
+                          setRegionalIntensity(prev => ({ ...prev, brighten: val, darken: val }));
+                        }}
+                        size="sm"
+                      />
+                    </Form.Group>
+                  </div>
+                  
+                  <h6 className="small mb-2">Regional Tools</h6>
                   <ButtonGroup size="sm" className="w-100 mb-2">
                     <Button
                       variant={drawingMode === 'blur' ? 'primary' : 'outline-primary'}
