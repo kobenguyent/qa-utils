@@ -297,8 +297,14 @@ export const ImageEditor: React.FC = () => {
     
     const canvas = drawingCanvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    
+    // Calculate scale factors between displayed size and actual canvas size
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    // Get mouse position relative to canvas and scale to actual coordinates
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
     
     setIsDrawing(true);
     setStartPoint({ x, y });
@@ -309,8 +315,14 @@ export const ImageEditor: React.FC = () => {
     
     const canvas = drawingCanvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    
+    // Calculate scale factors between displayed size and actual canvas size
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    // Get mouse position relative to canvas and scale to actual coordinates
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
     
     // Draw a preview rectangle
     const ctx = canvas.getContext('2d');
@@ -340,8 +352,14 @@ export const ImageEditor: React.FC = () => {
     
     const canvas = drawingCanvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    
+    // Calculate scale factors between displayed size and actual canvas size
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    // Get mouse position relative to canvas and scale to actual coordinates
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
     
     const width = Math.abs(x - startPoint.x);
     const height = Math.abs(y - startPoint.y);
