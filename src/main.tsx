@@ -54,6 +54,7 @@ const KanbanBoard = lazy(() => import('./components/utils/KanbanBoard.tsx').then
 const CommandBook = lazy(() => import('./components/utils/CommandBook.tsx').then(module => ({ default: module.CommandBook })));
 const KobeanAssistant = lazy(() => import('./components/utils/KobeanAssistant.tsx').then(module => ({ default: module.KobeanAssistant })));
 const ImageEditor = lazy(() => import('./components/utils/ImageEditor.tsx').then(module => ({ default: module.ImageEditor })));
+const SequenceDiagramGenerator = lazy(() => import('./components/utils/SequenceDiagramGenerator.tsx').then(module => ({ default: module.SequenceDiagramGenerator })));
 
 // Component wrapper with suspense for lazy loaded routes
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -260,6 +261,10 @@ const router = createHashRouter([
   {
     path: 'image-editor',
     element: <RouteWrapper><ImageEditor /></RouteWrapper>
+  },
+  {
+    path: 'sequence-diagram',
+    element: <RouteWrapper><SequenceDiagramGenerator /></RouteWrapper>
   },
 ]);
 

@@ -379,6 +379,14 @@ export const searchData: SearchItem[] = [
     icon: '🤖'
   },
   {
+    title: 'Sequence Diagram Generator',
+    description: 'Generate sequence diagrams from CodeceptJS or Playwright test code',
+    path: '#/sequence-diagram',
+    category: 'Developer Tools',
+    keywords: ['sequence', 'diagram', 'mermaid', 'codeceptjs', 'playwright', 'test', 'flow', 'visualization', 'uml'],
+    icon: '📊'
+  },
+  {
     title: 'CI/CD Workflow Generator',
     description: 'Generate CI/CD workflows for GitHub Actions, GitLab, and more',
     path: '#/workflow-generator',
