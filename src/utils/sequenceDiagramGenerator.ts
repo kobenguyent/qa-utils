@@ -329,7 +329,7 @@ function extractStringArgs(args: string): string {
  */
 function escapeMermaid(text: string): string {
   return text
-    .replace(/;/g, '#59;')
+    .replace(/#/g, '#35;')
     .replace(/"/g, "'")
     .replace(/\n/g, ' ')
     .substring(0, 80); // Limit length for readability

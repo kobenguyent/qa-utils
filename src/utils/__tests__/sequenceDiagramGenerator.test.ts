@@ -19,8 +19,8 @@ describe('sequenceDiagramGenerator', () => {
       expect(result).toContain('participant User');
       expect(result).toContain('participant Browser');
       expect(result).toContain('Navigate to https://example.com/login');
-      expect(result).toContain('Fill: #email, user@example.com');
-      expect(result).toContain('Fill: #password, secret123');
+      expect(result).toContain('Fill: #35;email, user@example.com');
+      expect(result).toContain('Fill: #35;password, secret123');
       expect(result).toContain("Click button[type='submit']");
       expect(result).toContain('Assert toBeVisible (.welcome)');
     });
@@ -44,13 +44,13 @@ describe('sequenceDiagramGenerator', () => {
     it('handles Playwright fill action', () => {
       const code = `await page.fill('#email', 'user@test.com');`;
       const result = generateSequenceDiagram(code, 'playwright');
-      expect(result).toContain('Fill: #email, user@test.com');
+      expect(result).toContain('Fill: #35;email, user@test.com');
     });
 
     it('handles Playwright fill with email address', () => {
       const code = `await page.fill('#email', 'user@example.com');`;
       const result = generateSequenceDiagram(code, 'playwright');
-      expect(result).toContain('Fill: #email, user@example.com');
+      expect(result).toContain('Fill: #35;email, user@example.com');
     });
 
     it('handles Playwright click action', () => {
