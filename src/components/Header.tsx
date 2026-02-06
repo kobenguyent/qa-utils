@@ -168,6 +168,7 @@ export const Header: React.FC = () => {
               <NavDropdown.Item href="#/file-processor">📁 File Processor</NavDropdown.Item>
               <NavDropdown.Item href="#/encryption">🔒 Encryption</NavDropdown.Item>
               <NavDropdown.Item href="#/playwright2codecept">🎭 PW→CodeceptJS</NavDropdown.Item>
+              <NavDropdown.Item href="#/sequence-diagram">📊 Sequence Diagram</NavDropdown.Item>
               <NavDropdown.Item href="#/workflow-generator">🚀 CI/CD</NavDropdown.Item>
               <NavDropdown.Item href="#/kanban">📋 Kanban Board</NavDropdown.Item>
             </NavDropdown>
