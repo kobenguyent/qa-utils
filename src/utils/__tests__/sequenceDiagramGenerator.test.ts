@@ -18,9 +18,11 @@ describe('sequenceDiagramGenerator', () => {
       expect(result).toContain('sequenceDiagram');
       expect(result).toContain('participant User');
       expect(result).toContain('participant Browser');
-      expect(result).toContain('Navigate to');
-      expect(result).toContain('Fill');
-      expect(result).toContain('Click');
+      expect(result).toContain('Navigate to https://example.com/login');
+      expect(result).toContain('Fill: #email, user@example.com');
+      expect(result).toContain('Fill: #password, secret123');
+      expect(result).toContain("Click button[type='submit']");
+      expect(result).toContain('Assert toBeVisible (.welcome)');
     });
 
     it('parses CodeceptJS test code', () => {
@@ -43,6 +45,12 @@ describe('sequenceDiagramGenerator', () => {
       const code = `await page.fill('#email', 'user@test.com');`;
       const result = generateSequenceDiagram(code, 'playwright');
       expect(result).toContain('Fill: #email, user@test.com');
+    });
+
+    it('handles Playwright fill with email address', () => {
+      const code = `await page.fill('#email', 'user@example.com');`;
+      const result = generateSequenceDiagram(code, 'playwright');
+      expect(result).toContain('Fill: #email, user@example.com');
     });
 
     it('handles Playwright click action', () => {
