@@ -85,7 +85,8 @@ function extractCodeceptJSSteps(body: string): DiagramStep[] {
  * Map a CodeceptJS action to a diagram step.
  */
 function mapCodeceptJSAction(action: string, args: string): DiagramStep | null {
-  const cleanArgs = extractFirstStringArg(args);
+  const firstArg = extractFirstStringArg(args);
+  const allArgs = extractStringArgs(args);
 
   const navigationActions = ['amOnPage', 'navigateTo', 'openNewTab'];
   const inputActions = ['fillField', 'appendField', 'clearField', 'type'];
@@ -100,41 +101,41 @@ function mapCodeceptJSAction(action: string, args: string): DiagramStep | null {
   const scrollActions = ['scrollTo', 'scrollPageToTop', 'scrollPageToBottom'];
 
   if (navigationActions.includes(action)) {
-    return { from: 'User', to: 'Browser', action: `Navigate to ${cleanArgs || args}` };
+    return { from: 'User', to: 'Browser', action: `Navigate to ${firstArg || args}` };
   }
   if (inputActions.includes(action)) {
-    return { from: 'User', to: 'Browser', action: `${action}: ${cleanArgs || args}` };
+    return { from: 'User', to: 'Browser', action: `${action}: ${allArgs || args}` };
   }
   if (clickActions.includes(action)) {
-    return { from: 'User', to: 'Browser', action: `Click ${cleanArgs || args}` };
+    return { from: 'User', to: 'Browser', action: `Click ${firstArg || args}` };
   }
   if (seeActions.includes(action)) {
-    return { from: 'Browser', to: 'User', action: `Verify: ${cleanArgs || args}`, isResponse: true };
+    return { from: 'Browser', to: 'User', action: `Verify: ${allArgs || args}`, isResponse: true };
   }
   if (dontSeeActions.includes(action)) {
-    return { from: 'Browser', to: 'User', action: `Verify absent: ${cleanArgs || args}`, isResponse: true };
+    return { from: 'Browser', to: 'User', action: `Verify absent: ${allArgs || args}`, isResponse: true };
   }
   if (waitActions.includes(action)) {
-    return { from: 'User', to: 'Browser', action: `Wait: ${action.replace('waitFor', '')} ${cleanArgs || args}` };
+    return { from: 'User', to: 'Browser', action: `Wait: ${action.replace('waitFor', '')} ${allArgs || args}` };
   }
   if (grabActions.includes(action)) {
-    return { from: 'Browser', to: 'User', action: `Grab: ${action.replace('grab', '')} ${cleanArgs || args}`, isResponse: true };
+    return { from: 'Browser', to: 'User', action: `Grab: ${action.replace('grab', '')} ${allArgs || args}`, isResponse: true };
   }
   if (selectActions.includes(action)) {
-    return { from: 'User', to: 'Browser', action: `${action}: ${cleanArgs || args}` };
+    return { from: 'User', to: 'Browser', action: `${action}: ${allArgs || args}` };
   }
   if (keyActions.includes(action)) {
-    return { from: 'User', to: 'Browser', action: `Press key: ${cleanArgs || args}` };
+    return { from: 'User', to: 'Browser', action: `Press key: ${firstArg || args}` };
   }
   if (apiActions.includes(action)) {
-    return { from: 'User', to: 'Server', action: `${action}: ${cleanArgs || args}` };
+    return { from: 'User', to: 'Server', action: `${action}: ${allArgs || args}` };
   }
   if (scrollActions.includes(action)) {
-    return { from: 'User', to: 'Browser', action: `Scroll: ${cleanArgs || args}` };
+    return { from: 'User', to: 'Browser', action: `Scroll: ${allArgs || args}` };
   }
 
   // Generic fallback
-  return { from: 'User', to: 'Browser', action: `${action}(${cleanArgs || args})` };
+  return { from: 'User', to: 'Browser', action: `${action}(${allArgs || args})` };
 }
 
 /**

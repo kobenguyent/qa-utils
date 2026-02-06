@@ -104,7 +104,7 @@ describe('sequenceDiagramGenerator', () => {
     it('handles CodeceptJS fillField', () => {
       const code = `I.fillField('email', 'user@test.com');`;
       const result = generateSequenceDiagram(code, 'codeceptjs');
-      expect(result).toContain('fillField');
+      expect(result).toContain('fillField: email, user@test.com');
     });
 
     it('handles CodeceptJS click', () => {
@@ -141,7 +141,7 @@ describe('sequenceDiagramGenerator', () => {
     it('handles CodeceptJS selectOption', () => {
       const code = `I.selectOption('country', 'USA');`;
       const result = generateSequenceDiagram(code, 'codeceptjs');
-      expect(result).toContain('selectOption');
+      expect(result).toContain('selectOption: country, USA');
     });
 
     it('handles CodeceptJS pressKey', () => {
