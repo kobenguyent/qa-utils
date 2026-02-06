@@ -4,6 +4,7 @@ import {
   generateMermaidDiagram,
   sampleCodeceptJS,
   samplePlaywright,
+  samplePytest,
 } from '../sequenceDiagramGenerator';
 
 describe('sequenceDiagramGenerator', () => {
@@ -219,6 +220,125 @@ test('dashboard', async ({ page }) => {
       const code = `const x = 42;\nconsole.log(x);`;
       const result = generateSequenceDiagram(code, 'playwright');
       expect(result).toBe('');
+    });
+
+    // Pytest tests
+    it('parses pytest test code', () => {
+      const result = generateSequenceDiagram(samplePytest, 'pytest');
+      expect(result).toContain('sequenceDiagram');
+      expect(result).toContain('participant User');
+      expect(result).toContain('participant Browser');
+      expect(result).toContain('Navigate to https://example.com/login');
+      expect(result).toContain('Fill:');
+      expect(result).toContain('Click');
+    });
+
+    it('handles pytest goto action', () => {
+      const code = `page.goto("https://example.com")`;
+      const result = generateSequenceDiagram(code, 'pytest');
+      expect(result).toContain('Navigate to https://example.com');
+    });
+
+    it('handles pytest fill action', () => {
+      const code = `page.fill("#email", "user@test.com")`;
+      const result = generateSequenceDiagram(code, 'pytest');
+      expect(result).toContain('Fill:');
+    });
+
+    it('handles pytest click action', () => {
+      const code = `page.click("button.submit")`;
+      const result = generateSequenceDiagram(code, 'pytest');
+      expect(result).toContain('Click button.submit');
+    });
+
+    it('handles pytest expect assertions', () => {
+      const code = `expect(page.locator(".title")).to_be_visible()`;
+      const result = generateSequenceDiagram(code, 'pytest');
+      expect(result).toContain('Assert to_be_visible (.title)');
+      expect(result).toContain('-->>');
+    });
+
+    it('handles pytest assert statements', () => {
+      const code = `assert response.status_code == 200`;
+      const result = generateSequenceDiagram(code, 'pytest');
+      expect(result).toContain('Assert:');
+    });
+
+    it('handles pytest wait_for_selector', () => {
+      const code = `page.wait_for_selector(".loaded")`;
+      const result = generateSequenceDiagram(code, 'pytest');
+      expect(result).toContain('wait_for_selector');
+    });
+
+    it('handles pytest keyboard actions', () => {
+      const code = `page.keyboard.press("Enter")`;
+      const result = generateSequenceDiagram(code, 'pytest');
+      expect(result).toContain('Press key: Enter');
+    });
+
+    it('handles pytest screenshot', () => {
+      const code = `page.screenshot()`;
+      const result = generateSequenceDiagram(code, 'pytest');
+      expect(result).toContain('Take screenshot');
+    });
+
+    it('handles pytest API requests', () => {
+      const code = `requests.get("/api/users")`;
+      const result = generateSequenceDiagram(code, 'pytest');
+      expect(result).toContain('GET');
+      expect(result).toContain('Server');
+    });
+
+    it('handles pytest client requests', () => {
+      const code = `client.post("/api/login")`;
+      const result = generateSequenceDiagram(code, 'pytest');
+      expect(result).toContain('POST');
+      expect(result).toContain('Server');
+    });
+
+    it('handles pytest get_by_role click', () => {
+      const code = `page.get_by_role("button", name="Submit").click()`;
+      const result = generateSequenceDiagram(code, 'pytest');
+      expect(result).toContain('Click get_by_role');
+    });
+
+    it('handles Selenium driver.get', () => {
+      const code = `driver.get("https://example.com")`;
+      const result = generateSequenceDiagram(code, 'pytest');
+      expect(result).toContain('Navigate to https://example.com');
+    });
+
+    it('handles Selenium find_element click', () => {
+      const code = `driver.find_element(By.ID, "submit").click()`;
+      const result = generateSequenceDiagram(code, 'pytest');
+      expect(result).toContain('Click');
+    });
+
+    it('handles Selenium send_keys', () => {
+      const code = `driver.find_element(By.ID, "email").send_keys("user@test.com")`;
+      const result = generateSequenceDiagram(code, 'pytest');
+      expect(result).toContain('Type:');
+    });
+
+    it('handles multiple pytest test functions', () => {
+      const code = `def test_login(page):
+    page.goto("/login")
+    page.click("#submit")
+
+def test_dashboard(page):
+    page.goto("/dashboard")
+    expect(page.locator(".title")).to_be_visible()`;
+      const result = generateSequenceDiagram(code, 'pytest');
+      expect(result).toContain('login');
+      expect(result).toContain('dashboard');
+      expect(result).toContain('rect');
+    });
+
+    it('skips comment lines in pytest', () => {
+      const code = `# This is a comment\npage.click("Submit")`;
+      const result = generateSequenceDiagram(code, 'pytest');
+      expect(result).not.toContain('comment');
+      expect(result).toContain('Click Submit');
     });
   });
 

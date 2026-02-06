@@ -5,7 +5,7 @@
  * Mermaid sequence diagram syntax representing the test flow.
  */
 
-export type TestFramework = 'codeceptjs' | 'playwright';
+export type TestFramework = 'codeceptjs' | 'playwright' | 'pytest';
 
 export interface DiagramStep {
   from: string;
@@ -301,6 +301,265 @@ function extractPlaywrightSteps(body: string): DiagramStep[] {
 }
 
 /**
+ * Parse pytest test code and extract actions as diagram steps.
+ */
+function parsePytest(code: string): ParsedTest[] {
+  const tests: ParsedTest[] = [];
+
+  // Match def test_ functions: def test_name(page, ...):
+  const testRegex = /def\s+(test_\w+)\s*\([^)]*\)\s*:/g;
+  let match: RegExpExecArray | null;
+
+  while ((match = testRegex.exec(code)) !== null) {
+    const title = match[1].replace(/^test_/, '').replace(/_/g, ' ');
+    const startIndex = match.index + match[0].length;
+    const body = extractPythonBody(code, startIndex);
+    const steps = extractPytestSteps(body);
+    tests.push({ title, steps });
+  }
+
+  // If no test functions found, try parsing the entire code as steps
+  if (tests.length === 0) {
+    const steps = extractPytestSteps(code);
+    if (steps.length > 0) {
+      tests.push({ title: 'Test Flow', steps });
+    }
+  }
+
+  return tests;
+}
+
+/**
+ * Extract indented body from a Python function definition.
+ */
+function extractPythonBody(code: string, startIndex: number): string {
+  const lines = code.substring(startIndex).split('\n');
+  const bodyLines: string[] = [];
+  let baseIndent: number | null = null;
+
+  for (const line of lines) {
+    if (line.trim() === '') {
+      bodyLines.push(line);
+      continue;
+    }
+    const indent = line.match(/^(\s*)/)?.[1].length ?? 0;
+    if (baseIndent === null) {
+      if (indent === 0 && line.trim() !== '') continue; // skip same-line content
+      baseIndent = indent;
+    }
+    if (indent < baseIndent && line.trim() !== '') break;
+    bodyLines.push(line);
+  }
+
+  return bodyLines.join('\n');
+}
+
+/**
+ * Extract steps from pytest test body.
+ */
+function extractPytestSteps(body: string): DiagramStep[] {
+  const steps: DiagramStep[] = [];
+  const lines = body.split('\n');
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+
+    // page.goto(...)
+    const gotoMatch = trimmed.match(/page\.goto\s*\((.*)\)/);
+    if (gotoMatch) {
+      steps.push({ from: 'User', to: 'Browser', action: `Navigate to ${extractPythonStringArg(gotoMatch[1])}` });
+      continue;
+    }
+
+    // page.fill(...) or page.locator(...).fill(...)
+    const fillMatch = trimmed.match(/page\.(?:locator\(.*?\)\.)?fill\s*\((.*)\)/);
+    if (fillMatch) {
+      steps.push({ from: 'User', to: 'Browser', action: `Fill: ${extractPythonStringArgs(fillMatch[1])}` });
+      continue;
+    }
+
+    // page.click(...) or page.locator(...).click(...)
+    const clickMatch = trimmed.match(/page\.(?:locator\(.*?\)\.)?\s*click\s*\((.*?)\)/);
+    if (clickMatch) {
+      steps.push({ from: 'User', to: 'Browser', action: `Click ${extractPythonStringArg(clickMatch[1]) || clickMatch[1]}` });
+      continue;
+    }
+
+    // page.get_by_role/get_by_text/get_by_label/etc(...).click()
+    const getByClickMatch = trimmed.match(/page\.(get_by_\w+)\s*\((.*?)\)\s*\.click\s*\(/);
+    if (getByClickMatch) {
+      steps.push({ from: 'User', to: 'Browser', action: `Click ${getByClickMatch[1]}(${extractPythonStringArg(getByClickMatch[2]) || getByClickMatch[2]})` });
+      continue;
+    }
+
+    // page.get_by_role/get_by_text/etc(...).fill(...)
+    const getByFillMatch = trimmed.match(/page\.(get_by_\w+)\s*\((.*?)\)\s*\.fill\s*\((.*?)\)/);
+    if (getByFillMatch) {
+      steps.push({ from: 'User', to: 'Browser', action: `Fill ${getByFillMatch[1]}(${extractPythonStringArg(getByFillMatch[2])}): ${extractPythonStringArg(getByFillMatch[3])}` });
+      continue;
+    }
+
+    // expect(page...).to_be_visible/to_have_text/etc
+    const expectMatch = trimmed.match(/expect\s*\((.*?)\)\s*\.(to_\w+)\s*\((.*?)\)/);
+    if (expectMatch) {
+      const subject = expectMatch[1];
+      const assertion = expectMatch[2];
+      const argValue = extractPythonStringArg(expectMatch[3]);
+      const locatorInfo = extractPythonStringArg(subject);
+      let actionText = `Assert ${assertion}`;
+      if (argValue) {
+        actionText += `: ${argValue}`;
+      } else if (locatorInfo) {
+        actionText += ` (${locatorInfo})`;
+      }
+      steps.push({ from: 'Browser', to: 'User', action: actionText, isResponse: true });
+      continue;
+    }
+
+    // assert statements
+    const assertMatch = trimmed.match(/assert\s+(.*)/);
+    if (assertMatch) {
+      steps.push({ from: 'Browser', to: 'User', action: `Assert: ${assertMatch[1].substring(0, 60)}`, isResponse: true });
+      continue;
+    }
+
+    // page.wait_for_selector/wait_for_url/wait_for_load_state/wait_for_timeout
+    const waitMatch = trimmed.match(/page\.(wait_for_\w+)\s*\((.*?)\)/);
+    if (waitMatch) {
+      steps.push({ from: 'User', to: 'Browser', action: `${waitMatch[1]}: ${extractPythonStringArg(waitMatch[2]) || waitMatch[2]}` });
+      continue;
+    }
+
+    // page.type(...)
+    const typeMatch = trimmed.match(/page\.type\s*\((.*)\)/);
+    if (typeMatch) {
+      steps.push({ from: 'User', to: 'Browser', action: `Type: ${extractPythonStringArgs(typeMatch[1])}` });
+      continue;
+    }
+
+    // page.keyboard.press(...)
+    const keyMatch = trimmed.match(/page\.keyboard\.press\s*\((.*?)\)/);
+    if (keyMatch) {
+      steps.push({ from: 'User', to: 'Browser', action: `Press key: ${extractPythonStringArg(keyMatch[1]) || keyMatch[1]}` });
+      continue;
+    }
+
+    // page.select_option(...)
+    const selectMatch = trimmed.match(/page\.select_option\s*\((.*)\)/);
+    if (selectMatch) {
+      steps.push({ from: 'User', to: 'Browser', action: `Select: ${extractPythonStringArgs(selectMatch[1])}` });
+      continue;
+    }
+
+    // page.screenshot(...)
+    const screenshotMatch = trimmed.match(/page\.screenshot\s*\(/);
+    if (screenshotMatch) {
+      steps.push({ from: 'Browser', to: 'User', action: 'Take screenshot', isResponse: true });
+      continue;
+    }
+
+    // API: page.request.get/post/put/delete/patch or requests.get/post/etc
+    const apiMatch = trimmed.match(/(?:page\.)?request[s]?\.(get|post|put|delete|patch)\s*\((.*?)\)/);
+    if (apiMatch) {
+      steps.push({ from: 'User', to: 'Server', action: `${apiMatch[1].toUpperCase()} ${extractPythonStringArg(apiMatch[2]) || apiMatch[2]}` });
+      continue;
+    }
+
+    // page.evaluate(...)
+    const evalMatch = trimmed.match(/page\.evaluate\s*\(/);
+    if (evalMatch) {
+      steps.push({ from: 'User', to: 'Browser', action: 'Execute JavaScript' });
+      continue;
+    }
+
+    // page.set_viewport_size(...)
+    const viewportMatch = trimmed.match(/page\.set_viewport_size\s*\((.*?)\)/);
+    if (viewportMatch) {
+      steps.push({ from: 'User', to: 'Browser', action: `Set viewport: ${viewportMatch[1]}` });
+      continue;
+    }
+
+    // page.locator(...).action() - generic locator actions
+    const locatorMatch = trimmed.match(/page\.locator\s*\((.*?)\)\s*\.([\w]+)\s*\((.*?)\)/);
+    if (locatorMatch) {
+      const selector = extractPythonStringArg(locatorMatch[1]) || locatorMatch[1];
+      const locAction = locatorMatch[2];
+      const locArgs = extractPythonStringArg(locatorMatch[3]) || locatorMatch[3];
+      steps.push({ from: 'User', to: 'Browser', action: `${locAction}(${selector}${locArgs ? ', ' + locArgs : ''})` });
+      continue;
+    }
+
+    // client.get/post/put/delete/patch - Django/Flask/FastAPI test client
+    const clientMatch = trimmed.match(/client\.(get|post|put|delete|patch)\s*\((.*?)\)/);
+    if (clientMatch) {
+      steps.push({ from: 'User', to: 'Server', action: `${clientMatch[1].toUpperCase()} ${extractPythonStringArg(clientMatch[2]) || clientMatch[2]}` });
+      continue;
+    }
+
+    // response.status_code or response.json() assertions
+    const responseAssert = trimmed.match(/assert\s+response\.(status_code|json\(\))/);
+    if (responseAssert) {
+      steps.push({ from: 'Server', to: 'User', action: `Verify ${responseAssert[1]}`, isResponse: true });
+      continue;
+    }
+
+    // Selenium: driver.get(...)
+    const driverGetMatch = trimmed.match(/driver\.get\s*\((.*)\)/);
+    if (driverGetMatch) {
+      steps.push({ from: 'User', to: 'Browser', action: `Navigate to ${extractPythonStringArg(driverGetMatch[1])}` });
+      continue;
+    }
+
+    // Selenium: driver.find_element(...).click()
+    const seleniumClickMatch = trimmed.match(/driver\.find_element\s*\((.*?)\)\s*\.click\s*\(/);
+    if (seleniumClickMatch) {
+      steps.push({ from: 'User', to: 'Browser', action: `Click ${extractPythonStringArgs(seleniumClickMatch[1])}` });
+      continue;
+    }
+
+    // Selenium: driver.find_element(...).send_keys(...)
+    const seleniumTypeMatch = trimmed.match(/driver\.find_element\s*\((.*?)\)\s*\.send_keys\s*\((.*?)\)/);
+    if (seleniumTypeMatch) {
+      steps.push({ from: 'User', to: 'Browser', action: `Type: ${extractPythonStringArgs(seleniumTypeMatch[1])}, ${extractPythonStringArg(seleniumTypeMatch[2])}` });
+      continue;
+    }
+
+    // Selenium: WebDriverWait(...).until(...)
+    const waitUntilMatch = trimmed.match(/WebDriverWait\s*\(.*?\)\.until\s*\(/);
+    if (waitUntilMatch) {
+      steps.push({ from: 'User', to: 'Browser', action: 'Wait for condition' });
+      continue;
+    }
+  }
+
+  return steps;
+}
+
+/**
+ * Extract the first string argument from Python function call arguments.
+ * Handles both single and double quoted strings.
+ */
+function extractPythonStringArg(args: string): string {
+  const stringMatch = args.match(/'([^']*)'|"([^"]*)"/);
+  if (!stringMatch) return '';
+  return stringMatch[1] ?? stringMatch[2] ?? '';
+}
+
+/**
+ * Extract all string arguments from Python function call arguments.
+ */
+function extractPythonStringArgs(args: string): string {
+  const matches: string[] = [];
+  const regex = /'([^']*)'|"([^"]*)"/g;
+  let m: RegExpExecArray | null;
+  while ((m = regex.exec(args)) !== null) {
+    matches.push(m[1] ?? m[2] ?? '');
+  }
+  return matches.join(', ') || args;
+}
+
+/**
  * Extract the first string argument from a function call arguments string.
  * Handles matching quote pairs properly (e.g., 'button[type="submit"]').
  */
@@ -382,7 +641,14 @@ export function generateMermaidDiagram(tests: ParsedTest[]): string {
 export function generateSequenceDiagram(code: string, framework: TestFramework): string {
   if (!code.trim()) return '';
 
-  const tests = framework === 'codeceptjs' ? parseCodeceptJS(code) : parsePlaywright(code);
+  let tests: ParsedTest[];
+  if (framework === 'codeceptjs') {
+    tests = parseCodeceptJS(code);
+  } else if (framework === 'pytest') {
+    tests = parsePytest(code);
+  } else {
+    tests = parsePlaywright(code);
+  }
   return generateMermaidDiagram(tests);
 }
 
@@ -411,3 +677,16 @@ export const samplePlaywright = `test('login and verify dashboard', async ({ pag
   await expect(page.locator('.welcome')).toBeVisible();
   await expect(page).toHaveURL('/dashboard');
 });`;
+
+/**
+ * Sample pytest test code for demo purposes.
+ */
+export const samplePytest = `def test_login_and_verify_dashboard(page):
+    page.goto("https://example.com/login")
+    page.fill("#email", "user@example.com")
+    page.fill("#password", "secret123")
+    page.click('button[type="submit"]')
+    page.wait_for_selector(".dashboard")
+    expect(page.locator(".welcome")).to_be_visible()
+    expect(page).to_have_url("/dashboard")
+`;

@@ -8,6 +8,7 @@ import {
   generateSequenceDiagram,
   sampleCodeceptJS,
   samplePlaywright,
+  samplePytest,
   TestFramework,
 } from '../../utils/sequenceDiagramGenerator';
 import mermaid from 'mermaid';
@@ -75,7 +76,14 @@ export const SequenceDiagramGenerator: React.FC = () => {
   }, [mermaidSyntax]);
 
   const loadSample = () => {
-    const sample = framework === 'codeceptjs' ? sampleCodeceptJS : samplePlaywright;
+    let sample: string;
+    if (framework === 'codeceptjs') {
+      sample = sampleCodeceptJS;
+    } else if (framework === 'pytest') {
+      sample = samplePytest;
+    } else {
+      sample = samplePlaywright;
+    }
     setCode(sample);
   };
 
@@ -130,7 +138,7 @@ export const SequenceDiagramGenerator: React.FC = () => {
         📊 Sequence Diagram Generator
       </h2>
       <p className="text-muted mb-4">
-        Generate sequence diagrams from CodeceptJS or Playwright test code. Paste your test code below
+        Generate sequence diagrams from CodeceptJS, Playwright, or Pytest test code. Paste your test code below
         and visualize the test flow as a Mermaid sequence diagram.
       </p>
 
@@ -159,6 +167,16 @@ export const SequenceDiagramGenerator: React.FC = () => {
                 >
                   🤖 CodeceptJS
                 </Badge>
+                <Badge
+                  bg={framework === 'pytest' ? 'primary' : 'secondary'}
+                  className="ms-2"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setFramework('pytest')}
+                  role="button"
+                  aria-label="Select Pytest framework"
+                >
+                  🐍 Pytest
+                </Badge>
               </div>
             </Card.Header>
             <Card.Body>
@@ -169,7 +187,7 @@ export const SequenceDiagramGenerator: React.FC = () => {
                   rows={15}
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  placeholder={`Paste your ${framework === 'playwright' ? 'Playwright' : 'CodeceptJS'} test code here...`}
+                  placeholder={`Paste your ${framework === 'playwright' ? 'Playwright' : framework === 'pytest' ? 'Pytest' : 'CodeceptJS'} test code here...`}
                   className="font-monospace"
                   aria-label="Test code input"
                   style={{ fontSize: '0.85rem' }}

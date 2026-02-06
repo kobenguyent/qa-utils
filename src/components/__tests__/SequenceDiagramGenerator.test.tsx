@@ -24,6 +24,7 @@ describe('SequenceDiagramGenerator Component', () => {
     render(<SequenceDiagramGenerator />);
     expect(screen.getByLabelText('Select Playwright framework')).toBeInTheDocument();
     expect(screen.getByLabelText('Select CodeceptJS framework')).toBeInTheDocument();
+    expect(screen.getByLabelText('Select Pytest framework')).toBeInTheDocument();
   });
 
   it('renders generate, sample, and clear buttons', () => {
@@ -64,6 +65,36 @@ describe('SequenceDiagramGenerator Component', () => {
     fireEvent.click(screen.getByLabelText('Load sample code'));
     const textarea = screen.getByLabelText('Test code input') as HTMLTextAreaElement;
     expect(textarea.value).toContain('I.amOnPage');
+  });
+
+  it('loads sample Pytest code when Pytest is selected', () => {
+    render(<SequenceDiagramGenerator />);
+    fireEvent.click(screen.getByLabelText('Select Pytest framework'));
+    fireEvent.click(screen.getByLabelText('Load sample code'));
+    const textarea = screen.getByLabelText('Test code input') as HTMLTextAreaElement;
+    expect(textarea.value).toContain('page.goto');
+    expect(textarea.value).toContain('def test_');
+  });
+
+  it('generates diagram from Pytest code', async () => {
+    render(<SequenceDiagramGenerator />);
+    fireEvent.click(screen.getByLabelText('Select Pytest framework'));
+    const textarea = screen.getByLabelText('Test code input');
+    fireEvent.change(textarea, {
+      target: { value: `page.goto("https://example.com")\npage.click("#btn")` }
+    });
+    fireEvent.click(screen.getByLabelText('Generate diagram'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Mermaid Syntax')).toBeInTheDocument();
+    });
+  });
+
+  it('shows Pytest placeholder when Pytest is selected', () => {
+    render(<SequenceDiagramGenerator />);
+    fireEvent.click(screen.getByLabelText('Select Pytest framework'));
+    const textarea = screen.getByLabelText('Test code input') as HTMLTextAreaElement;
+    expect(textarea.placeholder).toContain('Pytest');
   });
 
   it('clears all state when clicking Clear', async () => {
