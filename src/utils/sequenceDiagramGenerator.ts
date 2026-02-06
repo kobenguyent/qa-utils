@@ -184,7 +184,7 @@ function extractPlaywrightSteps(body: string): DiagramStep[] {
     }
 
     // page.fill(...) or page.locator(...).fill(...)
-    const fillMatch = trimmed.match(/(?:await\s+)?page\.(?:locator\(.*?\)\.)?\s*fill\s*\((.*)\)/);
+    const fillMatch = trimmed.match(/(?:await\s+)?page\.(?:locator\(.*?\)\.)?fill\s*\((.*)\)/);
     if (fillMatch) {
       steps.push({ from: 'User', to: 'Browser', action: `Fill: ${extractStringArgs(fillMatch[1])}` });
       continue;
