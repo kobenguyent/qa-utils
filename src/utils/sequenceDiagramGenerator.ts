@@ -215,9 +215,18 @@ function extractPlaywrightSteps(body: string): DiagramStep[] {
     // expect(page...).toBeVisible/toHaveText/toContainText/etc
     const expectMatch = trimmed.match(/(?:await\s+)?expect\s*\((.*?)\)\s*\.([\w]+)\s*\((.*?)\)/);
     if (expectMatch) {
+      const subject = expectMatch[1];
       const assertion = expectMatch[2];
-      const value = extractFirstStringArg(expectMatch[3]) || expectMatch[3];
-      steps.push({ from: 'Browser', to: 'User', action: `Assert ${assertion}: ${value}`, isResponse: true });
+      const argValue = extractFirstStringArg(expectMatch[3]) || expectMatch[3];
+      // Extract locator/selector info from subject
+      const locatorInfo = extractFirstStringArg(subject);
+      let actionText = `Assert ${assertion}`;
+      if (argValue) {
+        actionText += `: ${argValue}`;
+      } else if (locatorInfo) {
+        actionText += ` (${locatorInfo})`;
+      }
+      steps.push({ from: 'Browser', to: 'User', action: actionText, isResponse: true });
       continue;
     }
 
@@ -293,21 +302,24 @@ function extractPlaywrightSteps(body: string): DiagramStep[] {
 
 /**
  * Extract the first string argument from a function call arguments string.
+ * Handles matching quote pairs properly (e.g., 'button[type="submit"]').
  */
 function extractFirstStringArg(args: string): string {
-  const stringMatch = args.match(/['"`](.*?)['"`]/);
-  return stringMatch ? stringMatch[1] : '';
+  const stringMatch = args.match(/'([^']*)'|"([^"]*)"|`([^`]*)`/);
+  if (!stringMatch) return '';
+  return stringMatch[1] ?? stringMatch[2] ?? stringMatch[3] ?? '';
 }
 
 /**
  * Extract all string arguments for display.
+ * Handles matching quote pairs properly (e.g., 'button[type="submit"]').
  */
 function extractStringArgs(args: string): string {
   const matches: string[] = [];
-  const regex = /['"`](.*?)['"`]/g;
+  const regex = /'([^']*)'|"([^"]*)"|`([^`]*)`/g;
   let m: RegExpExecArray | null;
   while ((m = regex.exec(args)) !== null) {
-    matches.push(m[1]);
+    matches.push(m[1] ?? m[2] ?? m[3] ?? '');
   }
   return matches.join(', ') || args;
 }

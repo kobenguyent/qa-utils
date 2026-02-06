@@ -42,19 +42,19 @@ describe('sequenceDiagramGenerator', () => {
     it('handles Playwright fill action', () => {
       const code = `await page.fill('#email', 'user@test.com');`;
       const result = generateSequenceDiagram(code, 'playwright');
-      expect(result).toContain('Fill');
+      expect(result).toContain('Fill: #email, user@test.com');
     });
 
     it('handles Playwright click action', () => {
       const code = `await page.click('button[type="submit"]');`;
       const result = generateSequenceDiagram(code, 'playwright');
-      expect(result).toContain('Click');
+      expect(result).toContain("Click button[type='submit']");
     });
 
     it('handles Playwright expect assertions', () => {
       const code = `await expect(page.locator('.title')).toBeVisible();`;
       const result = generateSequenceDiagram(code, 'playwright');
-      expect(result).toContain('Assert');
+      expect(result).toContain('Assert toBeVisible (.title)');
       expect(result).toContain('-->>');
     });
 
