@@ -72,15 +72,16 @@ Test gRPC services with browser-compatible gRPC-Web support:
 
 #### 📦 Collection Manager
 Unified API collection management tool supporting multiple formats:
-- **Multi-Format Support**: Postman, Insomnia, Thunder Client, .env, CSV, generic JSON
+- **Multi-Format Support**: Multiple API client formats (.env, CSV, generic JSON)
+- **Format Compatibility**: Postman-compatible, Insomnia-compatible, Thunder Client-compatible formats
 - **Multi-Collection Support**: Import and manage multiple collections and environments simultaneously
 - **Auto-Detection**: Automatically detect collection format and type (collection vs environment)
 - **Persistent Storage**: Auto-saves to IndexedDB - resume work after page refresh
 - **Inline Editor**: Edit requests directly - method, URL, headers, body, scripts with real-time updates
 - **Rename Items**: Double-click to rename collections, environments, folders, and requests
-- **Script Support**: Full support for pre-request and test scripts from Postman collections
-- **Script Preservation**: Scripts are preserved when converting between formats (Postman ↔ Insomnia ↔ Thunder Client)
-- **Script Translation**: Automatically translates script syntax between formats (pm.* ↔ insomnia.* ↔ tc.*)
+- **Script Support**: Full support for pre-request and test scripts
+- **Script Preservation**: Scripts are preserved when converting between formats
+- **Script Translation**: Automatically translates script syntax between formats
 - **Folder Scripts**: Pre-request and test scripts at folder and collection level
 - **Variable Rendering**: Visual badges show variable references with values on hover
 - **Autocomplete**: Type `{{` in URL/headers to see variable suggestions
@@ -94,6 +95,8 @@ Unified API collection management tool supporting multiple formats:
 - **Search & Filter**: Real-time search across all collection elements
 - **Request Search**: Filter requests/folders by name, URL, method, headers, or body content
 - **Collection Switching**: Easy switching between loaded collections and environments with tabs
+
+*Note: This tool supports conversion between various REST API collection formats. The tool is not affiliated with or endorsed by any API testing tool vendors.*
 
 #### 🛸 Base64 Encode/Decode
 Simple and efficient Base64 operations:

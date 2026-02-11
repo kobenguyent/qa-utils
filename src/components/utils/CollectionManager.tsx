@@ -697,7 +697,7 @@ export const CollectionManager: React.FC = () => {
                       <li>Use a browser extension like "CORS Unblock" or "Allow CORS"</li>
                       <li>Configure your API server to allow CORS from this origin</li>
                       <li>Use a CORS proxy (e.g., <code>https://cors-anywhere.herokuapp.com/</code>)</li>
-                      <li>Use Postman Desktop or Thunder Client (no CORS restrictions)</li>
+                      <li>Use an API testing desktop application (no CORS restrictions)</li>
                     </ul>
                   </div>
                 )}
@@ -1040,7 +1040,7 @@ export const CollectionManager: React.FC = () => {
   return (
     <Container className="py-4">
       <h1 className="mb-4">📦 Collection Manager</h1>
-      <p className="lead">Parse, edit, and convert API collections between Postman, Insomnia, Thunder Client, and more.</p>
+      <p className="lead">Parse, edit, and convert REST API collections between multiple popular API client formats.</p>
 
       {error && <Alert variant="danger" dismissible onClose={() => setError('')}>{error}</Alert>}
 
@@ -1055,7 +1055,7 @@ export const CollectionManager: React.FC = () => {
               onChange={handleFileUpload}
               multiple
             />
-            <Form.Text>Supports: Postman, Insomnia, Thunder Client, .env, .csv, generic JSON. Select multiple files to import both collections and environments.</Form.Text>
+            <Form.Text>Supports: Multiple API client formats (.env, .csv, generic JSON). Select multiple files to import both collections and environments.</Form.Text>
           </Form.Group>
         </Card.Body>
       </Card>
@@ -1459,9 +1459,9 @@ export const CollectionManager: React.FC = () => {
                 <Form.Group className="mb-3">
                   <Form.Label>Target Format</Form.Label>
                   <Form.Select value={targetFormat} onChange={(e) => setTargetFormat(e.target.value as CollectionFormat)}>
-                    <option value="postman">Postman Collection</option>
-                    <option value="insomnia">Insomnia Export</option>
-                    <option value="thunderclient">Thunder Client</option>
+                    <option value="postman">Postman-Format Collection</option>
+                    <option value="insomnia">Insomnia-Format Export</option>
+                    <option value="thunderclient">Thunder Client-Format</option>
                     <option value="env">.env File</option>
                     <option value="csv">CSV</option>
                     <option value="json">Generic JSON</option>
@@ -1508,10 +1508,10 @@ export const CollectionManager: React.FC = () => {
                     📊 Export Variables (CSV)
                   </Button>
                   <Button variant="outline-info" onClick={() => handleDownload(convertCollection(activeCollection, 'postman'), 'postman-collection.json')}>
-                    📮 Export as Postman
+                    📮 Export as Postman-Format
                   </Button>
                   <Button variant="outline-info" onClick={() => handleDownload(convertCollection(activeCollection, 'insomnia'), 'insomnia-export.json')}>
-                    💤 Export as Insomnia
+                    💤 Export as Insomnia-Format
                   </Button>
                   <Button variant="outline-info" onClick={() => handleDownload(convertCollection(activeCollection, 'env'), '.env')}>
                     🔐 Export as .env
