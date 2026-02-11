@@ -30,7 +30,6 @@ const WebSocketClient = lazy(() => import('./components/utils/WebSocketClient.ts
 const GrpcClient = lazy(() => import('./components/utils/GrpcClient.tsx').then(module => ({ default: module.GrpcClientComponent })));
 const Ctfl = lazy(() => import('./components/istqb/ctfl.tsx').then(module => ({ default: module.Ctfl })));
 const CharacterCounter = lazy(() => import('./components/utils/CharacterCounter.tsx').then(module => ({ default: module.CharacterCounter })));
-const AIChat = lazy(() => import('./components/utils/AIChat.tsx').then(module => ({ default: module.AIChat })));
 const TestFileGenerator = lazy(() => import('./components/utils/TestFileGenerator.tsx').then(module => ({ default: module.TestFileGenerator })));
 const WebTestingChecklist = lazy(() => import('./components/hints/WebTestingChecklist.tsx').then(module => ({ default: module.WebTestingChecklist })));
 const ApiTestingChecklist = lazy(() => import('./components/hints/ApiTestingChecklist.tsx').then(module => ({ default: module.ApiTestingChecklist })));
@@ -164,7 +163,7 @@ const router = createHashRouter([
   },
   {
     path: 'ai-chat',
-    element: <RouteWrapper><AIChat /></RouteWrapper>
+    element: <RouteWrapper><KobeanAssistant /></RouteWrapper>
   },
   {
     path: 'test-file-generator',

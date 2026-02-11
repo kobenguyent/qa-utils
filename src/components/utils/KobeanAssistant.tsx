@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Container, Form, Button, InputGroup, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { KobeanMessage, getKobean } from '../../utils/KobeanAgent';
+import { KobeanMessage, getKobean, getAiChatSessionConfig } from '../../utils/KobeanAgent';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import '../../styles/kobean.css';
 
@@ -18,6 +18,7 @@ export function KobeanAssistant() {
         aiProvider: 'ollama',
         aiEndpoint: 'http://localhost:11434',
         aiModel: 'mistral',
+        ...getAiChatSessionConfig(),
     }));
 
     useEffect(() => {

@@ -9,12 +9,49 @@ import { registerDefaultTools, getAllTools } from './defaultTools';
 import { sendChatMessage, ChatMessage, ChatConfig } from './aiChatClient';
 
 export interface KobeanConfig {
-    aiProvider?: 'ollama' | 'openai' | 'anthropic' | 'google';
+    aiProvider?: 'ollama' | 'openai' | 'anthropic' | 'google' | 'azure-openai';
     aiEndpoint?: string;
     aiModel?: string;
     aiApiKey?: string;
     enableVoice?: boolean;
     systemPrompt?: string;
+}
+
+/**
+ * Read AI Chat configuration from session storage.
+ * Returns a KobeanConfig populated with the user's AI Chat settings,
+ * falling back to defaults if not configured.
+ */
+export function getAiChatSessionConfig(): KobeanConfig {
+    if (typeof window === 'undefined') {
+        return {};
+    }
+
+    try {
+        const provider = window.sessionStorage.getItem('aiChat_provider');
+        const apiKey = window.sessionStorage.getItem('aiChat_apiKey');
+        const endpoint = window.sessionStorage.getItem('aiChat_endpoint');
+        const model = window.sessionStorage.getItem('aiChat_model');
+
+        const config: KobeanConfig = {};
+
+        if (provider) {
+            config.aiProvider = JSON.parse(provider) as KobeanConfig['aiProvider'];
+        }
+        if (apiKey) {
+            config.aiApiKey = JSON.parse(apiKey) as string;
+        }
+        if (endpoint) {
+            config.aiEndpoint = JSON.parse(endpoint) as string;
+        }
+        if (model) {
+            config.aiModel = JSON.parse(model) as string;
+        }
+
+        return config;
+    } catch {
+        return {};
+    }
 }
 
 export interface KobeanResponse {

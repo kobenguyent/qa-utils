@@ -161,7 +161,7 @@ export const Header: React.FC = () => {
               aria-label="Developer Tools menu"
             >
               <NavDropdown.Item href="#/image-editor">🎨 Image Editor</NavDropdown.Item>
-              <NavDropdown.Item href="#/ai-chat">🤖 AI Chat</NavDropdown.Item>
+              <NavDropdown.Item href="#/kobean">🤖 Kobean AI Chat</NavDropdown.Item>
               <NavDropdown.Item href="#/prompt-enhancer">✨ Prompt Enhancer</NavDropdown.Item>
               <NavDropdown.Item href="#/website-scanner">🔍 Website Scanner</NavDropdown.Item>
               <NavDropdown.Item href="#/ai-website-tester">🤖 AI Website Tester</NavDropdown.Item>

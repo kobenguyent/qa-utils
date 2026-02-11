@@ -345,11 +345,11 @@ export const searchData: SearchItem[] = [
   },
   // AI Tools
   {
-    title: 'AI Chat',
+    title: 'Kobean AI Chat',
     description: 'Chat with AI models from OpenAI, Anthropic, Google, and more',
-    path: '#/ai-chat',
+    path: '#/kobean',
     category: 'AI Tools',
-    keywords: ['ai', 'chat', 'gpt', 'openai', 'claude', 'gemini', 'llm', 'chatbot', 'assistant'],
+    keywords: ['ai', 'chat', 'gpt', 'openai', 'claude', 'gemini', 'llm', 'chatbot', 'assistant', 'kobean'],
     icon: '🤖'
   },
   {
