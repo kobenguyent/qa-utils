@@ -5,7 +5,7 @@
 
 A comprehensive collection of quality assurance tools and utilities designed to enhance your testing workflow. Built with modern React, TypeScript, and optimized for performance with comprehensive test coverage. **Now available as a desktop app for macOS, Windows, and Linux!**
 
-🌐 **[Live Demo](https://kobenguyent.github.io/qa-utils/#/)** | 💻 **Desktop App Available** | 📊 **219 Tests** | 🎯 **Mobile-First Design** | 🤖 **AI-Powered**
+🌐 **[Live Demo](https://kobenguyent.github.io/qa-utils/#/)** | 💻 **Desktop App Available** | 📊 **655 Tests** | 🎯 **Mobile-First Design** | 🤖 **AI-Powered**
 
 <img width="1310" height="780" alt="Screenshot 1" src="https://github.com/user-attachments/assets/667bf71d-84cc-4d30-bb1c-7b95fe37ceab" />
 
@@ -480,8 +480,8 @@ Or use the portable version:
 
 **AppImage (Recommended - Works on all distributions)**
 ```bash
-chmod +x QA-Utils-1.0.0.AppImage
-./QA-Utils-1.0.0.AppImage
+chmod +x "QA Utils-1.0.0.AppImage"
+./"QA Utils-1.0.0.AppImage"
 ```
 
 **Debian/Ubuntu**
@@ -543,7 +543,7 @@ See `build/README.md` for detailed instructions on creating icons.
 - **Frontend**: React 18, TypeScript, Bootstrap 5
 - **Build System**: Vite with SWC for fast builds
 - **Desktop App**: Electron for cross-platform desktop distribution
-- **Testing**: Vitest + React Testing Library (219 tests)
+- **Testing**: Vitest + React Testing Library (655 tests)
 - **Package Manager**: npm (with Bun support)
 - **Code Quality**: ESLint, TypeScript strict mode
 - **CI/CD**: GitHub Actions with automated testing

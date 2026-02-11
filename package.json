@@ -1,6 +1,14 @@
 {
   "name": "qa-utils",
   "version": "1.0.0",
+  "description": "A comprehensive collection of quality assurance tools and utilities to enhance your testing workflow",
+  "author": "KobeT <kobenguyent@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/kobenguyent/qa-utils",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kobenguyent/qa-utils.git"
+  },
   "type": "module",
   "main": "electron/main.js",
   "scripts": {
@@ -77,8 +85,6 @@
     "jsdom": "^26.1.0",
     "typescript": "5.0.2",
     "vite": "4.3.2",
-    "vite-plugin-electron": "^0.29.0",
-    "vite-plugin-electron-renderer": "^0.14.6",
     "vite-plugin-istanbul": "^5.0.0",
     "vitest": "^1.0.4",
     "wait-on": "^9.0.3"
