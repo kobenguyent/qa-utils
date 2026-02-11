@@ -2,6 +2,7 @@
   "name": "qa-utils",
   "version": "1.0.0",
   "type": "module",
+  "main": "electron/main.js",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -12,7 +13,13 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
-    "pr": "./scripts/create_pr.sh"
+    "pr": "./scripts/create_pr.sh",
+    "electron:dev": "concurrently \"cross-env NODE_ENV=development npm run dev\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .\"",
+    "electron:build": "cross-env ELECTRON=true npm run build && electron-builder",
+    "electron:build:mac": "cross-env ELECTRON=true npm run build && electron-builder --mac",
+    "electron:build:win": "cross-env ELECTRON=true npm run build && electron-builder --win",
+    "electron:build:linux": "cross-env ELECTRON=true npm run build && electron-builder --linux",
+    "electron:build:all": "cross-env ELECTRON=true npm run build && electron-builder -mwl"
   },
   "dependencies": {
     "@imgly/background-removal": "^1.7.0",
@@ -59,6 +66,10 @@
     "@typescript-eslint/parser": "5.57.1",
     "@vitejs/plugin-react-swc": "3.0.0",
     "@vitest/coverage-v8": "^1.6.1",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "electron": "^40.3.0",
+    "electron-builder": "^26.7.0",
     "eslint": "8.38.0",
     "eslint-plugin-react-hooks": "4.6.0",
     "eslint-plugin-react-refresh": "0.3.4",
@@ -66,7 +77,54 @@
     "jsdom": "^26.1.0",
     "typescript": "5.0.2",
     "vite": "4.3.2",
+    "vite-plugin-electron": "^0.29.0",
+    "vite-plugin-electron-renderer": "^0.14.6",
     "vite-plugin-istanbul": "^5.0.0",
-    "vitest": "^1.0.4"
+    "vitest": "^1.0.4",
+    "wait-on": "^9.0.3"
+  },
+  "build": {
+    "appId": "com.kobenguyent.qa-utils",
+    "productName": "QA Utils",
+    "copyright": "Copyright © 2024 KobeT",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "build/icon.icns"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "build/icon.ico"
+    },
+    "linux": {
+      "category": "Development",
+      "target": [
+        "AppImage",
+        "deb",
+        "rpm"
+      ],
+      "icon": "build/icons"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
   }
 }

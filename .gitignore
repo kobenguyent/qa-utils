@@ -18,6 +18,11 @@ dist
 dist-ssr
 *.local
 
+# Electron build output
+release/
+out/
+build/
+
 # Testing and Coverage
 coverage/
 
