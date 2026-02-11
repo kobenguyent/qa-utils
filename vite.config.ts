@@ -18,39 +18,27 @@ const commitHash = (() => {
   }
 })()
 
-// Plugin to remove external scripts and analytics for Electron builds
+// Plugin to remove redundant external scripts for Electron builds
 function removeExternalScriptsForElectron(): Plugin {
   return {
     name: 'remove-external-scripts-for-electron',
     transformIndexHtml(html) {
-      // Only remove scripts when building for Electron
+      // Only remove redundant scripts when building for Electron
       if (process.env.ELECTRON === 'true') {
-        // Remove Umami analytics script
-        html = html.replace(
-          /<script[^>]*src="https:\/\/cloud\.umami\.is\/script\.js"[^>]*><\/script>\s*/g,
-          ''
-        )
-        
-        // Remove preconnect to Umami
-        html = html.replace(
-          /<link[^>]*href="https:\/\/cloud\.umami\.is"[^>]*>\s*/g,
-          ''
-        )
-        
-        // Remove external React CDN script (React is bundled by Vite)
+        // Remove external React CDN script (React is bundled by Vite, so this is redundant)
         html = html.replace(
           /<script[^>]*src="https:\/\/cdn\.jsdelivr\.net\/npm\/react\/[^"]*"[^>]*><\/script>\s*/g,
           ''
         )
         
-        // Remove preconnect to CDNs that are not needed for Electron
+        // Remove preconnect to jsdelivr CDN (no longer needed without React CDN)
         html = html.replace(
           /<link[^>]*href="https:\/\/cdn\.jsdelivr\.net"[^>]*>\s*/g,
           ''
         )
         
+        // Note: Umami analytics is kept to track Electron app usage
         // Note: OTPLib scripts from unpkg.com are kept as they're required for OTP functionality
-        // The unpkg.com preconnect is also kept to optimize loading of these scripts
       }
       return html
     }

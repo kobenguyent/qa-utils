@@ -129,17 +129,17 @@ if (process.env.ELECTRON === 'true') {
 
 When building for Electron (`ELECTRON=true`), the build process automatically:
 
-1. **Removes Umami Analytics**: The analytics script from `cloud.umami.is` is removed since desktop app usage tracking should be handled differently (if needed)
-2. **Removes External React CDN**: The React UMD build from `cdn.jsdelivr.net` is removed as React is bundled by Vite
+1. **Keeps Umami Analytics**: The analytics script from `cloud.umami.is` is included to track desktop app usage
+2. **Removes External React CDN**: The React UMD build from `cdn.jsdelivr.net` is removed as React is bundled by Vite (redundant)
 3. **Keeps OTPLib CDN**: The OTPLib scripts from `unpkg.com` are kept as they are required for the OTP Generator feature
 
 This ensures the Electron app:
-- Doesn't send analytics data to web analytics services
-- Doesn't load unnecessary external dependencies
-- Has a smaller network footprint
+- Tracks usage analytics via Umami (same as web version)
+- Doesn't load redundant React CDN dependencies
 - Maintains all required functionality
+- Has optimal performance
 
-The web and GitHub Pages builds continue to include Umami analytics for usage tracking.
+Both web and Electron builds include Umami analytics for consistent usage tracking across platforms.
 
 ## Security Features
 
