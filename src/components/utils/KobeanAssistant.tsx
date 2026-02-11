@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Container, Form, Button, InputGroup, Spinner } from 'react-bootstrap';
+import { Container, Form, Button, InputGroup, Spinner, Card, Collapse, Row, Col, Badge } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { KobeanMessage, getKobean, getAiChatSessionConfig } from '../../utils/KobeanAgent';
+import { KobeanMessage, getKobean, resetKobean, getAiChatSessionConfig } from '../../utils/KobeanAgent';
+import { AIProvider, getDefaultModel } from '../../utils/aiChatClient';
+import { useSessionStorage } from '../../utils/useSessionStorage';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import '../../styles/kobean.css';
 
@@ -12,6 +14,13 @@ export function KobeanAssistant() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [copied, setCopied] = useState<string | null>(null);
 
+    // AI Configuration state with session storage (shared with AIChat)
+    const [provider, setProvider] = useSessionStorage<AIProvider>('aiChat_provider', 'ollama');
+    const [apiKey, setApiKey] = useSessionStorage<string>('aiChat_apiKey', '');
+    const [endpoint, setEndpoint] = useSessionStorage<string>('aiChat_endpoint', 'http://localhost:11434');
+    const [model, setModel] = useSessionStorage<string>('aiChat_model', '');
+    const [configExpanded, setConfigExpanded] = useSessionStorage<boolean>('kobean_configExpanded', false);
+
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const agentRef = useRef(getKobean({
@@ -20,6 +29,39 @@ export function KobeanAssistant() {
         aiModel: 'mistral',
         ...getAiChatSessionConfig(),
     }));
+
+    // Update Kobean agent when config changes
+    useEffect(() => {
+        resetKobean();
+        agentRef.current = getKobean({
+            aiProvider: provider,
+            aiEndpoint: endpoint,
+            aiModel: model || getDefaultModel(provider).id,
+            aiApiKey: apiKey || undefined,
+        });
+    }, [provider, apiKey, endpoint, model]);
+
+    const handleProviderChange = (newProvider: AIProvider) => {
+        setProvider(newProvider);
+        const defaultModel = getDefaultModel(newProvider);
+        setModel(defaultModel.id);
+        if (newProvider === 'ollama') {
+            setEndpoint('http://localhost:11434');
+        } else {
+            setEndpoint('');
+        }
+    };
+
+    const isConfigured = (() => {
+        if (provider === 'openai' || provider === 'anthropic' || provider === 'google') {
+            return !!apiKey;
+        } else if (provider === 'azure-openai') {
+            return !!apiKey && !!endpoint;
+        } else if (provider === 'ollama') {
+            return !!endpoint;
+        }
+        return false;
+    })();
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -88,6 +130,89 @@ export function KobeanAssistant() {
                 <h2 className="kobean-simple-title">🤖 Kobean</h2>
                 <p className="text-muted small">Ask anything or try: "generate uuid", "password", "timestamp"</p>
             </div>
+
+            {/* Configuration Panel */}
+            <Card className="mb-3" style={{ border: '1px solid var(--border-color)' }}>
+                <Card.Header
+                    style={{ backgroundColor: 'var(--card-bg)', borderBottom: '1px solid var(--border-color)', cursor: 'pointer', padding: '0.5rem 1rem' }}
+                    onClick={() => setConfigExpanded(!configExpanded)}
+                    role="button"
+                    aria-expanded={configExpanded}
+                    aria-controls="kobean-config-collapse"
+                >
+                    <div className="d-flex justify-content-between align-items-center">
+                        <small style={{ fontWeight: '600', color: 'var(--text)' }}>
+                            {configExpanded ? '▼' : '▶'} ⚙️ AI Configuration
+                            {isConfigured && (
+                                <Badge bg="success" className="ms-2" style={{ fontSize: '0.7rem' }}>Configured</Badge>
+                            )}
+                        </small>
+                        <small className="text-muted">{provider}</small>
+                    </div>
+                </Card.Header>
+                <Collapse in={configExpanded}>
+                    <Card.Body id="kobean-config-collapse" style={{ padding: '1rem' }}>
+                        <Form>
+                            <Row className="mb-2">
+                                <Col xs={6}>
+                                    <Form.Group>
+                                        <Form.Label className="small mb-1">Provider</Form.Label>
+                                        <Form.Select
+                                            size="sm"
+                                            value={provider}
+                                            onChange={(e) => handleProviderChange(e.target.value as AIProvider)}
+                                        >
+                                            <option value="ollama">Ollama (Local)</option>
+                                            <option value="openai">OpenAI</option>
+                                            <option value="anthropic">Anthropic Claude</option>
+                                            <option value="google">Google Gemini</option>
+                                            <option value="azure-openai">Azure OpenAI</option>
+                                        </Form.Select>
+                                    </Form.Group>
+                                </Col>
+                                <Col xs={6}>
+                                    <Form.Group>
+                                        <Form.Label className="small mb-1">Model</Form.Label>
+                                        <Form.Control
+                                            size="sm"
+                                            type="text"
+                                            placeholder={getDefaultModel(provider).id}
+                                            value={model}
+                                            onChange={(e) => setModel(e.target.value)}
+                                        />
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+
+                            {(provider === 'openai' || provider === 'anthropic' || provider === 'google' || provider === 'azure-openai') && (
+                                <Form.Group className="mb-2">
+                                    <Form.Label className="small mb-1">API Key</Form.Label>
+                                    <Form.Control
+                                        size="sm"
+                                        type="password"
+                                        placeholder={provider === 'openai' ? 'sk-...' : provider === 'anthropic' ? 'sk-ant-...' : provider === 'google' ? 'AIza...' : 'Your API key'}
+                                        value={apiKey}
+                                        onChange={(e) => setApiKey(e.target.value)}
+                                    />
+                                </Form.Group>
+                            )}
+
+                            {(provider === 'ollama' || provider === 'azure-openai') && (
+                                <Form.Group className="mb-2">
+                                    <Form.Label className="small mb-1">Endpoint</Form.Label>
+                                    <Form.Control
+                                        size="sm"
+                                        type="text"
+                                        placeholder={provider === 'ollama' ? 'http://localhost:11434' : 'https://your-resource.openai.azure.com'}
+                                        value={endpoint}
+                                        onChange={(e) => setEndpoint(e.target.value)}
+                                    />
+                                </Form.Group>
+                            )}
+                        </Form>
+                    </Card.Body>
+                </Collapse>
+            </Card>
 
             {/* Messages */}
             <div className="kobean-simple-messages mb-3">
