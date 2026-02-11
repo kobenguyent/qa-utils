@@ -47,7 +47,7 @@ export function KobeanAssistant() {
         setModel(defaultModel.id);
         if (newProvider === 'ollama') {
             setEndpoint('http://localhost:11434');
-        } else {
+        } else if (newProvider !== 'azure-openai') {
             setEndpoint('');
         }
     };
@@ -136,7 +136,9 @@ export function KobeanAssistant() {
                 <Card.Header
                     style={{ backgroundColor: 'var(--card-bg)', borderBottom: '1px solid var(--border-color)', cursor: 'pointer', padding: '0.5rem 1rem' }}
                     onClick={() => setConfigExpanded(!configExpanded)}
+                    onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setConfigExpanded(!configExpanded); } }}
                     role="button"
+                    tabIndex={0}
                     aria-expanded={configExpanded}
                     aria-controls="kobean-config-collapse"
                 >
