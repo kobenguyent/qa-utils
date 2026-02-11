@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import istanbul from 'vite-plugin-istanbul'
 import { execSync } from 'child_process'
+import type { Plugin } from 'vite'
 
 // Timeout for git commands to prevent build from hanging
 const GIT_COMMAND_TIMEOUT_MS = 5000
@@ -16,6 +17,45 @@ const commitHash = (() => {
     return 'unknown'
   }
 })()
+
+// Plugin to remove external scripts and analytics for Electron builds
+function removeExternalScriptsForElectron(): Plugin {
+  return {
+    name: 'remove-external-scripts-for-electron',
+    transformIndexHtml(html) {
+      // Only remove scripts when building for Electron
+      if (process.env.ELECTRON === 'true') {
+        // Remove Umami analytics script
+        html = html.replace(
+          /<script[^>]*src="https:\/\/cloud\.umami\.is\/script\.js"[^>]*><\/script>/g,
+          ''
+        )
+        
+        // Remove preconnect to Umami
+        html = html.replace(
+          /<link[^>]*href="https:\/\/cloud\.umami\.is"[^>]*>/g,
+          ''
+        )
+        
+        // Remove external React CDN script (React is bundled by Vite)
+        html = html.replace(
+          /<script[^>]*src="https:\/\/cdn\.jsdelivr\.net\/npm\/react\/[^"]*"[^>]*><\/script>/g,
+          ''
+        )
+        
+        // Remove preconnect to CDNs that are not needed for Electron
+        html = html.replace(
+          /<link[^>]*href="https:\/\/cdn\.jsdelivr\.net"[^>]*>/g,
+          ''
+        )
+        
+        // Keep OTPLib from unpkg as it's needed for OTP functionality
+        // but we'll keep the preconnect for it
+      }
+      return html
+    }
+  }
+}
 
 // Dynamically configure base based on environment
 export default defineConfig(({ mode }) => {
@@ -34,6 +74,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       react(),
+      removeExternalScriptsForElectron(),
       istanbul({
         include: 'src/*',
         exclude: ['node_modules', 'test/'],
