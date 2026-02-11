@@ -127,6 +127,39 @@ describe('restClient', () => {
       expect(result.headers['Content-Type']).toBe('application/xml');
       expect(result.body).toBe('<xml>data</xml>');
     });
+
+    it('should handle URL before other flags', () => {
+      const curl = `curl https://api.example.com/users -X POST -d '{"name": "test"}'`;
+      const result = parseCurlCommand(curl);
+
+      expect(result.url).toBe('https://api.example.com/users');
+      expect(result.method).toBe('POST');
+      expect(result.body).toBe('{"name": "test"}');
+    });
+
+    it('should handle body with escaped quotes', () => {
+      const curl = `curl -d '{"message": "Hello \\"World\\""}' https://api.example.com/messages`;
+      const result = parseCurlCommand(curl);
+
+      expect(result.body).toBe('{"message": "Hello \\"World\\""}');
+      expect(result.method).toBe('POST');
+    });
+
+    it('should handle multiline JSON in body', () => {
+      const curl = `curl -X POST -d '{"user":{"name":"John","age":30}}' https://api.example.com/users`;
+      const result = parseCurlCommand(curl);
+
+      expect(result.body).toBe('{"user":{"name":"John","age":30}}');
+      expect(result.method).toBe('POST');
+    });
+
+    it('should handle DELETE method with body', () => {
+      const curl = `curl -X DELETE -d '{"id": 123}' https://api.example.com/users`;
+      const result = parseCurlCommand(curl);
+
+      expect(result.method).toBe('DELETE');
+      expect(result.body).toBe('{"id": 123}');
+    });
   });
 
   describe('curlToRequestConfig - Unit Tests', () => {
