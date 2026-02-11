@@ -35,6 +35,62 @@ export const detectFormat = (data: any): CollectionFormat => {
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
+/**
+ * Check if a string is valid JSON
+ */
+const isJsonString = (str: string | undefined): boolean => {
+  if (!str || typeof str !== 'string') return false;
+  const trimmed = str.trim();
+  if (!trimmed) return false;
+  
+  // Check if it starts with { or [
+  if (!(trimmed.startsWith('{') || trimmed.startsWith('['))) return false;
+  
+  try {
+    JSON.parse(trimmed);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Normalize Content-Type header for JSON bodies
+ * Adds application/json if missing, or replaces text/plain with application/json
+ */
+const normalizeJsonContentType = (headers: { key: string; value: string; enabled: boolean }[], body?: string): { key: string; value: string; enabled: boolean }[] => {
+  // Check if body is JSON
+  if (!isJsonString(body)) {
+    return headers;
+  }
+  
+  // Find existing Content-Type header (case-insensitive)
+  const contentTypeIndex = headers.findIndex(h => 
+    h.key.toLowerCase() === 'content-type'
+  );
+  
+  if (contentTypeIndex === -1) {
+    // No Content-Type header, add application/json
+    return [...headers, { key: 'Content-Type', value: 'application/json', enabled: true }];
+  }
+  
+  // Check if existing Content-Type is text/plain and body is JSON
+  const existingContentType = headers[contentTypeIndex];
+  const contentTypeValue = existingContentType.value.toLowerCase().split(';')[0].trim();
+  
+  if (contentTypeValue === 'text/plain') {
+    // Replace text/plain with application/json for JSON bodies
+    const updatedHeaders = [...headers];
+    updatedHeaders[contentTypeIndex] = {
+      ...existingContentType,
+      value: 'application/json'
+    };
+    return updatedHeaders;
+  }
+  
+  return headers;
+};
+
 export const parsePostman = (data: PostmanCollection | PostmanEnvironment): UnifiedCollection => {
   const isEnvironment = '_postman_variable_scope' in data || 'values' in data;
   
@@ -93,17 +149,20 @@ export const parsePostman = (data: PostmanCollection | PostmanEnvironment): Unif
         const preRequestScript = item.event?.find(e => e.listen === 'prerequest')?.script.exec.join('\n');
         const testScript = item.event?.find(e => e.listen === 'test')?.script.exec.join('\n');
         
+        const body = req.body?.raw;
+        const headers = (req.header || []).map(h => ({
+          key: h.key,
+          value: h.value,
+          enabled: !h.disabled,
+        }));
+        
         requests.push({
           id: generateId(),
           name: item.name,
           method: req.method as any,
           url: typeof req.url === 'string' ? req.url : req.url.raw,
-          headers: (req.header || []).map(h => ({
-            key: h.key,
-            value: h.value,
-            enabled: !h.disabled,
-          })),
-          body: req.body?.raw,
+          headers: normalizeJsonContentType(headers, body),
+          body,
           description: item.description,
           preRequestScript,
           testScript,
@@ -165,21 +224,26 @@ export const parseInsomnia = (data: InsomniaExport): UnifiedCollection => {
       id: folderId,
       name: folder?.name || 'Folder',
       description: (folder as any)?.description,
-      requests: childRequests.map(r => ({
-        id: r._id,
-        name: r.name || 'Request',
-        method: ((r as any).method || 'GET') as any,
-        url: (r as any).url || '',
-        headers: ((r as any).headers || []).map((h: any) => ({
+      requests: childRequests.map(r => {
+        const body = (r as any).body?.text;
+        const headers = ((r as any).headers || []).map((h: any) => ({
           key: h.name,
           value: h.value,
           enabled: !h.disabled,
-        })),
-        body: (r as any).body?.text,
-        description: (r as any).description,
-        preRequestScript: (r as any).preRequestScript,
-        testScript: (r as any).afterResponseScript,
-      })),
+        }));
+        
+        return {
+          id: r._id,
+          name: r.name || 'Request',
+          method: ((r as any).method || 'GET') as any,
+          url: (r as any).url || '',
+          headers: normalizeJsonContentType(headers, body),
+          body,
+          description: (r as any).description,
+          preRequestScript: (r as any).preRequestScript,
+          testScript: (r as any).afterResponseScript,
+        };
+      }),
       folders: childFolders.map(f => buildFolder(f._id)),
       preRequestScript: (folder as any)?.preRequestScript,
       testScript: (folder as any)?.afterResponseScript,
@@ -195,21 +259,26 @@ export const parseInsomnia = (data: InsomniaExport): UnifiedCollection => {
     version: '1.0',
     variables,
     folders: rootFolders.map(f => buildFolder(f._id)),
-    requests: rootRequests.map(r => ({
-      id: r._id,
-      name: r.name || 'Request',
-      method: ((r as any).method || 'GET') as any,
-      url: (r as any).url || '',
-      headers: ((r as any).headers || []).map((h: any) => ({
+    requests: rootRequests.map(r => {
+      const body = (r as any).body?.text;
+      const headers = ((r as any).headers || []).map((h: any) => ({
         key: h.name,
         value: h.value,
         enabled: !h.disabled,
-      })),
-      body: (r as any).body?.text,
-      description: (r as any).description,
-      preRequestScript: (r as any).preRequestScript,
-      testScript: (r as any).afterResponseScript,
-    })),
+      }));
+      
+      return {
+        id: r._id,
+        name: r.name || 'Request',
+        method: ((r as any).method || 'GET') as any,
+        url: (r as any).url || '',
+        headers: normalizeJsonContentType(headers, body),
+        body,
+        description: (r as any).description,
+        preRequestScript: (r as any).preRequestScript,
+        testScript: (r as any).afterResponseScript,
+      };
+    }),
     sourceFormat: 'insomnia',
     type: environments.length > 0 && requests.length === 0 ? 'environment' : 'collection',
     preRequestScript: (workspace as any)?.preRequestScript,
@@ -221,35 +290,45 @@ export const parseThunderClient = (data: ThunderClientCollection): UnifiedCollec
   const folders: CollectionFolder[] = (data.folders || []).map(folder => ({
     id: folder._id,
     name: folder.name,
-    requests: folder.requests.map(r => ({
+    requests: folder.requests.map(r => {
+      const body = r.body?.raw;
+      const headers = (r.headers || []).map(h => ({
+        key: h.name,
+        value: h.value,
+        enabled: h.active !== false,
+      }));
+      
+      return {
+        id: r._id,
+        name: r.name,
+        method: r.method as any,
+        url: r.url,
+        headers: normalizeJsonContentType(headers, body),
+        body,
+        description: r.description,
+      };
+    }),
+    folders: [],
+  }));
+
+  const requests: CollectionRequest[] = data.requests.map(r => {
+    const body = r.body?.raw;
+    const headers = (r.headers || []).map(h => ({
+      key: h.name,
+      value: h.value,
+      enabled: h.active !== false,
+    }));
+    
+    return {
       id: r._id,
       name: r.name,
       method: r.method as any,
       url: r.url,
-      headers: (r.headers || []).map(h => ({
-        key: h.name,
-        value: h.value,
-        enabled: h.active !== false,
-      })),
-      body: r.body?.raw,
+      headers: normalizeJsonContentType(headers, body),
+      body,
       description: r.description,
-    })),
-    folders: [],
-  }));
-
-  const requests: CollectionRequest[] = data.requests.map(r => ({
-    id: r._id,
-    name: r.name,
-    method: r.method as any,
-    url: r.url,
-    headers: (r.headers || []).map(h => ({
-      key: h.name,
-      value: h.value,
-      enabled: h.active !== false,
-    })),
-    body: r.body?.raw,
-    description: r.description,
-  }));
+    };
+  });
 
   return {
     id: data._id,

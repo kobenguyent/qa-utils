@@ -69,6 +69,148 @@ describe('collectionParser', () => {
       expect(result.requests[0].name).toBe('Get Users');
     });
 
+    it('should add Content-Type header for JSON body when missing', () => {
+      const collection: PostmanCollection = {
+        info: {
+          name: 'Test Collection',
+          schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
+        },
+        item: [
+          {
+            name: 'POST with JSON',
+            request: {
+              method: 'POST',
+              url: 'https://api.example.com/users',
+              header: [],
+              body: {
+                raw: '{"name": "John", "age": 30}',
+              },
+            },
+          },
+        ],
+      };
+
+      const result = parsePostman(collection);
+      expect(result.requests).toHaveLength(1);
+      expect(result.requests[0].headers).toHaveLength(1);
+      expect(result.requests[0].headers[0].key).toBe('Content-Type');
+      expect(result.requests[0].headers[0].value).toBe('application/json');
+    });
+
+    it('should replace text/plain with application/json for JSON body', () => {
+      const collection: PostmanCollection = {
+        info: {
+          name: 'Test Collection',
+          schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
+        },
+        item: [
+          {
+            name: 'POST with text/plain',
+            request: {
+              method: 'POST',
+              url: 'https://api.example.com/users',
+              header: [
+                { key: 'Content-Type', value: 'text/plain' }
+              ],
+              body: {
+                raw: '{"name": "Jane", "age": 25}',
+              },
+            },
+          },
+        ],
+      };
+
+      const result = parsePostman(collection);
+      expect(result.requests).toHaveLength(1);
+      expect(result.requests[0].headers).toHaveLength(1);
+      expect(result.requests[0].headers[0].key).toBe('Content-Type');
+      expect(result.requests[0].headers[0].value).toBe('application/json');
+    });
+
+    it('should not modify existing application/json Content-Type', () => {
+      const collection: PostmanCollection = {
+        info: {
+          name: 'Test Collection',
+          schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
+        },
+        item: [
+          {
+            name: 'POST with JSON',
+            request: {
+              method: 'POST',
+              url: 'https://api.example.com/users',
+              header: [
+                { key: 'Content-Type', value: 'application/json' }
+              ],
+              body: {
+                raw: '{"name": "Bob"}',
+              },
+            },
+          },
+        ],
+      };
+
+      const result = parsePostman(collection);
+      expect(result.requests).toHaveLength(1);
+      expect(result.requests[0].headers).toHaveLength(1);
+      expect(result.requests[0].headers[0].value).toBe('application/json');
+    });
+
+    it('should handle text/plain with charset parameter', () => {
+      const collection: PostmanCollection = {
+        info: {
+          name: 'Test Collection',
+          schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
+        },
+        item: [
+          {
+            name: 'POST with text/plain; charset=utf-8',
+            request: {
+              method: 'POST',
+              url: 'https://api.example.com/users',
+              header: [
+                { key: 'Content-Type', value: 'text/plain; charset=utf-8' }
+              ],
+              body: {
+                raw: '{"name": "Jane"}',
+              },
+            },
+          },
+        ],
+      };
+
+      const result = parsePostman(collection);
+      expect(result.requests).toHaveLength(1);
+      expect(result.requests[0].headers).toHaveLength(1);
+      expect(result.requests[0].headers[0].value).toBe('application/json');
+    });
+
+    it('should not add Content-Type for non-JSON body', () => {
+      const collection: PostmanCollection = {
+        info: {
+          name: 'Test Collection',
+          schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
+        },
+        item: [
+          {
+            name: 'POST with plain text',
+            request: {
+              method: 'POST',
+              url: 'https://api.example.com/users',
+              header: [],
+              body: {
+                raw: 'plain text data',
+              },
+            },
+          },
+        ],
+      };
+
+      const result = parsePostman(collection);
+      expect(result.requests).toHaveLength(1);
+      expect(result.requests[0].headers).toHaveLength(0);
+    });
+
     it('should parse Postman environment', () => {
       const env = {
         name: 'Dev Environment',
