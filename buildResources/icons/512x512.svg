@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Background circle with gradient -->
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d6efd;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0a58ca;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="url(#grad1)" stroke="#fff" stroke-width="8"/>
+  
+  <!-- QA Text -->
+  <text x="256" y="310" font-family="Arial, sans-serif" font-size="180" font-weight="bold" fill="#ffffff" text-anchor="middle">QA</text>
+  
+  <!-- Check mark accent -->
+  <path d="M 360 140 L 400 180 L 340 240" fill="none" stroke="#10b981" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Additional decorative elements -->
+  <circle cx="140" cy="380" r="12" fill="#10b981" opacity="0.6"/>
+  <circle cx="380" cy="380" r="12" fill="#10b981" opacity="0.6"/>
+</svg>

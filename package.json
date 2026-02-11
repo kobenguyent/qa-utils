@@ -1,6 +1,6 @@
 {
   "name": "qa-utils",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A comprehensive collection of quality assurance tools and utilities to enhance your testing workflow",
   "author": "KobeT <kobenguyent@gmail.com>",
   "license": "MIT",
@@ -95,7 +95,7 @@
     "copyright": "Copyright © 2024 KobeT",
     "directories": {
       "output": "release",
-      "buildResources": "build"
+      "buildResources": "buildResources"
     },
     "files": [
       "dist/**/*",
@@ -108,14 +108,14 @@
         "dmg",
         "zip"
       ],
-      "icon": "build/icon.icns"
+      "icon": "buildResources/icon.svg"
     },
     "win": {
       "target": [
         "nsis",
         "portable"
       ],
-      "icon": "build/icon.ico"
+      "icon": "buildResources/icon.svg"
     },
     "linux": {
       "category": "Development",
@@ -124,7 +124,7 @@
         "deb",
         "rpm"
       ],
-      "icon": "build/icons"
+      "icon": "buildResources/icon.svg"
     },
     "nsis": {
       "oneClick": false,
