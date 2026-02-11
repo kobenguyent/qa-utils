@@ -160,6 +160,34 @@ describe('restClient', () => {
       expect(result.method).toBe('DELETE');
       expect(result.body).toBe('{"id": 123}');
     });
+
+    it('should handle --data-raw flag', () => {
+      const curl = `curl --location 'https://helloworld.test/token' --header 'Content-Type: application/json' --header 'Cookie: PHPSESSID=31d0ftedrl43ibkna3p0ddfpab' --data-raw '{"password": "helloworld!", "username": "helloworld"}'`;
+      const result = parseCurlCommand(curl);
+
+      expect(result.url).toBe('https://helloworld.test/token');
+      expect(result.method).toBe('POST');
+      expect(result.headers['Content-Type']).toBe('application/json');
+      expect(result.headers['Cookie']).toBe('PHPSESSID=31d0ftedrl43ibkna3p0ddfpab');
+      expect(result.body).toBe('{"password": "helloworld!", "username": "helloworld"}');
+    });
+
+    it('should handle multiline curl with backslash continuations', () => {
+      const curl = `curl --location 'https://helloworld.test/token' \\
+--header 'Content-Type: application/json' \\
+--header 'Cookie: PHPSESSID=31d0ftedrl43ibkna3p0ddfpab' \\
+--data-raw '{
+    "password": "helloworld!",
+    "username": "helloworld"
+}'`;
+      const result = parseCurlCommand(curl);
+
+      expect(result.url).toBe('https://helloworld.test/token');
+      expect(result.method).toBe('POST');
+      expect(result.headers['Content-Type']).toBe('application/json');
+      expect(result.body).toContain('password');
+      expect(result.body).toContain('helloworld!');
+    });
   });
 
   describe('curlToRequestConfig - Unit Tests', () => {

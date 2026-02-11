@@ -95,7 +95,8 @@ export const makeRequest = async (config: RequestConfig): Promise<RestResponse> 
  * Parse a curl command and extract request details
  */
 export const parseCurlCommand = (curlCommand: string): CurlCommand => {
-  const normalizedCurl = curlCommand.trim();
+  // Normalize multiline curl commands (remove backslash line continuations)
+  const normalizedCurl = curlCommand.replace(/\\\s*\n\s*/g, ' ').trim();
   
   // Basic validation
   if (!normalizedCurl.startsWith('curl')) {
@@ -127,21 +128,21 @@ export const parseCurlCommand = (curlCommand: string): CurlCommand => {
     }
   }
 
-  // Extract body data - handle both quoted and unquoted with proper precedence
-  // Try single quotes first
-  let dataMatch = normalizedCurl.match(/-d\s+'([^']+)'|--data\s+'([^']+)'/);
+  // Extract body data - handle -d, --data, --data-raw, --data-binary
+  // Try to match various data flags with single quotes
+  let dataMatch = normalizedCurl.match(/(?:-d|--data|--data-raw|--data-binary)\s+'([^']+)'/);
   if (dataMatch) {
-    result.body = dataMatch[1] || dataMatch[2];
+    result.body = dataMatch[1];
   } else {
     // Try double quotes
-    dataMatch = normalizedCurl.match(/-d\s+"([^"]+)"|--data\s+"([^"]+)"/);
+    dataMatch = normalizedCurl.match(/(?:-d|--data|--data-raw|--data-binary)\s+"([^"]+)"/);
     if (dataMatch) {
-      result.body = dataMatch[1] || dataMatch[2];
+      result.body = dataMatch[1];
     } else {
-      // Try unquoted data
-      dataMatch = normalizedCurl.match(/-d\s+([^\s]+)|--data\s+([^\s]+)/);
+      // Try unquoted data (simple values)
+      dataMatch = normalizedCurl.match(/(?:-d|--data|--data-raw|--data-binary)\s+([^\s]+)/);
       if (dataMatch) {
-        result.body = dataMatch[1] || dataMatch[2];
+        result.body = dataMatch[1];
       }
     }
   }
