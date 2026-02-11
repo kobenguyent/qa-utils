@@ -27,25 +27,25 @@ function removeExternalScriptsForElectron(): Plugin {
       if (process.env.ELECTRON === 'true') {
         // Remove Umami analytics script
         html = html.replace(
-          /<script[^>]*src="https:\/\/cloud\.umami\.is\/script\.js"[^>]*><\/script>/g,
+          /<script[^>]*src="https:\/\/cloud\.umami\.is\/script\.js"[^>]*><\/script>\s*/g,
           ''
         )
         
         // Remove preconnect to Umami
         html = html.replace(
-          /<link[^>]*href="https:\/\/cloud\.umami\.is"[^>]*>/g,
+          /<link[^>]*href="https:\/\/cloud\.umami\.is"[^>]*>\s*/g,
           ''
         )
         
         // Remove external React CDN script (React is bundled by Vite)
         html = html.replace(
-          /<script[^>]*src="https:\/\/cdn\.jsdelivr\.net\/npm\/react\/[^"]*"[^>]*><\/script>/g,
+          /<script[^>]*src="https:\/\/cdn\.jsdelivr\.net\/npm\/react\/[^"]*"[^>]*><\/script>\s*/g,
           ''
         )
         
         // Remove preconnect to CDNs that are not needed for Electron
         html = html.replace(
-          /<link[^>]*href="https:\/\/cdn\.jsdelivr\.net"[^>]*>/g,
+          /<link[^>]*href="https:\/\/cdn\.jsdelivr\.net"[^>]*>\s*/g,
           ''
         )
         
