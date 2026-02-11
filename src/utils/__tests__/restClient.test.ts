@@ -96,6 +96,37 @@ describe('restClient', () => {
 
       expect(result.headers['X-Custom-Header']).toBe('value:with:colons');
     });
+
+    it('should handle quoted URLs properly', () => {
+      const curl = `curl -X POST "https://api.example.com/users" -d '{"name": "test"}'`;
+      const result = parseCurlCommand(curl);
+
+      expect(result.url).toBe('https://api.example.com/users');
+      expect(result.method).toBe('POST');
+      expect(result.body).toBe('{"name": "test"}');
+    });
+
+    it('should handle multiple data formats correctly', () => {
+      // Single quotes
+      const curl1 = `curl -d '{"test": "value"}' https://example.com`;
+      expect(parseCurlCommand(curl1).body).toBe('{"test": "value"}');
+
+      // Double quotes
+      const curl2 = `curl -d "{'test': 'value'}" https://example.com`;
+      expect(parseCurlCommand(curl2).body).toBe("{'test': 'value'}");
+
+      // Unquoted (simple values)
+      const curl3 = `curl -d key=value https://example.com`;
+      expect(parseCurlCommand(curl3).body).toBe('key=value');
+    });
+
+    it('should handle Content-Type header in cURL', () => {
+      const curl = `curl -X POST -H "Content-Type: application/xml" -d '<xml>data</xml>' https://api.example.com`;
+      const result = parseCurlCommand(curl);
+
+      expect(result.headers['Content-Type']).toBe('application/xml');
+      expect(result.body).toBe('<xml>data</xml>');
+    });
   });
 
   describe('curlToRequestConfig - Unit Tests', () => {
