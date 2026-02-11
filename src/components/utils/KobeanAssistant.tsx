@@ -478,7 +478,9 @@ export function KobeanAssistant() {
                 <Card.Header
                     style={{ backgroundColor: 'var(--card-bg)', borderBottom: '1px solid var(--border-color)', cursor: 'pointer' }}
                     onClick={() => setConfigExpanded(!configExpanded)}
+                    onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setConfigExpanded(!configExpanded); } }}
                     role="button"
+                    tabIndex={0}
                     aria-expanded={configExpanded}
                     aria-controls="kobean-config-collapse"
                 >
