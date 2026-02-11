@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 // Custom event name for cross-component session storage sync
 const SESSION_STORAGE_EVENT = 'sessionStorageUpdate';
@@ -31,6 +31,9 @@ export function useSessionStorage<T>(key: string, initialValue: T): [T, (value: 
     }
   });
 
+  // Guard to prevent reacting to own updates
+  const isUpdatingRef = useRef(false);
+
   // Update sessionStorage when state changes
   const setValue = useCallback((value: T | ((prev: T) => T)) => {
     try {
@@ -46,10 +49,12 @@ export function useSessionStorage<T>(key: string, initialValue: T): [T, (value: 
             window.sessionStorage.setItem(key, serialized);
             // Dispatch custom event asynchronously so other components using the same key can sync
             // without interfering with the current React render cycle
+            isUpdatingRef.current = true;
             setTimeout(() => {
               window.dispatchEvent(new CustomEvent(SESSION_STORAGE_EVENT, {
                 detail: { key, value: serialized },
               }));
+              isUpdatingRef.current = false;
             }, 0);
           } catch (storageError) {
             console.warn(`Error setting sessionStorage key "${key}":`, storageError);
@@ -81,25 +86,27 @@ export function useSessionStorage<T>(key: string, initialValue: T): [T, (value: 
   }, [key]);
 
   // Listen for cross-component updates to the same key
+  const handleUpdate = useCallback((e: Event) => {
+    // Skip if this component triggered the update
+    if (isUpdatingRef.current) return;
+    const detail = (e as CustomEvent<SessionStorageUpdateDetail>).detail;
+    if (detail.key === key) {
+      try {
+        setStoredValue(JSON.parse(detail.value));
+      } catch {
+        // ignore parse errors
+      }
+    }
+  }, [key]);
+
   useEffect(() => {
     if (typeof window === 'undefined') {
       return;
     }
 
-    const handleUpdate = (e: Event) => {
-      const detail = (e as CustomEvent<SessionStorageUpdateDetail>).detail;
-      if (detail.key === key) {
-        try {
-          setStoredValue(JSON.parse(detail.value));
-        } catch {
-          // ignore parse errors
-        }
-      }
-    };
-
     window.addEventListener(SESSION_STORAGE_EVENT, handleUpdate);
     return () => window.removeEventListener(SESSION_STORAGE_EVENT, handleUpdate);
-  }, [key]);
+  }, [handleUpdate]);
 
   return [storedValue, setValue];
 }
