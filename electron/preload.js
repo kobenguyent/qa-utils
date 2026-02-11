@@ -6,7 +6,7 @@
  * We use this to expose safe APIs to the renderer process.
  */
 
-const { contextBridge, ipcRenderer } = require('electron');
+import { contextBridge, ipcRenderer } from 'electron';
 
 // Expose protected methods that allow the renderer process to use
 // ipcRenderer without exposing the entire object
