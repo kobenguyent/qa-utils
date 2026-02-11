@@ -2,6 +2,8 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import istanbul from 'vite-plugin-istanbul'
 import { execSync } from 'child_process'
+import { readFileSync } from 'fs'
+import { resolve } from 'path'
 import type { Plugin } from 'vite'
 
 // Timeout for git commands to prevent build from hanging
@@ -17,6 +19,25 @@ const commitHash = (() => {
     return 'unknown'
   }
 })()
+
+// Get version from package.json
+const getPackageVersion = (): string => {
+  try {
+    const packageJsonPath = resolve(__dirname, 'package.json')
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'))
+    return packageJson.version || '0.0.0'
+  } catch (error) {
+    console.warn('Unable to read package.json version, using "0.0.0"')
+    return '0.0.0'
+  }
+}
+
+const packageVersion = getPackageVersion()
+
+// For Electron builds, create a unique version identifier: version+commit
+const appVersion = process.env.ELECTRON === 'true' 
+  ? `${packageVersion}+${commitHash}`
+  : packageVersion
 
 // Plugin to remove redundant external scripts for Electron builds
 function removeExternalScriptsForElectron(): Plugin {
@@ -92,6 +113,8 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       __COMMIT_HASH__: JSON.stringify(commitHash),
+      __APP_VERSION__: JSON.stringify(appVersion),
+      __PACKAGE_VERSION__: JSON.stringify(packageVersion),
     },
   }
 })

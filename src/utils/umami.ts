@@ -1,3 +1,7 @@
+// Declare global constants injected by Vite
+declare const __APP_VERSION__: string
+declare const __PACKAGE_VERSION__: string
+
 /**
  * Check if the app is running in Electron
  */
@@ -20,7 +24,7 @@ const getPlatformInfo = (): Record<string, string> => {
   return {
     environment: 'electron',
     platform: platform,
-    app_version: '1.0.1', // TODO: Get from package.json dynamically
+    app_version: __APP_VERSION__, // Dynamic version: package.json version + commit hash for Electron
   };
 };
 

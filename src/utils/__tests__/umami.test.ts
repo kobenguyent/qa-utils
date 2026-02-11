@@ -1,6 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { trackPageView, trackEvent } from '../umami';
 
+// Mock the global constants injected by Vite
+declare global {
+  const __APP_VERSION__: string;
+  const __PACKAGE_VERSION__: string;
+}
+
+// @ts-ignore - Set mock values for tests
+globalThis.__APP_VERSION__ = '1.0.1+abc123';
+// @ts-ignore - Set mock values for tests
+globalThis.__PACKAGE_VERSION__ = '1.0.1';
+
 // Create a minimal window mock
 const mockWindow = {
   umami: undefined,
@@ -53,7 +64,7 @@ describe('umami utilities', () => {
       expect(mockTrack).toHaveBeenCalledWith('electron:/test-page', {
         environment: 'electron',
         platform: 'darwin',
-        app_version: '1.0.1'
+        app_version: '1.0.1+abc123'
       });
       expect(mockTrack).toHaveBeenCalledTimes(1);
     });
@@ -114,7 +125,7 @@ describe('umami utilities', () => {
       expect(mockTrack).toHaveBeenCalledWith('custom-event', {
         environment: 'electron',
         platform: 'win32',
-        app_version: '1.0.1',
+        app_version: '1.0.1+abc123',
         action: 'click'
       });
     });

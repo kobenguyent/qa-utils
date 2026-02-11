@@ -148,18 +148,33 @@ The Electron app uses an enhanced Umami analytics implementation (`src/utils/uma
 3. **Prefixes page views**: Desktop app page views are tracked as `electron:/page` to distinguish from web traffic
 4. **Supports custom events**: Additional `trackEvent()` function for tracking desktop-specific user actions
 
+##### Automatic Version Management
+
+Desktop app builds include automatic version bumping to ensure each build has a unique identifier:
+
+1. **Auto-increment**: Running any `electron:build*` script automatically bumps the patch version in `package.json`
+2. **Unique versioning**: The app version includes the commit hash: `version+commit` (e.g., `1.0.2+abc123`)
+3. **Build tracking**: This allows tracking which specific build users are running in analytics
+
+The version is read dynamically from `package.json` at build time and combined with the git commit hash to create a unique identifier for each desktop build.
+
 Example tracking data:
 ```javascript
 // Web app
 { environment: 'web' }
 
-// Desktop app (macOS)
+// Desktop app (macOS, version 1.0.2, commit abc123)
 { 
   environment: 'electron',
   platform: 'darwin',
-  app_version: '1.0.1'
+  app_version: '1.0.2+abc123'
 }
 ```
+
+**Version Bump Script**: The `scripts/bump-electron-version.cjs` script automatically increments the patch version before each Electron build. This ensures:
+- Each release has a unique version number
+- Easy tracking of which version users are running
+- Clear distinction between different builds in analytics
 
 This allows for separate analytics dashboards and insights for web vs desktop users while using the same Umami instance.
 
