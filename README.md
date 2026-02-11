@@ -72,8 +72,7 @@ Test gRPC services with browser-compatible gRPC-Web support:
 
 #### 📦 Collection Manager
 Unified API collection management tool supporting multiple formats:
-- **Multi-Format Support**: Multiple API client formats (.env, CSV, generic JSON)
-- **Format Compatibility**: Postman-compatible, Insomnia-compatible, Thunder Client-compatible formats
+- **Format Compatibility**: Supports Postman-compatible, Insomnia-compatible, and Thunder Client-compatible collection formats, plus .env, CSV, and generic JSON files
 - **Multi-Collection Support**: Import and manage multiple collections and environments simultaneously
 - **Auto-Detection**: Automatically detect collection format and type (collection vs environment)
 - **Persistent Storage**: Auto-saves to IndexedDB - resume work after page refresh

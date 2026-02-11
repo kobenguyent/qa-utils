@@ -1055,7 +1055,7 @@ export const CollectionManager: React.FC = () => {
               onChange={handleFileUpload}
               multiple
             />
-            <Form.Text>Supports: Multiple API client formats (.env, .csv, generic JSON). Select multiple files to import both collections and environments.</Form.Text>
+            <Form.Text>Supports: Postman-Format, Insomnia-Format, Thunder Client-Format collections, plus .env, .csv, and generic JSON files. Select multiple files to import both collections and environments.</Form.Text>
           </Form.Group>
         </Card.Body>
       </Card>
