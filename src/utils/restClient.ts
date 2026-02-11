@@ -33,13 +33,20 @@ export const makeRequest = async (config: RequestConfig): Promise<RestResponse> 
   const startTime = Date.now();
   
   try {
+    // Build headers - only set default Content-Type if body exists and no Content-Type is provided
+    const headers: Record<string, string> = { ...config.headers };
+    
+    // Only set default Content-Type to application/json if:
+    // 1. A request body exists
+    // 2. No Content-Type header is already provided by the user
+    if (config.body && !headers['Content-Type'] && !headers['content-type']) {
+      headers['Content-Type'] = 'application/json';
+    }
+    
     const axiosConfig: AxiosRequestConfig = {
       url: config.url,
       method: config.method,
-      headers: {
-        'Content-Type': 'application/json',
-        ...config.headers,
-      },
+      headers,
       timeout: config.timeout || 30000,
       data: config.body,
       transformResponse: [(data: any) => data], // Keep raw response
@@ -115,44 +122,61 @@ export const parseCurlCommand = (curlCommand: string): CurlCommand => {
     }
   }
 
-  // Extract body data - handle both quoted and unquoted
-  const dataMatch = normalizedCurl.match(/-d\s+'([^']+)'|--data\s+'([^']+)'/) ||
-                   normalizedCurl.match(/-d\s+"([^"]+)"|--data\s+"([^"]+)"/) ||
-                   normalizedCurl.match(/-d\s+([^\s]+)|--data\s+([^\s]+)/);
+  // Extract body data - handle both quoted and unquoted with proper precedence
+  // Try single quotes first
+  let dataMatch = normalizedCurl.match(/-d\s+'([^']+)'|--data\s+'([^']+)'/);
   if (dataMatch) {
-    result.body = dataMatch[1] || dataMatch[2] || dataMatch[3] || dataMatch[4];
-    // If body is provided and no explicit method, default to POST
-    if (result.method === 'GET') {
-      result.method = 'POST';
+    result.body = dataMatch[1] || dataMatch[2];
+  } else {
+    // Try double quotes
+    dataMatch = normalizedCurl.match(/-d\s+"([^"]+)"|--data\s+"([^"]+)"/);
+    if (dataMatch) {
+      result.body = dataMatch[1] || dataMatch[2];
+    } else {
+      // Try unquoted data
+      dataMatch = normalizedCurl.match(/-d\s+([^\s]+)|--data\s+([^\s]+)/);
+      if (dataMatch) {
+        result.body = dataMatch[1] || dataMatch[2];
+      }
     }
   }
-
-  // Extract URL - be very specific about URL patterns
-  // First try to find URLs with protocol
-  const urlMatch = normalizedCurl.match(/https?:\/\/[^\s'"]+/);
   
+  // If body is provided and no explicit method, default to POST
+  if (result.body && result.method === 'GET') {
+    result.method = 'POST';
+  }
+
+  // Extract URL - handle URLs with and without quotes properly
+  // First try to find quoted URLs
+  let urlMatch = normalizedCurl.match(/["'](https?:\/\/[^"']+)["']/);
   if (urlMatch) {
-    result.url = urlMatch[0];
+    result.url = urlMatch[1];
   } else {
-    // Fallback: extract the last non-flag argument
-    // Remove curl and all known flags to find the URL
-    let remaining = normalizedCurl.replace(/^curl\s+/, '');
-    remaining = remaining.replace(/-X\s+\w+/gi, '');
-    remaining = remaining.replace(/--request\s+\w+/gi, '');
-    remaining = remaining.replace(/-H\s+['"][^'"]+['"]/g, '');
-    remaining = remaining.replace(/--header\s+['"][^'"]+['"]/g, '');
-    remaining = remaining.replace(/-d\s+['"][^'"]*['"]/g, '');
-    remaining = remaining.replace(/--data\s+['"][^'"]*['"]/g, '');
-    remaining = remaining.replace(/-d\s+[^\s]+/g, '');
-    remaining = remaining.replace(/--data\s+[^\s]+/g, '');
-    
-    // Clean up extra spaces and get the remaining non-empty part
-    const parts = remaining.trim().split(/\s+/).filter(part => part.length > 0);
-    if (parts.length > 0) {
-      // Take the first part that looks like a URL or the first part if no URL found
-      const potentialUrl = parts.find(part => part.includes('.') || part.startsWith('/')) || parts[0];
-      if (potentialUrl) {
-        result.url = potentialUrl.replace(/^['"]|['"]$/g, ''); // Remove quotes
+    // Try unquoted URLs - match until space or end of string
+    urlMatch = normalizedCurl.match(/https?:\/\/[^\s]+/);
+    if (urlMatch) {
+      result.url = urlMatch[0];
+    } else {
+      // Fallback: extract the last non-flag argument
+      // Remove curl and all known flags to find the URL
+      let remaining = normalizedCurl.replace(/^curl\s+/, '');
+      remaining = remaining.replace(/-X\s+\w+/gi, '');
+      remaining = remaining.replace(/--request\s+\w+/gi, '');
+      remaining = remaining.replace(/-H\s+['"][^'"]+['"]/g, '');
+      remaining = remaining.replace(/--header\s+['"][^'"]+['"]/g, '');
+      remaining = remaining.replace(/-d\s+['"][^'"]*['"]/g, '');
+      remaining = remaining.replace(/--data\s+['"][^'"]*['"]/g, '');
+      remaining = remaining.replace(/-d\s+[^\s]+/g, '');
+      remaining = remaining.replace(/--data\s+[^\s]+/g, '');
+      
+      // Clean up extra spaces and get the remaining non-empty part
+      const parts = remaining.trim().split(/\s+/).filter(part => part.length > 0);
+      if (parts.length > 0) {
+        // Take the first part that looks like a URL or the first part if no URL found
+        const potentialUrl = parts.find(part => part.includes('.') || part.startsWith('/')) || parts[0];
+        if (potentialUrl) {
+          result.url = potentialUrl.replace(/^['"]|['"]$/g, ''); // Remove quotes
+        }
       }
     }
   }
