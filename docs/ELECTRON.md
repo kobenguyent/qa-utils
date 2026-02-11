@@ -125,6 +125,59 @@ if (process.env.ELECTRON === 'true') {
 }
 ```
 
+#### Analytics and External Resources
+
+When building for Electron (`ELECTRON=true`), the build process automatically:
+
+1. **Keeps Umami Analytics**: The analytics script from `cloud.umami.is` is included to track desktop app usage
+2. **Removes External React CDN**: The React UMD build from `cdn.jsdelivr.net` is removed as React is bundled by Vite (redundant)
+3. **Keeps OTPLib CDN**: The OTPLib scripts from `unpkg.com` are kept as they are required for the OTP Generator feature
+
+This ensures the Electron app:
+- Tracks usage analytics via Umami with platform-specific data
+- Doesn't load redundant React CDN dependencies
+- Maintains all required functionality
+- Has optimal performance
+
+##### Desktop App Analytics Implementation
+
+The Electron app uses an enhanced Umami analytics implementation (`src/utils/umami.ts`) that automatically:
+
+1. **Detects the environment**: Distinguishes between web and Electron contexts
+2. **Adds platform metadata**: Tracks OS platform (macOS, Windows, Linux), app version, and environment
+3. **Prefixes page views**: Desktop app page views are tracked as `electron:/page` to distinguish from web traffic
+4. **Supports custom events**: Additional `trackEvent()` function for tracking desktop-specific user actions
+
+##### Automatic Version Management
+
+Desktop app builds include automatic version bumping to ensure each build has a unique identifier:
+
+1. **Auto-increment**: Running any `electron:build*` script automatically bumps the patch version in `package.json`
+2. **Unique versioning**: The app version includes the commit hash: `version+commit` (e.g., `1.0.2+abc123`)
+3. **Build tracking**: This allows tracking which specific build users are running in analytics
+
+The version is read dynamically from `package.json` at build time and combined with the git commit hash to create a unique identifier for each desktop build.
+
+Example tracking data:
+```javascript
+// Web app
+{ environment: 'web' }
+
+// Desktop app (macOS, version 1.0.2, commit abc123)
+{ 
+  environment: 'electron',
+  platform: 'darwin',
+  app_version: '1.0.2+abc123'
+}
+```
+
+**Version Bump Script**: The `scripts/bump-electron-version.cjs` script automatically increments the patch version before each Electron build. This ensures:
+- Each release has a unique version number
+- Easy tracking of which version users are running
+- Clear distinction between different builds in analytics
+
+This allows for separate analytics dashboards and insights for web vs desktop users while using the same Umami instance.
+
 ## Security Features
 
 The Electron app implements security best practices:

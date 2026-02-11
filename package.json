@@ -23,11 +23,11 @@
     "test:coverage": "vitest run --coverage",
     "pr": "./scripts/create_pr.sh",
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && NODE_ENV=development npx electron .\"",
-    "electron:build": "cross-env ELECTRON=true npm run build && electron-builder",
-    "electron:build:mac": "cross-env ELECTRON=true npm run build && electron-builder --mac",
-    "electron:build:win": "cross-env ELECTRON=true npm run build && electron-builder --win",
-    "electron:build:linux": "cross-env ELECTRON=true npm run build && electron-builder --linux",
-    "electron:build:all": "cross-env ELECTRON=true npm run build && electron-builder -mwl"
+    "electron:build": "node scripts/bump-electron-version.cjs && cross-env ELECTRON=true npm run build && electron-builder",
+    "electron:build:mac": "node scripts/bump-electron-version.cjs && cross-env ELECTRON=true npm run build && electron-builder --mac",
+    "electron:build:win": "node scripts/bump-electron-version.cjs && cross-env ELECTRON=true npm run build && electron-builder --win",
+    "electron:build:linux": "node scripts/bump-electron-version.cjs && cross-env ELECTRON=true npm run build && electron-builder --linux",
+    "electron:build:all": "node scripts/bump-electron-version.cjs && cross-env ELECTRON=true npm run build && electron-builder -mwl"
   },
   "dependencies": {
     "@imgly/background-removal": "^1.7.0",

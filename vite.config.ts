@@ -2,6 +2,9 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import istanbul from 'vite-plugin-istanbul'
 import { execSync } from 'child_process'
+import { readFileSync } from 'fs'
+import { resolve } from 'path'
+import type { Plugin } from 'vite'
 
 // Timeout for git commands to prevent build from hanging
 const GIT_COMMAND_TIMEOUT_MS = 5000
@@ -16,6 +19,52 @@ const commitHash = (() => {
     return 'unknown'
   }
 })()
+
+// Get version from package.json
+const getPackageVersion = (): string => {
+  try {
+    const packageJsonPath = resolve(__dirname, 'package.json')
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'))
+    return packageJson.version || '0.0.0'
+  } catch (error) {
+    console.warn('Unable to read package.json version, using "0.0.0"')
+    return '0.0.0'
+  }
+}
+
+const packageVersion = getPackageVersion()
+
+// For Electron builds, create a unique version identifier: version+commit
+const appVersion = process.env.ELECTRON === 'true' 
+  ? `${packageVersion}+${commitHash}`
+  : packageVersion
+
+// Plugin to remove redundant external scripts for Electron builds
+function removeExternalScriptsForElectron(): Plugin {
+  return {
+    name: 'remove-external-scripts-for-electron',
+    transformIndexHtml(html) {
+      // Only remove redundant scripts when building for Electron
+      if (process.env.ELECTRON === 'true') {
+        // Remove external React CDN script (React is bundled by Vite, so this is redundant)
+        html = html.replace(
+          /<script[^>]*src="https:\/\/cdn\.jsdelivr\.net\/npm\/react\/[^"]*"[^>]*><\/script>\s*/g,
+          ''
+        )
+        
+        // Remove preconnect to jsdelivr CDN (no longer needed without React CDN)
+        html = html.replace(
+          /<link[^>]*href="https:\/\/cdn\.jsdelivr\.net"[^>]*>\s*/g,
+          ''
+        )
+        
+        // Note: Umami analytics is kept to track Electron app usage
+        // Note: OTPLib scripts from unpkg.com are kept as they're required for OTP functionality
+      }
+      return html
+    }
+  }
+}
 
 // Dynamically configure base based on environment
 export default defineConfig(({ mode }) => {
@@ -34,6 +83,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       react(),
+      removeExternalScriptsForElectron(),
       istanbul({
         include: 'src/*',
         exclude: ['node_modules', 'test/'],
@@ -63,6 +113,8 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       __COMMIT_HASH__: JSON.stringify(commitHash),
+      __APP_VERSION__: JSON.stringify(appVersion),
+      __PACKAGE_VERSION__: JSON.stringify(packageVersion),
     },
   }
 })
