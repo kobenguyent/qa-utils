@@ -9,8 +9,14 @@ const commitHash = execSync('git rev-parse --short HEAD').toString().trim()
 export default defineConfig(({ mode }) => {
   let base = '/'
 
+  // For GitHub Pages deployment
   if (process.env.DEPLOY_ENV === 'github') {
     base = '/qa-utils/'
+  }
+  
+  // For Electron builds, use relative paths
+  if (process.env.ELECTRON === 'true') {
+    base = './'
   }
 
   return {
