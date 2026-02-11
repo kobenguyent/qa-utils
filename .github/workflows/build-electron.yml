@@ -13,9 +13,6 @@ on:
       - 'src/**'
       - 'package.json'
       - 'vite.config.ts'
-  
-  # Trigger on release tags
-  push:
     tags:
       - 'v*.*.*'
 
