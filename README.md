@@ -3,9 +3,9 @@
 [![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://paypal.me/peternguyentr?country.x=DE&locale.x=en_US)
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/peternguyew)
 
-A comprehensive collection of quality assurance tools and utilities designed to enhance your testing workflow. Built with modern React, TypeScript, and optimized for performance with comprehensive test coverage.
+A comprehensive collection of quality assurance tools and utilities designed to enhance your testing workflow. Built with modern React, TypeScript, and optimized for performance with comprehensive test coverage. **Now available as a desktop app for macOS, Windows, and Linux!**
 
-🌐 **[Live Demo](https://kobenguyent.github.io/qa-utils/#/)** | 📊 **219 Tests** | 🎯 **Mobile-First Design** | 🤖 **AI-Powered**
+🌐 **[Live Demo](https://kobenguyent.github.io/qa-utils/#/)** | 💻 **Desktop App Available** | 📊 **219 Tests** | 🎯 **Mobile-First Design** | 🤖 **AI-Powered**
 
 <img width="1310" height="780" alt="Screenshot 1" src="https://github.com/user-attachments/assets/667bf71d-84cc-4d30-bb1c-7b95fe37ceab" />
 
@@ -384,15 +384,170 @@ npm run lint        # Run ESLint with TypeScript support
 npm run preview     # Preview production build
 ```
 
+## 💻 Desktop Application (Electron)
+
+QA Utils is now available as a **cross-platform desktop application** for macOS, Windows, and Linux! The desktop app solves CORS issues that may occur when using the web version, providing a more seamless experience for tools like REST Client, WebSocket Client, and gRPC Client.
+
+### Why Use the Desktop App?
+
+- **🔓 No CORS Restrictions**: Make API calls to any server without browser security limitations
+- **⚡ Native Performance**: Faster startup and better resource management
+- **📴 Offline Capable**: Use most features without an internet connection
+- **🎯 Focused Environment**: Dedicated window without browser distractions
+- **🔒 Enhanced Security**: Isolated from web browser cookies and session data
+
+### Running the Desktop App (Development)
+
+To run the Electron app in development mode with hot reload:
+
+```bash
+npm install
+npm run electron:dev
+```
+
+This will:
+1. Start the Vite development server
+2. Wait for the server to be ready
+3. Launch the Electron app pointing to localhost:5173
+
+### Building the Desktop App
+
+#### Build for Current Platform
+```bash
+npm run electron:build
+```
+
+This builds the app for your current operating system and creates distributable packages in the `release/` directory.
+
+#### Build for Specific Platforms
+
+```bash
+# macOS (.dmg and .zip)
+npm run electron:build:mac
+
+# Windows (.exe installer and portable)
+npm run electron:build:win
+
+# Linux (AppImage, .deb, and .rpm)
+npm run electron:build:linux
+```
+
+#### Build for All Platforms
+```bash
+npm run electron:build:all
+```
+
+**Note**: Building for all platforms from a single OS may have limitations. For best results:
+- Build macOS apps from macOS
+- Build Windows apps from Windows or Linux with Wine
+- Build Linux apps from any platform
+
+### Distribution Packages
+
+After building, you'll find the following in the `release/` directory:
+
+#### macOS
+- `QA Utils-1.0.0.dmg` - Installer disk image
+- `QA Utils-1.0.0-mac.zip` - Zipped application bundle
+
+#### Windows
+- `QA Utils Setup 1.0.0.exe` - NSIS installer
+- `QA Utils 1.0.0.exe` - Portable executable (no installation required)
+
+#### Linux
+- `QA Utils-1.0.0.AppImage` - Universal Linux package
+- `qa-utils_1.0.0_amd64.deb` - Debian/Ubuntu package
+- `qa-utils-1.0.0.x86_64.rpm` - Red Hat/Fedora package
+
+### Installation Instructions
+
+#### macOS
+1. Download the `.dmg` file
+2. Double-click to open
+3. Drag "QA Utils" to the Applications folder
+4. Launch from Applications or Spotlight
+
+#### Windows
+1. Download the `.exe` installer
+2. Run the installer and follow the prompts
+3. Launch from Start Menu or Desktop shortcut
+
+Or use the portable version:
+1. Download the portable `.exe`
+2. Run directly - no installation needed!
+
+#### Linux
+
+**AppImage (Recommended - Works on all distributions)**
+```bash
+chmod +x QA-Utils-1.0.0.AppImage
+./QA-Utils-1.0.0.AppImage
+```
+
+**Debian/Ubuntu**
+```bash
+sudo dpkg -i qa-utils_1.0.0_amd64.deb
+```
+
+**Red Hat/Fedora**
+```bash
+sudo rpm -i qa-utils-1.0.0.x86_64.rpm
+```
+
+### Desktop App Features
+
+All web features are available in the desktop app, with enhanced capabilities:
+
+- **REST Client**: No CORS limitations when making API requests
+- **WebSocket Client**: Connect to any WebSocket server without restrictions
+- **gRPC Client**: Direct gRPC-Web calls without proxy requirements
+- **File Processing**: Better file system access for import/export operations
+- **Local Storage**: Persistent data storage across app restarts
+
+### Keyboard Shortcuts
+
+- `Ctrl/Cmd + R` - Reload the app
+- `Ctrl/Cmd + Q` - Quit the app
+- `F11` - Toggle fullscreen
+- `Ctrl/Cmd + Plus` - Zoom in
+- `Ctrl/Cmd + Minus` - Zoom out
+- `Ctrl/Cmd + 0` - Reset zoom
+- `F12` or `Ctrl/Cmd + Shift + I` - Toggle DevTools
+
+### Troubleshooting
+
+**App won't start on macOS**
+- Right-click the app and select "Open" the first time (to bypass Gatekeeper)
+- Or run: `xattr -cr /Applications/QA\ Utils.app`
+
+**App won't start on Windows**
+- Windows Defender may flag the app initially - click "More info" → "Run anyway"
+- Ensure you have the latest Visual C++ redistributables installed
+
+**App won't start on Linux**
+- For AppImage: Ensure the file is executable (`chmod +x`)
+- Install required dependencies: `sudo apt install libgtk-3-0 libnotify4 libnss3 libxss1`
+
+### Building Custom Icons
+
+To customize the app icon, place icon files in the `build/` directory:
+
+- `build/icon.icns` - macOS icon (512x512 or larger)
+- `build/icon.ico` - Windows icon (256x256 or larger)
+- `build/icons/*.png` - Linux icons (16x16 to 512x512)
+
+See `build/README.md` for detailed instructions on creating icons.
+
 ## 🏗️ Technology Stack
 
 - **Frontend**: React 18, TypeScript, Bootstrap 5
 - **Build System**: Vite with SWC for fast builds
-- **Testing**: Vitest + React Testing Library (62 tests)
-- **Package Manager**: npm
+- **Desktop App**: Electron for cross-platform desktop distribution
+- **Testing**: Vitest + React Testing Library (219 tests)
+- **Package Manager**: npm (with Bun support)
 - **Code Quality**: ESLint, TypeScript strict mode
 - **CI/CD**: GitHub Actions with automated testing
-- **Deployment**: GitHub Pages with automated workflows
+- **Deployment**: GitHub Pages with automated workflows + Electron builds
 
 ## 🤝 Contributing
 

@@ -14,12 +14,12 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "pr": "./scripts/create_pr.sh",
-    "electron:dev": "concurrently \"cross-env NODE_ENV=development npm run dev\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .\"",
-    "electron:build": "cross-env ELECTRON=true npm run build && electron-builder",
-    "electron:build:mac": "cross-env ELECTRON=true npm run build && electron-builder --mac",
-    "electron:build:win": "cross-env ELECTRON=true npm run build && electron-builder --win",
-    "electron:build:linux": "cross-env ELECTRON=true npm run build && electron-builder --linux",
-    "electron:build:all": "cross-env ELECTRON=true npm run build && electron-builder -mwl"
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && NODE_ENV=development npx electron .\"",
+    "electron:build": "ELECTRON=true npm run build && electron-builder",
+    "electron:build:mac": "ELECTRON=true npm run build && electron-builder --mac",
+    "electron:build:win": "ELECTRON=true npm run build && electron-builder --win",
+    "electron:build:linux": "ELECTRON=true npm run build && electron-builder --linux",
+    "electron:build:all": "ELECTRON=true npm run build && electron-builder -mwl"
   },
   "dependencies": {
     "@imgly/background-removal": "^1.7.0",
