@@ -55,9 +55,10 @@ const isJsonString = (str: string | undefined): boolean => {
 };
 
 /**
- * Ensure proper Content-Type header for JSON bodies
+ * Normalize Content-Type header for JSON bodies
+ * Adds application/json if missing, or replaces text/plain with application/json
  */
-const ensureJsonContentType = (headers: { key: string; value: string; enabled: boolean }[], body?: string): { key: string; value: string; enabled: boolean }[] => {
+const normalizeJsonContentType = (headers: { key: string; value: string; enabled: boolean }[], body?: string): { key: string; value: string; enabled: boolean }[] => {
   // Check if body is JSON
   if (!isJsonString(body)) {
     return headers;
@@ -75,7 +76,9 @@ const ensureJsonContentType = (headers: { key: string; value: string; enabled: b
   
   // Check if existing Content-Type is text/plain and body is JSON
   const existingContentType = headers[contentTypeIndex];
-  if (existingContentType.value.toLowerCase().includes('text/plain')) {
+  const contentTypeValue = existingContentType.value.toLowerCase().split(';')[0].trim();
+  
+  if (contentTypeValue === 'text/plain') {
     // Replace text/plain with application/json for JSON bodies
     const updatedHeaders = [...headers];
     updatedHeaders[contentTypeIndex] = {
@@ -158,7 +161,7 @@ export const parsePostman = (data: PostmanCollection | PostmanEnvironment): Unif
           name: item.name,
           method: req.method as any,
           url: typeof req.url === 'string' ? req.url : req.url.raw,
-          headers: ensureJsonContentType(headers, body),
+          headers: normalizeJsonContentType(headers, body),
           body,
           description: item.description,
           preRequestScript,
@@ -234,7 +237,7 @@ export const parseInsomnia = (data: InsomniaExport): UnifiedCollection => {
           name: r.name || 'Request',
           method: ((r as any).method || 'GET') as any,
           url: (r as any).url || '',
-          headers: ensureJsonContentType(headers, body),
+          headers: normalizeJsonContentType(headers, body),
           body,
           description: (r as any).description,
           preRequestScript: (r as any).preRequestScript,
@@ -269,7 +272,7 @@ export const parseInsomnia = (data: InsomniaExport): UnifiedCollection => {
         name: r.name || 'Request',
         method: ((r as any).method || 'GET') as any,
         url: (r as any).url || '',
-        headers: ensureJsonContentType(headers, body),
+        headers: normalizeJsonContentType(headers, body),
         body,
         description: (r as any).description,
         preRequestScript: (r as any).preRequestScript,
@@ -300,7 +303,7 @@ export const parseThunderClient = (data: ThunderClientCollection): UnifiedCollec
         name: r.name,
         method: r.method as any,
         url: r.url,
-        headers: ensureJsonContentType(headers, body),
+        headers: normalizeJsonContentType(headers, body),
         body,
         description: r.description,
       };
@@ -321,7 +324,7 @@ export const parseThunderClient = (data: ThunderClientCollection): UnifiedCollec
       name: r.name,
       method: r.method as any,
       url: r.url,
-      headers: ensureJsonContentType(headers, body),
+      headers: normalizeJsonContentType(headers, body),
       body,
       description: r.description,
     };

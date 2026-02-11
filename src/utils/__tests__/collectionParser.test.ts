@@ -156,6 +156,35 @@ describe('collectionParser', () => {
       expect(result.requests[0].headers[0].value).toBe('application/json');
     });
 
+    it('should handle text/plain with charset parameter', () => {
+      const collection: PostmanCollection = {
+        info: {
+          name: 'Test Collection',
+          schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
+        },
+        item: [
+          {
+            name: 'POST with text/plain; charset=utf-8',
+            request: {
+              method: 'POST',
+              url: 'https://api.example.com/users',
+              header: [
+                { key: 'Content-Type', value: 'text/plain; charset=utf-8' }
+              ],
+              body: {
+                raw: '{"name": "Jane"}',
+              },
+            },
+          },
+        ],
+      };
+
+      const result = parsePostman(collection);
+      expect(result.requests).toHaveLength(1);
+      expect(result.requests[0].headers).toHaveLength(1);
+      expect(result.requests[0].headers[0].value).toBe('application/json');
+    });
+
     it('should not add Content-Type for non-JSON body', () => {
       const collection: PostmanCollection = {
         info: {
