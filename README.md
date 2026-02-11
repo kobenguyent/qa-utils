@@ -5,6 +5,8 @@
 
 A comprehensive collection of quality assurance tools and utilities designed to enhance your testing workflow. Built with modern React, TypeScript, and optimized for performance with comprehensive test coverage. **Now available as a desktop app for macOS, Windows, and Linux!**
 
+> **Disclaimer**: This project references various third-party tools, frameworks, and services for compatibility and integration purposes. All trademarks, service marks, and trade names referenced in this project are the property of their respective owners. This project is not affiliated with, endorsed by, or sponsored by any of the referenced vendors or organizations.
+
 🌐 **[Live Demo](https://kobenguyent.github.io/qa-utils/#/)** | 💻 **Desktop App Available** | 📊 **655 Tests** | 🎯 **Mobile-First Design** | 🤖 **AI-Powered**
 
 <img width="1310" height="780" alt="Screenshot 1" src="https://github.com/user-attachments/assets/667bf71d-84cc-4d30-bb1c-7b95fe37ceab" />
@@ -26,9 +28,9 @@ Decode and analyze JSON Web Tokens with enhanced features:
 
 #### 🚀 CI/CD Workflow Generator
 Professional workflow generator supporting multiple platforms:
-- **5 CI/CD Platforms**: GitHub Actions, GitLab CI, Azure DevOps, Jenkins, Bitbucket Pipelines
+- **5 CI/CD Platforms**: Supports popular CI/CD services (GitHub Actions, GitLab CI, Azure DevOps, Jenkins, Bitbucket Pipelines)
 - **API & E2E Testing**: Configurable test types with multiple runners
-- **Test Runner Support**: Playwright, Puppeteer, WebDriverIO, Cypress
+- **Test Runner Support**: Supports popular test automation frameworks (Playwright, Puppeteer, WebDriverIO, Cypress)
 - **Node.js Versions**: 16, 18, 20, 21 support
 - **NPM Publishing**: Automated package publishing workflows
 - **Real-time Preview**: Live preview with syntax highlighting
@@ -72,15 +74,15 @@ Test gRPC services with browser-compatible gRPC-Web support:
 
 #### 📦 Collection Manager
 Unified API collection management tool supporting multiple formats:
-- **Multi-Format Support**: Postman, Insomnia, Thunder Client, .env, CSV, generic JSON
+- **Format Compatibility**: Supports Postman-compatible, Insomnia-compatible, and Thunder Client-compatible collection formats, plus .env, CSV, and generic JSON files
 - **Multi-Collection Support**: Import and manage multiple collections and environments simultaneously
 - **Auto-Detection**: Automatically detect collection format and type (collection vs environment)
 - **Persistent Storage**: Auto-saves to IndexedDB - resume work after page refresh
 - **Inline Editor**: Edit requests directly - method, URL, headers, body, scripts with real-time updates
 - **Rename Items**: Double-click to rename collections, environments, folders, and requests
-- **Script Support**: Full support for pre-request and test scripts from Postman collections
-- **Script Preservation**: Scripts are preserved when converting between formats (Postman ↔ Insomnia ↔ Thunder Client)
-- **Script Translation**: Automatically translates script syntax between formats (pm.* ↔ insomnia.* ↔ tc.*)
+- **Script Support**: Full support for pre-request and test scripts
+- **Script Preservation**: Scripts are preserved when converting between formats
+- **Script Translation**: Automatically translates script syntax between formats
 - **Folder Scripts**: Pre-request and test scripts at folder and collection level
 - **Variable Rendering**: Visual badges show variable references with values on hover
 - **Autocomplete**: Type `{{` in URL/headers to see variable suggestions
@@ -94,6 +96,8 @@ Unified API collection management tool supporting multiple formats:
 - **Search & Filter**: Real-time search across all collection elements
 - **Request Search**: Filter requests/folders by name, URL, method, headers, or body content
 - **Collection Switching**: Easy switching between loaded collections and environments with tabs
+
+*Note: This tool supports conversion between various REST API collection formats. The tool is not affiliated with or endorsed by any API testing tool vendors.*
 
 #### 🛸 Base64 Encode/Decode
 Simple and efficient Base64 operations:
@@ -161,9 +165,9 @@ Advanced AI chat interface with cutting-edge features:
 - **JIRA Comment Generator**: Format comments for JIRA with markdown support
 - **🌠 OTP Generator**: Generate time-based and counter-based OTP codes
 - **🔐 Encryption/Decryption**: Multiple encryption algorithms support
-- **🤖 Playwright to CodeceptJS Converter**: Convert Playwright tests to CodeceptJS format with dual conversion methods:
+- **🤖 Test Code Converter**: Convert between test automation framework formats with dual conversion methods:
   - **Default Mode**: Fast regex-based conversion for common patterns
-  - **AI-Powered Mode**: Context-aware conversion using AI providers (OpenAI, Anthropic, Google Gemini, Azure OpenAI, Ollama)
+  - **AI-Powered Mode**: Context-aware conversion using AI providers
   - **Features**: API key persistence, connection testing, automatic fallback on errors
   - **Smart Conversion**: AI mode provides better handling of complex test scenarios
 

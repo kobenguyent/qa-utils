@@ -167,7 +167,7 @@ export const Header: React.FC = () => {
               <NavDropdown.Item href="#/ai-website-tester">🤖 AI Website Tester</NavDropdown.Item>
               <NavDropdown.Item href="#/file-processor">📁 File Processor</NavDropdown.Item>
               <NavDropdown.Item href="#/encryption">🔒 Encryption</NavDropdown.Item>
-              <NavDropdown.Item href="#/playwright2codecept">🎭 PW→CodeceptJS</NavDropdown.Item>
+              <NavDropdown.Item href="#/playwright2codecept">🎭 Test Converter</NavDropdown.Item>
               <NavDropdown.Item href="#/sequence-diagram">📊 Sequence Diagram</NavDropdown.Item>
               <NavDropdown.Item href="#/workflow-generator">🚀 CI/CD</NavDropdown.Item>
               <NavDropdown.Item href="#/kanban">📋 Kanban Board</NavDropdown.Item>
@@ -180,7 +180,7 @@ export const Header: React.FC = () => {
               aria-label="Learning menu"
             >
               <NavDropdown.Item href="#/command-book">📖 Command Book</NavDropdown.Item>
-              <NavDropdown.Item href="#/codeceptjs">🔥 CodeceptJS Hints</NavDropdown.Item>
+              <NavDropdown.Item href="#/codeceptjs">🔥 Testing Hints</NavDropdown.Item>
               <NavDropdown.Item href="#/cicd-infographic">🔄 CI/CD Infographic</NavDropdown.Item>
               <NavDropdown.Item href="#/ai-agents-infographic">🤖 AI Agents & MCP</NavDropdown.Item>
               <NavDropdown.Item href="#/test-frameworks-comparison">⚖️ Test Frameworks</NavDropdown.Item>
