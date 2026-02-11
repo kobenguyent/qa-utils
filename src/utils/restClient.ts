@@ -36,10 +36,15 @@ export const makeRequest = async (config: RequestConfig): Promise<RestResponse> 
     // Build headers - only set default Content-Type if body exists and no Content-Type is provided
     const headers: Record<string, string> = { ...config.headers };
     
+    // Check if Content-Type header is already provided (case-insensitive)
+    const hasContentType = Object.keys(headers).some(
+      key => key.toLowerCase() === 'content-type'
+    );
+    
     // Only set default Content-Type to application/json if:
     // 1. A request body exists
     // 2. No Content-Type header is already provided by the user
-    if (config.body && !headers['Content-Type'] && !headers['content-type']) {
+    if (config.body && !hasContentType) {
       headers['Content-Type'] = 'application/json';
     }
     
