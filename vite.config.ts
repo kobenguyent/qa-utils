@@ -49,8 +49,8 @@ function removeExternalScriptsForElectron(): Plugin {
           ''
         )
         
-        // Keep OTPLib from unpkg as it's needed for OTP functionality
-        // but we'll keep the preconnect for it
+        // Note: OTPLib scripts from unpkg.com are kept as they're required for OTP functionality
+        // The unpkg.com preconnect is also kept to optimize loading of these scripts
       }
       return html
     }
