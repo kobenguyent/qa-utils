@@ -253,7 +253,7 @@ export class KobeanAgent {
                 'Generate a UUID',
                 'Create a password',
                 'Encode to Base64',
-                'Open AI Chat',
+                'Configure AI Provider',
             ],
         };
     }

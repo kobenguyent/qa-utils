@@ -10,7 +10,7 @@ import '../../styles/kobean.css';
 export function KobeanAssistant() {
     const navigate = useNavigate();
     const [input, setInput] = useState('');
-    const [messages, setMessages] = useState<KobeanMessage[]>([]);
+    const [messages, setMessages] = useSessionStorage<KobeanMessage[]>('kobean_messages', []);
     const [isProcessing, setIsProcessing] = useState(false);
     const [copied, setCopied] = useState<string | null>(null);
 

@@ -345,9 +345,9 @@ export const searchData: SearchItem[] = [
   },
   // AI Tools
   {
-    title: 'AI Chat',
-    description: 'Chat with AI models from OpenAI, Anthropic, Google, and more',
-    path: '#/ai-chat',
+    title: 'Kobean Assistant',
+    description: 'AI-powered assistant with tool execution and multi-provider support (OpenAI, Anthropic, Google, and more)',
+    path: '#/kobean',
     category: 'AI Tools',
     keywords: ['ai', 'chat', 'gpt', 'openai', 'claude', 'gemini', 'llm', 'chatbot', 'assistant', 'kobean'],
     icon: '🤖'

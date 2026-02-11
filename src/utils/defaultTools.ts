@@ -476,13 +476,13 @@ const navigableTools: ToolDefinition[] = [
         route: '/grpc-client',
     },
     {
-        id: 'ai-chat',
-        name: 'AI Chat',
-        description: 'Chat with AI assistants (OpenAI, Claude, Gemini, Ollama)',
+        id: 'kobean-assistant',
+        name: 'Kobean Assistant',
+        description: 'AI-powered assistant with tool execution (OpenAI, Claude, Gemini, Ollama)',
         category: 'ai',
         keywords: ['ai', 'chat', 'gpt', 'claude', 'gemini', 'ollama', 'assistant', 'kobean'],
         examples: ['open ai chat', 'chat with ai', 'ask gpt', 'open kobean'],
-        route: '/ai-chat',
+        route: '/kobean',
     },
     {
         id: 'prompt-enhancer',

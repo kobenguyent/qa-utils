@@ -1,5 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 
+// Custom event name for cross-component session storage sync
+const SESSION_STORAGE_EVENT = 'sessionStorageUpdate';
+
+interface SessionStorageUpdateDetail {
+  key: string;
+  value: string;
+}
+
 /**
  * Custom hook for managing state with sessionStorage persistence
  * @param key - The key to use in sessionStorage
@@ -34,7 +42,15 @@ export function useSessionStorage<T>(key: string, initialValue: T): [T, (value: 
         // Check if window is defined (SSR/Node environment compatibility)
         if (typeof window !== 'undefined') {
           try {
-            window.sessionStorage.setItem(key, JSON.stringify(valueToStore));
+            const serialized = JSON.stringify(valueToStore);
+            window.sessionStorage.setItem(key, serialized);
+            // Dispatch custom event asynchronously so other components using the same key can sync
+            // without interfering with the current React render cycle
+            setTimeout(() => {
+              window.dispatchEvent(new CustomEvent(SESSION_STORAGE_EVENT, {
+                detail: { key, value: serialized },
+              }));
+            }, 0);
           } catch (storageError) {
             console.warn(`Error setting sessionStorage key "${key}":`, storageError);
           }
@@ -62,6 +78,27 @@ export function useSessionStorage<T>(key: string, initialValue: T): [T, (value: 
     } catch (error) {
       console.warn(`Error syncing sessionStorage key "${key}":`, error);
     }
+  }, [key]);
+
+  // Listen for cross-component updates to the same key
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const handleUpdate = (e: Event) => {
+      const detail = (e as CustomEvent<SessionStorageUpdateDetail>).detail;
+      if (detail.key === key) {
+        try {
+          setStoredValue(JSON.parse(detail.value));
+        } catch {
+          // ignore parse errors
+        }
+      }
+    };
+
+    window.addEventListener(SESSION_STORAGE_EVENT, handleUpdate);
+    return () => window.removeEventListener(SESSION_STORAGE_EVENT, handleUpdate);
   }, [key]);
 
   return [storedValue, setValue];
