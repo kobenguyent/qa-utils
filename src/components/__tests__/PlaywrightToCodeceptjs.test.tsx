@@ -46,7 +46,7 @@ describe('PlaywrightToCodeceptjs', () => {
   it('should render the component with default mode selected', () => {
     render(<PlaywrightToCodeceptjs />);
     
-    expect(screen.getByText('Playwright to CodeceptJS Test Converter')).toBeInTheDocument();
+    expect(screen.getByText('Test Automation Code Converter')).toBeInTheDocument();
     expect(screen.getByText('Default (Regex-based)')).toBeInTheDocument();
     expect(screen.getByText('AI-Powered')).toBeInTheDocument();
   });

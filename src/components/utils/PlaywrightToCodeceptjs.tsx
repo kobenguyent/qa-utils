@@ -307,8 +307,8 @@ Return ONLY the converted CodeceptJS code without any explanations or markdown f
   return (
     <Container>
       <div style={{padding: '20px', fontFamily: 'Arial, sans-serif'}}>
-        <h2>Playwright to CodeceptJS Test Converter</h2>
-        
+        <h2>Test Automation Code Converter</h2>
+        <p className="text-muted">Convert test automation code between different framework formats</p>
         {/* Conversion Method Selection */}
         <Row className="mb-3">
           <Col>

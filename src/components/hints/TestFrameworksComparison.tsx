@@ -5,6 +5,10 @@ export const TestFrameworksComparison = () => {
     <Container className="py-4">
       <h1 className="text-center mb-4">Test Automation Frameworks Comparison</h1>
       <p className="text-center text-muted mb-4">Compare popular test automation frameworks to choose the right one for your project</p>
+      
+      <div className="alert alert-info mb-4" role="alert">
+        <strong>Note:</strong> All framework names and trademarks referenced in this comparison are the property of their respective owners. This comparison is provided for educational purposes only and is not affiliated with or endorsed by any framework vendor.
+      </div>
 
       {/* E2E Testing Frameworks */}
       <Row className="mb-4">
