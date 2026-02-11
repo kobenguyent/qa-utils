@@ -477,12 +477,12 @@ const navigableTools: ToolDefinition[] = [
     },
     {
         id: 'ai-chat',
-        name: 'Kobean AI Chat',
+        name: 'AI Chat',
         description: 'Chat with AI assistants (OpenAI, Claude, Gemini, Ollama)',
         category: 'ai',
         keywords: ['ai', 'chat', 'gpt', 'claude', 'gemini', 'ollama', 'assistant', 'kobean'],
         examples: ['open ai chat', 'chat with ai', 'ask gpt', 'open kobean'],
-        route: '/kobean',
+        route: '/ai-chat',
     },
     {
         id: 'prompt-enhancer',
