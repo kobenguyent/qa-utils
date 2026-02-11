@@ -216,6 +216,41 @@ To distribute the app:
 2. Upload files from `release/` to GitHub Releases
 3. Users download platform-specific files
 
+### GitHub Actions Workflow
+
+The repository includes a GitHub Actions workflow (`.github/workflows/build-electron.yml`) that automatically builds the Electron app for all platforms:
+
+**Features:**
+- Builds for macOS, Windows, and Linux in parallel
+- Uploads artifacts for easy download
+- Triggered on:
+  - Push to `main` branch (when electron/src files change)
+  - Release tags (e.g., `v1.0.0`)
+  - Manual trigger via Actions tab
+
+**Accessing Build Artifacts:**
+1. Go to [Actions tab](https://github.com/kobenguyent/qa-utils/actions/workflows/build-electron.yml)
+2. Click on a successful workflow run
+3. Download artifacts:
+   - `linux-appimage` - AppImage for Linux
+   - `linux-deb` - Debian package
+   - `linux-rpm` - Red Hat package
+   - `windows-installer` - Windows installer
+   - `macos-dmg` - macOS disk image
+   - `macos-zip` - macOS zip archive
+
+**Workflow Jobs:**
+- `build-linux` - Builds AppImage, DEB, and RPM on Ubuntu
+- `build-windows` - Builds NSIS installer and portable on Windows
+- `build-macos` - Builds DMG and ZIP on macOS
+- `build-summary` - Provides build status summary
+
+**Manual Trigger:**
+1. Go to Actions tab
+2. Select "Build Electron App" workflow
+3. Click "Run workflow"
+4. Select branch and run
+
 ### Auto-Updates (Future Enhancement)
 
 electron-builder supports auto-updates via:
@@ -252,9 +287,10 @@ Configuration in `package.json`:
    - Can't be reduced significantly
 
 4. **CI/CD:**
-   - GitHub Actions can build for all platforms
-   - Requires separate runners (macos, windows, ubuntu)
-   - See `.github/workflows/build-electron.yml` (future)
+   - GitHub Actions workflow available at `.github/workflows/build-electron.yml`
+   - Automatically builds for all platforms (macOS, Windows, Linux)
+   - Artifacts uploaded to GitHub Actions for download
+   - Triggered on main branch pushes, release tags, or manual dispatch
 
 ## Troubleshooting
 

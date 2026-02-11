@@ -410,7 +410,24 @@ This will:
 2. Wait for the server to be ready
 3. Launch the Electron app pointing to localhost:5173
 
-### Building the Desktop App
+### Downloading Pre-built Apps
+
+Pre-built desktop applications are automatically generated via GitHub Actions and available for download:
+
+1. Go to the [Actions tab](https://github.com/kobenguyent/qa-utils/actions/workflows/build-electron.yml)
+2. Click on the latest successful workflow run
+3. Scroll down to the "Artifacts" section
+4. Download the appropriate package for your platform:
+   - **Linux**: `linux-appimage`, `linux-deb`, or `linux-rpm`
+   - **Windows**: `windows-installer`
+   - **macOS**: `macos-dmg` or `macos-zip`
+
+The workflow is automatically triggered when:
+- Changes are pushed to `main` branch that affect Electron files
+- A release tag (e.g., `v1.0.0`) is created
+- Manually triggered from the Actions tab
+
+### Building the Desktop App Locally
 
 #### Build for Current Platform
 ```bash
