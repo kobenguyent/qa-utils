@@ -1,10 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { trackPageView } from '../umami';
+import { trackPageView, trackEvent } from '../umami';
 
 // Create a minimal window mock
 const mockWindow = {
   umami: undefined,
-} as Partial<Window & { umami?: { trackView: (url: string) => void } }>;
+  electron: undefined,
+} as Partial<Window & { 
+  umami?: { track: (event: string, data?: Record<string, string | number>) => void };
+  electron?: { platform: string };
+}>;
 
 // Set up global window mock
 Object.defineProperty(global, 'window', {
@@ -14,23 +18,44 @@ Object.defineProperty(global, 'window', {
 
 describe('umami utilities', () => {
   beforeEach(() => {
-    // Clear all mocks and reset umami
+    // Clear all mocks and reset umami/electron
     vi.clearAllMocks();
     mockWindow.umami = undefined;
+    mockWindow.electron = undefined;
   });
 
   describe('trackPageView', () => {
-    it('should call umami.trackView when umami is available', () => {
-      const mockTrackView = vi.fn();
+    it('should call umami.track when umami is available (web)', () => {
+      const mockTrack = vi.fn();
       mockWindow.umami = {
-        trackView: mockTrackView
+        track: mockTrack
       };
 
       const testUrl = '/test-page';
       trackPageView(testUrl);
 
-      expect(mockTrackView).toHaveBeenCalledWith(testUrl);
-      expect(mockTrackView).toHaveBeenCalledTimes(1);
+      expect(mockTrack).toHaveBeenCalledWith('/test-page', { environment: 'web' });
+      expect(mockTrack).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call umami.track with electron prefix when in Electron', () => {
+      const mockTrack = vi.fn();
+      mockWindow.umami = {
+        track: mockTrack
+      };
+      mockWindow.electron = {
+        platform: 'darwin'
+      };
+
+      const testUrl = '/test-page';
+      trackPageView(testUrl);
+
+      expect(mockTrack).toHaveBeenCalledWith('electron:/test-page', {
+        environment: 'electron',
+        platform: 'darwin',
+        app_version: '1.0.1'
+      });
+      expect(mockTrack).toHaveBeenCalledTimes(1);
     });
 
     it('should log warning when umami is not available', () => {
@@ -40,21 +65,80 @@ describe('umami utilities', () => {
       trackPageView(testUrl);
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        'Umami tracking script not loaded or trackView function not available.'
+        'Umami tracking script not loaded or track function not available.'
       );
     });
 
-    it('should log warning when umami.trackView is not a function', () => {
+    it('should log warning when umami.track is not a function', () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       mockWindow.umami = {
-        trackView: 'not a function' as unknown as (url: string) => void
+        track: 'not a function' as unknown as (event: string, data?: Record<string, string | number>) => void
       };
       
       const testUrl = '/test-page';
       trackPageView(testUrl);
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        'Umami tracking script not loaded or trackView function not available.'
+        'Umami tracking script not loaded or track function not available.'
+      );
+    });
+  });
+
+  describe('trackEvent', () => {
+    it('should track custom events with platform info (web)', () => {
+      const mockTrack = vi.fn();
+      mockWindow.umami = {
+        track: mockTrack
+      };
+
+      trackEvent('custom-event', { action: 'click', value: 5 });
+
+      expect(mockTrack).toHaveBeenCalledWith('custom-event', {
+        environment: 'web',
+        action: 'click',
+        value: 5
+      });
+    });
+
+    it('should track custom events with electron platform info', () => {
+      const mockTrack = vi.fn();
+      mockWindow.umami = {
+        track: mockTrack
+      };
+      mockWindow.electron = {
+        platform: 'win32'
+      };
+
+      trackEvent('custom-event', { action: 'click' });
+
+      expect(mockTrack).toHaveBeenCalledWith('custom-event', {
+        environment: 'electron',
+        platform: 'win32',
+        app_version: '1.0.1',
+        action: 'click'
+      });
+    });
+
+    it('should track events without additional data', () => {
+      const mockTrack = vi.fn();
+      mockWindow.umami = {
+        track: mockTrack
+      };
+
+      trackEvent('app-opened');
+
+      expect(mockTrack).toHaveBeenCalledWith('app-opened', {
+        environment: 'web'
+      });
+    });
+
+    it('should log warning when umami is not available', () => {
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+      
+      trackEvent('test-event');
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Umami tracking script not loaded or track function not available.'
       );
     });
   });

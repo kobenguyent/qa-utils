@@ -134,12 +134,34 @@ When building for Electron (`ELECTRON=true`), the build process automatically:
 3. **Keeps OTPLib CDN**: The OTPLib scripts from `unpkg.com` are kept as they are required for the OTP Generator feature
 
 This ensures the Electron app:
-- Tracks usage analytics via Umami (same as web version)
+- Tracks usage analytics via Umami with platform-specific data
 - Doesn't load redundant React CDN dependencies
 - Maintains all required functionality
 - Has optimal performance
 
-Both web and Electron builds include Umami analytics for consistent usage tracking across platforms.
+##### Desktop App Analytics Implementation
+
+The Electron app uses an enhanced Umami analytics implementation (`src/utils/umami.ts`) that automatically:
+
+1. **Detects the environment**: Distinguishes between web and Electron contexts
+2. **Adds platform metadata**: Tracks OS platform (macOS, Windows, Linux), app version, and environment
+3. **Prefixes page views**: Desktop app page views are tracked as `electron:/page` to distinguish from web traffic
+4. **Supports custom events**: Additional `trackEvent()` function for tracking desktop-specific user actions
+
+Example tracking data:
+```javascript
+// Web app
+{ environment: 'web' }
+
+// Desktop app (macOS)
+{ 
+  environment: 'electron',
+  platform: 'darwin',
+  app_version: '1.0.1'
+}
+```
+
+This allows for separate analytics dashboards and insights for web vs desktop users while using the same Umami instance.
 
 ## Security Features
 
