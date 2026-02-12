@@ -9,12 +9,49 @@ import { registerDefaultTools, getAllTools } from './defaultTools';
 import { sendChatMessage, ChatMessage, ChatConfig } from './aiChatClient';
 
 export interface KobeanConfig {
-    aiProvider?: 'ollama' | 'openai' | 'anthropic' | 'google';
+    aiProvider?: 'ollama' | 'openai' | 'anthropic' | 'google' | 'azure-openai';
     aiEndpoint?: string;
     aiModel?: string;
     aiApiKey?: string;
     enableVoice?: boolean;
     systemPrompt?: string;
+}
+
+/**
+ * Read AI Chat configuration from session storage.
+ * Returns a KobeanConfig populated with the user's AI Chat settings,
+ * falling back to defaults if not configured.
+ */
+export function getAiChatSessionConfig(): KobeanConfig {
+    if (typeof window === 'undefined') {
+        return {};
+    }
+
+    try {
+        const provider = window.sessionStorage.getItem('aiChat_provider');
+        const apiKey = window.sessionStorage.getItem('aiChat_apiKey');
+        const endpoint = window.sessionStorage.getItem('aiChat_endpoint');
+        const model = window.sessionStorage.getItem('aiChat_model');
+
+        const config: KobeanConfig = {};
+
+        if (provider) {
+            config.aiProvider = JSON.parse(provider) as KobeanConfig['aiProvider'];
+        }
+        if (apiKey) {
+            config.aiApiKey = JSON.parse(apiKey) as string;
+        }
+        if (endpoint) {
+            config.aiEndpoint = JSON.parse(endpoint) as string;
+        }
+        if (model) {
+            config.aiModel = JSON.parse(model) as string;
+        }
+
+        return config;
+    } catch {
+        return {};
+    }
 }
 
 export interface KobeanResponse {
@@ -84,6 +121,15 @@ export class KobeanAgent {
             return this.generateHelpResponse();
         }
 
+        // Check if this is a conversational query (should go to AI, not tools)
+        const conversationalPatterns = [
+            /^(do you|can you|will you|would you|could you)\s+(know|think|believe|remember|understand)/i,
+            /^(who|what|why|how|when|where)\s+(is|are|was|were|do|does|did)\s/i,
+            /^(tell me about|explain|describe)\s/i,
+            /\?$/,  // Questions should generally go to AI
+        ];
+        const isConversational = conversationalPatterns.some(p => p.test(userMessage.trim()));
+
         // Parse the intent
         const intent = parseIntent(userMessage);
 
@@ -99,8 +145,10 @@ export class KobeanAgent {
             }
         }
 
-        // Try to find and execute a tool
-        if (intent.suggestedTool || intent.confidence > 40) {
+        // Try to find and execute a tool only if not a conversational query
+        // Conversational queries should go to AI for proper responses
+        const shouldTryTool = !isConversational;
+        if (shouldTryTool && (intent.suggestedTool || intent.confidence > 50)) {
             const toolResult = await this.executeFromIntent(intent);
 
             if (toolResult.success) {
@@ -216,7 +264,7 @@ export class KobeanAgent {
                 'Generate a UUID',
                 'Create a password',
                 'Encode to Base64',
-                'Open AI Chat',
+                'Configure AI Provider',
             ],
         };
     }
@@ -228,8 +276,13 @@ export class KobeanAgent {
         userMessage: string,
         intent: ParsedIntent
     ): Promise<KobeanResponse> {
-        // Check if AI is configured
-        if (this.config.aiProvider === 'ollama' && !this.config.aiEndpoint) {
+        // Check if AI is properly configured
+        const isOllamaConfigured = this.config.aiProvider === 'ollama' && this.config.aiEndpoint;
+        const isCloudProviderConfigured = this.config.aiProvider && 
+            this.config.aiProvider !== 'ollama' && 
+            this.config.aiApiKey;
+        
+        if (!isOllamaConfigured && !isCloudProviderConfigured) {
             return {
                 text: this.generateFallbackResponse(intent),
                 intent,

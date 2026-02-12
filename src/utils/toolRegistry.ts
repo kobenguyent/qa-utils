@@ -167,7 +167,9 @@ class ToolRegistryClass {
             }
         }
 
-        return bestScore > 0 ? bestTool : null;
+        // Require a minimum score to avoid false positives from incidental word matches
+        // Score of 15 requires at least a keyword match (+20) or significant partial matches
+        return bestScore >= 15 ? bestTool : null;
     }
 
     /**

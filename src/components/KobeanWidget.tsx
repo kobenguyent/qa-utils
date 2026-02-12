@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Form, Button, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { getKobean, KobeanMessage } from '../utils/KobeanAgent';
+import { getKobean, getAiChatSessionConfig, KobeanMessage } from '../utils/KobeanAgent';
+import { useSessionStorage } from '../utils/useSessionStorage';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import './KobeanWidget.css';
 
@@ -9,7 +10,7 @@ export function KobeanWidget() {
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const [input, setInput] = useState('');
-    const [messages, setMessages] = useState<KobeanMessage[]>([]);
+    const [messages, setMessages] = useSessionStorage<KobeanMessage[]>('kobean_messages', []);
     const [isProcessing, setIsProcessing] = useState(false);
     const [copied, setCopied] = useState<string | null>(null);
 
@@ -19,6 +20,7 @@ export function KobeanWidget() {
         aiProvider: 'ollama',
         aiEndpoint: 'http://localhost:11434',
         aiModel: 'mistral',
+        ...getAiChatSessionConfig(),
     }));
 
     useEffect(() => {
@@ -28,6 +30,16 @@ export function KobeanWidget() {
     useEffect(() => {
         if (isOpen && inputRef.current) {
             inputRef.current.focus();
+        }
+        // Refresh AI config when widget opens to pick up any configuration changes
+        if (isOpen) {
+            const latestConfig = getAiChatSessionConfig();
+            agentRef.current = getKobean({
+                aiProvider: 'ollama',
+                aiEndpoint: 'http://localhost:11434',
+                aiModel: 'mistral',
+                ...latestConfig,
+            });
         }
     }, [isOpen]);
 

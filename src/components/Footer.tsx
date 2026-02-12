@@ -75,9 +75,9 @@ export const Footer: React.FC = () => {
             <li>✅ <strong>Works offline</strong> (except AI features)</li>
           </ul>
 
-          <h6 className="text-warning mt-4 mb-3">⚠️ Exception: AI Chat Feature</h6>
+          <h6 className="text-warning mt-4 mb-3">⚠️ Exception: Kobean Assistant AI Feature</h6>
           <p>
-            When you use the <strong>AI Chat</strong> tool with third-party AI providers:
+            When you use the <strong>Kobean Assistant</strong> with third-party AI providers:
           </p>
           <ul>
             <li>🔗 Your messages are sent to the AI provider you select (OpenAI, Anthropic, Google, etc.)</li>

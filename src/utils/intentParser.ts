@@ -118,11 +118,11 @@ const INTENT_PATTERNS: Record<IntentType, { keywords: string[]; patterns: RegExp
         ],
     },
     execute: {
-        keywords: ['run', 'execute', 'do', 'perform'],
+        keywords: ['run', 'execute', 'perform'],
         patterns: [
-            /run\s+(.+)/i,
-            /execute\s+(.+)/i,
-            /do\s+(.+)/i,
+            /^run\s+(.+)/i,
+            /^execute\s+(.+)/i,
+            /^please\s+do\s+(.+)/i,
         ],
     },
     unknown: {
@@ -179,8 +179,8 @@ const TOOL_ALIASES: Record<string, string> = {
     'kanban': 'kanban-board',
     'board': 'kanban-board',
     'tasks': 'kanban-board',
-    'ai': 'ai-chat',
-    'chat': 'ai-chat',
+    'ai': 'kobean-assistant',
+    'chat': 'kobean-assistant',
     'prompt': 'prompt-enhancer',
     'collection': 'collection-manager',
     'postman': 'collection-manager',
