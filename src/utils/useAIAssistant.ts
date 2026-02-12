@@ -5,7 +5,7 @@
  * and provides a simple interface for utilities to send AI-powered requests.
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import { sendChatMessage, ChatMessage, ChatConfig, AIProvider, validateConfig } from './aiChatClient';
 
 export interface AIAssistantState {
@@ -77,7 +77,7 @@ export function useAIAssistant(): AIAssistantState {
   const [error, setError] = useState('');
   const [result, setResult] = useState('');
 
-  const config = useMemo(() => getAIConfig(), []);
+  const config = getAIConfig();
 
   const isConfigured = config !== null;
   const providerName = config?.provider || '';
