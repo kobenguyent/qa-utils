@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Container, Form, Button, Row, Col, Alert } from 'react-bootstrap';
 import CopyWithToast from '../CopyWithToast';
 import { generateSqlCommand } from '../../utils/sqlGenerator';
+import { useAIAssistant } from '../../utils/useAIAssistant';
+import { AIAssistButton } from '../AIAssistButton';
 
 type SqlOperation = 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE' | 'CREATE_TABLE' | 'ALTER_TABLE';
 type JoinType = 'INNER' | 'LEFT' | 'RIGHT' | 'FULL';
@@ -18,6 +20,8 @@ export const SqlGenerator = () => {
   const [joinType, setJoinType] = useState<JoinType>('INNER');
   const [joinCondition, setJoinCondition] = useState('');
   const [generatedSql, setGeneratedSql] = useState('');
+  const [aiPrompt, setAiPrompt] = useState('');
+  const ai = useAIAssistant();
 
   const handleGenerate = () => {
     const sql = generateSqlCommand({
@@ -35,12 +39,48 @@ export const SqlGenerator = () => {
     setGeneratedSql(sql);
   };
 
+  const handleAIGenerate = async () => {
+    try {
+      const response = await ai.sendRequest(
+        'You are a SQL expert. Generate a SQL query based on the user\'s natural language description. Return ONLY the SQL query without any explanation or markdown formatting.',
+        `Generate a SQL query for: ${aiPrompt}`
+      );
+      setGeneratedSql(response);
+    } catch {
+      // error is displayed by AIAssistButton
+    }
+  };
+
   return (
     <Container>
       <div className="text-center mb-4">
         <h1>SQL Command Generator</h1>
         <p className="text-muted">Generate SQL commands with a visual interface</p>
       </div>
+
+      {ai.isConfigured && (
+        <Alert variant="light" className="mb-4">
+          <Form.Group as={Row} className="mb-2">
+            <Form.Label column sm="2">🤖 AI Generate</Form.Label>
+            <Col sm="10">
+              <Form.Control
+                type="text"
+                placeholder="Describe your query in plain English, e.g., 'Get all users who signed up last month'"
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
+              />
+            </Col>
+          </Form.Group>
+          <AIAssistButton
+            label="Generate SQL from Description"
+            onClick={handleAIGenerate}
+            isLoading={ai.isLoading}
+            disabled={!aiPrompt.trim()}
+            error={ai.error}
+            onClear={ai.clear}
+          />
+        </Alert>
+      )}
 
       <Form>
         <Form.Group as={Row} className="mb-3">

@@ -7,6 +7,8 @@ import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import CopyWithToast from '../CopyWithToast.tsx';
+import { useAIAssistant } from '../../utils/useAIAssistant';
+import { AIAssistButton } from '../AIAssistButton';
 
 export const JSONFormatter = () => {
   const [postContent, setPostContent] = useState('{\n' +
@@ -14,6 +16,7 @@ export const JSONFormatter = () => {
     '  "name": "John Doe",\n' +
     '  "iat": 1516239022\n' +
     '}');
+  const ai = useAIAssistant();
 
   function jsonParse (string: string) {
     try {
@@ -22,6 +25,18 @@ export const JSONFormatter = () => {
       return { error: e instanceof Error ? e.message : 'Unknown error' }
     }
   }
+
+  const handleAIFix = async () => {
+    try {
+      const response = await ai.sendRequest(
+        'You are a JSON expert. Fix the provided malformed JSON and return ONLY the corrected, valid JSON. Do not include any explanation or markdown formatting.',
+        `Fix this JSON:\n\n${postContent}`
+      );
+      setPostContent(response);
+    } catch {
+      // error is displayed by AIAssistButton
+    }
+  };
 
   return(
     <Container>      <div className="text-center">
@@ -37,6 +52,17 @@ export const JSONFormatter = () => {
             {/*
 // @ts-ignore */}
             <Form.Control id="json-input" value={postContent} onChange={e => setPostContent(e.target.value)}></Form.Control>
+            {ai.isConfigured && (
+              <AIAssistButton
+                label="Fix JSON with AI"
+                onClick={handleAIFix}
+                isLoading={ai.isLoading}
+                disabled={!postContent.trim()}
+                error={ai.error}
+                onClear={ai.clear}
+                className="mt-2"
+              />
+            )}
           </Col>
         </Form.Group>
 

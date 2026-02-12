@@ -4,10 +4,25 @@ import { encode, decode } from 'js-base64';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import { useAIAssistant } from '../../utils/useAIAssistant';
+import { AIAssistButton } from '../AIAssistButton';
 
 export const Base64 = () => {
   const [postContent, setPostContent] = useState('');
   const [result, setResult] = useState('');
+  const ai = useAIAssistant();
+
+  const handleAIExplain = async () => {
+    const decoded = result || postContent;
+    try {
+      await ai.sendRequest(
+        'You are a helpful assistant. Analyze the provided content and explain what it is, what format it might be in, and any relevant details. Be concise.',
+        `Explain this content:\n\n${decoded}`
+      );
+    } catch {
+      // error is displayed by AIAssistButton
+    }
+  };
 
   return(
     <Container>
@@ -38,6 +53,18 @@ export const Base64 = () => {
         <Button onClick={() => setPostContent('')}>Clear all</Button>
         <Button onClick={() => setResult(encode(postContent))}>Encode</Button>
         <Button onClick={() => setResult(decode(postContent))}>Decode</Button>
+        {ai.isConfigured && (
+          <AIAssistButton
+            label="Explain Content"
+            onClick={handleAIExplain}
+            isLoading={ai.isLoading}
+            disabled={!postContent.trim() && !result.trim()}
+            error={ai.error}
+            result={ai.result}
+            onClear={ai.clear}
+            className="mt-2"
+          />
+        )}
       </Form>
 
 

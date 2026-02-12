@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { Container, Form, Button, Card, Row, Col } from 'react-bootstrap';
 import CopyWithToast from '../CopyWithToast';
+import { useAIAssistant } from '../../utils/useAIAssistant';
+import { AIAssistButton } from '../AIAssistButton';
 
 export const LoremIpsumGenerator: React.FC = () => {
   const [text, setText] = useState('');
   const [type, setType] = useState<'paragraphs' | 'words' | 'sentences'>('paragraphs');
   const [count, setCount] = useState(3);
+  const [aiTopic, setAiTopic] = useState('');
+  const ai = useAIAssistant();
 
   const loremWords = [
     'lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit',
@@ -97,9 +101,42 @@ export const LoremIpsumGenerator: React.FC = () => {
                 />
               </Form.Group>
 
-              <Button variant="primary" onClick={generateText} className="w-100">
+              <Button variant="primary" onClick={generateText} className="w-100 mb-3">
                 Generate Text
               </Button>
+
+              {ai.isConfigured && (
+                <>
+                  <hr />
+                  <h6 className="mb-2">🤖 AI-Powered Text</h6>
+                  <Form.Group className="mb-2">
+                    <Form.Control
+                      type="text"
+                      placeholder="Topic, e.g., 'e-commerce product descriptions'"
+                      value={aiTopic}
+                      onChange={(e) => setAiTopic(e.target.value)}
+                      size="sm"
+                    />
+                  </Form.Group>
+                  <AIAssistButton
+                    label="Generate AI Text"
+                    onClick={async () => {
+                      try {
+                        const response = await ai.sendRequest(
+                          'You are a content writer. Generate realistic placeholder text based on the given topic. Return ONLY the generated text without any explanation or formatting.',
+                          `Generate ${count} ${type} of realistic placeholder text about: ${aiTopic || 'general topics'}. Make it sound natural and professional.`
+                        );
+                        setText(response);
+                      } catch {
+                        // error displayed by AIAssistButton
+                      }
+                    }}
+                    isLoading={ai.isLoading}
+                    error={ai.error}
+                    onClear={ai.clear}
+                  />
+                </>
+              )}
             </Card.Body>
           </Card>
         </Col>
