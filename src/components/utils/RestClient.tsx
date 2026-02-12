@@ -12,6 +12,7 @@ import {
 } from '../../utils/restClient';
 import { useAIAssistant } from '../../utils/useAIAssistant';
 import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 interface RequestHistory {
   id: string;
@@ -375,7 +376,7 @@ export const RestClient: React.FC = () => {
               </Tab>
             </Tabs>
 
-            {ai.isConfigured && (
+            {ai.isConfigured ? (
               <AIAssistButton
                 label="Analyze Response"
                 onClick={async () => {
@@ -394,6 +395,8 @@ export const RestClient: React.FC = () => {
                 onClear={ai.clear}
                 className="mt-2"
               />
+            ) : (
+              <AIConfigureHint className="mt-2" />
             )}
           </div>
         </div>

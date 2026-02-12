@@ -14,6 +14,7 @@ import {
 import mermaid from 'mermaid';
 import { useAIAssistant } from '../../utils/useAIAssistant';
 import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 SyntaxHighlighter.registerLanguage('javascript', js);
 
@@ -207,7 +208,7 @@ export const SequenceDiagramGenerator: React.FC = () => {
                   🗑️ Clear
                 </Button>
               </div>
-              {ai.isConfigured && (
+              {ai.isConfigured ? (
                 <AIAssistButton
                   label="Generate Test Code from Description"
                   onClick={async () => {
@@ -228,6 +229,8 @@ export const SequenceDiagramGenerator: React.FC = () => {
                   onClear={ai.clear}
                   className="mt-2"
                 />
+              ) : (
+                <AIConfigureHint className="mt-2" />
               )}
             </Card.Body>
           </Card>

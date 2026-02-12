@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Container, 
   Card, 
@@ -17,6 +17,8 @@ import {
 } from 'react-bootstrap';
 import { AITestingService, TestPlan, TestExecution, TestResult } from '../../utils/aiTestingService';
 import { ChatConfig, AIProvider } from '../../utils/aiChatClient';
+import { getAIConfig } from '../../utils/useAIAssistant';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 // Helper functions
 const getCategoryIcon = (category: string) => {
@@ -73,6 +75,25 @@ export const AIWebsiteTester: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [activeTab, setActiveTab] = useState('config');
+
+  // Check if Kobean AI config is available and use it
+  const kobeanConfig = getAIConfig();
+  const hasKobeanConfig = kobeanConfig !== null;
+
+  // Auto-populate from Kobean config
+  useEffect(() => {
+    if (hasKobeanConfig) {
+      const kConfig = getAIConfig();
+      if (kConfig) {
+        setConfig(prev => ({
+          ...prev,
+          aiProvider: kConfig.provider,
+          apiKey: kConfig.apiKey || '',
+          useAI: true,
+        }));
+      }
+    }
+  }, [hasKobeanConfig]);
 
   const handleGenerateTests = async () => {
     if (!config.url) {
@@ -232,7 +253,14 @@ export const AIWebsiteTester: React.FC = () => {
                   </Form.Text>
                 </Form.Group>
 
-                <Row className="mb-3">
+                {config.useAI && hasKobeanConfig ? (
+                  <Alert variant="success" className="mb-3">
+                    ✅ Using AI configuration from <strong>Kobean Assistant</strong> ({config.aiProvider})
+                  </Alert>
+                ) : config.useAI ? (
+                  <>
+                    <AIConfigureHint className="mb-3" />
+                    <Row className="mb-3">
                   <Col md={8}>
                     <Form.Group>
                       <Form.Label>API Key {config.useAI && <span className="text-danger">*</span>}</Form.Label>
@@ -261,6 +289,8 @@ export const AIWebsiteTester: React.FC = () => {
                     </Form.Group>
                   </Col>
                 </Row>
+                  </>
+                ) : null}
 
                 <Form.Group className="mb-3">
                   <Form.Label>Website Context (Optional)</Form.Label>

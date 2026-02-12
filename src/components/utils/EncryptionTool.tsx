@@ -6,6 +6,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { useAIAssistant } from '../../utils/useAIAssistant';
 import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 // TypeScript interfaces for our encryption component
 interface EncryptionResult {
@@ -272,7 +273,7 @@ export const EncryptionTool = () => {
           <li><strong>Security:</strong> Uses AES-256-GCM with PBKDF2 key derivation (100,000 iterations).</li>
           <li><strong>Note:</strong> Keep your passphrase safe. Without it, encrypted data cannot be recovered.</li>
         </ul>
-        {ai.isConfigured && (
+        {ai.isConfigured ? (
           <AIAssistButton
             label="Security Recommendations"
             onClick={async () => {
@@ -291,6 +292,8 @@ export const EncryptionTool = () => {
             onClear={ai.clear}
             className="mt-2"
           />
+        ) : (
+          <AIConfigureHint className="mt-2" />
         )}
       </div>    </Container>
   );

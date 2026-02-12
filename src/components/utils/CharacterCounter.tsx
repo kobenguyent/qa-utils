@@ -6,6 +6,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { useAIAssistant } from '../../utils/useAIAssistant';
 import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 export const CharacterCounter = () => {
   const [text, setText] = useState('');
@@ -69,7 +70,7 @@ export const CharacterCounter = () => {
           setCount(0);
           ai.clear();
         }}>Clear</Button>
-        {ai.isConfigured && (
+        {ai.isConfigured ? (
           <AIAssistButton
             label="Analyze Text"
             onClick={handleAIAnalyze}
@@ -80,6 +81,8 @@ export const CharacterCounter = () => {
             onClear={ai.clear}
             className="mt-2"
           />
+        ) : (
+          <AIConfigureHint className="mt-2" />
         )}
       </Form>    </Container>
   )

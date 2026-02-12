@@ -5,6 +5,7 @@ import { createGenerator, defaultConfig, type ScriptConfig, type GeneratedScript
 import { useSessionStorage } from '../../utils/useSessionStorage';
 import { useAIAssistant } from '../../utils/useAIAssistant';
 import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 export const GithubPrScriptGenerator: React.FC = () => {
   const [config, setConfig] = useSessionStorage<ScriptConfig>('github-pr-config', defaultConfig);
@@ -152,7 +153,7 @@ export const GithubPrScriptGenerator: React.FC = () => {
                     value={config.prDescription}
                     onChange={(e) => handleConfigChange('prDescription', e.target.value)}
                   />
-                  {ai.isConfigured && (
+                  {ai.isConfigured ? (
                     <AIAssistButton
                       label="Draft PR Description"
                       onClick={async () => {
@@ -172,6 +173,8 @@ export const GithubPrScriptGenerator: React.FC = () => {
                       onClear={ai.clear}
                       className="mt-2"
                     />
+                  ) : (
+                    <AIConfigureHint className="mt-2" />
                   )}
                 </Form.Group>
 

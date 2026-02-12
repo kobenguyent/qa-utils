@@ -9,6 +9,7 @@ import Col from 'react-bootstrap/Col';
 import CopyWithToast from '../CopyWithToast.tsx';
 import { useAIAssistant } from '../../utils/useAIAssistant';
 import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 export const JSONFormatter = () => {
   const [postContent, setPostContent] = useState('{\n' +
@@ -52,7 +53,7 @@ export const JSONFormatter = () => {
             {/*
 // @ts-ignore */}
             <Form.Control id="json-input" value={postContent} onChange={e => setPostContent(e.target.value)}></Form.Control>
-            {ai.isConfigured && (
+            {ai.isConfigured ? (
               <AIAssistButton
                 label="Fix JSON with AI"
                 onClick={handleAIFix}
@@ -62,6 +63,8 @@ export const JSONFormatter = () => {
                 onClear={ai.clear}
                 className="mt-2"
               />
+            ) : (
+              <AIConfigureHint className="mt-2" />
             )}
           </Col>
         </Form.Group>

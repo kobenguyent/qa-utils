@@ -12,6 +12,7 @@ import {
 } from '../../utils/websocketClient';
 import { useAIAssistant } from '../../utils/useAIAssistant';
 import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 interface ConnectionHistory {
   id: string;
@@ -293,7 +294,7 @@ export const WebSocketClientComponent: React.FC = () => {
             </InputGroup>
             <small className="text-muted">
               Tip: Use JSON format for structured messages like {"{"}"type": "ping", "data": "hello"{"}"}</small>
-            {ai.isConfigured && (
+            {ai.isConfigured ? (
               <AIAssistButton
                 label="Generate Message"
                 onClick={async () => {
@@ -312,6 +313,8 @@ export const WebSocketClientComponent: React.FC = () => {
                 onClear={ai.clear}
                 className="mt-2"
               />
+            ) : (
+              <AIConfigureHint className="mt-2" />
             )}
           </Card.Body>
         </Card>

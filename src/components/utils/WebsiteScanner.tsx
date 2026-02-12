@@ -8,6 +8,7 @@ import {
 } from '../../utils/websiteScanner';
 import { useAIAssistant } from '../../utils/useAIAssistant';
 import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 export const WebsiteScanner: React.FC = () => {
   const [config, setConfig] = useState<ScanConfiguration>({
@@ -279,7 +280,7 @@ export const WebsiteScanner: React.FC = () => {
               <small className="text-muted">
                 Scanned: {result.url} • {new Date(result.timestamp).toLocaleString()}
               </small>
-              {ai.isConfigured && (
+              {ai.isConfigured ? (
                 <AIAssistButton
                   label="AI Analyze Results"
                   onClick={async () => {
@@ -306,6 +307,8 @@ export const WebsiteScanner: React.FC = () => {
                   onClear={ai.clear}
                   className="mt-2"
                 />
+              ) : (
+                <AIConfigureHint className="mt-2" />
               )}
             </div>
 

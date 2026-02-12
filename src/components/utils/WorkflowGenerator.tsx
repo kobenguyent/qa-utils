@@ -13,6 +13,7 @@ import {
 import CopyWithToast from '../CopyWithToast.tsx';
 import { useAIAssistant } from '../../utils/useAIAssistant';
 import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 export const WorkflowGenerator: React.FC = () => {
   const [config, setConfig] = useState<WorkflowConfig>({
@@ -341,7 +342,7 @@ export const WorkflowGenerator: React.FC = () => {
               </Card>
             )}
 
-            {ai.isConfigured && generatedWorkflow && (
+            {ai.isConfigured && generatedWorkflow ? (
               <AIAssistButton
                 label="AI Optimize Workflow"
                 onClick={async () => {
@@ -361,7 +362,9 @@ export const WorkflowGenerator: React.FC = () => {
                 onClear={ai.clear}
                 className="mb-4"
               />
-            )}
+            ) : !ai.isConfigured ? (
+              <AIConfigureHint className="mb-4" />
+            ) : null}
           </Col>
         </Row>
 

@@ -6,6 +6,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { useAIAssistant } from '../../utils/useAIAssistant';
 import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 export const Base64 = () => {
   const [postContent, setPostContent] = useState('');
@@ -53,7 +54,7 @@ export const Base64 = () => {
         <Button onClick={() => setPostContent('')}>Clear all</Button>
         <Button onClick={() => setResult(encode(postContent))}>Encode</Button>
         <Button onClick={() => setResult(decode(postContent))}>Decode</Button>
-        {ai.isConfigured && (
+        {ai.isConfigured ? (
           <AIAssistButton
             label="Explain Content"
             onClick={handleAIExplain}
@@ -64,6 +65,8 @@ export const Base64 = () => {
             onClear={ai.clear}
             className="mt-2"
           />
+        ) : (
+          <AIConfigureHint className="mt-2" />
         )}
       </Form>
 

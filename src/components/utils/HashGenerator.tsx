@@ -3,6 +3,7 @@ import { Container, Form, Button, Card, Row, Col, Tabs, Tab } from 'react-bootst
 import CopyWithToast from '../CopyWithToast';
 import { useAIAssistant } from '../../utils/useAIAssistant';
 import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 export const HashGenerator: React.FC = () => {
   const [input, setInput] = useState('');
@@ -88,7 +89,7 @@ export const HashGenerator: React.FC = () => {
                 <li><strong>SHA-1</strong>: Deprecated for security, but still used in some systems</li>
                 <li>Hashes are one-way functions - you cannot reverse them</li>
               </ul>
-              {ai.isConfigured && (
+              {ai.isConfigured ? (
                 <AIAssistButton
                   label="Explain Hash Security"
                   onClick={async () => {
@@ -108,6 +109,8 @@ export const HashGenerator: React.FC = () => {
                   onClear={ai.clear}
                   className="mt-3"
                 />
+              ) : (
+                <AIConfigureHint className="mt-3" />
               )}
             </Card.Body>
           </Card>

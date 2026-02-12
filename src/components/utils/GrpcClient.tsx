@@ -13,6 +13,7 @@ import {
 } from '../../utils/grpcClient';
 import { useAIAssistant } from '../../utils/useAIAssistant';
 import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 interface RequestHistory {
   id: string;
@@ -362,7 +363,7 @@ export const GrpcClientComponent: React.FC = () => {
                 <Form.Text className="text-muted">
                   JSON representation of the protobuf message
                 </Form.Text>
-                {ai.isConfigured && (
+                {ai.isConfigured ? (
                   <AIAssistButton
                     label="Generate Request Body"
                     onClick={async () => {
@@ -381,6 +382,8 @@ export const GrpcClientComponent: React.FC = () => {
                     onClear={ai.clear}
                     className="mt-2"
                   />
+                ) : (
+                  <AIConfigureHint className="mt-2" />
                 )}
               </Form.Group>
 

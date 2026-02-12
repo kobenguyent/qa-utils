@@ -3,6 +3,7 @@ import { Container, Form, Button, Card, Row, Col } from 'react-bootstrap';
 import CopyWithToast from '../CopyWithToast';
 import { useAIAssistant } from '../../utils/useAIAssistant';
 import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 export const LoremIpsumGenerator: React.FC = () => {
   const [text, setText] = useState('');
@@ -105,7 +106,7 @@ export const LoremIpsumGenerator: React.FC = () => {
                 Generate Text
               </Button>
 
-              {ai.isConfigured && (
+              {ai.isConfigured ? (
                 <>
                   <hr />
                   <h6 className="mb-2">🤖 AI-Powered Text</h6>
@@ -136,6 +137,8 @@ export const LoremIpsumGenerator: React.FC = () => {
                     onClear={ai.clear}
                   />
                 </>
+              ) : (
+                <AIConfigureHint className="mt-3" />
               )}
             </Card.Body>
           </Card>

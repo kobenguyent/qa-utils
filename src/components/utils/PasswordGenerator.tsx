@@ -3,6 +3,7 @@ import { Container, Form, Button, Card, Row, Col, Badge } from 'react-bootstrap'
 import CopyWithToast from '../CopyWithToast';
 import { useAIAssistant } from '../../utils/useAIAssistant';
 import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 export const PasswordGenerator: React.FC = () => {
   const [password, setPassword] = useState('');
@@ -114,7 +115,7 @@ export const PasswordGenerator: React.FC = () => {
                 Generate Password
               </Button>
 
-              {ai.isConfigured && (
+              {ai.isConfigured ? (
                 <>
                   <hr />
                   <AIAssistButton
@@ -136,6 +137,8 @@ export const PasswordGenerator: React.FC = () => {
                     onClear={ai.clear}
                   />
                 </>
+              ) : (
+                <AIConfigureHint className="mt-3" />
               )}
             </Card.Body>
           </Card>

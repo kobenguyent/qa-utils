@@ -19,6 +19,7 @@ import {
 } from '../../utils/jwtHelpers.ts';
 import { useAIAssistant } from '../../utils/useAIAssistant';
 import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 export const JWTDebugger = () => {
   const [postContent, setPostContent] = useState('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c');
@@ -283,7 +284,7 @@ export const JWTDebugger = () => {
                     </div>
                   )}
 
-                  {ai.isConfigured && (
+                  {ai.isConfigured ? (
                     <AIAssistButton
                       label="Explain this JWT"
                       onClick={async () => {
@@ -303,6 +304,8 @@ export const JWTDebugger = () => {
                       onClear={ai.clear}
                       className="mt-3"
                     />
+                  ) : (
+                    <AIConfigureHint className="mt-3" />
                   )}
                 </Card.Body>
               </Card>

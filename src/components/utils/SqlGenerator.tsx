@@ -4,6 +4,7 @@ import CopyWithToast from '../CopyWithToast';
 import { generateSqlCommand } from '../../utils/sqlGenerator';
 import { useAIAssistant } from '../../utils/useAIAssistant';
 import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 type SqlOperation = 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE' | 'CREATE_TABLE' | 'ALTER_TABLE';
 type JoinType = 'INNER' | 'LEFT' | 'RIGHT' | 'FULL';
@@ -58,7 +59,7 @@ export const SqlGenerator = () => {
         <p className="text-muted">Generate SQL commands with a visual interface</p>
       </div>
 
-      {ai.isConfigured && (
+      {ai.isConfigured ? (
         <Alert variant="light" className="mb-4">
           <Form.Group as={Row} className="mb-2">
             <Form.Label column sm="2">🤖 AI Generate</Form.Label>
@@ -80,6 +81,8 @@ export const SqlGenerator = () => {
             onClear={ai.clear}
           />
         </Alert>
+      ) : (
+        <AIConfigureHint className="mb-4" />
       )}
 
       <Form>

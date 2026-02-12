@@ -3,6 +3,7 @@ import { Container, Form, Button, Row, Col, Alert } from 'react-bootstrap';
 import { sanitizeHtml } from '../../utils/htmlRenderer';
 import { useAIAssistant } from '../../utils/useAIAssistant';
 import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 export const HtmlRenderer = () => {
   const [htmlCode, setHtmlCode] = useState('');
@@ -44,7 +45,7 @@ export const HtmlRenderer = () => {
               value={htmlCode}
               onChange={(e) => setHtmlCode(e.target.value)}
             />
-            {ai.isConfigured && (
+            {ai.isConfigured ? (
               <AIAssistButton
                 label="Generate HTML from Description"
                 onClick={handleAIGenerate}
@@ -54,6 +55,8 @@ export const HtmlRenderer = () => {
                 onClear={ai.clear}
                 className="mt-2"
               />
+            ) : (
+              <AIConfigureHint className="mt-2" />
             )}
           </Col>
         </Form.Group>
