@@ -118,11 +118,11 @@ const INTENT_PATTERNS: Record<IntentType, { keywords: string[]; patterns: RegExp
         ],
     },
     execute: {
-        keywords: ['run', 'execute', 'do', 'perform'],
+        keywords: ['run', 'execute', 'perform'],
         patterns: [
-            /run\s+(.+)/i,
-            /execute\s+(.+)/i,
-            /do\s+(.+)/i,
+            /^run\s+(.+)/i,
+            /^execute\s+(.+)/i,
+            /^please\s+do\s+(.+)/i,
         ],
     },
     unknown: {

@@ -121,6 +121,15 @@ export class KobeanAgent {
             return this.generateHelpResponse();
         }
 
+        // Check if this is a conversational query (should go to AI, not tools)
+        const conversationalPatterns = [
+            /^(do you|can you|will you|would you|could you)\s+(know|think|believe|remember|understand)/i,
+            /^(who|what|why|how|when|where)\s+(is|are|was|were|do|does|did)\s/i,
+            /^(tell me about|explain|describe)\s/i,
+            /\?$/,  // Questions should generally go to AI
+        ];
+        const isConversational = conversationalPatterns.some(p => p.test(userMessage.trim()));
+
         // Parse the intent
         const intent = parseIntent(userMessage);
 
@@ -136,8 +145,10 @@ export class KobeanAgent {
             }
         }
 
-        // Try to find and execute a tool
-        if (intent.suggestedTool || intent.confidence > 40) {
+        // Try to find and execute a tool only if not a conversational query
+        // Conversational queries should go to AI for proper responses
+        const shouldTryTool = !isConversational;
+        if (shouldTryTool && (intent.suggestedTool || intent.confidence > 50)) {
             const toolResult = await this.executeFromIntent(intent);
 
             if (toolResult.success) {
