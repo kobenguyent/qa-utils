@@ -212,9 +212,10 @@ export const SequenceDiagramGenerator: React.FC = () => {
                   label="Generate Test Code from Description"
                   onClick={async () => {
                     try {
+                      const description = code.trim();
                       const response = await ai.sendRequest(
                         `You are a test automation expert. Generate ${framework} test code based on the user's description. Return ONLY the test code without any explanation or markdown formatting.`,
-                        `Generate ${framework} test code for: ${code}`
+                        `Generate ${framework} test code for: ${description}`
                       );
                       setCode(response);
                     } catch {

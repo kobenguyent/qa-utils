@@ -382,7 +382,7 @@ export const RestClient: React.FC = () => {
                   try {
                     await ai.sendRequest(
                       'You are an API expert. Analyze the HTTP response and provide insights about the data structure, potential issues, and suggestions. Be concise.',
-                      `Analyze this API response:\nStatus: ${response.status} ${response.statusText}\nDuration: ${response.duration}ms\nBody:\n${response.data.substring(0, 2000)}`
+                      `Analyze this API response:\nStatus: ${response.status} ${response.statusText}\nDuration: ${response.duration}ms\nBody${response.data.length > 2000 ? ' (truncated)' : ''}:\n${response.data.substring(0, 2000)}`
                     );
                   } catch {
                     // error displayed by AIAssistButton
