@@ -2,8 +2,8 @@ import fs from 'fs';
 import path from 'path';
 
 describe('Theme colors - no hard-coded light-only colors', () => {
-  it('does not contain legacy light-only hex colors in AIChat', () => {
-    const file = fs.readFileSync(path.resolve(__dirname, '../utils/AIChat.tsx'), 'utf8');
+  it('does not contain legacy light-only hex colors in KobeanAssistant', () => {
+    const file = fs.readFileSync(path.resolve(__dirname, '../utils/KobeanAssistant.tsx'), 'utf8');
     expect(file).not.toMatch(/#212529|#495057|#dee2e6|#f8f9fa|rgba\(255,255,255,0.8\)/);
   });
 
