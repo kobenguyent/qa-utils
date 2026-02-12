@@ -276,8 +276,13 @@ export class KobeanAgent {
         userMessage: string,
         intent: ParsedIntent
     ): Promise<KobeanResponse> {
-        // Check if AI is configured
-        if (this.config.aiProvider === 'ollama' && !this.config.aiEndpoint) {
+        // Check if AI is properly configured
+        const isOllamaConfigured = this.config.aiProvider === 'ollama' && this.config.aiEndpoint;
+        const isCloudProviderConfigured = this.config.aiProvider && 
+            this.config.aiProvider !== 'ollama' && 
+            this.config.aiApiKey;
+        
+        if (!isOllamaConfigured && !isCloudProviderConfigured) {
             return {
                 text: this.generateFallbackResponse(intent),
                 intent,

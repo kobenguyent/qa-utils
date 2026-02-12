@@ -31,6 +31,16 @@ export function KobeanWidget() {
         if (isOpen && inputRef.current) {
             inputRef.current.focus();
         }
+        // Refresh AI config when widget opens to pick up any configuration changes
+        if (isOpen) {
+            const latestConfig = getAiChatSessionConfig();
+            agentRef.current = getKobean({
+                aiProvider: 'ollama',
+                aiEndpoint: 'http://localhost:11434',
+                aiModel: 'mistral',
+                ...latestConfig,
+            });
+        }
     }, [isOpen]);
 
     useEffect(() => {
