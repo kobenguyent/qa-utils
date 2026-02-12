@@ -4,6 +4,9 @@ import { useState } from 'react';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import { useAIAssistant } from '../../utils/useAIAssistant';
+import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 // TypeScript interfaces for our encryption component
 interface EncryptionResult {
@@ -24,6 +27,7 @@ export const EncryptionTool = () => {
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const ai = useAIAssistant();
 
   // Function to derive a key from passphrase using PBKDF2
   const deriveKey = async (passphrase: string, salt: Uint8Array): Promise<CryptoKey> => {
@@ -269,6 +273,28 @@ export const EncryptionTool = () => {
           <li><strong>Security:</strong> Uses AES-256-GCM with PBKDF2 key derivation (100,000 iterations).</li>
           <li><strong>Note:</strong> Keep your passphrase safe. Without it, encrypted data cannot be recovered.</li>
         </ul>
+        {ai.isConfigured ? (
+          <AIAssistButton
+            label="Security Recommendations"
+            onClick={async () => {
+              try {
+                await ai.sendRequest(
+                  'You are a cybersecurity expert. Analyze the encryption setup and provide security recommendations. Be concise and practical.',
+                  `The user is using AES-256-GCM encryption with PBKDF2 key derivation (100,000 iterations, SHA-256). Their passphrase length is ${passphrase.length} characters. Provide security recommendations for their encryption setup and passphrase strength.`
+                );
+              } catch {
+                // error displayed by AIAssistButton
+              }
+            }}
+            isLoading={ai.isLoading}
+            error={ai.error}
+            result={ai.result}
+            onClear={ai.clear}
+            className="mt-2"
+          />
+        ) : (
+          <AIConfigureHint className="mt-2" />
+        )}
       </div>    </Container>
   );
 };

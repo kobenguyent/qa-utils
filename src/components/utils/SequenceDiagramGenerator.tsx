@@ -12,6 +12,9 @@ import {
   TestFramework,
 } from '../../utils/sequenceDiagramGenerator';
 import mermaid from 'mermaid';
+import { useAIAssistant } from '../../utils/useAIAssistant';
+import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 SyntaxHighlighter.registerLanguage('javascript', js);
 
@@ -28,6 +31,7 @@ export const SequenceDiagramGenerator: React.FC = () => {
   const [svgOutput, setSvgOutput] = useState('');
   const [error, setError] = useState('');
   const diagramRef = useRef<HTMLDivElement>(null);
+  const ai = useAIAssistant();
 
   const handleGenerate = useCallback(async () => {
     setError('');
@@ -204,6 +208,30 @@ export const SequenceDiagramGenerator: React.FC = () => {
                   🗑️ Clear
                 </Button>
               </div>
+              {ai.isConfigured ? (
+                <AIAssistButton
+                  label="Generate Test Code from Description"
+                  onClick={async () => {
+                    try {
+                      const description = code.trim();
+                      const response = await ai.sendRequest(
+                        `You are a test automation expert. Generate ${framework} test code based on the user's description. Return ONLY the test code without any explanation or markdown formatting.`,
+                        `Generate ${framework} test code for: ${description}`
+                      );
+                      setCode(response);
+                    } catch {
+                      // error displayed by AIAssistButton
+                    }
+                  }}
+                  isLoading={ai.isLoading}
+                  disabled={!code.trim()}
+                  error={ai.error}
+                  onClear={ai.clear}
+                  className="mt-2"
+                />
+              ) : (
+                <AIConfigureHint className="mt-2" />
+              )}
             </Card.Body>
           </Card>
         </Col>

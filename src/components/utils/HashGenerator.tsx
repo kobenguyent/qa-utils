@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Container, Form, Button, Card, Row, Col, Tabs, Tab } from 'react-bootstrap';
 import CopyWithToast from '../CopyWithToast';
+import { useAIAssistant } from '../../utils/useAIAssistant';
+import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 export const HashGenerator: React.FC = () => {
   const [input, setInput] = useState('');
@@ -8,6 +11,7 @@ export const HashGenerator: React.FC = () => {
   const [sha1Hash, setSha1Hash] = useState('');
   const [sha256Hash, setSha256Hash] = useState('');
   const [sha512Hash, setSha512Hash] = useState('');
+  const ai = useAIAssistant();
 
   const generateHashes = async () => {
     if (!input) {
@@ -85,6 +89,29 @@ export const HashGenerator: React.FC = () => {
                 <li><strong>SHA-1</strong>: Deprecated for security, but still used in some systems</li>
                 <li>Hashes are one-way functions - you cannot reverse them</li>
               </ul>
+              {ai.isConfigured ? (
+                <AIAssistButton
+                  label="Explain Hash Security"
+                  onClick={async () => {
+                    try {
+                      await ai.sendRequest(
+                        'You are a cryptography and security expert. Explain the security implications of the hash algorithms used and provide recommendations. Be concise.',
+                        `The user hashed the text "${input}" using SHA-1, SHA-256, and SHA-512. Explain the security of each algorithm and which is recommended for their use case.`
+                      );
+                    } catch {
+                      // error displayed by AIAssistButton
+                    }
+                  }}
+                  isLoading={ai.isLoading}
+                  disabled={!input.trim()}
+                  error={ai.error}
+                  result={ai.result}
+                  onClear={ai.clear}
+                  className="mt-3"
+                />
+              ) : (
+                <AIConfigureHint className="mt-3" />
+              )}
             </Card.Body>
           </Card>
         </Col>

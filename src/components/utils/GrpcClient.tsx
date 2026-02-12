@@ -11,6 +11,9 @@ import {
   parseProtobufDefinition,
   createGrpcClient,
 } from '../../utils/grpcClient';
+import { useAIAssistant } from '../../utils/useAIAssistant';
+import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 interface RequestHistory {
   id: string;
@@ -47,6 +50,7 @@ export const GrpcClientComponent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('manual');
   const [client, setClient] = useState<GrpcClient | null>(null);
   const [streamingMessages, setStreamingMessages] = useState<GrpcMessage[]>([]);
+  const ai = useAIAssistant();
 
   // Parse metadata from textarea
   const parseMetadata = (metadataText: string): Record<string, string> => {
@@ -359,6 +363,28 @@ export const GrpcClientComponent: React.FC = () => {
                 <Form.Text className="text-muted">
                   JSON representation of the protobuf message
                 </Form.Text>
+                {ai.isConfigured ? (
+                  <AIAssistButton
+                    label="Generate Request Body"
+                    onClick={async () => {
+                      try {
+                        const response = await ai.sendRequest(
+                          'You are a gRPC expert. Generate a JSON request body for the given gRPC service and method. Return ONLY the JSON without any explanation or markdown formatting.',
+                          `Generate a gRPC JSON request body for service "${config.service}", method "${config.method}". ${protoDefinition ? `Proto definition:\n${protoDefinition}` : 'Generate a reasonable sample request.'}`
+                        );
+                        setRequest(response);
+                      } catch {
+                        // error displayed by AIAssistButton
+                      }
+                    }}
+                    isLoading={ai.isLoading}
+                    error={ai.error}
+                    onClear={ai.clear}
+                    className="mt-2"
+                  />
+                ) : (
+                  <AIConfigureHint className="mt-2" />
+                )}
               </Form.Group>
 
               <div className="d-flex gap-2">

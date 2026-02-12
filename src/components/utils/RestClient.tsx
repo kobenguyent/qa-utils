@@ -10,6 +10,9 @@ import {
   RequestConfig,
   RestResponse,
 } from '../../utils/restClient';
+import { useAIAssistant } from '../../utils/useAIAssistant';
+import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 interface RequestHistory {
   id: string;
@@ -41,6 +44,7 @@ export const RestClient: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState<RequestHistory[]>([]);
   const [activeTab, setActiveTab] = useState<string>('manual');
+  const ai = useAIAssistant();
 
   // Parse headers from textarea
   const parseHeaders = (headersText: string): Record<string, string> => {
@@ -371,6 +375,29 @@ export const RestClient: React.FC = () => {
                 </pre>
               </Tab>
             </Tabs>
+
+            {ai.isConfigured ? (
+              <AIAssistButton
+                label="Analyze Response"
+                onClick={async () => {
+                  try {
+                    await ai.sendRequest(
+                      'You are an API expert. Analyze the HTTP response and provide insights about the data structure, potential issues, and suggestions. Be concise.',
+                      `Analyze this API response:\nStatus: ${response.status} ${response.statusText}\nDuration: ${response.duration}ms\nBody${response.data.length > 2000 ? ' (truncated)' : ''}:\n${response.data.substring(0, 2000)}`
+                    );
+                  } catch {
+                    // error displayed by AIAssistButton
+                  }
+                }}
+                isLoading={ai.isLoading}
+                error={ai.error}
+                result={ai.result}
+                onClear={ai.clear}
+                className="mt-2"
+              />
+            ) : (
+              <AIConfigureHint className="mt-2" />
+            )}
           </div>
         </div>
       )}    </Container>

@@ -11,6 +11,9 @@ import {
   type AvailableTemplates
 } from '../../utils/workflowGenerator.ts';
 import CopyWithToast from '../CopyWithToast.tsx';
+import { useAIAssistant } from '../../utils/useAIAssistant';
+import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 export const WorkflowGenerator: React.FC = () => {
   const [config, setConfig] = useState<WorkflowConfig>({
@@ -26,6 +29,7 @@ export const WorkflowGenerator: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [showInstructions, setShowInstructions] = useState<boolean>(false);
   const [templates, setTemplates] = useState<AvailableTemplates | null>(null);
+  const ai = useAIAssistant();
 
   // Load available templates on component mount
   useEffect(() => {
@@ -337,6 +341,30 @@ export const WorkflowGenerator: React.FC = () => {
                 </Card.Body>
               </Card>
             )}
+
+            {ai.isConfigured && generatedWorkflow ? (
+              <AIAssistButton
+                label="AI Optimize Workflow"
+                onClick={async () => {
+                  const workflowContent = generatedWorkflow.files.map(f => f.content).join('\n---\n');
+                  try {
+                    await ai.sendRequest(
+                      'You are a CI/CD and DevOps expert. Analyze the provided workflow configuration and suggest optimizations for performance, security, and best practices. Be concise and actionable.',
+                      `Analyze and suggest optimizations for this CI/CD workflow:\n\n${workflowContent}`
+                    );
+                  } catch {
+                    // error displayed by AIAssistButton
+                  }
+                }}
+                isLoading={ai.isLoading}
+                error={ai.error}
+                result={ai.result}
+                onClear={ai.clear}
+                className="mb-4"
+              />
+            ) : !ai.isConfigured ? (
+              <AIConfigureHint className="mb-4" />
+            ) : null}
           </Col>
         </Row>
 

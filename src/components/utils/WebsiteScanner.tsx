@@ -6,6 +6,9 @@ import {
   ScanProgress, 
   createScanner 
 } from '../../utils/websiteScanner';
+import { useAIAssistant } from '../../utils/useAIAssistant';
+import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 export const WebsiteScanner: React.FC = () => {
   const [config, setConfig] = useState<ScanConfiguration>({
@@ -28,6 +31,7 @@ export const WebsiteScanner: React.FC = () => {
   const [progress, setProgress] = useState<ScanProgress | null>(null);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [error, setError] = useState<string>('');
+  const ai = useAIAssistant();
 
   const handleScan = async () => {
     if (!config.url) {
@@ -276,6 +280,36 @@ export const WebsiteScanner: React.FC = () => {
               <small className="text-muted">
                 Scanned: {result.url} • {new Date(result.timestamp).toLocaleString()}
               </small>
+              {ai.isConfigured ? (
+                <AIAssistButton
+                  label="AI Analyze Results"
+                  onClick={async () => {
+                    const summary = [
+                      `URL: ${result.url}`,
+                      `Overall Score: ${result.overallScore}/100`,
+                      result.accessibility ? `Accessibility: ${result.accessibility.score}/100, ${result.accessibility.violations.length} violations` : '',
+                      result.performance ? `Performance: ${result.performance.score}/100` : '',
+                      result.seo ? `SEO: ${result.seo.score}/100` : '',
+                      result.security ? `Security: ${result.security.score}/100` : '',
+                    ].filter(Boolean).join('\n');
+                    try {
+                      await ai.sendRequest(
+                        'You are a web development and QA expert. Analyze the website scan results and provide prioritized, actionable recommendations to improve the scores. Be concise.',
+                        `Analyze these website scan results and suggest improvements:\n\n${summary}`
+                      );
+                    } catch {
+                      // error displayed by AIAssistButton
+                    }
+                  }}
+                  isLoading={ai.isLoading}
+                  error={ai.error}
+                  result={ai.result}
+                  onClear={ai.clear}
+                  className="mt-2"
+                />
+              ) : (
+                <AIConfigureHint className="mt-2" />
+              )}
             </div>
 
             <Tabs defaultActiveKey="overview" className="mb-3">

@@ -10,6 +10,8 @@ import {
   getDefaultModel,
   fetchModels
 } from '../../utils/aiChatClient';
+import { getAIConfig } from '../../utils/useAIAssistant';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import js from 'react-syntax-highlighter/dist/esm/languages/hljs/javascript';
@@ -151,6 +153,24 @@ const TestConverter = () => {
   const [loadingModels, setLoadingModels] = useState(false);
   const [error, setError] = useState('');
   const [connectionStatus, setConnectionStatus] = useState<'unknown' | 'connected' | 'disconnected'>('unknown');
+
+  // Check if Kobean AI config is available and use it
+  const kobeanConfig = getAIConfig();
+  const hasKobeanConfig = kobeanConfig !== null;
+
+  // Auto-populate from Kobean config when switching to AI mode
+  useEffect(() => {
+    if (hasKobeanConfig && conversionMethod === 'ai') {
+      const kConfig = getAIConfig();
+      if (kConfig) {
+        setProvider(kConfig.provider);
+        if (kConfig.apiKey) setApiKey(kConfig.apiKey);
+        if (kConfig.endpoint) setEndpoint(kConfig.endpoint);
+        if (kConfig.model) setModel(kConfig.model);
+        setUseAI(true);
+      }
+    }
+  }, [conversionMethod, hasKobeanConfig]);
 
   // Load saved API key from localStorage and fetch available models
   useEffect(() => {
@@ -345,64 +365,71 @@ Return ONLY the converted CodeceptJS code without any explanations or markdown f
         {conversionMethod === 'ai' && (
           <Row className="mb-3">
             <Col>
-              <Alert variant="info">
-                <Alert.Heading>AI Configuration</Alert.Heading>
+              {hasKobeanConfig ? (
+                <Alert variant="success" className="mb-0">
+                  ✅ Using AI configuration from <strong>Kobean Assistant</strong> ({provider}{model ? ` / ${model}` : ''})
+                </Alert>
+              ) : (
+                <Alert variant="info">
+                  <Alert.Heading>AI Configuration</Alert.Heading>
+                  <AIConfigureHint className="mb-3" />
                 
-                <Form.Group className="mb-2">
-                  <Form.Label>AI Provider</Form.Label>
-                  <Form.Select 
-                    value={provider} 
-                    onChange={(e) => setProvider(e.target.value as AIProvider)}
-                  >
-                    <option value="openai">OpenAI</option>
-                    <option value="anthropic">Anthropic Claude</option>
-                    <option value="google">Google Gemini</option>
-                    <option value="azure-openai">Azure OpenAI</option>
-                    <option value="ollama">Ollama (Local)</option>
-                  </Form.Select>
-                </Form.Group>
-
-                {(provider === 'ollama' || provider === 'azure-openai') && (
                   <Form.Group className="mb-2">
-                    <Form.Label>Endpoint</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder={provider === 'ollama' ? 'http://localhost:11434' : 'https://your-resource.openai.azure.com'}
-                      value={endpoint}
-                      onChange={(e) => setEndpoint(e.target.value)}
-                    />
-                  </Form.Group>
-                )}
-
-                {provider !== 'ollama' && (
-                  <Form.Group className="mb-2">
-                    <Form.Label>API Key</Form.Label>
-                    <Form.Control
-                      type="password"
-                      placeholder="Enter your API key"
-                      value={apiKey}
-                      onChange={(e) => setApiKey(e.target.value)}
-                    />
-                    <Button 
-                      size="sm" 
-                      variant="outline-secondary" 
-                      className="mt-1"
-                      onClick={handleSaveApiKey}
-                      disabled={!apiKey}
+                    <Form.Label>AI Provider</Form.Label>
+                    <Form.Select 
+                      value={provider} 
+                      onChange={(e) => setProvider(e.target.value as AIProvider)}
                     >
-                      Save API Key
-                    </Button>
+                      <option value="openai">OpenAI</option>
+                      <option value="anthropic">Anthropic Claude</option>
+                      <option value="google">Google Gemini</option>
+                      <option value="azure-openai">Azure OpenAI</option>
+                      <option value="ollama">Ollama (Local)</option>
+                    </Form.Select>
                   </Form.Group>
-                )}
 
-                {connectionStatus !== 'unknown' && (
-                  <Alert variant={connectionStatus === 'connected' ? 'success' : 'warning'} className="mt-2 mb-0">
-                    {connectionStatus === 'connected' 
-                      ? '✓ Connected to AI provider' 
-                      : '⚠ Unable to connect to AI provider. Please check your configuration.'}
-                  </Alert>
-                )}
-              </Alert>
+                  {(provider === 'ollama' || provider === 'azure-openai') && (
+                    <Form.Group className="mb-2">
+                      <Form.Label>Endpoint</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder={provider === 'ollama' ? 'http://localhost:11434' : 'https://your-resource.openai.azure.com'}
+                        value={endpoint}
+                        onChange={(e) => setEndpoint(e.target.value)}
+                      />
+                    </Form.Group>
+                  )}
+
+                  {provider !== 'ollama' && (
+                    <Form.Group className="mb-2">
+                      <Form.Label>API Key</Form.Label>
+                      <Form.Control
+                        type="password"
+                        placeholder="Enter your API key"
+                        value={apiKey}
+                        onChange={(e) => setApiKey(e.target.value)}
+                      />
+                      <Button 
+                        size="sm" 
+                        variant="outline-secondary" 
+                        className="mt-1"
+                        onClick={handleSaveApiKey}
+                        disabled={!apiKey}
+                      >
+                        Save API Key
+                      </Button>
+                    </Form.Group>
+                  )}
+
+                  {connectionStatus !== 'unknown' && (
+                    <Alert variant={connectionStatus === 'connected' ? 'success' : 'warning'} className="mt-2 mb-0">
+                      {connectionStatus === 'connected' 
+                        ? '✓ Connected to AI provider' 
+                        : '⚠ Unable to connect to AI provider. Please check your configuration.'}
+                    </Alert>
+                  )}
+                </Alert>
+              )}
             </Col>
           </Row>
         )}

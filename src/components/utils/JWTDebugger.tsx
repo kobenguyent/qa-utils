@@ -17,6 +17,9 @@ import {
   getTimeUntilExpiry,
   verifyJWTSignature,
 } from '../../utils/jwtHelpers.ts';
+import { useAIAssistant } from '../../utils/useAIAssistant';
+import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 export const JWTDebugger = () => {
   const [postContent, setPostContent] = useState('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c');
@@ -25,6 +28,7 @@ export const JWTDebugger = () => {
   const [secretKey, setSecretKey] = useState<string>('');
   const [verificationResult, setVerificationResult] = useState<{ verified: boolean; message: string } | null>(null);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
+  const ai = useAIAssistant();
 
   const handleJWTChange = useCallback((value: string) => {
     setPostContent(value);
@@ -278,6 +282,30 @@ export const JWTDebugger = () => {
                         </div>
                       )}
                     </div>
+                  )}
+
+                  {ai.isConfigured ? (
+                    <AIAssistButton
+                      label="Explain this JWT"
+                      onClick={async () => {
+                        try {
+                          await ai.sendRequest(
+                            'You are a security and JWT expert. Analyze the JWT token details and explain what each claim means, any security concerns, and recommendations. Be concise.',
+                            `Analyze this JWT:\nHeader: ${JSON.stringify(header, null, 2)}\nPayload: ${JSON.stringify(payload, null, 2)}\nIs expired: ${isExpired}`
+                          );
+                        } catch {
+                          // error displayed by AIAssistButton
+                        }
+                      }}
+                      isLoading={ai.isLoading}
+                      disabled={!isValidJWT || !payload}
+                      error={ai.error}
+                      result={ai.result}
+                      onClear={ai.clear}
+                      className="mt-3"
+                    />
+                  ) : (
+                    <AIConfigureHint className="mt-3" />
                   )}
                 </Card.Body>
               </Card>

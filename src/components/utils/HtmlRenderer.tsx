@@ -1,13 +1,30 @@
 import { useState } from 'react';
 import { Container, Form, Button, Row, Col, Alert } from 'react-bootstrap';
 import { sanitizeHtml } from '../../utils/htmlRenderer';
+import { useAIAssistant } from '../../utils/useAIAssistant';
+import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 export const HtmlRenderer = () => {
   const [htmlCode, setHtmlCode] = useState('');
   const [showPreview, setShowPreview] = useState(false);
+  const ai = useAIAssistant();
 
   const handleRender = () => {
     setShowPreview(true);
+  };
+
+  const handleAIGenerate = async () => {
+    try {
+      const response = await ai.sendRequest(
+        'You are an HTML expert. Generate clean, semantic HTML based on the user\'s description. Return ONLY the HTML code without any explanation or markdown formatting.',
+        `Generate HTML for: ${htmlCode}`
+      );
+      setHtmlCode(response);
+      setShowPreview(true);
+    } catch {
+      // error displayed by AIAssistButton
+    }
   };
 
   return (
@@ -28,6 +45,19 @@ export const HtmlRenderer = () => {
               value={htmlCode}
               onChange={(e) => setHtmlCode(e.target.value)}
             />
+            {ai.isConfigured ? (
+              <AIAssistButton
+                label="Generate HTML from Description"
+                onClick={handleAIGenerate}
+                isLoading={ai.isLoading}
+                disabled={!htmlCode.trim()}
+                error={ai.error}
+                onClear={ai.clear}
+                className="mt-2"
+              />
+            ) : (
+              <AIConfigureHint className="mt-2" />
+            )}
           </Col>
         </Form.Group>
 

@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Container, Form, Button, Card, Row, Col, Badge } from 'react-bootstrap';
 import CopyWithToast from '../CopyWithToast';
+import { useAIAssistant } from '../../utils/useAIAssistant';
+import { AIAssistButton } from '../AIAssistButton';
+import { AIConfigureHint } from '../AIConfigureHint';
 
 export const PasswordGenerator: React.FC = () => {
   const [password, setPassword] = useState('');
@@ -10,6 +13,7 @@ export const PasswordGenerator: React.FC = () => {
   const [includeNumbers, setIncludeNumbers] = useState(true);
   const [includeSymbols, setIncludeSymbols] = useState(true);
   const [strength, setStrength] = useState('');
+  const ai = useAIAssistant();
 
   const generatePassword = () => {
     let charset = '';
@@ -107,9 +111,35 @@ export const PasswordGenerator: React.FC = () => {
                 className="mb-3"
               />
 
-              <Button variant="primary" onClick={generatePassword} className="w-100">
+              <Button variant="primary" onClick={generatePassword} className="w-100 mb-3">
                 Generate Password
               </Button>
+
+              {ai.isConfigured ? (
+                <>
+                  <hr />
+                  <AIAssistButton
+                    label="Generate Memorable Passphrase"
+                    onClick={async () => {
+                      try {
+                        const response = await ai.sendRequest(
+                          'You are a security expert. Generate a single memorable but secure passphrase. Return ONLY the passphrase, nothing else. Use a combination of random words, numbers, and a symbol to make it both memorable and secure.',
+                          `Generate a memorable passphrase that is approximately ${length} characters long. Just output the passphrase.`
+                        );
+                        setPassword(response);
+                        calculateStrength(response);
+                      } catch {
+                        // error displayed by AIAssistButton
+                      }
+                    }}
+                    isLoading={ai.isLoading}
+                    error={ai.error}
+                    onClear={ai.clear}
+                  />
+                </>
+              ) : (
+                <AIConfigureHint className="mt-3" />
+              )}
             </Card.Body>
           </Card>
         </Col>
