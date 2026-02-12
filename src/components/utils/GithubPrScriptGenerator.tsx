@@ -3,11 +3,14 @@ import { Container, Form, Row, Col, Button, Card, Alert, Badge } from 'react-boo
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { createGenerator, defaultConfig, type ScriptConfig, type GeneratedScript } from '../../utils/githubPrScriptGenerator';
 import { useSessionStorage } from '../../utils/useSessionStorage';
+import { useAIAssistant } from '../../utils/useAIAssistant';
+import { AIAssistButton } from '../AIAssistButton';
 
 export const GithubPrScriptGenerator: React.FC = () => {
   const [config, setConfig] = useSessionStorage<ScriptConfig>('github-pr-config', defaultConfig);
   const [generatedScript, setGeneratedScript] = useState<GeneratedScript | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
+  const ai = useAIAssistant();
 
   const generator = createGenerator();
 
@@ -149,6 +152,27 @@ export const GithubPrScriptGenerator: React.FC = () => {
                     value={config.prDescription}
                     onChange={(e) => handleConfigChange('prDescription', e.target.value)}
                   />
+                  {ai.isConfigured && (
+                    <AIAssistButton
+                      label="Draft PR Description"
+                      onClick={async () => {
+                        try {
+                          const response = await ai.sendRequest(
+                            'You are a software engineer. Write a clear, professional PR description based on the given context. Return ONLY the description text without markdown formatting headers.',
+                            `Draft a PR description for:\nTitle: ${config.prTitle}\nBranch: ${config.featureBranch}\nBase: ${config.baseBranch}\nCommit message: ${config.commitMessage}`
+                          );
+                          handleConfigChange('prDescription', response);
+                        } catch {
+                          // error displayed by AIAssistButton
+                        }
+                      }}
+                      isLoading={ai.isLoading}
+                      disabled={!config.prTitle}
+                      error={ai.error}
+                      onClear={ai.clear}
+                      className="mt-2"
+                    />
+                  )}
                 </Form.Group>
 
                 <Form.Group className="mb-3">

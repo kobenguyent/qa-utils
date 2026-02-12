@@ -79,7 +79,7 @@ const uuidGenerator: ToolDefinition = {
             data: uuids,
             message: count === 1
                 ? `Generated UUID: ${uuids[0]}`
-                : `Generated ${count} UUIDs`,
+                : `Generated ${count} UUIDs:\n${uuids.join('\n')}`,
             copyable: uuids.join('\n'),
         };
     },
@@ -346,7 +346,7 @@ const loremIpsumGenerator: ToolDefinition = {
         return {
             success: true,
             data: result,
-            message: `Generated ${paragraphs} paragraph(s) of Lorem Ipsum`,
+            message: `Generated ${paragraphs} paragraph(s) of Lorem Ipsum:\n\n${result}`,
             copyable: result,
         };
     },

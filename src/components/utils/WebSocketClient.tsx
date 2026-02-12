@@ -10,6 +10,8 @@ import {
   formatWebSocketMessage,
   createWebSocketClient,
 } from '../../utils/websocketClient';
+import { useAIAssistant } from '../../utils/useAIAssistant';
+import { AIAssistButton } from '../AIAssistButton';
 
 interface ConnectionHistory {
   id: string;
@@ -33,6 +35,7 @@ export const WebSocketClientComponent: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [history, setHistory] = useState<ConnectionHistory[]>([]);
   const [client, setClient] = useState<WebSocketClient | null>(null);
+  const ai = useAIAssistant();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -290,6 +293,26 @@ export const WebSocketClientComponent: React.FC = () => {
             </InputGroup>
             <small className="text-muted">
               Tip: Use JSON format for structured messages like {"{"}"type": "ping", "data": "hello"{"}"}</small>
+            {ai.isConfigured && (
+              <AIAssistButton
+                label="Generate Message"
+                onClick={async () => {
+                  try {
+                    const response = await ai.sendRequest(
+                      'You are a WebSocket messaging expert. Generate a JSON message payload based on the user\'s description. Return ONLY the JSON without any explanation or markdown formatting.',
+                      `Generate a WebSocket JSON message for: ${messageInput || 'a test ping message'}`
+                    );
+                    setMessageInput(response);
+                  } catch {
+                    // error displayed by AIAssistButton
+                  }
+                }}
+                isLoading={ai.isLoading}
+                error={ai.error}
+                onClear={ai.clear}
+                className="mt-2"
+              />
+            )}
           </Card.Body>
         </Card>
       )}
