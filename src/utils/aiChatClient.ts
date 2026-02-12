@@ -56,7 +56,7 @@ interface GeminiModelsResponse {
 }
 
 const DEFAULT_TIMEOUT = 30000; // 30 seconds
-const CONNECTION_TEST_TIMEOUT = 10000; // 10 seconds for connection tests
+const CONNECTION_TEST_TIMEOUT = 30000; // 30 seconds for connection tests (Ollama models may need time to load)
 const DEFAULT_GEMINI_CONTEXT_WINDOW = 32768; // Default context window for Gemini models
 
 // Default models configuration
