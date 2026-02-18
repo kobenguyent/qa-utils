@@ -487,6 +487,23 @@ export const PlaywrightTraceViewer: React.FC = () => {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  // Compute filtered actions unconditionally (Rules of Hooks — no hooks after early returns)
+  const filteredActions = useMemo(() => {
+    const allActions = trace?.actions ?? [];
+    let result = allActions;
+    if (errorsOnly) result = result.filter(a => a.error);
+    if (filterText) {
+      const lower = filterText.toLowerCase();
+      result = result.filter(
+        a =>
+          getActionLabel(a).toLowerCase().includes(lower) ||
+          (a.name ?? '').toLowerCase().includes(lower) ||
+          (a.apiName ?? '').toLowerCase().includes(lower)
+      );
+    }
+    return result;
+  }, [trace, errorsOnly, filterText]);
+
   // ── Render upload area ──────────────────────────────────────────────────
   if (!trace && !loading) {
     return (
@@ -586,28 +603,12 @@ export const PlaywrightTraceViewer: React.FC = () => {
 
   // ── Render trace ────────────────────────────────────────────────────────
   if (!trace) return null;
-  const { metadata, actions, networkRequests, screenshots } = trace;
-  const failedActions = actions.filter(a => a.error);
-  const stackActions = actions.filter(a => a.callStack && a.callStack.length > 0);
-  const traceStart = actions.length > 0 ? actions[0].startTime : 0;
-  const traceEnd = actions.length > 0 ? actions[actions.length - 1].endTime : 0;
+  const { metadata, actions: traceActions, networkRequests, screenshots } = trace;
+  const failedActions = traceActions.filter(a => a.error);
+  const stackActions = traceActions.filter(a => a.callStack && a.callStack.length > 0);
+  const traceStart = traceActions.length > 0 ? traceActions[0].startTime : 0;
+  const traceEnd = traceActions.length > 0 ? traceActions[traceActions.length - 1].endTime : 0;
   const totalDuration = traceEnd - traceStart;
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const filteredActions = useMemo(() => {
-    let result = actions;
-    if (errorsOnly) result = result.filter(a => a.error);
-    if (filterText) {
-      const lower = filterText.toLowerCase();
-      result = result.filter(
-        a =>
-          getActionLabel(a).toLowerCase().includes(lower) ||
-          (a.name ?? '').toLowerCase().includes(lower) ||
-          (a.apiName ?? '').toLowerCase().includes(lower)
-      );
-    }
-    return result;
-  }, [actions, errorsOnly, filterText]);
 
   return (
     <Container fluid className="py-3">
@@ -640,7 +641,7 @@ export const PlaywrightTraceViewer: React.FC = () => {
       <Row className="g-2 mb-3">
         <Col xs={6} sm={3}>
           <Card className="text-center py-2">
-            <div className="fs-4 fw-bold">{actions.length}</div>
+            <div className="fs-4 fw-bold">{traceActions.length}</div>
             <div className="small text-muted">Actions</div>
           </Card>
         </Col>
@@ -673,7 +674,7 @@ export const PlaywrightTraceViewer: React.FC = () => {
       {/* Tabs */}
       <Tabs defaultActiveKey="actions" className="mb-2">
         {/* Actions tab */}
-        <Tab eventKey="actions" title={`▶️ Actions (${actions.length})`}>
+        <Tab eventKey="actions" title={`▶️ Actions (${traceActions.length})`}>
           {/* Filter bar */}
           <div className="d-flex gap-2 mb-2 flex-wrap">
             <InputGroup size="sm" style={{ maxWidth: 280 }}>
@@ -701,14 +702,14 @@ export const PlaywrightTraceViewer: React.FC = () => {
                 📍 {stackActions.length} actions with call stacks
               </span>
             )}
-            {filteredActions.length !== actions.length && (
+            {filteredActions.length !== traceActions.length && (
               <span className="small text-muted align-self-center">
-                Showing {filteredActions.length} of {actions.length}
+                Showing {filteredActions.length} of {traceActions.length}
               </span>
             )}
           </div>
 
-          {actions.length === 0 ? (
+          {traceActions.length === 0 ? (
             <Alert variant="secondary">No actions found in this trace.</Alert>
           ) : (
             <Row className="g-2">
@@ -719,7 +720,7 @@ export const PlaywrightTraceViewer: React.FC = () => {
                   <ActionRow
                     key={a.callId}
                     action={a}
-                    index={actions.indexOf(a)}
+                    index={traceActions.indexOf(a)}
                     screenshots={screenshots}
                     traceStart={traceStart}
                     traceEnd={traceEnd}
@@ -754,7 +755,7 @@ export const PlaywrightTraceViewer: React.FC = () => {
                     <th>Wall Time</th>
                     <td>{metadata.wallTime ? new Date(metadata.wallTime * 1000).toLocaleString() : '—'}</td>
                   </tr>
-                  <tr><th>Actions</th><td>{actions.length}</td></tr>
+                  <tr><th>Actions</th><td>{traceActions.length}</td></tr>
                   <tr><th>Failed Actions</th><td className={failedActions.length > 0 ? 'text-danger fw-bold' : ''}>{failedActions.length}</td></tr>
                   <tr><th>Actions with Call Stack</th><td>{stackActions.length}</td></tr>
                   <tr><th>Network Requests</th><td>{networkRequests.length}</td></tr>
