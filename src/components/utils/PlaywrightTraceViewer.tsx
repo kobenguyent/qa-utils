@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useRef } from 'react';
 import {
-  Container, Row, Col, Card, Badge, Button, Alert, Tab, Tabs, Spinner, Table,
+  Container, Row, Col, Card, Badge, Button, Alert, Tab, Tabs, Spinner, Table, Form, InputGroup,
 } from 'react-bootstrap';
 import {
   parsePlaywrightTrace,
+  fetchAndParseTraceFromUrl,
   getActionLabel,
   getActionStatusColor,
   getActionIcon,
@@ -227,19 +228,20 @@ export const PlaywrightTraceViewer: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedAction, setSelectedAction] = useState<TraceAction | null>(null);
+  const [urlInput, setUrlInput] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const processTrace = useCallback(async (source: File | Blob | string) => {
     setLoading(true);
     setError(null);
     setTrace(null);
     setSelectedAction(null);
 
     try {
-      const parsed = await parsePlaywrightTrace(file);
+      const parsed = typeof source === 'string'
+        ? await fetchAndParseTraceFromUrl(source)
+        : await parsePlaywrightTrace(source);
+
       if (parsed.parseError) {
         setError(parsed.parseError);
       } else {
@@ -251,39 +253,35 @@ export const PlaywrightTraceViewer: React.FC = () => {
       setLoading(false);
     }
   }, []);
+
+  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await processTrace(file);
+  }, [processTrace]);
 
   const handleDrop = useCallback(async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
     if (!file) return;
-
-    setLoading(true);
-    setError(null);
-    setTrace(null);
-    setSelectedAction(null);
-
-    try {
-      const parsed = await parsePlaywrightTrace(file);
-      if (parsed.parseError) {
-        setError(parsed.parseError);
-      } else {
-        setTrace(parsed);
-      }
-    } catch (err) {
-      setError(`Unexpected error: ${(err as Error).message}`);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    await processTrace(file);
+  }, [processTrace]);
 
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
   }, []);
 
+  const handleUrlLoad = useCallback(async () => {
+    const url = urlInput.trim();
+    if (!url) return;
+    await processTrace(url);
+  }, [urlInput, processTrace]);
+
   const handleReset = () => {
     setTrace(null);
     setError(null);
     setSelectedAction(null);
+    setUrlInput('');
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -296,9 +294,8 @@ export const PlaywrightTraceViewer: React.FC = () => {
             <div className="mb-4">
               <h2 className="fw-bold">🎭 Playwright Trace Viewer</h2>
               <p className="text-muted">
-                Upload a Playwright <code>.zip</code> trace file to visualize test actions,
-                network requests, and screenshots. Traces are parsed locally in your browser —
-                no data is sent to any server.
+                Upload a Playwright <code>.zip</code> trace file or load one from a remote URL.
+                Traces are parsed locally in your browser — no data is sent to any server.
               </p>
               <Alert variant="info" className="small">
                 <strong>How to generate a trace:</strong> Run your Playwright tests with{' '}
@@ -310,6 +307,36 @@ export const PlaywrightTraceViewer: React.FC = () => {
 
             {error && <Alert variant="danger">{error}</Alert>}
 
+            {/* URL input */}
+            <div className="mb-3">
+              <Form.Label className="fw-semibold">Load from URL</Form.Label>
+              <InputGroup>
+                <Form.Control
+                  type="url"
+                  placeholder="https://example.com/trace.zip"
+                  value={urlInput}
+                  onChange={e => setUrlInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleUrlLoad()}
+                  aria-label="Trace ZIP URL"
+                  style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text)' }}
+                />
+                <Button
+                  variant="primary"
+                  onClick={handleUrlLoad}
+                  disabled={!urlInput.trim()}
+                  aria-label="Load trace from URL"
+                >
+                  Load
+                </Button>
+              </InputGroup>
+              <Form.Text className="text-muted">
+                The remote server must allow CORS. Public trace reports (e.g. Playwright demo reports) work out of the box.
+              </Form.Text>
+            </div>
+
+            <div className="text-center text-muted my-3">— or —</div>
+
+            {/* File drop zone */}
             <div
               onDrop={handleDrop}
               onDragOver={handleDragOver}

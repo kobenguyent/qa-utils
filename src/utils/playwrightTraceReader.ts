@@ -180,6 +180,40 @@ function formatApiName(raw: string): string {
 // ─── Main export ──────────────────────────────────────────────────────────────
 
 /**
+ * Fetch a Playwright trace ZIP from a remote URL and parse it.
+ *
+ * The request is made with `mode: 'cors'` so the remote server must include
+ * appropriate CORS headers.  If CORS is blocked the function returns a
+ * `parseError` describing the problem so the caller can surface it to the user.
+ *
+ * @param url - A fully-qualified URL pointing to a `.zip` trace file
+ */
+export async function fetchAndParseTraceFromUrl(url: string): Promise<PlaywrightTrace> {
+  const errorResult = (): PlaywrightTrace => ({
+    metadata: { browserName: 'unknown', platform: 'unknown', wallTime: 0 },
+    actions: [],
+    networkRequests: [],
+    screenshots: {},
+  });
+
+  let blob: Blob;
+  try {
+    const response = await fetch(url, { mode: 'cors' });
+    if (!response.ok) {
+      return { ...errorResult(), parseError: `Failed to fetch trace: HTTP ${response.status} ${response.statusText}` };
+    }
+    blob = await response.blob();
+  } catch (err) {
+    return {
+      ...errorResult(),
+      parseError: `Failed to fetch trace from URL: ${(err as Error).message}. Make sure the server allows CORS.`,
+    };
+  }
+
+  return parsePlaywrightTrace(blob);
+}
+
+/**
  * Parse a Playwright `.zip` trace file (as a File/Blob) and return a
  * structured {@link PlaywrightTrace} object.
  *

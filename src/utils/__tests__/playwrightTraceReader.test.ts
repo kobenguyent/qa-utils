@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import JSZip from 'jszip';
 import {
   parsePlaywrightTrace,
+  fetchAndParseTraceFromUrl,
   getActionLabel,
   getActionStatusColor,
   getActionIcon,
@@ -393,6 +394,52 @@ describe('playwrightTraceReader', () => {
 
     it('returns play for unknown actions', () => {
       expect(getActionIcon(makeAction('page.unknownAction'))).toBe('▶️');
+    });
+  });
+
+  // ─── fetchAndParseTraceFromUrl ──────────────────────────────────────────────
+  describe('fetchAndParseTraceFromUrl', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('returns parseError when fetch fails (network error)', async () => {
+      vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
+      const result = await fetchAndParseTraceFromUrl('https://example.com/trace.zip');
+      expect(result.parseError).toMatch(/Failed to fetch trace from URL/);
+      expect(result.parseError).toMatch(/CORS/);
+    });
+
+    it('returns parseError on non-OK HTTP response', async () => {
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        statusText: 'Not Found',
+        blob: vi.fn(),
+      }));
+      const result = await fetchAndParseTraceFromUrl('https://example.com/missing.zip');
+      expect(result.parseError).toMatch(/HTTP 404/);
+    });
+
+    it('parses a valid trace fetched from URL', async () => {
+      const zip = new JSZip();
+      zip.file(
+        'trace.trace',
+        [CONTEXT_OPTIONS, BEFORE_GOTO, AFTER_GOTO].map(l => JSON.stringify(l)).join('\n'),
+      );
+      const blob = await zip.generateAsync({ type: 'blob' });
+
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        blob: vi.fn().mockResolvedValue(blob),
+      }));
+
+      const result = await fetchAndParseTraceFromUrl('https://example.com/trace.zip');
+      expect(result.parseError).toBeUndefined();
+      expect(result.metadata.browserName).toBe('chromium');
+      expect(result.actions).toHaveLength(1);
     });
   });
 });
