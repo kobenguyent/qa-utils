@@ -332,6 +332,57 @@ describe('playwrightTraceReader', () => {
       const result = await parsePlaywrightTrace(makeFile(blob));
       expect(result.actions[0].screenshotSha1s).toContain('deadbeef');
     });
+
+    it('parses call stacks from 0-trace.stacks and attaches to actions', async () => {
+      const stackEntry = {
+        callId: 'call1',
+        callStack: [
+          { file: 'test.spec.ts', line: 10, column: 3, function: 'myTest' },
+          { file: 'helpers.ts', line: 55, column: 1, function: 'setup' },
+        ],
+      };
+      const zip = new JSZip();
+      zip.file('0-trace.trace', [CONTEXT_OPTIONS, BEFORE_GOTO, AFTER_GOTO].map(l => JSON.stringify(l)).join('\n'));
+      zip.file('0-trace.stacks', JSON.stringify(stackEntry));
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const result = await parsePlaywrightTrace(blob);
+
+      expect(result.actions).toHaveLength(1);
+      expect(result.actions[0].callStack).toBeDefined();
+      expect(result.actions[0].callStack).toHaveLength(2);
+      expect(result.actions[0].callStack?.[0].file).toBe('test.spec.ts');
+      expect(result.actions[0].callStack?.[0].line).toBe(10);
+      expect(result.actions[0].callStack?.[0].function).toBe('myTest');
+    });
+
+    it('handles stacks entries with "stack" key instead of "callStack"', async () => {
+      const stackEntry = {
+        callId: 'call1',
+        stack: [{ file: 'test.spec.ts', line: 5, column: 1, function: 'test' }],
+      };
+      const zip = new JSZip();
+      zip.file('0-trace.trace', [BEFORE_GOTO, AFTER_GOTO].map(l => JSON.stringify(l)).join('\n'));
+      zip.file('0-trace.stacks', JSON.stringify(stackEntry));
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const result = await parsePlaywrightTrace(blob);
+      expect(result.actions[0].callStack?.[0].file).toBe('test.spec.ts');
+    });
+
+    it('handles stacks callId with "s@" prefix', async () => {
+      const stackEntry = { callId: 's@call1', callStack: [{ file: 'a.ts', line: 1, column: 0, function: '' }] };
+      const zip = new JSZip();
+      zip.file('0-trace.trace', [BEFORE_GOTO, AFTER_GOTO].map(l => JSON.stringify(l)).join('\n'));
+      zip.file('0-trace.stacks', JSON.stringify(stackEntry));
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const result = await parsePlaywrightTrace(blob);
+      expect(result.actions[0].callStack).toBeDefined();
+    });
+
+    it('leaves callStack undefined when no stacks file present', async () => {
+      const blob = await buildTraceZip([BEFORE_GOTO, AFTER_GOTO]);
+      const result = await parsePlaywrightTrace(makeFile(blob));
+      expect(result.actions[0].callStack).toBeUndefined();
+    });
   });
 
   // ─── getActionLabel ─────────────────────────────────────────────────────────

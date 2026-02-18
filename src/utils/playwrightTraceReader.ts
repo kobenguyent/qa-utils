@@ -21,6 +21,13 @@ export interface TraceMetadata {
   testIdAttributeName?: string;
 }
 
+export interface CallStackFrame {
+  file: string;
+  line: number;
+  column: number;
+  function: string;
+}
+
 export interface TraceAction {
   callId: string;
   apiName: string;
@@ -36,6 +43,8 @@ export interface TraceAction {
   /** sha1 hashes of screenshots captured around this action */
   screenshotSha1s: string[];
   pageId?: string;
+  /** Call stack from 0-trace.stacks showing where in test code the action was triggered */
+  callStack?: CallStackFrame[];
 }
 
 export interface NetworkRequest {
@@ -140,6 +149,23 @@ interface RawNetworkFailed {
   timestamp?: number;
 }
 
+/** Entry shape inside a 0-trace.stacks file */
+interface RawStackEntry {
+  callId: string;
+  callStack?: Array<{
+    file?: string;
+    line?: number;
+    column?: number;
+    function?: string;
+  }>;
+  stack?: Array<{
+    file?: string;
+    line?: number;
+    column?: number;
+    function?: string;
+  }>;
+}
+
 type RawEntry =
   | RawContextOptions
   | RawBefore
@@ -161,6 +187,20 @@ function parseJsonl(text: string): RawEntry[] {
     .flatMap(line => {
       try {
         return [JSON.parse(line) as RawEntry];
+      } catch {
+        return [];
+      }
+    });
+}
+
+function parseJsonlGeneric<T>(text: string): T[] {
+  return text
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0)
+    .flatMap(line => {
+      try {
+        return [JSON.parse(line) as T];
       } catch {
         return [];
       }
@@ -249,9 +289,12 @@ export async function parsePlaywrightTrace(file: File | Blob): Promise<Playwrigh
     /(?:^|\/)\d*-?trace\.trace$/.test(name) || name === 'trace.trace';
   const isNetworkFile = (name: string) =>
     /(?:^|\/)\d*-?trace\.network$/.test(name) || name === 'trace.network';
+  const isStacksFile = (name: string) =>
+    /(?:^|\/)\d*-?trace\.stacks$/.test(name) || name === 'trace.stacks';
 
   const traceFiles = allFiles.filter(f => !f.dir && isTraceFile(f.name));
   const networkFiles = allFiles.filter(f => !f.dir && isNetworkFile(f.name));
+  const stackFiles = allFiles.filter(f => !f.dir && isStacksFile(f.name));
 
   if (traceFiles.length === 0) {
     result.parseError =
@@ -265,7 +308,31 @@ export async function parsePlaywrightTrace(file: File | Blob): Promise<Playwrigh
   const traceTexts = await Promise.all(traceFiles.map(f => f.async('string')));
   const traceEntries = parseJsonl(traceTexts.join('\n'));
 
-  // ── 2. Extract metadata ───────────────────────────────────────────────────
+  // ── 2. Parse call stacks (0-trace.stacks) ────────────────────────────────
+  // callId in stacks may be bare (same as action) or prefixed with "s@"
+  const stackMap = new Map<string, CallStackFrame[]>();
+  if (stackFiles.length > 0) {
+    stackFiles.sort((a, b) => a.name.localeCompare(b.name));
+    const stackTexts = await Promise.all(stackFiles.map(f => f.async('string')));
+    const stackEntries = parseJsonlGeneric<RawStackEntry>(stackTexts.join('\n'));
+    for (const entry of stackEntries) {
+      if (!entry.callId) continue;
+      const rawFrames = entry.callStack ?? entry.stack ?? [];
+      const frames: CallStackFrame[] = rawFrames.map(f => ({
+        file: f.file ?? '',
+        line: f.line ?? 0,
+        column: f.column ?? 0,
+        function: f.function ?? '',
+      }));
+      // Strip the "s@" prefix sometimes used in the stacks file
+      const id = entry.callId.startsWith('s@') ? entry.callId.slice(2) : entry.callId;
+      stackMap.set(id, frames);
+      // Also store under the original key in case it differs
+      stackMap.set(entry.callId, frames);
+    }
+  }
+
+  // ── 3. Extract metadata ───────────────────────────────────────────────────
   const ctxEntry = traceEntries.find(e => e.type === 'context-options') as RawContextOptions | undefined;
   if (ctxEntry) {
     result.metadata = {
@@ -278,7 +345,7 @@ export async function parsePlaywrightTrace(file: File | Blob): Promise<Playwrigh
     };
   }
 
-  // ── 3. Build actions from before/after pairs ──────────────────────────────
+  // ── 4. Build actions from before/after pairs ──────────────────────────────
   const beforeMap = new Map<string, RawBefore>();
   const screenshotMap = new Map<string, string[]>(); // callId → sha1[]
 
@@ -323,12 +390,13 @@ export async function parsePlaywrightTrace(file: File | Blob): Promise<Playwrigh
         log: after.log ?? [],
         screenshotSha1s: sha1s,
         pageId: before.pageId,
+        callStack: stackMap.get(after.callId) ?? stackMap.get(`s@${after.callId}`),
       };
       result.actions.push(action);
     }
   }
 
-  // ── 4. Parse network file(s) ─────────────────────────────────────────────
+  // ── 5. Parse network file(s) ─────────────────────────────────────────────
   if (networkFiles.length > 0) {
     networkFiles.sort((a, b) => a.name.localeCompare(b.name));
     const netTexts = await Promise.all(networkFiles.map(f => f.async('string')));
@@ -396,7 +464,7 @@ export async function parsePlaywrightTrace(file: File | Blob): Promise<Playwrigh
     result.networkRequests = Array.from(reqMap.values());
   }
 
-  // ── 5. Extract screenshot images ──────────────────────────────────────────
+  // ── 6. Extract screenshot images ──────────────────────────────────────────
   const allSha1s = new Set(result.actions.flatMap(a => a.screenshotSha1s));
   // Also pick up any screencast frames not yet captured
   screencasts.forEach(s => allSha1s.add(s.sha1));
@@ -501,3 +569,4 @@ export function getActionIcon(action: TraceAction): string {
   if (name.includes('new') || name.includes('launch')) return '🚀';
   return '▶️';
 }
+
