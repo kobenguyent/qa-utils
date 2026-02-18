@@ -360,21 +360,13 @@ export async function parsePlaywrightTrace(file: File | Blob): Promise<Playwrigh
       const before = beforeMap.get(after.callId);
       if (!before) continue;
 
-      // Collect screenshot sha1s mentioned in snapshots
+      // Collect screencast frames that occurred during this action's time window.
+      // NOTE: after.snapshots are DOM/accessibility snapshots (not JPEG images) –
+      //       the actual screenshot images come only from screencast-frame entries.
       const sha1s: string[] = [];
-      if (after.snapshots) {
-        for (const snap of after.snapshots) {
-          // snapshotName may be like "resources/abc123.png" or just "abc123"
-          const parts = snap.snapshotName.split('/');
-          const name = parts[parts.length - 1];
-          if (name) sha1s.push(name.replace(/\.[^.]+$/, ''));
-        }
-      }
-
-      // Also capture screencast frames that occurred between this action's start/end
       screencasts
         .filter(s => s.timestamp >= before.startTime && s.timestamp <= after.endTime)
-        .forEach(s => sha1s.push(s.sha1));
+        .forEach(s => { if (!sha1s.includes(s.sha1)) sha1s.push(s.sha1); });
 
       screenshotMap.set(after.callId, sha1s);
 
@@ -469,24 +461,39 @@ export async function parsePlaywrightTrace(file: File | Blob): Promise<Playwrigh
   }
 
   // ── 6. Extract screenshot images ──────────────────────────────────────────
+  // Collect all screencast sha1s: from action windows plus ALL frames recorded
   const allSha1s = new Set(result.actions.flatMap(a => a.screenshotSha1s));
-  // Also pick up any screencast frames not yet captured
-  screencasts.forEach(s => allSha1s.add(s.sha1));
+  screencasts.forEach(s => { if (s.sha1) allSha1s.add(s.sha1); });
+
+  // Build a map from sha1 → JSZip file for fast lookup.
+  // Playwright stores screencast frames as "resources/<sha1>.jpeg" (some versions
+  // drop the extension entirely and store "resources/<sha1>").
+  const resourceFileBySha1 = new Map<string, JSZip.JSZipObject>();
+  for (const f of Object.values(zip.files)) {
+    if (f.dir) continue;
+    const base = f.name.split('/').pop() ?? '';
+    // Match with extension: "<sha1>.jpeg", "<sha1>.png", "<sha1>.webp"
+    const withExt = base.match(/^([0-9a-f]{20,})\.(jpeg|jpg|png|webp)$/i);
+    if (withExt) {
+      resourceFileBySha1.set(withExt[1], f);
+      continue;
+    }
+    // Match extensionless: "<sha1>" (hex-only, ≥20 chars)
+    if (/^[0-9a-f]{20,}$/i.test(base)) {
+      resourceFileBySha1.set(base, f);
+    }
+  }
 
   for (const sha1 of allSha1s) {
     if (!sha1) continue;
-    // Playwright stores screenshots as resources/<sha1>.jpeg or resources/<sha1>.png
-    const resourceFile =
-      zip.file(`resources/${sha1}.jpeg`) ??
-      zip.file(`resources/${sha1}.png`) ??
-      zip.file(`resources/${sha1}.jpg`) ??
-      Object.values(zip.files).find(
-        f => f.name.endsWith(`/${sha1}.jpeg`) || f.name.endsWith(`/${sha1}.png`) || f.name.endsWith(`/${sha1}.jpg`)
-      );
-
+    const resourceFile = resourceFileBySha1.get(sha1);
     if (resourceFile) {
       const blob = await resourceFile.async('blob');
-      result.screenshots[sha1] = URL.createObjectURL(blob);
+      // Ensure blob has image MIME type so the browser renders it
+      const imgBlob = blob.type.startsWith('image/')
+        ? blob
+        : new Blob([blob], { type: 'image/jpeg' });
+      result.screenshots[sha1] = URL.createObjectURL(imgBlob);
     }
   }
 

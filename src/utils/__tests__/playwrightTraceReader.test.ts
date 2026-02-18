@@ -323,24 +323,33 @@ describe('playwrightTraceReader', () => {
       expect(result.networkRequests[0].status).toBe(200);
     });
 
-    it('returns screenshots map (empty when no resource files)', async () => {
+    it('returns screenshots map (empty when no screencast frames)', async () => {
       const blob = await buildTraceZip([
         BEFORE_GOTO,
-        { ...AFTER_GOTO, snapshots: [{ title: 'before', snapshotName: 'resources/abc123.png' }] },
+        // snapshots are DOM snapshots, not JPEG images — they don't add to screenshotSha1s
+        { ...AFTER_GOTO, snapshots: [{ title: 'before', snapshotName: 'snapshot@call1.before' }] },
       ]);
       const result = await parsePlaywrightTrace(makeFile(blob));
-      // The sha1 is extracted but no file exists in the zip
       expect(result.screenshots).toBeDefined();
+      // No screencast frames → no screenshot sha1s
+      expect(result.actions[0].screenshotSha1s).toHaveLength(0);
     });
 
-    it('includes screenshot sha1s from snapshots', async () => {
+    it('includes screenshot sha1s from screencast-frame entries (not DOM snapshots)', async () => {
+      // DOM snapshots (after.snapshots) are NOT JPEG images; screencasts ARE
+      const screencastFrame = {
+        type: 'screencast-frame',
+        sha1: 'deadbeef1234567890abcdef1234567890abcdef',
+        timestamp: 1250, // between BEFORE_GOTO.startTime (1000) and AFTER_GOTO.endTime (1500)
+        pageId: 'page@1',
+      };
       const afterWithSnapshot = {
         ...AFTER_GOTO,
-        snapshots: [{ title: 'before', snapshotName: 'resources/deadbeef.png' }],
+        snapshots: [{ title: 'before', snapshotName: 'snapshot@call1.before' }],
       };
-      const blob = await buildTraceZip([BEFORE_GOTO, afterWithSnapshot]);
+      const blob = await buildTraceZip([BEFORE_GOTO, screencastFrame, afterWithSnapshot]);
       const result = await parsePlaywrightTrace(makeFile(blob));
-      expect(result.actions[0].screenshotSha1s).toContain('deadbeef');
+      expect(result.actions[0].screenshotSha1s).toContain('deadbeef1234567890abcdef1234567890abcdef');
     });
 
     it('parses call stacks from 0-trace.stacks and attaches to actions', async () => {
@@ -392,6 +401,31 @@ describe('playwrightTraceReader', () => {
       const blob = await buildTraceZip([BEFORE_GOTO, AFTER_GOTO]);
       const result = await parsePlaywrightTrace(makeFile(blob));
       expect(result.actions[0].callStack).toBeUndefined();
+    });
+
+    it('loads screencast JPEG resource and creates object URL', async () => {
+      const sha1 = 'abcdef1234567890abcdef1234567890abcdef12';
+      const screencastFrame = { type: 'screencast-frame', sha1, timestamp: 1250, pageId: 'page@1' };
+      const zip = new JSZip();
+      zip.file('0-trace.trace', [BEFORE_GOTO, screencastFrame, AFTER_GOTO].map(l => JSON.stringify(l)).join('\n'));
+      // Add the resource as a JPEG file (normal Playwright format)
+      zip.file(`resources/${sha1}.jpeg`, new Uint8Array([0xff, 0xd8, 0xff])); // JPEG magic bytes
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const result = await parsePlaywrightTrace(blob);
+      expect(result.screenshots[sha1]).toMatch(/^blob:/);
+      expect(result.actions[0].screenshotSha1s).toContain(sha1);
+    });
+
+    it('loads extensionless screencast resource (some Playwright versions omit extension)', async () => {
+      const sha1 = 'feed1234567890abcdef1234567890abcdef5678';
+      const screencastFrame = { type: 'screencast-frame', sha1, timestamp: 1250, pageId: 'page@1' };
+      const zip = new JSZip();
+      zip.file('0-trace.trace', [BEFORE_GOTO, screencastFrame, AFTER_GOTO].map(l => JSON.stringify(l)).join('\n'));
+      // No extension — just the sha1 as filename
+      zip.file(`resources/${sha1}`, new Uint8Array([0xff, 0xd8, 0xff]));
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const result = await parsePlaywrightTrace(blob);
+      expect(result.screenshots[sha1]).toMatch(/^blob:/);
     });
   });
 
