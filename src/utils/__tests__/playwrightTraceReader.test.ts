@@ -15,11 +15,14 @@ import {
 async function buildTraceZip(
   traceLines: object[],
   networkLines: object[] = [],
+  prefix = '',
 ): Promise<Blob> {
   const zip = new JSZip();
-  zip.file('trace.trace', traceLines.map(l => JSON.stringify(l)).join('\n'));
+  const traceFileName = prefix ? `${prefix}trace.trace` : 'trace.trace';
+  const netFileName = prefix ? `${prefix}trace.network` : 'trace.network';
+  zip.file(traceFileName, traceLines.map(l => JSON.stringify(l)).join('\n'));
   if (networkLines.length > 0) {
-    zip.file('trace.network', networkLines.map(l => JSON.stringify(l)).join('\n'));
+    zip.file(netFileName, networkLines.map(l => JSON.stringify(l)).join('\n'));
   }
   return zip.generateAsync({ type: 'blob' });
 }
@@ -161,7 +164,7 @@ describe('playwrightTraceReader', () => {
       zip.file('other.txt', 'hello');
       const blob = await zip.generateAsync({ type: 'blob' });
       const result = await parsePlaywrightTrace(blob);
-      expect(result.parseError).toContain('trace.trace');
+      expect(result.parseError).toContain('trace');
     });
 
     it('parses metadata from context-options', async () => {
@@ -270,6 +273,33 @@ describe('playwrightTraceReader', () => {
       const blob = await zip.generateAsync({ type: 'blob' });
       const result = await parsePlaywrightTrace(blob);
       expect(result.actions).toHaveLength(1);
+    });
+
+    it('handles real Playwright ZIP format with "0-trace.trace" prefix', async () => {
+      const blob = await buildTraceZip([CONTEXT_OPTIONS, BEFORE_GOTO, AFTER_GOTO], [], '0-');
+      const result = await parsePlaywrightTrace(makeFile(blob));
+      expect(result.metadata.browserName).toBe('chromium');
+      expect(result.actions).toHaveLength(1);
+    });
+
+    it('handles multiple prefixed trace files (merges them)', async () => {
+      const zip = new JSZip();
+      zip.file('0-trace.trace', [CONTEXT_OPTIONS, BEFORE_GOTO, AFTER_GOTO].map(l => JSON.stringify(l)).join('\n'));
+      zip.file('1-trace.trace', [BEFORE_CLICK, AFTER_CLICK].map(l => JSON.stringify(l)).join('\n'));
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const result = await parsePlaywrightTrace(blob);
+      expect(result.actions).toHaveLength(2);
+    });
+
+    it('handles real Playwright ZIP format with "0-trace.network" prefix', async () => {
+      const blob = await buildTraceZip(
+        [CONTEXT_OPTIONS, BEFORE_GOTO, AFTER_GOTO],
+        [NET_REQUEST, NET_RESPONSE, NET_FINISHED],
+        '0-',
+      );
+      const result = await parsePlaywrightTrace(makeFile(blob));
+      expect(result.networkRequests).toHaveLength(1);
+      expect(result.networkRequests[0].status).toBe(200);
     });
 
     it('returns screenshots map (empty when no resource files)', async () => {

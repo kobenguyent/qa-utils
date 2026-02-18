@@ -238,18 +238,32 @@ export async function parsePlaywrightTrace(file: File | Blob): Promise<Playwrigh
     return result;
   }
 
-  // ── 1. Locate the trace.trace file (may be in a sub-folder) ──────────────
-  const traceFile =
-    zip.file('trace.trace') ??
-    Object.values(zip.files).find(f => f.name.endsWith('/trace.trace') || f.name === 'trace.trace');
+  // ── 1. Locate trace file(s) (real Playwright traces use "0-trace.trace",
+  //      "1-trace.trace", etc.; older/test zips may use plain "trace.trace")
+  //      We collect ALL matching files and concatenate their JSONL contents
+  //      so multi-chunk traces are handled correctly.
+  const allFiles = Object.values(zip.files);
 
-  if (!traceFile) {
-    result.parseError = 'No trace.trace file found in the ZIP archive.';
+  /** Returns true if the basename matches any of the Playwright trace suffixes */
+  const isTraceFile = (name: string) =>
+    /(?:^|\/)\d*-?trace\.trace$/.test(name) || name === 'trace.trace';
+  const isNetworkFile = (name: string) =>
+    /(?:^|\/)\d*-?trace\.network$/.test(name) || name === 'trace.network';
+
+  const traceFiles = allFiles.filter(f => !f.dir && isTraceFile(f.name));
+  const networkFiles = allFiles.filter(f => !f.dir && isNetworkFile(f.name));
+
+  if (traceFiles.length === 0) {
+    result.parseError =
+      'No trace file found in the ZIP archive. ' +
+      'Expected files like "trace.trace" or "0-trace.trace".';
     return result;
   }
 
-  const traceText = await traceFile.async('string');
-  const traceEntries = parseJsonl(traceText);
+  // Read and merge all trace JSONL files (sorted by name for deterministic order)
+  traceFiles.sort((a, b) => a.name.localeCompare(b.name));
+  const traceTexts = await Promise.all(traceFiles.map(f => f.async('string')));
+  const traceEntries = parseJsonl(traceTexts.join('\n'));
 
   // ── 2. Extract metadata ───────────────────────────────────────────────────
   const ctxEntry = traceEntries.find(e => e.type === 'context-options') as RawContextOptions | undefined;
@@ -314,14 +328,11 @@ export async function parsePlaywrightTrace(file: File | Blob): Promise<Playwrigh
     }
   }
 
-  // ── 4. Parse trace.network ────────────────────────────────────────────────
-  const netFile =
-    zip.file('trace.network') ??
-    Object.values(zip.files).find(f => f.name.endsWith('/trace.network') || f.name === 'trace.network');
-
-  if (netFile) {
-    const netText = await netFile.async('string');
-    const netEntries = parseJsonl(netText);
+  // ── 4. Parse network file(s) ─────────────────────────────────────────────
+  if (networkFiles.length > 0) {
+    networkFiles.sort((a, b) => a.name.localeCompare(b.name));
+    const netTexts = await Promise.all(networkFiles.map(f => f.async('string')));
+    const netEntries = parseJsonl(netTexts.join('\n'));
     const reqMap = new Map<string, NetworkRequest>();
 
     for (const entry of netEntries) {
