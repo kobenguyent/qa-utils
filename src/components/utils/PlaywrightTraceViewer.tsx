@@ -64,6 +64,7 @@ const ActionRow: React.FC<ActionRowProps> = ({
   const color = getActionStatusColor(action);
   const firstSha1 = action.screenshotSha1s[0];
   const thumb = firstSha1 ? screenshots[firstSha1] : undefined;
+  const label = getActionLabel(action);
 
   return (
     <div
@@ -72,25 +73,41 @@ const ActionRow: React.FC<ActionRowProps> = ({
       onClick={() => onSelect(action)}
       onKeyDown={e => e.key === 'Enter' && onSelect(action)}
       aria-selected={selected}
-      aria-label={`Action ${index + 1}: ${getActionLabel(action)}`}
-      className={`d-flex align-items-start gap-2 p-2 mb-1 rounded small ${selected ? 'shadow-sm' : ''}`}
+      aria-label={`Action ${index + 1}: ${label}`}
+      className={`d-flex align-items-center gap-2 px-2 py-1 mb-1 rounded ${selected ? 'shadow-sm' : ''}`}
       style={{
         cursor: 'pointer',
         borderLeft: `3px solid var(--bs-${color})`,
         background: selected ? 'var(--bs-primary-bg-subtle, rgba(13,110,253,.08))' : 'transparent',
         outline: selected ? '1px solid var(--bs-primary)' : undefined,
+        minHeight: 44,
       }}
     >
-      {/* Index + icon */}
-      <div className="text-muted fw-bold" style={{ minWidth: 28, fontSize: '0.7rem', paddingTop: 2 }}>
+      {/* Index */}
+      <div className="text-muted" style={{ minWidth: 24, fontSize: '0.68rem', fontVariantNumeric: 'tabular-nums' }}>
         {String(index + 1).padStart(2, '0')}
       </div>
-      <div style={{ fontSize: '1rem', minWidth: 22 }}>{getActionIcon(action)}</div>
 
-      {/* Label + timeline */}
+      {/* Screenshot thumbnail — always shown when available */}
+      {thumb ? (
+        <img
+          src={thumb}
+          alt=""
+          aria-hidden="true"
+          style={{ height: 36, width: 64, objectFit: 'cover', borderRadius: 3, flexShrink: 0, border: '1px solid var(--border-color)' }}
+        />
+      ) : (
+        <div style={{ width: 64, height: 36, flexShrink: 0, background: 'var(--bs-gray-200)', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem' }}>
+          {getActionIcon(action)}
+        </div>
+      )}
+
+      {/* Label + api name + timeline */}
       <div className="flex-grow-1 overflow-hidden">
-        <div className="fw-semibold text-truncate" style={{ fontSize: '0.8rem' }}>{getActionLabel(action)}</div>
-        <div className="text-muted text-truncate" style={{ fontSize: '0.68rem' }}>{action.name || action.apiName}</div>
+        <div className="fw-semibold text-truncate" style={{ fontSize: '0.8rem' }} title={label}>{label}</div>
+        {action.name && (
+          <div className="text-muted text-truncate" style={{ fontSize: '0.65rem' }}>{action.name}</div>
+        )}
         <TimelineBar
           startTime={action.startTime}
           endTime={action.endTime}
@@ -100,25 +117,13 @@ const ActionRow: React.FC<ActionRowProps> = ({
         />
       </div>
 
-      {/* Duration + badges */}
-      <div className="text-end flex-shrink-0">
-        <Badge bg={color} className="me-1" style={{ fontSize: '0.65rem' }}>
+      {/* Duration + error badge */}
+      <div className="text-end flex-shrink-0 d-flex flex-column align-items-end gap-1">
+        <Badge bg={color} style={{ fontSize: '0.62rem' }}>
           {action.duration < 1000 ? `${action.duration}ms` : `${(action.duration / 1000).toFixed(2)}s`}
         </Badge>
-        {action.error && <Badge bg="danger" style={{ fontSize: '0.65rem' }}>⚠</Badge>}
-        {action.callStack && action.callStack.length > 0 && (
-          <Badge bg="light" text="dark" style={{ fontSize: '0.65rem' }} title="Has call stack">📍</Badge>
-        )}
+        {action.error && <Badge bg="danger" style={{ fontSize: '0.62rem' }}>⚠ fail</Badge>}
       </div>
-
-      {/* Thumbnail */}
-      {thumb && (
-        <img
-          src={thumb}
-          alt="screenshot"
-          style={{ height: 32, width: 56, objectFit: 'cover', borderRadius: 3, border: '1px solid var(--border-color)', flexShrink: 0 }}
-        />
-      )}
     </div>
   );
 };
@@ -172,41 +177,53 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ action, screenshots }) => {
     );
   }
 
+  const firstSha1 = action.screenshotSha1s[0];
+  const mainScreenshot = firstSha1 ? screenshots[firstSha1] : undefined;
+
   return (
     <Card className="h-100">
-      <Card.Header className="py-2">
-        <span className="me-1">{getActionIcon(action)}</span>
-        <strong>{action.name || action.apiName || '(unknown)'}</strong>
-        {' '}
-        <Badge bg={getActionStatusColor(action)} style={{ fontSize: '0.7rem' }}>
+      <Card.Header className="py-2 d-flex align-items-center gap-2">
+        <span>{getActionIcon(action)}</span>
+        <strong className="text-truncate flex-grow-1" title={action.name || action.apiName || '(internal)'}>
+          {action.name || action.apiName || '(internal)'}
+        </strong>
+        <Badge bg={getActionStatusColor(action)} style={{ fontSize: '0.7rem', flexShrink: 0 }}>
           {action.duration < 1000 ? `${action.duration}ms` : `${(action.duration / 1000).toFixed(2)}s`}
         </Badge>
-        {action.pageId && (
-          <Badge bg="light" text="dark" className="ms-1" style={{ fontSize: '0.68rem' }}>
-            page: {action.pageId.slice(0, 8)}
-          </Badge>
-        )}
       </Card.Header>
-      <Card.Body style={{ overflowY: 'auto', maxHeight: 560 }}>
+      <Card.Body style={{ overflowY: 'auto', maxHeight: 600, padding: '0.75rem' }}>
         {action.error && (
           <Alert variant="danger" className="small py-2 mb-2">
             <strong>Error:</strong> {action.error}
           </Alert>
         )}
 
-        {/* Screenshots */}
-        {action.screenshotSha1s.length > 0 && (
+        {/* Main page screenshot — shown prominently at the top */}
+        {mainScreenshot && (
           <div className="mb-3">
-            {action.screenshotSha1s.map(sha1 =>
-              screenshots[sha1] ? (
-                <img
-                  key={sha1}
-                  src={screenshots[sha1]}
-                  alt="action screenshot"
-                  className="img-fluid rounded border mb-2 d-block"
-                  style={{ maxHeight: 220 }}
-                />
-              ) : null
+            <div className="text-muted small mb-1 fw-semibold">📸 Page State</div>
+            <a href={mainScreenshot} target="_blank" rel="noopener noreferrer" title="Click to open full size">
+              <img
+                src={mainScreenshot}
+                alt="page state after action"
+                className="img-fluid rounded border d-block"
+                style={{ maxHeight: 260, width: '100%', objectFit: 'contain', background: '#000' }}
+              />
+            </a>
+            {action.screenshotSha1s.length > 1 && (
+              <div className="d-flex gap-1 mt-1 flex-wrap">
+                {action.screenshotSha1s.slice(1).map(sha1 =>
+                  screenshots[sha1] ? (
+                    <a key={sha1} href={screenshots[sha1]} target="_blank" rel="noopener noreferrer">
+                      <img
+                        src={screenshots[sha1]}
+                        alt="additional screenshot"
+                        style={{ height: 40, width: 72, objectFit: 'cover', borderRadius: 3, border: '1px solid var(--border-color)' }}
+                      />
+                    </a>
+                  ) : null
+                )}
+              </div>
             )}
           </div>
         )}
@@ -256,8 +273,9 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ action, screenshots }) => {
           </div>
         )}
 
-        {/* Timing */}
-        <div className="text-muted" style={{ fontSize: '0.7rem' }}>
+        {/* Timing + page */}
+        <div className="text-muted" style={{ fontSize: '0.68rem' }}>
+          {action.pageId && <span className="me-2 badge bg-secondary fw-normal" style={{ fontSize: '0.65rem' }}>{action.pageId}</span>}
           <span className="me-3">Start: {new Date(action.startTime).toISOString()}</span>
           <span>End: {new Date(action.endTime).toISOString()}</span>
         </div>

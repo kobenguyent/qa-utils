@@ -250,13 +250,23 @@ describe('playwrightTraceReader', () => {
     });
 
     it('handles before entries with missing apiName without crashing', async () => {
-      // Real traces can omit apiName; formatApiName must not return undefined
+      // Real traces can omit apiName; these entries are now filtered out (no apiName + no params = internal event)
+      // An entry with apiName=undefined AND empty params is skipped as an internal event
       const beforeNoApi = { type: 'before', callId: 'c1', startTime: 100, params: {} };
       const afterNoApi = { type: 'after', callId: 'c1', endTime: 200, error: null, log: [] };
       const blob = await buildTraceZip([beforeNoApi, afterNoApi]);
       const result = await parsePlaywrightTrace(makeFile(blob));
+      // Skipped because no apiName and no params — doesn't crash
+      expect(result.actions).toHaveLength(0);
+    });
+
+    it('keeps before entries that have no apiName but do have params', async () => {
+      // If params are present, the entry is not purely internal and should be kept
+      const beforeWithParams = { type: 'before', callId: 'c1', startTime: 100, params: { selector: '#btn' } };
+      const afterWithParams = { type: 'after', callId: 'c1', endTime: 200, error: null, log: [] };
+      const blob = await buildTraceZip([beforeWithParams, afterWithParams]);
+      const result = await parsePlaywrightTrace(makeFile(blob));
       expect(result.actions).toHaveLength(1);
-      // name must be a string (not undefined)
       expect(typeof result.actions[0].name).toBe('string');
     });
 
@@ -420,8 +430,9 @@ describe('playwrightTraceReader', () => {
       expect(getActionLabel(makeAction('page.screenshot', {}))).toBe('Take screenshot');
     });
 
-    it('falls back to action name for unknown actions', () => {
-      expect(getActionLabel(makeAction('page.someUnknown', {}))).toBe('page.someUnknown');
+    it('falls back to formatted apiName for unknown actions', () => {
+      // "page.someUnknown" → "page: someUnknown" (Class: method format)
+      expect(getActionLabel(makeAction('page.someUnknown', {}))).toBe('page: someUnknown');
     });
   });
 

@@ -378,9 +378,13 @@ export async function parsePlaywrightTrace(file: File | Blob): Promise<Playwrigh
 
       screenshotMap.set(after.callId, sha1s);
 
+      // Skip purely internal Playwright events that have no apiName and no params –
+      // they are framework bookkeeping entries that add no value to the user view.
+      if (!before.apiName && Object.keys(before.params ?? {}).length === 0) continue;
+
       const action: TraceAction = {
         callId: after.callId,
-        apiName: before.apiName,
+        apiName: before.apiName ?? '',
         name: formatApiName(before.apiName),
         params: before.params ?? {},
         startTime: before.startTime,
@@ -486,15 +490,20 @@ export async function parsePlaywrightTrace(file: File | Blob): Promise<Playwrigh
     }
   }
 
-  // Attach screencast frames to actions that don't already have screenshots
+  // Attach screencast frames to actions that don't already have screenshots.
+  // Use the most recent frame whose timestamp is ≤ action.endTime so every
+  // action has a "current page state" screenshot when screencast is enabled.
+  const sortedScreencasts = [...screencasts].sort((a, b) => a.timestamp - b.timestamp);
   for (const action of result.actions) {
     if (action.screenshotSha1s.length === 0) {
-      // Find the nearest screencast frame within the action window
-      const frame = screencasts.find(
-        s => s.timestamp >= action.startTime && s.timestamp <= action.endTime
-      );
-      if (frame && result.screenshots[frame.sha1]) {
-        action.screenshotSha1s.push(frame.sha1);
+      // Find the latest screencast frame captured at or before the action ends
+      let best: RawScreencast | undefined;
+      for (const sc of sortedScreencasts) {
+        if (sc.timestamp <= action.endTime) best = sc;
+        else break;
+      }
+      if (best && result.screenshots[best.sha1]) {
+        action.screenshotSha1s.push(best.sha1);
       }
     }
   }
@@ -511,32 +520,60 @@ export function getActionLabel(action: TraceAction): string {
   switch (true) {
     case name.includes('goto'):
       return `Navigate to ${String(p.url ?? '')}`;
+    case name.includes('dblclick') || name.includes('doubleClick'):
+      return `Double-click ${String(p.selector ?? '')}`;
     case name.includes('click'):
       return `Click ${String(p.selector ?? '')}`;
     case name.includes('fill'):
       return `Fill "${String(p.value ?? '')}" in ${String(p.selector ?? '')}`;
     case name.includes('type'):
       return `Type "${String(p.text ?? '')}"`;
-    case name.includes('check'):
-      return `Check ${String(p.selector ?? '')}`;
     case name.includes('uncheck'):
       return `Uncheck ${String(p.selector ?? '')}`;
-    case name.includes('select'):
+    case name.includes('check'):
+      return `Check ${String(p.selector ?? '')}`;
+    case name.includes('selectOption') || name.includes('select'):
       return `Select option in ${String(p.selector ?? '')}`;
     case name.includes('hover'):
       return `Hover ${String(p.selector ?? '')}`;
+    case name.includes('focus'):
+      return `Focus ${String(p.selector ?? '')}`;
     case name.includes('press'):
       return `Press ${String(p.key ?? '')}`;
+    case name.includes('keyboard'):
+      return `Keyboard: ${String(p.key ?? p.text ?? '')}`;
+    case name.includes('waitForLoadState') || name.includes('waitUntil'):
+      return `Wait for load: ${String(p.state ?? '')}`;
     case name.includes('waitFor'):
       return `Wait for ${String(p.selector ?? p.state ?? '')}`;
+    case name.includes('reload'):
+      return 'Reload page';
+    case name.includes('goBack'):
+      return 'Go back';
+    case name.includes('goForward'):
+      return 'Go forward';
     case name.includes('screenshot'):
       return 'Take screenshot';
-    case name.includes('evaluate'):
+    case name.includes('evaluate') || name.includes('evaluateHandle'):
       return 'Evaluate JS';
-    case name.includes('expect'):
-      return `Expect ${String(p.expression ?? '')}`;
+    case name.includes('dispatchEvent'):
+      return `Dispatch ${String(p.type ?? '')} on ${String(p.selector ?? '')}`;
+    case name.includes('expect') || name.includes('assert'):
+      return `Expect ${String(p.expression ?? p.selector ?? '')}`;
+    case name.includes('newPage') || name.includes('newContext'):
+      return action.apiName ? action.apiName : 'New page';
+    case name.includes('close'):
+      return action.apiName ? `Close ${action.apiName.split('.')[0]}` : 'Close';
+    case name.includes('route') || name.includes('unroute'):
+      return `Route ${String(p.url ?? '')}`;
     default:
-      return name || action.apiName || '(unknown)';
+      // Format "Class.method" → "Class: method" for readability
+      if (action.apiName) {
+        const parts = action.apiName.split('.');
+        if (parts.length === 2) return `${parts[0]}: ${parts[1]}`;
+        return action.apiName;
+      }
+      return name || '(internal)';
   }
 }
 
@@ -555,18 +592,25 @@ export function getActionStatusColor(action: TraceAction): string {
 export function getActionIcon(action: TraceAction): string {
   const name = (action.name ?? '').toLowerCase();
   if (name.includes('goto') || name.includes('navigate')) return '🌐';
+  if (name.includes('dblclick') || name.includes('doubleclick')) return '🖱️';
   if (name.includes('click')) return '🖱️';
   if (name.includes('fill') || name.includes('type')) return '⌨️';
   if (name.includes('screenshot')) return '📸';
   if (name.includes('wait')) return '⏳';
   if (name.includes('assert') || name.includes('expect')) return '✅';
+  if (name.includes('uncheck')) return '☑️';
   if (name.includes('check')) return '☑️';
   if (name.includes('select')) return '📋';
   if (name.includes('hover')) return '👆';
-  if (name.includes('press')) return '🔑';
+  if (name.includes('focus')) return '🎯';
+  if (name.includes('press') || name.includes('keyboard')) return '🔑';
   if (name.includes('evaluate')) return '⚙️';
+  if (name.includes('reload') || name.includes('goback') || name.includes('goforward')) return '🔄';
+  if (name.includes('route') || name.includes('unroute')) return '🔀';
   if (name.includes('close')) return '❌';
   if (name.includes('new') || name.includes('launch')) return '🚀';
+  // For any remaining API name (Class.method style), show a generic API icon
+  if (action.apiName) return '⚙️';
   return '▶️';
 }
 
