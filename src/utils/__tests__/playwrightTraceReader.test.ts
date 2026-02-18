@@ -249,6 +249,17 @@ describe('playwrightTraceReader', () => {
       expect(result.networkRequests).toHaveLength(0);
     });
 
+    it('handles before entries with missing apiName without crashing', async () => {
+      // Real traces can omit apiName; formatApiName must not return undefined
+      const beforeNoApi = { type: 'before', callId: 'c1', startTime: 100, params: {} };
+      const afterNoApi = { type: 'after', callId: 'c1', endTime: 200, error: null, log: [] };
+      const blob = await buildTraceZip([beforeNoApi, afterNoApi]);
+      const result = await parsePlaywrightTrace(makeFile(blob));
+      expect(result.actions).toHaveLength(1);
+      // name must be a string (not undefined)
+      expect(typeof result.actions[0].name).toBe('string');
+    });
+
     it('gracefully skips malformed JSONL lines', async () => {
       const zip = new JSZip();
       zip.file(
@@ -424,6 +435,13 @@ describe('playwrightTraceReader', () => {
 
     it('returns play for unknown actions', () => {
       expect(getActionIcon(makeAction('page.unknownAction'))).toBe('▶️');
+    });
+
+    it('does not crash when action.name is empty string (missing apiName)', () => {
+      // Regression: real traces can have before entries without apiName,
+      // resulting in action.name === ''. Must not throw.
+      expect(() => getActionIcon(makeAction(''))).not.toThrow();
+      expect(() => getActionLabel({ ...makeAction(''), apiName: '', params: {} } as TraceAction)).not.toThrow();
     });
   });
 

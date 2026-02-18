@@ -171,8 +171,8 @@ function parseJsonl(text: string): RawEntry[] {
  * Convert a raw apiName like "Page.goto" → "page.goto".
  * Keeps any existing camelCase within the method name.
  */
-function formatApiName(raw: string): string {
-  if (!raw) return raw;
+function formatApiName(raw: string | undefined): string {
+  if (!raw) return '';
   // "Page.goto" → "page.goto"; "BrowserContext.newPage" → "browserContext.newPage"
   return raw.replace(/^([A-Z][a-zA-Z]*)\./, (_m, cls: string) => `${cls.charAt(0).toLowerCase()}${cls.slice(1)}.`);
 }
@@ -438,36 +438,37 @@ export async function parsePlaywrightTrace(file: File | Blob): Promise<Playwrigh
  * Get a human-readable label for an action (suitable for display).
  */
 export function getActionLabel(action: TraceAction): string {
+  const name = action.name ?? '';
   const p = action.params;
   switch (true) {
-    case action.name.includes('goto'):
+    case name.includes('goto'):
       return `Navigate to ${String(p.url ?? '')}`;
-    case action.name.includes('click'):
+    case name.includes('click'):
       return `Click ${String(p.selector ?? '')}`;
-    case action.name.includes('fill'):
+    case name.includes('fill'):
       return `Fill "${String(p.value ?? '')}" in ${String(p.selector ?? '')}`;
-    case action.name.includes('type'):
+    case name.includes('type'):
       return `Type "${String(p.text ?? '')}"`;
-    case action.name.includes('check'):
+    case name.includes('check'):
       return `Check ${String(p.selector ?? '')}`;
-    case action.name.includes('uncheck'):
+    case name.includes('uncheck'):
       return `Uncheck ${String(p.selector ?? '')}`;
-    case action.name.includes('select'):
+    case name.includes('select'):
       return `Select option in ${String(p.selector ?? '')}`;
-    case action.name.includes('hover'):
+    case name.includes('hover'):
       return `Hover ${String(p.selector ?? '')}`;
-    case action.name.includes('press'):
+    case name.includes('press'):
       return `Press ${String(p.key ?? '')}`;
-    case action.name.includes('waitFor'):
+    case name.includes('waitFor'):
       return `Wait for ${String(p.selector ?? p.state ?? '')}`;
-    case action.name.includes('screenshot'):
+    case name.includes('screenshot'):
       return 'Take screenshot';
-    case action.name.includes('evaluate'):
+    case name.includes('evaluate'):
       return 'Evaluate JS';
-    case action.name.includes('expect'):
+    case name.includes('expect'):
       return `Expect ${String(p.expression ?? '')}`;
     default:
-      return action.name;
+      return name || action.apiName || '(unknown)';
   }
 }
 
@@ -484,7 +485,7 @@ export function getActionStatusColor(action: TraceAction): string {
  * Get an emoji icon for an action name.
  */
 export function getActionIcon(action: TraceAction): string {
-  const name = action.name.toLowerCase();
+  const name = (action.name ?? '').toLowerCase();
   if (name.includes('goto') || name.includes('navigate')) return '🌐';
   if (name.includes('click')) return '🖱️';
   if (name.includes('fill') || name.includes('type')) return '⌨️';
