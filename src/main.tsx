@@ -54,6 +54,7 @@ const CommandBook = lazy(() => import('./components/utils/CommandBook.tsx').then
 const KobeanAssistant = lazy(() => import('./components/utils/KobeanAssistant.tsx').then(module => ({ default: module.KobeanAssistant })));
 const ImageEditor = lazy(() => import('./components/utils/ImageEditor.tsx').then(module => ({ default: module.ImageEditor })));
 const SequenceDiagramGenerator = lazy(() => import('./components/utils/SequenceDiagramGenerator.tsx').then(module => ({ default: module.SequenceDiagramGenerator })));
+const PlaywrightTraceViewer = lazy(() => import('./components/utils/PlaywrightTraceViewer.tsx').then(module => ({ default: module.PlaywrightTraceViewer })));
 
 // Component wrapper with suspense for lazy loaded routes
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -264,6 +265,10 @@ const router = createHashRouter([
   {
     path: 'sequence-diagram',
     element: <RouteWrapper><SequenceDiagramGenerator /></RouteWrapper>
+  },
+  {
+    path: 'playwright-trace-viewer',
+    element: <RouteWrapper><PlaywrightTraceViewer /></RouteWrapper>
   },
 ]);
 

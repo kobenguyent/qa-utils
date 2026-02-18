@@ -387,6 +387,14 @@ export const searchData: SearchItem[] = [
     icon: '📊'
   },
   {
+    title: 'Playwright Trace Viewer',
+    description: 'Upload and visualize Playwright trace ZIP files — inspect actions, network requests, and screenshots',
+    path: '#/playwright-trace-viewer',
+    category: 'Developer Tools',
+    keywords: ['playwright', 'trace', 'viewer', 'zip', 'test', 'actions', 'network', 'screenshot', 'debug', 'e2e', 'automation'],
+    icon: '🎭'
+  },
+  {
     title: 'CI/CD Workflow Generator',
     description: 'Generate CI/CD workflows for GitHub Actions, GitLab, and more',
     path: '#/workflow-generator',
