@@ -343,6 +343,14 @@ export const searchData: SearchItem[] = [
     keywords: ['collection', 'postman', 'insomnia', 'thunder', 'client', 'api', 'convert', 'import', 'export', 'variables', 'environment', 'bulk', 'edit'],
     icon: '📦'
   },
+  {
+    title: 'Collection Visualizer',
+    description: 'Visualize REST API collections as an interactive tree — see all requests, folders, and HTTP methods at a glance',
+    path: '#/collection-visualizer',
+    category: 'API Testing',
+    keywords: ['collection', 'visualizer', 'postman', 'insomnia', 'thunder', 'api', 'tree', 'requests', 'folders', 'http', 'methods', 'view', 'explore'],
+    icon: '🗺️'
+  },
   // AI Tools
   {
     title: 'Kobean Assistant',
