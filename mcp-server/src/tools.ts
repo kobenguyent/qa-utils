@@ -419,7 +419,7 @@ export function generateRandomString(length: number = 16): string {
  */
 export function sanitizeHtml(html: string): string {
   let result = html;
-  const scriptPattern = /<script\b[^]*?<\/script\s*>/gi;
+  const scriptPattern = /<script\b[^]*?<\/script[^>]*>/gi;
   const eventDoubleQuote = /\son\w+="[^"]*"/gi;
   const eventSingleQuote = /\son\w+='[^']*'/gi;
 
