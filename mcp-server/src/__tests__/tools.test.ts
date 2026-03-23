@@ -268,6 +268,16 @@ describe('generateSql', () => {
     expect(sql).toContain("'John'");
   });
 
+  it('should escape single quotes in INSERT values', () => {
+    const sql = generateSql({
+      operation: 'INSERT',
+      tableName: 'users',
+      columns: ['name'],
+      values: ["O'Brien"],
+    });
+    expect(sql).toContain("'O''Brien'");
+  });
+
   it('should generate DELETE query', () => {
     const sql = generateSql({
       operation: 'DELETE',

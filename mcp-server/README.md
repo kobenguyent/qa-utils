@@ -16,7 +16,7 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that e
 | `count_characters` | Count characters, words, sentences, lines, and paragraphs |
 | `validate_email` | Validate email address format |
 | `format_json` | Format and validate JSON strings |
-| `decode_jwt` | Decode JWT tokens to inspect header, payload, and expiration |
+| `decode_jwt` | Decode JWT tokens to inspect header, payload, and expiration (**does not verify signatures — do not use for security decisions**) |
 | `generate_sql` | Generate SQL commands (SELECT, INSERT, UPDATE, DELETE, CREATE TABLE) |
 | `convert_color` | Convert colors between hex, RGB, and HSL formats |
 | `generate_random_string` | Generate random alphanumeric strings |

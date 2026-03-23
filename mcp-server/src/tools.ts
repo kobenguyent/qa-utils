@@ -186,6 +186,9 @@ export function formatJson(
 
 /**
  * Decode a JWT token (without verification).
+ * WARNING: This does NOT verify the token signature. Do not use decoded
+ * contents to make security decisions. Use a proper JWT verification
+ * library for that purpose.
  */
 export function decodeJwt(token: string): {
   header: Record<string, unknown> | null;
@@ -241,6 +244,10 @@ export type SqlOperation =
 
 /**
  * Generate SQL commands.
+ *
+ * NOTE: Generated SQL is for development/testing convenience only. Values are
+ * escaped with basic single-quote doubling but this should NOT be relied upon
+ * for production queries. Always use parameterized queries in production code.
  */
 export function generateSql(options: {
   operation: SqlOperation;
@@ -254,6 +261,8 @@ export function generateSql(options: {
   const { operation, tableName, columns, values, whereClause, orderBy, limit } =
     options;
 
+  const escapeValue = (v: string): string => v.replace(/'/g, "''");
+
   switch (operation) {
     case 'SELECT': {
       const cols = columns?.length ? columns.join(', ') : '*';
@@ -265,7 +274,7 @@ export function generateSql(options: {
     }
     case 'INSERT': {
       const cols = columns?.length ? columns.join(', ') : '';
-      const vals = values?.length ? values.map((v) => `'${v}'`).join(', ') : '';
+      const vals = values?.length ? values.map((v) => `'${escapeValue(v)}'`).join(', ') : '';
       return `INSERT INTO ${tableName} (${cols}) VALUES (${vals});`;
     }
     case 'UPDATE': {
@@ -273,7 +282,7 @@ export function generateSql(options: {
         return `-- Error: UPDATE requires columns and values`;
       }
       const sets = columns
-        .map((col, i) => `${col} = '${values[i] ?? ''}'`)
+        .map((col, i) => `${col} = '${escapeValue(values[i] ?? '')}'`)
         .join(', ');
       let sql = `UPDATE ${tableName} SET ${sets}`;
       if (whereClause) sql += ` WHERE ${whereClause}`;
@@ -404,6 +413,11 @@ export function generateRandomString(length: number = 16): string {
 
 /**
  * Sanitize HTML by removing script tags and event handlers.
+ *
+ * NOTE: This is a basic sanitizer for convenience. It removes `<script>` tags
+ * and inline `on*` event handlers but does NOT protect against all XSS vectors
+ * (e.g. `javascript:` URIs, data URIs, or SVG-based attacks). For production
+ * use, prefer a dedicated library such as DOMPurify.
  */
 export function sanitizeHtml(html: string): string {
   return html
