@@ -341,6 +341,11 @@ describe('sanitizeHtml', () => {
     expect(result).toBe('<p>Hello</p>');
   });
 
+  it('should remove script tags with spaces in closing tag', () => {
+    const result = sanitizeHtml('<p>Hello</p><script>alert("xss")</script >');
+    expect(result).toBe('<p>Hello</p>');
+  });
+
   it('should remove event handlers', () => {
     const result = sanitizeHtml('<div onclick="alert(1)">Hello</div>');
     expect(result).toBe('<div>Hello</div>');

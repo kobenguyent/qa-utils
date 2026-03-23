@@ -1,4 +1,4 @@
-import { createHash, randomUUID, randomBytes } from 'node:crypto';
+import { createHash, randomUUID, randomInt } from 'node:crypto';
 
 /**
  * Generate one or more UUIDs.
@@ -55,10 +55,9 @@ export function generatePassword(
   }
 
   const safeLength = Math.max(1, Math.min(length, 256));
-  const bytes = randomBytes(safeLength);
   let password = '';
   for (let i = 0; i < safeLength; i++) {
-    password += charset[bytes[i] % charset.length];
+    password += charset[randomInt(charset.length)];
   }
   return password;
 }
@@ -403,10 +402,9 @@ export function convertColor(input: string): {
 export function generateRandomString(length: number = 16): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   const safeLength = Math.max(1, Math.min(length, 1024));
-  const bytes = randomBytes(safeLength);
   let result = '';
   for (let i = 0; i < safeLength; i++) {
-    result += chars[bytes[i] % chars.length];
+    result += chars[randomInt(chars.length)];
   }
   return result;
 }
@@ -420,8 +418,20 @@ export function generateRandomString(length: number = 16): string {
  * use, prefer a dedicated library such as DOMPurify.
  */
 export function sanitizeHtml(html: string): string {
-  return html
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/\son\w+="[^"]*"/gi, '')
-    .replace(/\son\w+='[^']*'/gi, '');
+  let result = html;
+  const scriptPattern = /<script\b[^]*?<\/script\s*>/gi;
+  const eventDoubleQuote = /\son\w+="[^"]*"/gi;
+  const eventSingleQuote = /\son\w+='[^']*'/gi;
+
+  // Loop to handle nested/recursive patterns
+  let previous: string;
+  do {
+    previous = result;
+    result = result
+      .replace(scriptPattern, '')
+      .replace(eventDoubleQuote, '')
+      .replace(eventSingleQuote, '');
+  } while (result !== previous);
+
+  return result;
 }
