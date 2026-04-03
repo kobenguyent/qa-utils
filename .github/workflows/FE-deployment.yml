@@ -36,6 +36,10 @@ jobs:
         run: npm i
       - name: Build
         run: npm run build:github
+      - name: Build docs
+        run: npm run docs:build
+      - name: Copy docs to dist
+        run: cp -r docs/.vitepress/dist dist/docs
       - name: Upload static files as artifact
         id: deployment
         uses: actions/upload-pages-artifact@v3 # or specific "vX.X.X" version tag for this action

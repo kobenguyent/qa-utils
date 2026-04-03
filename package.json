@@ -27,7 +27,10 @@
     "electron:build:mac": "node scripts/bump-electron-version.cjs && cross-env ELECTRON=true npm run build && electron-builder --mac",
     "electron:build:win": "node scripts/bump-electron-version.cjs && cross-env ELECTRON=true npm run build && electron-builder --win",
     "electron:build:linux": "node scripts/bump-electron-version.cjs && cross-env ELECTRON=true npm run build && electron-builder --linux",
-    "electron:build:all": "node scripts/bump-electron-version.cjs && cross-env ELECTRON=true npm run build && electron-builder -mwl"
+    "electron:build:all": "node scripts/bump-electron-version.cjs && cross-env ELECTRON=true npm run build && electron-builder -mwl",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
     "@imgly/background-removal": "^1.7.0",
@@ -86,6 +89,7 @@
     "typescript": "5.0.2",
     "vite": "4.3.2",
     "vite-plugin-istanbul": "^5.0.0",
+    "vitepress": "^1.6.4",
     "vitest": "^1.0.4",
     "wait-on": "^9.0.3"
   },

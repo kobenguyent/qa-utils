@@ -3,11 +3,11 @@
 [![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://paypal.me/peternguyentr?country.x=DE&locale.x=en_US)
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/peternguyew)
 
-A comprehensive collection of quality assurance tools and utilities designed to enhance your testing workflow. Built with modern React, TypeScript, and optimized for performance with comprehensive test coverage. **Now available as a desktop app for macOS, Windows, and Linux!**
+A comprehensive collection of quality assurance tools and utilities designed to enhance your testing workflow. Built with modern React, TypeScript, and optimized for performance with comprehensive test coverage. **Now available as a desktop app for macOS, Windows, and Linux!** Includes an **MCP server** for AI agent integration and a built-in **Agent Mode** for autonomous multi-step task execution.
 
 > **Disclaimer**: This project references various third-party tools, frameworks, and services for compatibility and integration purposes. All trademarks, service marks, and trade names referenced in this project are the property of their respective owners. This project is not affiliated with, endorsed by, or sponsored by any of the referenced vendors or organizations.
 
-🌐 **[Live Demo](https://kobenguyent.github.io/qa-utils/#/)** | 💻 **Desktop App Available** | 📊 **655 Tests** | 🎯 **Mobile-First Design** | 🤖 **AI-Powered**
+🌐 **[Live Demo](https://kobenguyent.github.io/qa-utils/#/)** | 💻 **Desktop App Available** | 📊 **760+ Tests** | 🎯 **Mobile-First Design** | 🤖 **AI-Powered** | 🔌 **MCP Server**
 
 <img width="1310" height="780" alt="Screenshot 1" src="https://github.com/user-attachments/assets/667bf71d-84cc-4d30-bb1c-7b95fe37ceab" />
 
@@ -160,6 +160,25 @@ Advanced AI chat interface with cutting-edge features:
 - **Model Management**: Fetch and select from available models for each provider
 - **Real-time Statistics**: Monitor cache usage, document count, and token usage
 
+#### 🤖 Agent Mode
+Autonomous AI agent that plans and executes multi-step tasks using QA tools:
+- **Autonomous Execution**: Describe a task and the agent plans & executes tools automatically
+- **Observe-Think-Act Loop**: Iterative reasoning with tool calls until the task is complete
+- **Step-by-Step Timeline**: Visual timeline showing thinking, tool calls, results, and final answer
+- **Preset Task Examples**: Quick-start examples like "Generate a UUID and base64 encode it"
+- **Multi-Provider Support**: Reuses AI provider config from Kobean Assistant (OpenAI, Claude, Gemini, Azure, Ollama)
+- **Configurable Iterations**: Set max iterations (1–25) for complex multi-step tasks
+- **Error Handling**: Graceful recovery when tools fail, with alternative approach suggestions
+
+#### 🔌 MCP Server
+[Model Context Protocol](https://modelcontextprotocol.io/) server exposing QA tools to AI agents like Claude:
+- **15 Tools Available**: UUID generation, Base64 encoding/decoding, password generation, timestamp conversion, hashing, lorem ipsum, character counting, email validation, JSON formatting, JWT decoding, SQL generation, color conversion, random strings, and HTML sanitization
+- **Stdio Transport**: Standard MCP transport for local integration with Claude Desktop and other MCP clients
+- **Shared Tool Logic**: Platform-agnostic implementations shared between MCP server and UI to avoid duplication
+- **Easy Setup**: Simple configuration for Claude Desktop, Cursor, or any MCP-compatible client
+
+See [MCP Server README](mcp-server/README.md) for detailed setup instructions.
+
 #### 🌠 Additional Tools
 - **UUID Generator**: Generate UUIDs v1, v4 with copy functionality
 - **JIRA Comment Generator**: Format comments for JIRA with markdown support
@@ -194,13 +213,16 @@ Advanced AI chat interface with cutting-edge features:
 - **Mobile-first responsive design** with Bootstrap
 
 ### 🧪 Comprehensive Testing
-- **273 test cases** across 18 test files
+- **760+ test cases** across multiple test files
 - **Component testing** with React Testing Library
 - **Utility function testing** with comprehensive coverage
+- **Shared tools testing** for platform-agnostic implementations
+- **Agent executor testing** for autonomous task execution
 - **AI/ML features testing** with MCP, conversation management, and knowledge base tests
 - **Multi-provider AI testing** for OpenAI, Anthropic, Google, Azure, and Ollama
 - **Token optimization testing** for cost-effective AI usage
 - **WebSocket & gRPC client testing** with mocked services
+- **MCP server testing** with 48 dedicated tests
 - **Integration tests** demonstrating real-world usage patterns
 - **CI/CD integration** with automated testing on PRs
 - **Coverage reporting** with detailed metrics
@@ -353,6 +375,84 @@ const stats = manager.getStats();
 ```
 
 For the complete MCP Tool Management Guide, click "📖 View Complete MCP Tools Guide" in the AI Chat interface.
+
+## 🔌 MCP Server Setup
+
+QA Utils includes a standalone MCP server that exposes 15 QA tools to AI assistants like Claude Desktop, Cursor, and any MCP-compatible client.
+
+### Quick Setup
+
+```bash
+cd mcp-server
+npm install
+npm run build
+```
+
+### Usage with Claude Desktop
+
+Add to your Claude Desktop config:
+
+**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "qa-utils": {
+      "command": "node",
+      "args": ["/absolute/path/to/qa-utils/mcp-server/dist/mcp-server/src/index.js"]
+    }
+  }
+}
+```
+
+### Available MCP Tools
+
+| Tool | Description |
+|------|-------------|
+| `generate_uuid` | Generate random UUIDs (v4) |
+| `base64_encode` / `base64_decode` | Base64 encoding and decoding |
+| `generate_password` | Secure random password generation |
+| `convert_timestamp` | Unix timestamp conversion |
+| `generate_hash` | Cryptographic hashes (MD5, SHA-1, SHA-256, SHA-384, SHA-512) |
+| `generate_lorem_ipsum` | Placeholder text generation |
+| `count_characters` | Text analysis (characters, words, sentences, lines, paragraphs) |
+| `validate_email` | Email format validation |
+| `format_json` | JSON formatting and validation |
+| `decode_jwt` | JWT token decoding (does not verify signatures) |
+| `generate_sql` | SQL command generation (SELECT, INSERT, UPDATE, DELETE, CREATE TABLE) |
+| `convert_color` | Color conversion between hex, RGB, and HSL |
+| `generate_random_string` | Random alphanumeric string generation |
+| `sanitize_html` | HTML sanitization (script/event handler removal) |
+
+For more details, see the [MCP Server README](mcp-server/README.md).
+
+## 🤖 Agent Mode
+
+Agent Mode (`/agent` route) turns QA Utils into an autonomous AI agent. Describe a task in natural language and the agent will plan and execute the necessary tools to accomplish it.
+
+### How It Works
+
+1. **Describe your task** — e.g., "Generate a UUID and base64 encode it"
+2. **Agent plans** — The AI provider decides which tools to call
+3. **Tools execute** — The agent calls tools from the registry and collects results
+4. **Loop continues** — Results feed back to the AI until the task is complete
+5. **Final answer** — The agent presents the completed result
+
+### Features
+
+- **Observe-Think-Act loop** with configurable max iterations (1–25)
+- **Step-by-step timeline** showing thinking, tool calls, results, and final answer
+- **Preset examples** to get started quickly
+- **Shared AI config** — reuses provider settings from Kobean Assistant
+- **All providers supported** — OpenAI, Claude, Gemini, Azure OpenAI, Ollama
+
+### Getting Started with Agent Mode
+
+1. Configure an AI provider in [Kobean Assistant](#-ai-provider-setup) (`/kobean`)
+2. Navigate to Agent Mode (`/agent`)
+3. Enter a task description or pick a preset example
+4. Click **▶ Run Agent** and watch the step-by-step execution
 
 ## 🚀 Getting Started
 
@@ -564,7 +664,9 @@ See `build/README.md` for detailed instructions on creating icons.
 - **Frontend**: React 18, TypeScript, Bootstrap 5
 - **Build System**: Vite with SWC for fast builds
 - **Desktop App**: Electron for cross-platform desktop distribution
-- **Testing**: Vitest + React Testing Library (655 tests)
+- **MCP Server**: `@modelcontextprotocol/sdk` with stdio transport for AI agent integration
+- **AI Agent**: Built-in autonomous agent with observe-think-act execution loop
+- **Testing**: Vitest + React Testing Library (760+ tests)
 - **Package Manager**: npm (with Bun support)
 - **Code Quality**: ESLint, TypeScript strict mode
 - **CI/CD**: GitHub Actions with automated testing

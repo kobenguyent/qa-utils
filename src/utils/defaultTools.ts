@@ -4,6 +4,11 @@
  */
 
 import { ToolDefinition, ToolRegistry, ToolResult } from './toolRegistry';
+import {
+    generateLoremIpsum,
+    countTextStats,
+    convertTimestamp as sharedConvertTimestamp,
+} from './sharedTools';
 
 // Helper function to generate UUID using browser's native crypto API
 function generateUUID(): string {
@@ -208,49 +213,22 @@ const timestampConverter: ToolDefinition = {
     execute: async (params): Promise<ToolResult> => {
         const value = params.value as string | number;
 
-        // If no value provided, return current timestamp
+        const result = sharedConvertTimestamp(value || undefined);
+
         if (!value) {
-            const now = Math.floor(Date.now() / 1000);
-            const dateStr = new Date().toISOString();
             return {
                 success: true,
-                data: { timestamp: now, date: dateStr },
-                message: `Current timestamp: ${now}\nDate: ${dateStr}`,
-                copyable: now.toString(),
-            };
-        }
-
-        // Try to parse as timestamp
-        const numValue = typeof value === 'number' ? value : parseInt(value, 10);
-
-        if (!isNaN(numValue)) {
-            // Detect if it's in seconds or milliseconds
-            const timestamp = numValue > 1e12 ? numValue : numValue * 1000;
-            const date = new Date(timestamp);
-
-            return {
-                success: true,
-                data: { timestamp: Math.floor(timestamp / 1000), date: date.toISOString() },
-                message: `Timestamp: ${Math.floor(timestamp / 1000)}\nDate: ${date.toISOString()}\nLocal: ${date.toLocaleString()}`,
-                copyable: date.toISOString(),
-            };
-        }
-
-        // Try to parse as date string
-        const date = new Date(value);
-        if (!isNaN(date.getTime())) {
-            const timestamp = Math.floor(date.getTime() / 1000);
-            return {
-                success: true,
-                data: { timestamp, date: date.toISOString() },
-                message: `Timestamp: ${timestamp}\nDate: ${date.toISOString()}`,
-                copyable: timestamp.toString(),
+                data: { timestamp: result.timestamp, date: result.iso },
+                message: `Current timestamp: ${result.timestamp}\nDate: ${result.iso}`,
+                copyable: result.timestamp.toString(),
             };
         }
 
         return {
-            success: false,
-            error: 'Could not parse input as timestamp or date',
+            success: true,
+            data: { timestamp: result.timestamp, date: result.iso },
+            message: `Timestamp: ${result.timestamp}\nDate: ${result.iso}\nLocal: ${result.local}`,
+            copyable: result.iso,
         };
     },
 };
@@ -339,9 +317,7 @@ const loremIpsumGenerator: ToolDefinition = {
     execute: async (params): Promise<ToolResult> => {
         const paragraphs = (params.quantity as number) || 1;
 
-        const loremText = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.`;
-
-        const result = Array(paragraphs).fill(loremText).join('\n\n');
+        const result = generateLoremIpsum(paragraphs);
 
         return {
             success: true,
@@ -370,24 +346,19 @@ const characterCounter: ToolDefinition = {
     execute: async (params): Promise<ToolResult> => {
         const text = (params.value as string) || '';
 
-        const characters = text.length;
+        const stats = countTextStats(text);
         const charactersNoSpaces = text.replace(/\s/g, '').length;
-        const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-        const sentences = text.split(/[.!?]+/).filter(s => s.trim()).length;
-        const paragraphs = text.split(/\n\n+/).filter(p => p.trim()).length;
-
-        const stats = {
-            characters,
-            charactersNoSpaces,
-            words,
-            sentences,
-            paragraphs,
-        };
 
         return {
             success: true,
-            data: stats,
-            message: `Characters: ${characters} (${charactersNoSpaces} without spaces)\nWords: ${words}\nSentences: ${sentences}\nParagraphs: ${paragraphs}`,
+            data: {
+                characters: stats.characters,
+                charactersNoSpaces,
+                words: stats.words,
+                sentences: stats.sentences,
+                paragraphs: stats.paragraphs,
+            },
+            message: `Characters: ${stats.characters} (${charactersNoSpaces} without spaces)\nWords: ${stats.words}\nSentences: ${stats.sentences}\nParagraphs: ${stats.paragraphs}`,
         };
     },
 };
@@ -618,6 +589,15 @@ const navigableTools: ToolDefinition[] = [
         keywords: ['test', 'generate', 'template', 'jest', 'mocha', 'vitest'],
         examples: ['create test file', 'generate tests', 'test template'],
         route: '/test-file-generator',
+    },
+    {
+        id: 'agent-mode',
+        name: 'Agent Mode',
+        description: 'Autonomous AI agent that plans and executes multi-step tasks using QA tools',
+        category: 'ai',
+        keywords: ['agent', 'autonomous', 'ai', 'auto', 'plan', 'execute', 'multi-step', 'workflow'],
+        examples: ['open agent', 'run agent', 'agent mode', 'autonomous task'],
+        route: '/agent',
     },
 ];
 

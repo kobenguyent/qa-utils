@@ -55,6 +55,7 @@ const KobeanAssistant = lazy(() => import('./components/utils/KobeanAssistant.ts
 const ImageEditor = lazy(() => import('./components/utils/ImageEditor.tsx').then(module => ({ default: module.ImageEditor })));
 const SequenceDiagramGenerator = lazy(() => import('./components/utils/SequenceDiagramGenerator.tsx').then(module => ({ default: module.SequenceDiagramGenerator })));
 const CollectionVisualizer = lazy(() => import('./components/utils/CollectionVisualizer.tsx').then(module => ({ default: module.CollectionVisualizer })));
+const AgentMode = lazy(() => import('./components/utils/AgentMode.tsx').then(module => ({ default: module.AgentMode })));
 
 // Component wrapper with suspense for lazy loaded routes
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -269,6 +270,10 @@ const router = createHashRouter([
   {
     path: 'collection-visualizer',
     element: <RouteWrapper><CollectionVisualizer /></RouteWrapper>
+  },
+  {
+    path: 'agent',
+    element: <RouteWrapper><AgentMode /></RouteWrapper>
   },
 ]);
 
