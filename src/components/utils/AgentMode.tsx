@@ -119,7 +119,7 @@ export function AgentMode() {
     <Container className="py-4 agent-page">
       <h2 className="mb-1">🤖 Agent Mode</h2>
       <p className="text-muted mb-4">
-        Describe a task and the agent will autonomously plan &amp; execute tools to accomplish it.
+        Describe a task and the agent will autonomously plan & execute tools to accomplish it.
       </p>
 
       {/* AI config warning */}
@@ -218,7 +218,7 @@ export function AgentMode() {
               </Row>
               <p className="text-muted small mb-0">
                 AI provider settings are shared with Kobean Assistant.{' '}
-                <a href="#/kobean">Change provider &amp; model →</a>
+                <a href="#/kobean">Change provider & model →</a>
               </p>
             </div>
           </Collapse>
