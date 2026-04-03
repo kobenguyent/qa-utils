@@ -590,6 +590,15 @@ const navigableTools: ToolDefinition[] = [
         examples: ['create test file', 'generate tests', 'test template'],
         route: '/test-file-generator',
     },
+    {
+        id: 'agent-mode',
+        name: 'Agent Mode',
+        description: 'Autonomous AI agent that plans and executes multi-step tasks using QA tools',
+        category: 'ai',
+        keywords: ['agent', 'autonomous', 'ai', 'auto', 'plan', 'execute', 'multi-step', 'workflow'],
+        examples: ['open agent', 'run agent', 'agent mode', 'autonomous task'],
+        route: '/agent',
+    },
 ];
 
 /**
