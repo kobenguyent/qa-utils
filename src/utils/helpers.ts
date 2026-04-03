@@ -1,3 +1,5 @@
+import { sanitizeHtml } from './sharedTools';
+
 /**
  * Format a date to a human-readable string
  */
@@ -34,15 +36,11 @@ export const generateRandomString = (length: number): string => {
 };
 
 /**
- * Sanitize HTML content by removing script tags and other dangerous content
+ * Sanitize HTML content by removing script tags and other dangerous content.
+ * Delegates to the shared implementation in sharedTools.
  */
 export const sanitizeHTML = (html: string): string => {
-  // Basic sanitization - remove script tags and event handlers
-  return html
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/on\w+="[^"]*"/gi, '')
-    .replace(/on\w+='[^']*'/gi, '')
-    .replace(/\s+>/g, '>'); // Clean up extra spaces before closing >
+  return sanitizeHtml(html);
 };
 
 /**

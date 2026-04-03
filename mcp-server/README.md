@@ -55,7 +55,7 @@ Add the following to your Claude Desktop configuration file:
   "mcpServers": {
     "qa-utils": {
       "command": "node",
-      "args": ["/absolute/path/to/qa-utils/mcp-server/dist/index.js"]
+      "args": ["/absolute/path/to/qa-utils/mcp-server/dist/mcp-server/src/index.js"]
     }
   }
 }
@@ -68,10 +68,14 @@ After adding the configuration, restart Claude Desktop. The qa-utils tools will 
 The server uses stdio transport, which is the standard for local MCP servers. Any MCP-compatible client can connect by spawning the process:
 
 ```bash
-node /path/to/qa-utils/mcp-server/dist/index.js
+node /path/to/qa-utils/mcp-server/dist/mcp-server/src/index.js
 ```
 
 ## Development
+
+The MCP server shares platform-agnostic tool logic with the main UI via
+`src/utils/sharedTools.ts`. Node.js-specific wrappers (crypto, Buffer) live
+in `mcp-server/src/tools.ts`.
 
 ```bash
 # Watch mode for TypeScript compilation

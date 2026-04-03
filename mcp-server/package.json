@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "description": "MCP server for qa-utils - enables AI agents to interact with QA utility tools",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/mcp-server/src/index.js",
   "bin": {
-    "qa-utils-mcp": "dist/index.js"
+    "qa-utils-mcp": "dist/mcp-server/src/index.js"
   },
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "node dist/mcp-server/src/index.js",
     "dev": "tsc --watch",
     "test": "vitest run",
     "test:watch": "vitest"
