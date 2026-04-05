@@ -10,6 +10,7 @@ export interface WorkflowConfig {
   dronePipelineType?: string;
   npmPublish: boolean;
   customFileName?: string;
+  includeBetterleaks?: boolean;
 }
 
 export interface GeneratedFile {
@@ -124,6 +125,54 @@ export function validateConfiguration(config: WorkflowConfig): WorkflowConfig {
   
   return config;
 }
+
+// Betterleaks version and checksum constants
+const BETTERLEAKS_VERSION = '1.1.1';
+const BETTERLEAKS_CHECKSUM = 'd590d5f051e49f6769c61dc8cebbce947b20a4042e2915ee234760f81a01c8c4';
+
+// Generates a standalone GitHub Actions workflow file for betterleaks
+const generateBetterleaksGitHubWorkflow = (): GeneratedFile => {
+  const content = `name: Betterleaks Secret Scan
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  betterleaks:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      BETTERLEAKS_VERSION: "${BETTERLEAKS_VERSION}"
+      BETTERLEAKS_CHECKSUM: "${BETTERLEAKS_CHECKSUM}"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install betterleaks
+        run: |
+          curl -sSfLO "https://github.com/betterleaks/betterleaks/releases/download/v\${BETTERLEAKS_VERSION}/betterleaks_\${BETTERLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "\${BETTERLEAKS_CHECKSUM}  betterleaks_\${BETTERLEAKS_VERSION}_linux_x64.tar.gz" | sha256sum -c -
+          tar -xzf "betterleaks_\${BETTERLEAKS_VERSION}_linux_x64.tar.gz"
+          sudo mv betterleaks /usr/local/bin/betterleaks
+
+      - name: Scan git commit history with betterleaks
+        run: betterleaks git -v --no-banner .
+
+      - name: Scan codebase (working tree) with betterleaks
+        run: betterleaks dir -v --no-banner .
+`;
+
+  return {
+    name: 'betterleaks.yml',
+    content,
+    description: 'Betterleaks secret scanning workflow',
+    path: '.github/workflows/'
+  };
+};
 
 // Template generation functions
 const generateGitHubWorkflow = (config: WorkflowConfig): GeneratedFile[] => {
@@ -240,10 +289,30 @@ jobs:
     });
   }
 
+  // Betterleaks secret scanning workflow (optional)
+  if (config.includeBetterleaks) {
+    files.push(generateBetterleaksGitHubWorkflow());
+  }
+
   return files;
 };
 
 const generateGitLabWorkflow = (config: WorkflowConfig): GeneratedFile[] => {
+  const betterleaksJob = config.includeBetterleaks ? `
+betterleaks_scan:
+  stage: test
+  needs: []
+  script:
+    - BETTERLEAKS_VERSION="${BETTERLEAKS_VERSION}"
+    - BETTERLEAKS_CHECKSUM="${BETTERLEAKS_CHECKSUM}"
+    - curl -sSfLO "https://github.com/betterleaks/betterleaks/releases/download/v\${BETTERLEAKS_VERSION}/betterleaks_\${BETTERLEAKS_VERSION}_linux_x64.tar.gz"
+    - echo "\${BETTERLEAKS_CHECKSUM}  betterleaks_\${BETTERLEAKS_VERSION}_linux_x64.tar.gz" | sha256sum -c -
+    - tar -xzf "betterleaks_\${BETTERLEAKS_VERSION}_linux_x64.tar.gz"
+    - mv betterleaks /usr/local/bin/betterleaks
+    - betterleaks git -v --no-banner .
+    - betterleaks dir -v --no-banner .
+` : '';
+
   const content = `image: node:${config.nodeVersion}
 
 stages:
@@ -276,7 +345,7 @@ ${config.testType === 'e2e' ? `  artifacts:
       - screenshots/
     expire_in: 1 week` : ''}
   coverage: '/Lines\\s*:\\s*(\\d+\\.?\\d*)%/'
-
+${betterleaksJob}
 build_project:
   stage: build
   script:
@@ -300,6 +369,28 @@ build_project:
 };
 
 const generateAzureWorkflow = (config: WorkflowConfig): GeneratedFile[] => {
+  const betterleaksStage = config.includeBetterleaks ? `
+- stage: SecurityScan
+  displayName: 'Security Scan Stage'
+  jobs:
+  - job: BetterleaksScan
+    displayName: 'Betterleaks Secret Scan'
+    steps:
+    - checkout: self
+      fetchDepth: 0
+
+    - script: |
+        BETTERLEAKS_VERSION="${BETTERLEAKS_VERSION}"
+        BETTERLEAKS_CHECKSUM="${BETTERLEAKS_CHECKSUM}"
+        curl -sSfLO "https://github.com/betterleaks/betterleaks/releases/download/v\${BETTERLEAKS_VERSION}/betterleaks_\${BETTERLEAKS_VERSION}_linux_x64.tar.gz"
+        echo "\${BETTERLEAKS_CHECKSUM}  betterleaks_\${BETTERLEAKS_VERSION}_linux_x64.tar.gz" | sha256sum -c -
+        tar -xzf "betterleaks_\${BETTERLEAKS_VERSION}_linux_x64.tar.gz"
+        sudo mv betterleaks /usr/local/bin/betterleaks
+        betterleaks git -v --no-banner .
+        betterleaks dir -v --no-banner .
+      displayName: 'Run betterleaks secret scan'
+` : '';
+
   const content = `trigger:
 - main
 - develop
@@ -345,7 +436,7 @@ ${config.testType === 'e2e' ? `    - task: PublishTestResults@2
       inputs:
         codeCoverageTool: 'Cobertura'
         summaryFileLocation: '**/coverage/cobertura-coverage.xml'` : ''}
-
+${betterleaksStage}
 - stage: Build
   displayName: 'Build Stage'
   condition: and(succeeded(), in(variables['Build.SourceBranch'], 'refs/heads/main', 'refs/heads/develop'))
@@ -385,6 +476,23 @@ const generateJenkinsWorkflow = (config: WorkflowConfig): GeneratedFile[] => {
   const buildNumVar = '${env.BUILD_NUMBER}';
   const buildUrlVar = '${env.BUILD_URL}';
   const emailVar = '${env.CHANGE_AUTHOR_EMAIL}';
+
+  const betterleaksStage = config.includeBetterleaks ? `
+        stage('Security Scan') {
+            steps {
+                sh '''
+                    BETTERLEAKS_VERSION="${BETTERLEAKS_VERSION}"
+                    BETTERLEAKS_CHECKSUM="${BETTERLEAKS_CHECKSUM}"
+                    curl -sSfLO "https://github.com/betterleaks/betterleaks/releases/download/v\${BETTERLEAKS_VERSION}/betterleaks_\${BETTERLEAKS_VERSION}_linux_x64.tar.gz"
+                    echo "\${BETTERLEAKS_CHECKSUM}  betterleaks_\${BETTERLEAKS_VERSION}_linux_x64.tar.gz" | sha256sum -c -
+                    tar -xzf "betterleaks_\${BETTERLEAKS_VERSION}_linux_x64.tar.gz"
+                    sudo mv betterleaks /usr/local/bin/betterleaks
+                    betterleaks git -v --no-banner .
+                    betterleaks dir -v --no-banner .
+                '''
+            }
+        }
+` : '';
   
   const content = `pipeline {
     agent any
@@ -449,7 +557,7 @@ ${config.testType === 'e2e' ? `                    // Archive test artifacts
                 }
             }
         }
-
+${betterleaksStage}
         stage('Build') {
             when {
                 anyOf {
@@ -497,6 +605,20 @@ ${config.testType === 'e2e' ? `                    // Archive test artifacts
 };
 
 const generateBitbucketWorkflow = (config: WorkflowConfig): GeneratedFile[] => {
+  const betterleaksStep = config.includeBetterleaks ? `
+    - step:
+        name: Betterleaks Secret Scan
+        script:
+          - BETTERLEAKS_VERSION="${BETTERLEAKS_VERSION}"
+          - BETTERLEAKS_CHECKSUM="${BETTERLEAKS_CHECKSUM}"
+          - curl -sSfLO "https://github.com/betterleaks/betterleaks/releases/download/v\${BETTERLEAKS_VERSION}/betterleaks_\${BETTERLEAKS_VERSION}_linux_x64.tar.gz"
+          - echo "\${BETTERLEAKS_CHECKSUM}  betterleaks_\${BETTERLEAKS_VERSION}_linux_x64.tar.gz" | sha256sum -c -
+          - tar -xzf "betterleaks_\${BETTERLEAKS_VERSION}_linux_x64.tar.gz"
+          - mv betterleaks /usr/local/bin/betterleaks
+          - betterleaks git -v --no-banner .
+          - betterleaks dir -v --no-banner .
+` : '';
+
   const content = `image: node:${config.nodeVersion}
 
 pipelines:
@@ -513,7 +635,7 @@ pipelines:
 ${config.testType === 'e2e' ? `        artifacts:
           - test-results/**
           - screenshots/**` : ''}
-
+${betterleaksStep}
   branches:
     main:
       - step:
@@ -527,7 +649,7 @@ ${config.testType === 'e2e' ? `        artifacts:
 ${config.testType === 'e2e' ? `          artifacts:
             - test-results/**
             - screenshots/**` : ''}
-      - step:
+${betterleaksStep}      - step:
           name: Build and Deploy
           script:
             - npm run build || echo "No build script found"
@@ -547,7 +669,7 @@ ${config.testType === 'e2e' ? `          artifacts:
 ${config.testType === 'e2e' ? `          artifacts:
             - test-results/**
             - screenshots/**` : ''}
-
+${betterleaksStep}
 definitions:
   caches:
     node: node_modules
