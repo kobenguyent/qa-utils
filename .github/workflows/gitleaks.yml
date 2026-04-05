@@ -26,3 +26,24 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_SCAN_MODE: detect
           GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
+
+  betterleaks:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install betterleaks
+        run: |
+          curl -sSfL https://github.com/betterleaks/betterleaks/releases/download/v1.1.1/betterleaks_1.1.1_linux_x64.tar.gz | tar -xz
+          sudo mv betterleaks /usr/local/bin/betterleaks
+
+      - name: Scan git commit history with betterleaks
+        run: betterleaks git --no-banner .
+
+      - name: Scan codebase (working tree) with betterleaks
+        run: betterleaks dir --no-banner .
