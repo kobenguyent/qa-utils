@@ -1,0 +1,8 @@
+title = "Betterleaks custom configuration"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Ignore test directories"
+paths = ['''__tests__''']
