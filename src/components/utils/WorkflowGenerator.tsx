@@ -21,7 +21,8 @@ export const WorkflowGenerator: React.FC = () => {
     testType: 'api',
     nodeVersion: '18',
     runTestCommand: 'npm test',
-    npmPublish: false
+    npmPublish: false,
+    includeBetterleaks: false
   });
 
   const [generatedWorkflow, setGeneratedWorkflow] = useState<GeneratedWorkflow | null>(null);
@@ -268,6 +269,23 @@ export const WorkflowGenerator: React.FC = () => {
                       </Col>
                     </Row>
                   )}
+
+                  <Row>
+                    <Col md={12}>
+                      <Form.Group className="mb-3">
+                        <Form.Check
+                          type="checkbox"
+                          id="include-betterleaks"
+                          label="Include betterleaks secret scanning"
+                          checked={config.includeBetterleaks}
+                          onChange={(e) => handleConfigChange('includeBetterleaks', e.target.checked)}
+                        />
+                        <Form.Text className="text-muted">
+                          Adds a betterleaks secret scanning step to detect leaked credentials and sensitive data
+                        </Form.Text>
+                      </Form.Group>
+                    </Col>
+                  </Row>
 
                   <div className="d-flex gap-2">
                     <Button

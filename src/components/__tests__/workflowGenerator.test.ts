@@ -306,6 +306,163 @@ describe('Workflow Generator', () => {
     });
   });
 
+  describe('betterleaks integration', () => {
+    it('should generate betterleaks workflow file for GitHub Actions when enabled', () => {
+      const config: WorkflowConfig = {
+        pipelineType: 'github',
+        testType: 'api',
+        nodeVersion: '18',
+        runTestCommand: 'npm test',
+        npmPublish: false,
+        includeBetterleaks: true
+      };
+
+      const result = generateWorkflowContent(config);
+
+      const betterleaksFile = result.files.find(f => f.name === 'betterleaks.yml');
+      expect(betterleaksFile).toBeDefined();
+      expect(betterleaksFile?.content).toContain('Betterleaks Secret Scan');
+      expect(betterleaksFile?.content).toContain('betterleaks git -v --no-banner .');
+      expect(betterleaksFile?.content).toContain('betterleaks dir -v --no-banner .');
+      expect(betterleaksFile?.content).toContain('Install betterleaks');
+      expect(betterleaksFile?.path).toBe('.github/workflows/');
+    });
+
+    it('should not include betterleaks file when disabled for GitHub Actions', () => {
+      const config: WorkflowConfig = {
+        pipelineType: 'github',
+        testType: 'api',
+        nodeVersion: '18',
+        runTestCommand: 'npm test',
+        npmPublish: false,
+        includeBetterleaks: false
+      };
+
+      const result = generateWorkflowContent(config);
+
+      const betterleaksFile = result.files.find(f => f.name === 'betterleaks.yml');
+      expect(betterleaksFile).toBeUndefined();
+    });
+
+    it('should include betterleaks job in GitLab CI when enabled', () => {
+      const config: WorkflowConfig = {
+        pipelineType: 'gitlab',
+        testType: 'api',
+        nodeVersion: '18',
+        runTestCommand: 'npm test',
+        npmPublish: false,
+        includeBetterleaks: true
+      };
+
+      const result = generateWorkflowContent(config);
+
+      expect(result.files[0].content).toContain('betterleaks_scan');
+      expect(result.files[0].content).toContain('betterleaks git -v --no-banner .');
+      expect(result.files[0].content).toContain('betterleaks dir -v --no-banner .');
+    });
+
+    it('should not include betterleaks job in GitLab CI when disabled', () => {
+      const config: WorkflowConfig = {
+        pipelineType: 'gitlab',
+        testType: 'api',
+        nodeVersion: '18',
+        runTestCommand: 'npm test',
+        npmPublish: false,
+        includeBetterleaks: false
+      };
+
+      const result = generateWorkflowContent(config);
+
+      expect(result.files[0].content).not.toContain('betterleaks_scan');
+    });
+
+    it('should include betterleaks stage in Azure DevOps when enabled', () => {
+      const config: WorkflowConfig = {
+        pipelineType: 'azure',
+        testType: 'api',
+        nodeVersion: '18',
+        runTestCommand: 'npm test',
+        npmPublish: false,
+        includeBetterleaks: true
+      };
+
+      const result = generateWorkflowContent(config);
+
+      expect(result.files[0].content).toContain('SecurityScan');
+      expect(result.files[0].content).toContain('Betterleaks Secret Scan');
+      expect(result.files[0].content).toContain('betterleaks git -v --no-banner .');
+    });
+
+    it('should include betterleaks stage in Jenkins when enabled', () => {
+      const config: WorkflowConfig = {
+        pipelineType: 'jenkins',
+        testType: 'api',
+        nodeVersion: '18',
+        runTestCommand: 'npm test',
+        npmPublish: false,
+        includeBetterleaks: true
+      };
+
+      const result = generateWorkflowContent(config);
+
+      expect(result.files[0].content).toContain("stage('Security Scan')");
+      expect(result.files[0].content).toContain('betterleaks git -v --no-banner .');
+      expect(result.files[0].content).toContain('betterleaks dir -v --no-banner .');
+    });
+
+    it('should include betterleaks step in Bitbucket Pipelines when enabled', () => {
+      const config: WorkflowConfig = {
+        pipelineType: 'bitbucket',
+        testType: 'api',
+        nodeVersion: '18',
+        runTestCommand: 'npm test',
+        npmPublish: false,
+        includeBetterleaks: true
+      };
+
+      const result = generateWorkflowContent(config);
+
+      expect(result.files[0].content).toContain('Betterleaks Secret Scan');
+      expect(result.files[0].content).toContain('betterleaks git -v --no-banner .');
+      expect(result.files[0].content).toContain('betterleaks dir -v --no-banner .');
+    });
+
+    it('should include betterleaks version and checksum in GitHub Actions workflow', () => {
+      const config: WorkflowConfig = {
+        pipelineType: 'github',
+        testType: 'api',
+        nodeVersion: '18',
+        runTestCommand: 'npm test',
+        npmPublish: false,
+        includeBetterleaks: true
+      };
+
+      const result = generateWorkflowContent(config);
+
+      const betterleaksFile = result.files.find(f => f.name === 'betterleaks.yml');
+      expect(betterleaksFile?.content).toContain('BETTERLEAKS_VERSION: "1.1.1"');
+      expect(betterleaksFile?.content).toContain('BETTERLEAKS_CHECKSUM:');
+    });
+
+    it('should generate GitHub Actions workflow with both NPM publish and betterleaks', () => {
+      const config: WorkflowConfig = {
+        pipelineType: 'github',
+        testType: 'api',
+        nodeVersion: '18',
+        runTestCommand: 'npm test',
+        npmPublish: true,
+        includeBetterleaks: true
+      };
+
+      const result = generateWorkflowContent(config);
+
+      expect(result.files).toHaveLength(3);
+      expect(result.files.map(f => f.name)).toContain('ci.yml');
+      expect(result.files.map(f => f.name)).toContain('npm-publish.yml');
+      expect(result.files.map(f => f.name)).toContain('betterleaks.yml');
+    });
+  });
+
   describe('getPlacementInstructions', () => {
     it('should return correct instructions for GitHub Actions', () => {
       const instructions = getPlacementInstructions('github');
