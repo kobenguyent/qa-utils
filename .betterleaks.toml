@@ -8,4 +8,5 @@ description = "Ignore test directories and files with intentional sample data"
 paths = [
   '''__tests__''',
   '''src/components/utils/JWTDebugger\.tsx''',
+  '''README\.md''',
 ]
