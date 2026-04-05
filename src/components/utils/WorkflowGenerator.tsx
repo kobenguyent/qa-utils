@@ -276,12 +276,12 @@ export const WorkflowGenerator: React.FC = () => {
                         <Form.Check
                           type="checkbox"
                           id="include-betterleaks"
-                          label="Include Betterleaks secret scanning"
+                          label="Include betterleaks secret scanning"
                           checked={config.includeBetterleaks}
                           onChange={(e) => handleConfigChange('includeBetterleaks', e.target.checked)}
                         />
                         <Form.Text className="text-muted">
-                          Adds a Betterleaks secret scanning step to detect leaked credentials and sensitive data
+                          Adds a betterleaks secret scanning step to detect leaked credentials and sensitive data
                         </Form.Text>
                       </Form.Group>
                     </Col>
