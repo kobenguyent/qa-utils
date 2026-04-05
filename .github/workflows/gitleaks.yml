@@ -31,6 +31,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      BETTERLEAKS_VERSION: "1.1.1"
+      BETTERLEAKS_CHECKSUM: "d590d5f051e49f6769c61dc8cebbce947b20a4042e2915ee234760f81a01c8c4"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -39,7 +42,9 @@ jobs:
 
       - name: Install betterleaks
         run: |
-          curl -sSfL https://github.com/betterleaks/betterleaks/releases/download/v1.1.1/betterleaks_1.1.1_linux_x64.tar.gz | tar -xz
+          curl -sSfLO "https://github.com/betterleaks/betterleaks/releases/download/v${BETTERLEAKS_VERSION}/betterleaks_${BETTERLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${BETTERLEAKS_CHECKSUM}  betterleaks_${BETTERLEAKS_VERSION}_linux_x64.tar.gz" | sha256sum -c -
+          tar -xzf "betterleaks_${BETTERLEAKS_VERSION}_linux_x64.tar.gz"
           sudo mv betterleaks /usr/local/bin/betterleaks
 
       - name: Scan git commit history with betterleaks
