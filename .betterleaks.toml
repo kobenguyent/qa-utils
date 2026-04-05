@@ -1,0 +1,12 @@
+title = "Betterleaks custom configuration"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Ignore test directories and files with intentional sample data"
+paths = [
+  '''__tests__''',
+  '''src/components/utils/JWTDebugger\.tsx''',
+  '''README\.md''',
+]
