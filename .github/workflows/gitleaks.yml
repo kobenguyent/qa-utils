@@ -48,7 +48,7 @@ jobs:
           sudo mv betterleaks /usr/local/bin/betterleaks
 
       - name: Scan git commit history with betterleaks
-        run: betterleaks git --no-banner .
+        run: betterleaks git -v --no-banner .
 
       - name: Scan codebase (working tree) with betterleaks
-        run: betterleaks dir --no-banner .
+        run: betterleaks dir -v --no-banner .
