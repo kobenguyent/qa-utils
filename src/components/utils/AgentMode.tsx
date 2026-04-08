@@ -49,6 +49,7 @@ export function AgentMode() {
   const [apiKey] = useSessionStorage<string>('aiChat_apiKey', '');
   const [endpoint] = useSessionStorage<string>('aiChat_endpoint', 'http://localhost:11434');
   const [model] = useSessionStorage<string>('aiChat_model', '');
+  const [obfuscateSensitiveData, setObfuscateSensitiveData] = useSessionStorage<boolean>('aiChat_obfuscateSensitiveData', false);
 
   // Advanced settings
   const [maxIterations, setMaxIterations] = useState(10);
@@ -78,6 +79,7 @@ export function AgentMode() {
       apiKey,
       maxIterations,
       temperature: 0.3,
+      obfuscateSensitiveData,
     };
 
     try {
@@ -96,7 +98,7 @@ export function AgentMode() {
     } finally {
       setRunning(false);
     }
-  }, [task, running, provider, endpoint, model, apiKey, maxIterations, scrollToBottom]);
+  }, [task, running, provider, endpoint, model, apiKey, maxIterations, obfuscateSensitiveData, scrollToBottom]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -220,6 +222,20 @@ export function AgentMode() {
                 AI provider settings are shared with Kobean Assistant.{' '}
                 <a href="#/kobean">Change provider & model →</a>
               </p>
+              <Form.Group className="mt-2">
+                <Form.Check
+                  type="checkbox"
+                  id="agent-obfuscate-sensitive"
+                  label="🔒 Obfuscate sensitive data before sending to AI"
+                  checked={obfuscateSensitiveData}
+                  onChange={(e) => setObfuscateSensitiveData(e.target.checked)}
+                  disabled={running}
+                  className="small"
+                />
+                <Form.Text className="text-muted">
+                  Replaces emails, phone numbers, API keys, and other sensitive values with placeholders
+                </Form.Text>
+              </Form.Group>
             </div>
           </Collapse>
 
