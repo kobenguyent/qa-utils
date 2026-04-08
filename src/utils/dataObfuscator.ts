@@ -281,8 +281,13 @@ export function summarizeDetections(detectedItems: DetectedItem[]): string {
     email: 'email addresses',
     phone: 'phone numbers',
     creditCard: 'credit card numbers',
+    ssn: 'SSNs',
+    apiKey: 'API keys/tokens',
+    jwt: 'JWT tokens',
     ipAddress: 'IP addresses',
     urlCredentials: 'URLs with credentials',
+    awsKey: 'AWS keys',
+    privateKey: 'private keys',
   };
 
   return Object.entries(counts)
