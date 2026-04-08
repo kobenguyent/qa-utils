@@ -35,6 +35,7 @@ export interface AgentConfig {
   apiKey?: string;
   maxIterations?: number;
   temperature?: number;
+  obfuscateSensitiveData?: boolean;
 }
 
 export interface AgentRunResult {
@@ -161,6 +162,7 @@ export async function runAgent(
     apiKey: config.apiKey,
     temperature: config.temperature ?? 0.3,
     maxTokens: 2048,
+    obfuscateSensitiveData: config.obfuscateSensitiveData,
   };
 
   for (let i = 0; i < maxIter; i++) {

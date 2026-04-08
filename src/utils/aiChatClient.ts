@@ -4,6 +4,8 @@
  * Enhanced with knowledge management, token optimization, and prompt guidance
  */
 
+import { obfuscateMessages } from './dataObfuscator';
+
 export type AIProvider = 'openai' | 'anthropic' | 'google' | 'azure-openai' | 'ollama';
 
 export interface ChatMessage {
@@ -23,6 +25,7 @@ export interface ChatConfig {
   azureApiVersion?: string; // For Azure OpenAI
   optimizeTokens?: boolean; // Enable token optimization
   systemPrompt?: string; // Custom system prompt for guidance
+  obfuscateSensitiveData?: boolean; // Replace sensitive values with placeholders before sending
 }
 
 export interface ChatResponse {
@@ -613,6 +616,12 @@ export async function sendChatMessage(
   // Add system prompt if provided and not present
   if (config.systemPrompt) {
     processedMessages = enhanceMessagesWithSystemPrompt(processedMessages, config.systemPrompt);
+  }
+
+  // Obfuscate sensitive data before sending to the AI provider
+  if (config.obfuscateSensitiveData) {
+    const { messages: obfuscated } = obfuscateMessages(processedMessages);
+    processedMessages = obfuscated;
   }
 
   switch (config.provider) {

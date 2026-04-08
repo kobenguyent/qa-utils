@@ -52,6 +52,7 @@ export function KobeanAssistant() {
     const [model, setModel] = useSessionStorage<string>('aiChat_model', '');
     const [temperature, setTemperature] = useSessionStorage<number>('aiChat_temperature', 0.7);
     const [optimizeTokens, setOptimizeTokens] = useSessionStorage<boolean>('aiChat_optimizeTokens', true);
+    const [obfuscateSensitiveData, setObfuscateSensitiveData] = useSessionStorage<boolean>('aiChat_obfuscateSensitiveData', false);
     const [systemPromptType, setSystemPromptType] = useSessionStorage<'default' | 'technical' | 'creative'>('aiChat_systemPromptType', 'default');
     const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
     const [configExpanded, setConfigExpanded] = useSessionStorage<boolean>('aiChat_configExpanded', false);
@@ -201,6 +202,7 @@ export function KobeanAssistant() {
             temperature,
             timeout: 60000,
             optimizeTokens,
+            obfuscateSensitiveData,
             systemPrompt: getSystemPrompt(systemPromptType),
         };
     };
@@ -785,6 +787,21 @@ export function KobeanAssistant() {
                         />
                         <Form.Text className="text-muted d-block">
                           Automatically removes redundant whitespace and compresses messages
+                        </Form.Text>
+                      </Form.Group>
+
+                      <Form.Group className="mb-3">
+                        <Form.Check
+                          type="checkbox"
+                          id="kobean-obfuscate-sensitive"
+                          label="🔒 Obfuscate sensitive data before sending to AI"
+                          checked={obfuscateSensitiveData}
+                          onChange={(e) => setObfuscateSensitiveData(e.target.checked)}
+                          disabled={loading}
+                        />
+                        <Form.Text className="text-muted d-block">
+                          Replaces emails, phone numbers, credit cards, API keys, and other sensitive values
+                          with placeholders (e.g. <code>[EMAIL_1]</code>) to reduce accidental data leakage
                         </Form.Text>
                       </Form.Group>
 
