@@ -22,11 +22,11 @@ export const VoicePalaceWalk: React.FC = () => {
 
   const isSupported =
     typeof window !== 'undefined' &&
-    (window.SpeechRecognition || (window as Window & { webkitSpeechRecognition?: typeof SpeechRecognition }).webkitSpeechRecognition);
+    (window.SpeechRecognition || window.webkitSpeechRecognition);
 
   const startListening = useCallback(() => {
     const SpeechRecognitionAPI =
-      window.SpeechRecognition || (window as Window & { webkitSpeechRecognition?: typeof SpeechRecognition }).webkitSpeechRecognition;
+      window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognitionAPI) {
       setError('Speech recognition is not supported in this browser.');
       return;
