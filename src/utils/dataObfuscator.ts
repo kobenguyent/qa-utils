@@ -100,8 +100,8 @@ const PATTERN_DEFS: PatternDef[] = [
   {
     type: 'creditCard',
     label: 'CARD',
-    // 13-19 digit card numbers (Luhn-pattern groups with optional separators)
-    regex: /\b(?:\d[ -]?){13,18}\d\b/g,
+    // 12-19 digit card numbers (Luhn-pattern groups with optional separators)
+    regex: /\b(?:\d[ -]?){11,18}\d\b/g,
   },
   {
     type: 'ssn',
