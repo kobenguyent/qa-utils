@@ -2,6 +2,33 @@ import React, { useState, useRef, useCallback } from 'react';
 import { Card, Button, Badge, Alert } from 'react-bootstrap';
 import { matchPalaceCommand, isPalaceNavigationIntent } from '../../utils/palaceVoiceNav';
 
+// Local Web Speech API type declarations (not always available in TypeScript lib)
+interface SpeechRecognitionEvent extends Event {
+  readonly results: { [index: number]: { [index: number]: { transcript: string } } };
+  readonly resultIndex: number;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  readonly error: string;
+  readonly message: string;
+}
+
+interface SpeechRecognitionInstance {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  onstart: (() => void) | null;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  abort(): void;
+}
+
+interface SpeechRecognitionConstructor {
+  new (): SpeechRecognitionInstance;
+}
+
 interface CommandLog {
   transcript: string;
   matched: boolean;
@@ -18,15 +45,21 @@ export const VoicePalaceWalk: React.FC = () => {
   const [status, setStatus] = useState('');
   const [logs, setLogs] = useState<CommandLog[]>([]);
   const [error, setError] = useState('');
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
 
-  const isSupported =
-    typeof window !== 'undefined' &&
-    (window.SpeechRecognition || (window as Window & { webkitSpeechRecognition?: typeof SpeechRecognition }).webkitSpeechRecognition);
+  const getSpeechRecognitionAPI = (): SpeechRecognitionConstructor | undefined => {
+    if (typeof window === 'undefined') return undefined;
+    const w = window as Window & {
+      SpeechRecognition?: SpeechRecognitionConstructor;
+      webkitSpeechRecognition?: SpeechRecognitionConstructor;
+    };
+    return w.SpeechRecognition ?? w.webkitSpeechRecognition;
+  };
+
+  const isSupported = !!getSpeechRecognitionAPI();
 
   const startListening = useCallback(() => {
-    const SpeechRecognitionAPI =
-      window.SpeechRecognition || (window as Window & { webkitSpeechRecognition?: typeof SpeechRecognition }).webkitSpeechRecognition;
+    const SpeechRecognitionAPI = getSpeechRecognitionAPI();
     if (!SpeechRecognitionAPI) {
       setError('Speech recognition is not supported in this browser.');
       return;
