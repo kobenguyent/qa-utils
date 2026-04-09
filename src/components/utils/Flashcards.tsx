@@ -36,6 +36,7 @@ export const Flashcards: React.FC = () => {
 
   useEffect(() => {
     refreshDue(cards);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const currentCard: FlashCard | undefined = dueCards[currentIndex];

@@ -30,6 +30,7 @@ export const WorkflowGenerator: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [showInstructions, setShowInstructions] = useState<boolean>(false);
   const [templates, setTemplates] = useState<AvailableTemplates | null>(null);
+  const [chainMode, setChainMode] = useState(false);
   const ai = useAIAssistant();
 
   // Load available templates on component mount
@@ -76,8 +77,8 @@ export const WorkflowGenerator: React.FC = () => {
       // Generate workflow content
       const result = generateWorkflowContent(config);
       setGeneratedWorkflow(result);
-    } catch (err: any) {
-      setError(err.message || 'Failed to generate workflow. Please check your configuration.');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Failed to generate workflow. Please check your configuration.');
       console.error('Error generating workflow:', err);
     } finally {
       setIsGenerating(false);
@@ -99,6 +100,33 @@ export const WorkflowGenerator: React.FC = () => {
   const getInstructions = useCallback((pipelineType: string) => {
     return getPlacementInstructions(pipelineType);
   }, []);
+
+  // Parse YAML-ish content into association chain steps
+  const buildAssociationChain = (content: string): string[] => {
+    const steps: string[] = [];
+    const lines = content.split('\n');
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      // Extract meaningful step lines: job names, run commands, uses actions
+      if (/^\s*(name|run|uses):\s/.test(line)) {
+        const value = trimmed.replace(/^(name|run|uses):\s*/, '').replace(/^['"]|['"]$/g, '').trim();
+        if (value && value.length > 2) steps.push(value);
+      }
+    }
+    // Deduplicate and limit
+    return [...new Set(steps)].slice(0, 12);
+  };
+
+  const CHAIN_TRANSITIONS = [
+    '→ which triggers',
+    '→ leading to',
+    '→ followed by',
+    '→ then',
+    '→ next up',
+    '→ which enables',
+    '→ completing with',
+  ];
 
   if (!templates) {
     return (
@@ -315,23 +343,66 @@ export const WorkflowGenerator: React.FC = () => {
 
             {generatedWorkflow && (
               <Card>
-                <Card.Header className="d-flex justify-content-between align-items-center">
+                <Card.Header className="d-flex justify-content-between align-items-center flex-wrap gap-2">
                   <h3 className="h5 mb-0">
                     ✅ Generated Workflow Files 
                     <Badge bg="secondary" className="ms-2">
                       {generatedWorkflow.files.length} file{generatedWorkflow.files.length !== 1 ? 's' : ''}
                     </Badge>
                   </h3>
-                  <div>
+                  <div className="d-flex gap-2 align-items-center flex-wrap">
                     {getInstructions(generatedWorkflow.pipelineType).folder && (
                       <Badge bg="info">
                         📁 {getInstructions(generatedWorkflow.pipelineType).folder}
                       </Badge>
                     )}
+                    <Button
+                      variant={chainMode ? 'warning' : 'outline-secondary'}
+                      size="sm"
+                      onClick={() => setChainMode(c => !c)}
+                      aria-label={chainMode ? 'Switch to code view' : 'Switch to association chain view'}
+                    >
+                      {chainMode ? '🔗 Chain View ON' : '🔗 Chain View'}
+                    </Button>
                   </div>
                 </Card.Header>
                 <Card.Body>
-                  {generatedWorkflow.files.map((file, index) => (
+                  {chainMode ? (
+                    <div>
+                      <p className="text-muted small mb-3">
+                        <strong>🔗 Association Chain</strong> — your workflow as a linked narrative, easier to mentally rehearse:
+                      </p>
+                      {generatedWorkflow.files.map((file, fileIdx) => {
+                        const steps = buildAssociationChain(file.content);
+                        return (
+                          <div key={fileIdx} className={fileIdx > 0 ? 'mt-4' : ''}>
+                            <h6>📄 {file.name}</h6>
+                            {steps.length === 0 ? (
+                              <p className="text-muted small">No steps extracted.</p>
+                            ) : (
+                              <div className="d-flex flex-column gap-2">
+                                {steps.map((step, i) => (
+                                  <div key={i} className="d-flex align-items-start gap-2">
+                                    <Badge bg="primary" style={{ minWidth: 26, textAlign: 'center' }}>{i + 1}</Badge>
+                                    <div>
+                                      <strong>{step}</strong>
+                                      {i < steps.length - 1 && (
+                                        <div className="text-muted small fst-italic">
+                                          {CHAIN_TRANSITIONS[i % CHAIN_TRANSITIONS.length]}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <>
+                    {generatedWorkflow.files.map((file, index) => (
                     <div key={index} className={index > 0 ? 'mt-4' : ''}>
                       <div className="d-flex justify-content-between align-items-center mb-2">
                         <h4 className="h6 mb-0">
@@ -356,6 +427,8 @@ export const WorkflowGenerator: React.FC = () => {
                       </pre>
                     </div>
                   ))}
+                    </>
+                  )}
                 </Card.Body>
               </Card>
             )}

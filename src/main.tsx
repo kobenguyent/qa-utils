@@ -56,6 +56,10 @@ const ImageEditor = lazy(() => import('./components/utils/ImageEditor.tsx').then
 const SequenceDiagramGenerator = lazy(() => import('./components/utils/SequenceDiagramGenerator.tsx').then(module => ({ default: module.SequenceDiagramGenerator })));
 const CollectionVisualizer = lazy(() => import('./components/utils/CollectionVisualizer.tsx').then(module => ({ default: module.CollectionVisualizer })));
 const AgentMode = lazy(() => import('./components/utils/AgentMode.tsx').then(module => ({ default: module.AgentMode })));
+const QAPalace = lazy(() => import('./components/utils/QAPalace.tsx').then(module => ({ default: module.QAPalace })));
+const Flashcards = lazy(() => import('./components/utils/Flashcards.tsx').then(module => ({ default: module.Flashcards })));
+const CoveragePalace = lazy(() => import('./components/utils/CoveragePalace.tsx').then(module => ({ default: module.CoveragePalace })));
+const MyPalace = lazy(() => import('./components/utils/MyPalace.tsx').then(module => ({ default: module.MyPalace })));
 
 // Component wrapper with suspense for lazy loaded routes
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -274,6 +278,22 @@ const router = createHashRouter([
   {
     path: 'agent',
     element: <RouteWrapper><AgentMode /></RouteWrapper>
+  },
+  {
+    path: 'palace',
+    element: <RouteWrapper><QAPalace /></RouteWrapper>
+  },
+  {
+    path: 'flashcards',
+    element: <RouteWrapper><Flashcards /></RouteWrapper>
+  },
+  {
+    path: 'coverage-palace',
+    element: <RouteWrapper><CoveragePalace /></RouteWrapper>
+  },
+  {
+    path: 'my-palace',
+    element: <RouteWrapper><MyPalace /></RouteWrapper>
   },
 ]);
 

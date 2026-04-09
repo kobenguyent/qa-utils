@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Container, Card, Badge, Row, Col, Button } from 'react-bootstrap';
 import { searchData } from '../../utils/searchData';
 import { addAnchor, isAnchored, removeAnchor, ROOM_OPTIONS } from '../../utils/palaceStorage';
+import { VoicePalaceWalk } from './VoicePalaceWalk';
 
 interface PalaceRoom {
   category: string;
@@ -65,7 +66,14 @@ export const QAPalace: React.FC = () => {
           Walk through the QA Palace — each room holds a set of tools, spatially grouped so your
           memory can navigate by place. Click any tool to enter its room.
         </p>
+        <div className="d-flex gap-2 justify-content-center flex-wrap">
+          <Button variant="outline-primary" href="#/my-palace" size="sm">🏠 My Palace</Button>
+          <Button variant="outline-success" href="#/flashcards" size="sm">🃏 Flashcards</Button>
+          <Button variant="outline-info" href="#/coverage-palace" size="sm">🗺️ Coverage Palace</Button>
+        </div>
       </div>
+
+      <VoicePalaceWalk />
 
       {PALACE_ROOMS.map(room => {
         const tools = searchData.filter(item => item.category === room.category);
