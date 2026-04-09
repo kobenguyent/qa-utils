@@ -49,6 +49,13 @@ describe('dataObfuscator', () => {
       expect(result.detectedItems[0].type).toBe('creditCard');
     });
 
+    it('should obfuscate a 12-digit card number', () => {
+      const result = obfuscateText('my card is 411111111111');
+      expect(result.obfuscatedText).not.toContain('411111111111');
+      expect(result.obfuscatedText).toContain('[CARD_1]');
+      expect(result.detectedItems[0].type).toBe('creditCard');
+    });
+
     it('should obfuscate a social security number', () => {
       const result = obfuscateText('SSN: 123-45-6789');
       expect(result.obfuscatedText).toContain('[SSN_1]');

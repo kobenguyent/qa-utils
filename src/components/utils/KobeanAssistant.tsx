@@ -123,8 +123,9 @@ export function KobeanAssistant() {
             aiEndpoint: endpoint,
             aiModel: model || getDefaultModel(provider).id,
             aiApiKey: apiKey || undefined,
+            obfuscateSensitiveData,
         });
-    }, [provider, apiKey, endpoint, model]);
+    }, [provider, apiKey, endpoint, model, obfuscateSensitiveData]);
 
     // Restore knowledge base documents from session storage on mount
     useEffect(() => {
