@@ -134,8 +134,5 @@ export function matchPalaceCommand(transcript: string): PalaceNavCommand | null 
  */
 export function isPalaceNavigationIntent(transcript: string): boolean {
   const lower = transcript.toLowerCase();
-  return (
-    /take me to|navigate to|go to|open|show me|what'?s in|enter the|walk to/.test(lower) ||
-    /take me to|navigate to|go to|open|show me|enter the|walk to/.test(lower)
-  );
+  return /take me to|navigate to|go to|open|show me|what'?s in|enter the|walk to/.test(lower);
 }

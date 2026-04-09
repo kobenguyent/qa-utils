@@ -35,8 +35,8 @@ export const Flashcards: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    // Only run on mount — cards from localStorage are stable at init
     refreshDue(cards);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const currentCard: FlashCard | undefined = dueCards[currentIndex];
