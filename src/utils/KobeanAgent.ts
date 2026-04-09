@@ -15,6 +15,7 @@ export interface KobeanConfig {
     aiApiKey?: string;
     enableVoice?: boolean;
     systemPrompt?: string;
+    obfuscateSensitiveData?: boolean;
 }
 
 /**
@@ -32,6 +33,7 @@ export function getAiChatSessionConfig(): KobeanConfig {
         const apiKey = window.sessionStorage.getItem('aiChat_apiKey');
         const endpoint = window.sessionStorage.getItem('aiChat_endpoint');
         const model = window.sessionStorage.getItem('aiChat_model');
+        const obfuscate = window.sessionStorage.getItem('aiChat_obfuscateSensitiveData');
 
         const config: KobeanConfig = {};
 
@@ -46,6 +48,9 @@ export function getAiChatSessionConfig(): KobeanConfig {
         }
         if (model) {
             config.aiModel = JSON.parse(model) as string;
+        }
+        if (obfuscate !== null) {
+            config.obfuscateSensitiveData = JSON.parse(obfuscate) as boolean;
         }
 
         return config;
@@ -307,6 +312,7 @@ export class KobeanAgent {
                 apiKey: this.config.aiApiKey,
                 temperature: 0.7,
                 maxTokens: 1000,
+                obfuscateSensitiveData: this.config.obfuscateSensitiveData,
             };
 
             const response = await sendChatMessage(messages, chatConfig);
