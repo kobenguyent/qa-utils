@@ -2,37 +2,7 @@
  * Voice Interface for Kobean AI Assistant
  * Uses Web Speech API for voice input/output
  */
-
-// Web Speech API type declarations
-interface SpeechRecognitionEvent extends Event {
-    resultIndex: number;
-    results: SpeechRecognitionResultList;
-}
-
-interface SpeechRecognitionErrorEvent extends Event {
-    error: string;
-    message: string;
-}
-
-interface SpeechRecognitionInterface extends EventTarget {
-    continuous: boolean;
-    interimResults: boolean;
-    lang: string;
-    onstart: (() => void) | null;
-    onend: (() => void) | null;
-    onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
-    onresult: ((event: SpeechRecognitionEvent) => void) | null;
-    start(): void;
-    stop(): void;
-    abort(): void;
-}
-
-declare global {
-    interface Window {
-        SpeechRecognition: new () => SpeechRecognitionInterface;
-        webkitSpeechRecognition: new () => SpeechRecognitionInterface;
-    }
-}
+// Web Speech API global types are declared in src/vite-env.d.ts
 
 export interface VoiceConfig {
     language?: string;
@@ -60,7 +30,7 @@ type StateChangeCallback = (state: Partial<VoiceState>) => void;
  * Voice Interface Class
  */
 export class VoiceInterface {
-    private recognition: SpeechRecognitionInterface | null = null;
+    private recognition: SpeechRecognition | null = null;
 
     private synthesis: SpeechSynthesis | null = null;
     private config: VoiceConfig;
@@ -113,28 +83,27 @@ export class VoiceInterface {
 
         if (!SpeechRecognitionAPI) return;
 
-        this.recognition = new SpeechRecognitionAPI();
-        this.recognition.continuous = this.config.continuous!;
-        this.recognition.interimResults = this.config.interimResults!;
-        this.recognition.lang = this.config.language!;
+        const recognition = new SpeechRecognitionAPI();
+        recognition.continuous = this.config.continuous!;
+        recognition.interimResults = this.config.interimResults!;
+        recognition.lang = this.config.language!;
 
-
-        this.recognition.onstart = () => {
+        recognition.onstart = () => {
             this.updateState({ isListening: true, error: undefined });
         };
 
-        this.recognition.onend = () => {
+        recognition.onend = () => {
             this.updateState({ isListening: false });
         };
 
-        this.recognition.onerror = (event) => {
+        recognition.onerror = (event) => {
             this.updateState({
                 isListening: false,
                 error: `Speech recognition error: ${event.error}`
             });
         };
 
-        this.recognition.onresult = (event) => {
+        recognition.onresult = (event) => {
             let interimTranscript = '';
             let finalTranscript = '';
 
@@ -159,6 +128,8 @@ export class VoiceInterface {
                 this.updateState({ interimTranscript });
             }
         };
+
+        this.recognition = recognition;
     }
 
     /**
