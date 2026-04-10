@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import {Container, Image, Row, Col, Button} from "react-bootstrap";
+import {Container, Image, Row, Col, Button, Card, Badge} from "react-bootstrap";
 import qaHeroImage from '../assets/qa-hero.svg'
 import { getRandomTool } from '../utils/randomTool';
 import { SearchItem } from '../utils/searchData';
 import { getRandomQuote, Quote } from '../utils/quotes';
+import { loadAnchors, PalaceAnchor } from '../utils/palaceStorage';
 
 export const Home: React.FC = () => {
   const [randomTool, setRandomTool] = useState<SearchItem | null>(null);
   const [quote, setQuote] = useState<Quote | null>(null);
+  const [anchors, setAnchors] = useState<PalaceAnchor[]>([]);
 
   // Common card style for quote and random tool sections
   const cardStyle = {
@@ -20,6 +22,7 @@ export const Home: React.FC = () => {
     // Get a random tool and quote on component mount
     setRandomTool(getRandomTool());
     setQuote(getRandomQuote());
+    setAnchors(loadAnchors());
   }, []);
 
   const handleNewRandomTool = () => {
@@ -98,6 +101,46 @@ export const Home: React.FC = () => {
                     >
                       🔄 Try Another
                     </Button>
+                  </div>
+                </div>
+              )}
+
+              {anchors.length > 0 && (
+                <div className="mt-4 p-3 text-start" style={cardStyle}>
+                  <div className="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-1">
+                    <h3 className="h5 mb-0">⚓ My Palace</h3>
+                    <a href="#/my-palace" className="small" style={{ color: 'var(--primary)' }}>View all →</a>
+                  </div>
+                  <div className="d-flex flex-wrap gap-2">
+                    {anchors.slice(0, 8).map(anchor => (
+                      <a
+                        key={anchor.id}
+                        href={anchor.toolPath}
+                        className="text-decoration-none"
+                        aria-label={`Open ${anchor.toolTitle}`}
+                      >
+                        <Card
+                          className="d-flex flex-row align-items-center gap-1 px-2 py-1"
+                          style={{
+                            backgroundColor: 'var(--bg)',
+                            border: '1px solid var(--border-color)',
+                            fontSize: '0.8rem',
+                            color: 'var(--text)',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <span>{anchor.roomIcon}</span>
+                          <span>{anchor.toolIcon}</span>
+                          <span className="fw-semibold">{anchor.toolTitle}</span>
+                          <Badge bg="light" text="dark" style={{ fontSize: '0.65rem' }}>{anchor.roomName}</Badge>
+                        </Card>
+                      </a>
+                    ))}
+                    {anchors.length > 8 && (
+                      <a href="#/my-palace" className="small align-self-center" style={{ color: 'var(--muted)' }}>
+                        +{anchors.length - 8} more
+                      </a>
+                    )}
                   </div>
                 </div>
               )}

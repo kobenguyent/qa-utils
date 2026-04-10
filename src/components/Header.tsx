@@ -195,6 +195,19 @@ export const Header: React.FC = () => {
               <NavDropdown.Item href="#/sip">📡 SIP</NavDropdown.Item>
               <NavDropdown.Divider />
               <NavDropdown.Item href="#/ctfl">🎓 ISTQB CTFL</NavDropdown.Item>
+              <NavDropdown.Item href="#/flashcards">🃏 Flashcards</NavDropdown.Item>
+            </NavDropdown>
+
+            {/* Memory Palace */}
+            <NavDropdown
+              title="🏛️ Palace"
+              id="nav-dropdown-palace"
+              aria-label="Memory Palace menu"
+            >
+              <NavDropdown.Item href="#/palace">🗺️ QA Palace</NavDropdown.Item>
+              <NavDropdown.Item href="#/my-palace">🏠 My Palace</NavDropdown.Item>
+              <NavDropdown.Item href="#/flashcards">🃏 Flashcards</NavDropdown.Item>
+              <NavDropdown.Item href="#/coverage-palace">🗺️ Coverage Palace</NavDropdown.Item>
             </NavDropdown>
           </Nav>
 

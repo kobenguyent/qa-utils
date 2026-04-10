@@ -411,7 +411,39 @@ export const searchData: SearchItem[] = [
     category: 'ISTQB',
     keywords: ['istqb', 'ctfl', 'certification', 'exam', 'practice', 'test', 'foundation', 'level'],
     icon: '📚'
-  }
+  },
+  {
+    title: 'QA Palace',
+    description: 'Spatial tool map — browse all QA Utils tools organised into themed palace rooms.',
+    path: '#/palace',
+    category: 'Navigation',
+    keywords: ['palace', 'map', 'tools', 'rooms', 'spatial', 'memory', 'discover'],
+    icon: '🏛️'
+  },
+  {
+    title: 'My Palace',
+    description: 'Your personal pinboard of favourite tools, organised into custom palace rooms.',
+    path: '#/my-palace',
+    category: 'Navigation',
+    keywords: ['palace', 'pinned', 'saved', 'favourites', 'workflow', 'personal'],
+    icon: '🏠'
+  },
+  {
+    title: 'Flashcards',
+    description: 'Spaced repetition flashcards for QA concepts using the SM-2 algorithm.',
+    path: '#/flashcards',
+    category: 'ISTQB',
+    keywords: ['flashcard', 'spaced repetition', 'sm2', 'review', 'qa terms', 'memory'],
+    icon: '🃏'
+  },
+  {
+    title: 'Coverage Palace',
+    description: 'Visual heatmap of your test coverage across unit, integration, E2E, security, and more.',
+    path: '#/coverage-palace',
+    category: 'Testing Tools',
+    keywords: ['coverage', 'palace', 'heatmap', 'unit', 'integration', 'e2e', 'security', 'spatial'],
+    icon: '🗺️'
+  },
 ];
 
 /**
