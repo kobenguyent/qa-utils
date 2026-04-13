@@ -1,0 +1,45 @@
+{
+  "name": "qautils-cli",
+  "version": "1.0.0",
+  "description": "Command-line interface for QA Utils — utility tools for testing and automation workflows",
+  "type": "module",
+  "bin": {
+    "qautils": "dist/src/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/src/index.js",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext ts --report-unused-disable-directives --max-warnings 0"
+  },
+  "keywords": [
+    "qa",
+    "testing",
+    "cli",
+    "utilities",
+    "jwt",
+    "uuid",
+    "hash",
+    "base64",
+    "automation",
+    "sdet"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^8.4.1",
+    "chalk": "^5.3.0",
+    "commander": "^12.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@vitest/coverage-v8": "^1.0.4",
+    "typescript": "^5.0.2",
+    "vitest": "^1.0.4"
+  }
+}
