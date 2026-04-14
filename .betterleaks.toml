@@ -10,4 +10,5 @@ paths = [
   '''src/utils/__tests__/dataObfuscator\.test\.ts''',
   '''README\.md''',
   '''api/src/routes/analysers\.ts''',
+  '''src/components/utils/JWTDebugger\.tsx''',
 ]
