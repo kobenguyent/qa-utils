@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import path from 'node:path';
@@ -78,7 +80,49 @@ export const swaggerSpec = swaggerJsdoc(swaggerOptions);
 export function createApp() {
   const app = express();
 
-  app.use(cors());
+  // ── Security headers (helmet) ───────────────────────────────────────────────
+  app.use(
+    helmet({
+      // Relax CSP for Swagger UI which loads external resources
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", 'data:', 'https:'],
+        },
+      },
+    }),
+  );
+
+  // ── CORS ─────────────────────────────────────────────────────────────────────
+  const allowedOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(',')
+    : ['http://localhost:3333', 'http://localhost:5173', 'http://localhost:4173'];
+
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        // Allow requests with no origin (curl, Postman, server-to-server)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) return callback(null, true);
+        callback(new Error(`CORS: origin '${origin}' not allowed`));
+      },
+      methods: ['GET', 'POST'],
+      allowedHeaders: ['Content-Type'],
+    }),
+  );
+
+  // ── Rate limiting ─────────────────────────────────────────────────────────────
+  const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: parseInt(process.env.RATE_LIMIT_MAX ?? '300', 10),
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please try again later.' },
+  });
+  app.use('/api', limiter);
+
   app.use(express.json({ limit: '1mb' }));
 
   // ── Swagger UI ──────────────────────────────────────────────────────────────
