@@ -68,7 +68,7 @@ const swaggerOptions: swaggerJsdoc.Options = {
     },
   },
   // Scan route files for @openapi JSDoc comments
-  apis: [path.join(__dirname, 'routes/*.js'), path.join(__dirname, 'routes/*.ts'), path.join(__dirname, 'app.ts')],
+  apis: [path.join(__dirname, 'routes/*.js'), path.join(__dirname, 'routes/*.ts'), __filename],
 };
 
 export const swaggerSpec = swaggerJsdoc(swaggerOptions);
