@@ -1,182 +1,202 @@
 /**
- * qautils-cli — Interactive TUI Mode
- *
- * Launched when `qautils` is run with no arguments (or with -i / --interactive).
- * Provides a beautiful menu-driven interface to all 14 tools.
+ * qautils-cli — Interactive TUI Mode  (v2)
+ * Launched when qautils is run with no arguments (or -i / --interactive).
  */
 
 import chalk from 'chalk';
 import { select, input, checkbox, Separator } from '@inquirer/prompts';
+import ora from 'ora';
+import clipboard from 'clipboardy';
 
 import {
-  generateUuids,
-  base64Encode,
-  base64Decode,
-  decodeJwt,
-  generateHash,
-  generatePassword,
-  generateRandomString,
-  generateLoremIpsum,
-  countTextStats,
-  validateEmail,
-  formatJson,
-  convertTimestamp,
-  generateSql,
-  convertColor,
-  sanitizeHtml,
-  HASH_ALGORITHMS,
-  type HashAlgorithm,
-  type SqlOperation,
+  generateUuids, base64Encode, base64Decode, decodeJwt, generateHash,
+  generatePassword, generateRandomString, generateLoremIpsum, countTextStats,
+  validateEmail, formatJson, convertTimestamp, generateSql, convertColor,
+  sanitizeHtml, urlEncode, urlDecode, parseUrl, testRegex, convertBase,
+  convertCase, generateNanoId, HASH_ALGORITHMS, CASE_TYPES,
+  type HashAlgorithm, type SqlOperation, type CaseType,
 } from './lib/tools.js';
 
-// ── Layout constants ──────────────────────────────────────────────────────────
+// ── Theme ─────────────────────────────────────────────────────────────────────
+const T = {
+  border:  (s: string) => chalk.cyan(s),
+  title:   (s: string) => chalk.bold.yellow(s),
+  value:   (s: string) => chalk.bold.white(s),
+  label:   (s: string) => chalk.cyan(s),
+  dim:     (s: string) => chalk.dim(s),
+  success: (s: string) => chalk.bold.green(s),
+  error:   (s: string) => chalk.bold.red(s),
+  warn:    (s: string) => chalk.bold.yellow(s),
+  number:  (s: string) => chalk.bold.yellow(s),
+};
 
-const BW = 52; // banner/box inner width
-
-function center(str: string, width: number): string {
-  const spaces = Math.max(0, width - str.length);
-  return ' '.repeat(Math.floor(spaces / 2)) + str + ' '.repeat(Math.ceil(spaces / 2));
+// ── Gradient title ─────────────────────────────────────────────────────────────
+function gradientTitle(text: string): string {
+  const stops = [
+    chalk.hex('#00e5ff'), chalk.hex('#00b4ff'), chalk.hex('#2979ff'),
+    chalk.hex('#651fff'), chalk.hex('#d500f9'), chalk.hex('#ff1744'),
+  ];
+  let ci = 0;
+  return text.split('').map((ch) => ch === ' ' ? ch : stops[ci++ % stops.length](ch)).join('');
 }
 
-// ── Banner ────────────────────────────────────────────────────────────────────
+// ── Banner ─────────────────────────────────────────────────────────────────────
+const BANNER_W = 62;
 
-export function printBanner(): void {
-  const bar = '━'.repeat(BW);
-  const blank = ' '.repeat(BW);
+export function printBanner(toolCount = 19): void {
+  const bar = '─'.repeat(BANNER_W);
+  const empty = ' '.repeat(BANNER_W);
+  const version = 'v2.0.0';
+  const vPad = BANNER_W - 18 - version.length - 2;
+  const titleLine =
+    '  ' + chalk.bold.yellow('◆') + '  ' + gradientTitle('QA UTILS CLI') +
+    ' '.repeat(Math.max(2, vPad)) + T.dim(version) + '  ';
+  const d1 = '  Quality Assurance Toolkit  ·  SDETs & QA Engineers  ';
+  const d2 = `  ${toolCount} tools  ·  interactive TUI  ·  scriptable CLI    `;
+
   console.log();
-  console.log(chalk.bold.cyan(`  ┏${bar}┓`));
-  console.log(chalk.bold.cyan('  ┃') + blank + chalk.bold.cyan('┃'));
-  console.log(
-    chalk.bold.cyan('  ┃') +
-      chalk.bold.white(center('QA UTILS CLI', BW)) +
-      chalk.bold.cyan('┃'),
-  );
-  console.log(
-    chalk.bold.cyan('  ┃') +
-      chalk.dim(center('v1.0.0  ·  Quality Assurance Toolkit', BW)) +
-      chalk.bold.cyan('┃'),
-  );
-  console.log(
-    chalk.bold.cyan('  ┃') +
-      chalk.dim(center('14 tools  ·  interactive + direct CLI', BW)) +
-      chalk.bold.cyan('┃'),
-  );
-  console.log(chalk.bold.cyan('  ┃') + blank + chalk.bold.cyan('┃'));
-  console.log(chalk.bold.cyan(`  ┗${bar}┛`));
+  console.log(T.border(`  ╭${bar}╮`));
+  console.log(T.border('  │') + empty + T.border('│'));
+  console.log(T.border('  │') + titleLine + T.border('│'));
+  console.log(T.border('  │') + empty + T.border('│'));
+  console.log(T.border('  │') + T.dim(d1.padEnd(BANNER_W)) + T.border('│'));
+  console.log(T.border('  │') + T.dim(d2.padEnd(BANNER_W)) + T.border('│'));
+  console.log(T.border('  │') + empty + T.border('│'));
+  console.log(T.border(`  ╰${bar}╯`));
   console.log();
 }
 
 // ── Result box ────────────────────────────────────────────────────────────────
+const BOX_W = 60;
 
 function resultBox(title: string, lines: string[]): void {
+  const dashes = Math.max(1, BOX_W - title.length - 2);
+  const top    = T.border('╭─ ') + T.title(title) + T.border(' ' + '─'.repeat(dashes) + '╮');
+  const bottom = T.border('╰' + '─'.repeat(BOX_W + 2) + '╯');
+  const rule   = T.border('│') + ' '.repeat(BOX_W + 2) + T.border('│');
   console.log();
-  console.log(`  ${chalk.bold.green('✔')}  ${chalk.bold.underline(title)}`);
-  console.log(`  ${chalk.dim('─'.repeat(50))}`);
-  lines.forEach((line) => console.log(`    ${line}`));
-  console.log(`  ${chalk.dim('─'.repeat(50))}`);
+  console.log(`  ${top}`);
+  console.log(`  ${rule}`);
+  lines.forEach((line) => console.log(`  ${T.border('│')}   ${line}`));
+  console.log(`  ${rule}`);
+  console.log(`  ${bottom}`);
   console.log();
 }
 
 function cliTip(cmd: string): void {
-  console.log(chalk.dim(`  Tip ›  qautils ${cmd}\n`));
+  console.log(T.dim(`  💡  qautils ${cmd}\n`));
 }
 
-// ── After-action menu ─────────────────────────────────────────────────────────
+// ── Clipboard ─────────────────────────────────────────────────────────────────
+async function tryCopy(text: string): Promise<void> {
+  try {
+    await clipboard.write(text);
+    console.log(`  ${T.success('✔')}  ${chalk.dim('Copied to clipboard!')}\n`);
+  } catch {
+    console.log(`  ${T.warn('⚠')}  ${chalk.dim('Clipboard unavailable in this terminal')}\n`);
+  }
+}
 
-type NextAction = 'again' | 'menu' | 'exit';
+// ── After-action ──────────────────────────────────────────────────────────────
+type NavAction = 'again' | 'menu' | 'exit';
+type PostAction = 'copy' | NavAction;
 
-async function askNext(toolLabel: string): Promise<NextAction> {
-  return select<NextAction>({
-    message: chalk.dim('What next?'),
-    choices: [
+async function askNext(toolLabel: string, copyText: string | null): Promise<NavAction> {
+  for (;;) {
+    const choices: Array<{ name: string; value: PostAction }> = [];
+    if (copyText !== null) {
+      const preview = copyText.length > 36 ? copyText.slice(0, 36) + '…' : copyText;
+      choices.push({ name: `  📋  Copy to clipboard  ${T.dim(`"${preview}"`)}`, value: 'copy' });
+    }
+    choices.push(
       { name: `  🔄  Run "${toolLabel}" again`, value: 'again' },
-      { name: '  🏠  Return to main menu', value: 'menu' },
-      { name: '  👋  Exit', value: 'exit' },
-    ],
-  });
+      { name: '  🏠  Return to main menu',      value: 'menu'  },
+      { name: '  ✕   Exit',                     value: 'exit'  },
+    );
+    const action = await select<PostAction>({ message: T.dim('What would you like to do?'), choices });
+    if (action === 'copy') { await tryCopy(copyText ?? ''); continue; }
+    return action as NavAction;
+  }
 }
 
-// ── Validation helpers ────────────────────────────────────────────────────────
+// ── Validators ────────────────────────────────────────────────────────────────
+const positiveInt = (label = 'value') => (v: string): string | true => {
+  const n = parseInt(v, 10);
+  return (!isNaN(n) && n >= 1) || `${label} must be a positive integer`;
+};
 
-const positiveInt =
-  (label = 'value') =>
-  (v: string): string | true => {
-    const n = parseInt(v, 10);
-    return (!isNaN(n) && n >= 1) || `${label} must be a positive integer`;
-  };
+// ── Spinner ───────────────────────────────────────────────────────────────────
+function spin(text: string) {
+  return ora({ text: T.dim(` ${text}`), color: 'cyan', spinner: 'dots2' });
+}
 
 // ── Tool runners ──────────────────────────────────────────────────────────────
 
-async function runUuid(): Promise<void> {
-  const countStr = await input({
-    message: 'How many UUIDs?',
-    default: '1',
-    validate: positiveInt('count'),
-  });
+async function runUuid(): Promise<string | null> {
+  const countStr = await input({ message: 'How many UUIDs?', default: '1', validate: positiveInt('count') });
   const count = parseInt(countStr, 10);
+  const sp = spin('Generating…').start();
   const uuids = generateUuids(count);
-  resultBox(
-    `Generated ${count} UUID${count > 1 ? 's' : ''}`,
-    uuids.map((u, i) => `${chalk.dim(`${String(i + 1).padStart(2)}.`)} ${chalk.bold.yellow(u)}`),
-  );
+  sp.stop();
+  resultBox(`Generated ${count} UUID${count > 1 ? 's' : ''}`,
+    uuids.map((u, i) => `${T.dim(`${String(i + 1).padStart(2)}.`)} ${T.number(u)}`));
   cliTip(`uuid${count > 1 ? ` -c ${count}` : ''}`);
+  return uuids.join('\n');
 }
 
-async function runBase64(): Promise<void> {
+async function runBase64(): Promise<string | null> {
   const op = await select<'encode' | 'decode'>({
     message: 'Operation:',
     choices: [
-      { name: '  📤  Encode  — text  →  Base64', value: 'encode' },
-      { name: '  📥  Decode  — Base64  →  text', value: 'decode' },
+      { name: '  📤  Encode  — text → Base64',  value: 'encode' },
+      { name: '  📥  Decode  — Base64 → text',  value: 'decode' },
     ],
   });
-  const text = await input({
-    message: op === 'encode' ? 'Text to encode:' : 'Base64 string:',
-  });
+  const text = await input({ message: op === 'encode' ? 'Text to encode:' : 'Base64 string:' });
   try {
+    const sp = spin('Processing…').start();
     const result = op === 'encode' ? base64Encode(text) : base64Decode(text);
-    resultBox(`Base64 ${op}d`, [chalk.bold.yellow(result)]);
-    cliTip(`base64 ${op} "${text.slice(0, 20)}${text.length > 20 ? '…' : ''}"`);
+    sp.stop();
+    resultBox(`Base64 ${op}d`, [T.number(result)]);
+    cliTip(`base64 ${op} "${text.slice(0, 20)}"`);
+    return result;
   } catch (e) {
-    console.log(`\n  ${chalk.red('✗')}  ${e instanceof Error ? e.message : 'Error'}\n`);
+    console.log(`\n  ${T.error('✗')}  ${e instanceof Error ? e.message : 'Error'}\n`);
+    return null;
   }
 }
 
-async function runJwt(): Promise<void> {
+async function runJwt(): Promise<string | null> {
   const token = await input({ message: 'JWT token:' });
+  const sp = spin('Decoding…').start();
   const result = decodeJwt(token);
-  if (result.error) {
-    console.log(`\n  ${chalk.red('✗')}  ${chalk.red(result.error)}\n`);
-    return;
-  }
+  sp.stop();
+  if (result.error) { console.log(`\n  ${T.error('✗')}  ${chalk.red(result.error)}\n`); return null; }
+  const section = (label: string) =>
+    `  ${T.border('┌─')} ${T.title(label)} ${T.border('─'.repeat(Math.max(1, 42 - label.length)))}`;
   console.log();
-  console.log(`  ${chalk.bold.cyan('── Header ──────────────────────────────────────')}`);
-  Object.entries(result.header ?? {}).forEach(([k, v]) => {
-    console.log(`    ${chalk.cyan(k.padEnd(16))} ${chalk.white(JSON.stringify(v))}`);
-  });
+  console.log(section('Header'));
+  Object.entries(result.header ?? {}).forEach(([k, v]) =>
+    console.log(`  ${T.border('│')}  ${T.label(k.padEnd(16))} ${chalk.white(JSON.stringify(v))}`));
   console.log();
-  console.log(`  ${chalk.bold.cyan('── Payload ─────────────────────────────────────')}`);
-  Object.entries(result.payload ?? {}).forEach(([k, v]) => {
-    console.log(`    ${chalk.cyan(k.padEnd(16))} ${chalk.white(JSON.stringify(v))}`);
-  });
+  console.log(section('Payload'));
+  Object.entries(result.payload ?? {}).forEach(([k, v]) =>
+    console.log(`  ${T.border('│')}  ${T.label(k.padEnd(16))} ${chalk.white(JSON.stringify(v))}`));
   console.log();
-  if (result.expired === null) {
-    console.log(`  ${chalk.yellow('⚠')}   No ${chalk.bold('exp')} claim — expiry is unknown`);
-  } else if (result.expired) {
-    console.log(`  ${chalk.red('✗')}   Token is ${chalk.bold.red('EXPIRED')}`);
-  } else {
-    console.log(`  ${chalk.green('✔')}   Token is ${chalk.bold.green('valid')} (not yet expired)`);
-  }
+  if (result.expired === null) console.log(`  ${T.warn('⚠')}  No ${chalk.bold('exp')} claim — expiry unknown`);
+  else if (result.expired) console.log(`  ${T.error('✗')}  Token is ${chalk.bold.red('EXPIRED')}`);
+  else console.log(`  ${T.success('✔')}  Token is ${chalk.bold.green('valid')} (not expired)`);
   console.log();
+  return null;
 }
 
-async function runHash(): Promise<void> {
+async function runHash(): Promise<string | null> {
   const text = await input({ message: 'Text to hash:' });
   const algoChoice = await select<HashAlgorithm | 'all'>({
     message: 'Algorithm:',
     choices: [
       ...HASH_ALGORITHMS.map((a) => ({
-        name: `  ${a.toUpperCase().padEnd(8)} ${chalk.dim('─ ' + { md5: '128 bit', sha1: '160 bit', sha256: '256 bit', sha384: '384 bit', sha512: '512 bit' }[a])}`,
+        name: `  ${a.toUpperCase().padEnd(8)} ${T.dim('─ ' + { md5: '128-bit', sha1: '160-bit', sha256: '256-bit', sha384: '384-bit', sha512: '512-bit' }[a])}`,
         value: a as HashAlgorithm | 'all',
       })),
       new Separator(),
@@ -184,391 +204,408 @@ async function runHash(): Promise<void> {
     ],
   });
   const algos: HashAlgorithm[] = algoChoice === 'all' ? HASH_ALGORITHMS : [algoChoice];
-  resultBox(
-    'Hash Result',
-    algos.map((a) => `${chalk.cyan(a.padEnd(8))} ${chalk.bold.yellow(generateHash(text, a))}`),
-  );
-  if (algoChoice !== 'all') cliTip(`hash "${text.slice(0, 15)}…" --algo ${algoChoice}`);
-  else cliTip(`hash "${text.slice(0, 15)}…" --all`);
+  const sp = spin('Hashing…').start();
+  const results = algos.map((a) => ({ algo: a, hash: generateHash(text, a) }));
+  sp.stop();
+  resultBox('Hash Result', results.map(({ algo, hash }) => `${T.label(algo.padEnd(8))} ${T.number(hash)}`));
+  cliTip(algoChoice !== 'all' ? `hash "${text.slice(0, 15)}…" --algo ${algoChoice}` : `hash "${text.slice(0, 15)}…" --all`);
+  return results.map(({ hash }) => hash).join('\n');
 }
 
 type CharType = 'uppercase' | 'lowercase' | 'numbers' | 'symbols';
 
-async function runPassword(): Promise<void> {
-  const lengthStr = await input({
-    message: 'Password length:',
-    default: '16',
-    validate: positiveInt('length'),
-  });
-  const countStr = await input({
-    message: 'How many passwords?',
-    default: '1',
-    validate: positiveInt('count'),
-  });
+async function runPassword(): Promise<string | null> {
+  const lengthStr = await input({ message: 'Password length:', default: '16', validate: positiveInt('length') });
+  const countStr  = await input({ message: 'How many passwords?', default: '1', validate: positiveInt('count') });
   const charTypes = await checkbox<CharType>({
     message: 'Include character types:',
     choices: [
       { name: '  Uppercase  A–Z', value: 'uppercase', checked: true },
       { name: '  Lowercase  a–z', value: 'lowercase', checked: true },
-      { name: '  Numbers    0–9', value: 'numbers', checked: true },
+      { name: '  Numbers    0–9', value: 'numbers',   checked: true },
       { name: '  Symbols    !@#$…', value: 'symbols', checked: true },
     ],
     validate: (items) => items.length > 0 || 'Select at least one character type',
   });
-  const count = parseInt(countStr, 10);
-  const length = parseInt(lengthStr, 10);
+  const count = parseInt(countStr, 10); const length = parseInt(lengthStr, 10);
+  const sp = spin('Generating…').start();
   const passwords = Array.from({ length: count }, () =>
     generatePassword(length, {
-      uppercase: charTypes.includes('uppercase'),
-      lowercase: charTypes.includes('lowercase'),
-      numbers: charTypes.includes('numbers'),
-      symbols: charTypes.includes('symbols'),
-    }),
-  );
-  resultBox(
-    `Generated ${count} Password${count > 1 ? 's' : ''}`,
-    passwords.map((p, i) => `${chalk.dim(`${String(i + 1).padStart(2)}.`)} ${chalk.bold.yellow(p)}`),
-  );
+      uppercase: charTypes.includes('uppercase'), lowercase: charTypes.includes('lowercase'),
+      numbers: charTypes.includes('numbers'),     symbols:   charTypes.includes('symbols'),
+    }));
+  sp.stop();
+  resultBox(`Generated ${count} Password${count > 1 ? 's' : ''}`,
+    passwords.map((p, i) => `${T.dim(`${String(i + 1).padStart(2)}.`)} ${T.number(p)}`));
   cliTip(`password -l ${length}${count > 1 ? ` -c ${count}` : ''}`);
+  return passwords.join('\n');
 }
 
-async function runTimestamp(): Promise<void> {
-  const value = await input({
-    message: 'Timestamp / date string  (blank = now):',
-    default: '',
-  });
+async function runTimestamp(): Promise<string | null> {
+  const value = await input({ message: 'Timestamp / date string  (blank = now):', default: '' });
   const result = convertTimestamp(value || undefined);
   resultBox('Timestamp Conversion', [
-    `${chalk.cyan('Unix (s)'.padEnd(16))} ${chalk.bold.yellow(String(result.timestamp))}`,
-    `${chalk.cyan('ISO 8601'.padEnd(16))} ${chalk.white(result.iso)}`,
-    `${chalk.cyan('UTC'.padEnd(16))} ${chalk.white(result.utc)}`,
-    `${chalk.cyan('Local'.padEnd(16))} ${chalk.white(result.local)}`,
+    `${T.label('Unix (s)'.padEnd(16))} ${T.number(String(result.timestamp))}`,
+    `${T.label('ISO 8601'.padEnd(16))} ${chalk.white(result.iso)}`,
+    `${T.label('UTC'.padEnd(16))}      ${chalk.white(result.utc)}`,
+    `${T.label('Local'.padEnd(16))}    ${chalk.white(result.local)}`,
   ]);
   cliTip(`timestamp ${value || ''}`);
+  return result.iso;
 }
 
-async function runJson(): Promise<void> {
+async function runJson(): Promise<string | null> {
   const op = await select<'format' | 'validate' | 'minify'>({
     message: 'Operation:',
     choices: [
-      { name: '  🎨  Format   — pretty-print with indentation', value: 'format' },
-      { name: '  ✔   Validate — check JSON syntax', value: 'validate' },
-      { name: '  📦  Minify   — strip all whitespace', value: 'minify' },
+      { name: '  🎨  Format   — pretty-print with indentation', value: 'format'   },
+      { name: '  ✔   Validate — check JSON syntax',             value: 'validate' },
+      { name: '  📦  Minify   — strip all whitespace',          value: 'minify'   },
     ],
   });
   const raw = await input({ message: 'JSON string (paste inline):' });
-
   if (op === 'format') {
     const indentStr = await input({ message: 'Indent spaces:', default: '2' });
     const result = formatJson(raw, parseInt(indentStr, 10) || 2);
-    if (!result.valid) {
-      console.log(`\n  ${chalk.red('✗')}  ${chalk.red(result.error)}\n`);
-      return;
-    }
+    if (!result.valid) { console.log(`\n  ${T.error('✗')}  ${chalk.red(result.error)}\n`); return null; }
     resultBox('Formatted JSON', result.formatted.split('\n').map((l) => chalk.white(l)));
-  } else if (op === 'validate') {
+    cliTip(`json format '${raw.slice(0, 20)}…'`);
+    return result.formatted;
+  }
+  if (op === 'validate') {
     const result = formatJson(raw);
     console.log();
-    if (result.valid) {
-      console.log(`  ${chalk.bold.green('✔')}  ${chalk.bold.green('Valid JSON')}`);
-    } else {
-      console.log(`  ${chalk.bold.red('✗')}  ${chalk.bold.red('Invalid JSON')}  ${chalk.dim(result.error ?? '')}`);
-    }
-    console.log();
-  } else {
-    try {
-      const minified = JSON.stringify(JSON.parse(raw));
-      resultBox('Minified JSON', [chalk.bold.yellow(minified)]);
-    } catch {
-      console.log(`\n  ${chalk.red('✗')}  Invalid JSON\n`);
-    }
+    if (result.valid) console.log(`  ${T.success('✔')}  ${chalk.bold.green('Valid JSON')}`);
+    else console.log(`  ${T.error('✗')}  ${chalk.bold.red('Invalid JSON')}  ${T.dim(result.error ?? '')}`);
+    console.log(); return null;
   }
-  cliTip(`json ${op} '${raw.slice(0, 20)}…'`);
+  try {
+    const minified = JSON.stringify(JSON.parse(raw));
+    resultBox('Minified JSON', [T.number(minified)]);
+    cliTip(`json minify '${raw.slice(0, 20)}…'`);
+    return minified;
+  } catch { console.log(`\n  ${T.error('✗')}  Invalid JSON\n`); return null; }
 }
 
-async function runLorem(): Promise<void> {
+async function runLorem(): Promise<string | null> {
   const countStr = await input({
-    message: 'Number of paragraphs (1–20):',
-    default: '1',
-    validate: (v) => {
-      const n = parseInt(v, 10);
-      return (!isNaN(n) && n >= 1 && n <= 20) || 'Enter a number between 1 and 20';
-    },
+    message: 'Number of paragraphs (1–20):', default: '1',
+    validate: (v) => { const n = parseInt(v, 10); return (!isNaN(n) && n >= 1 && n <= 20) || 'Enter 1–20'; },
   });
   const count = parseInt(countStr, 10);
   const text = generateLoremIpsum(count);
-  const paragraphs = text.split('\n\n');
-  resultBox(
-    `Lorem Ipsum (${count} paragraph${count > 1 ? 's' : ''})`,
-    paragraphs.flatMap((p, i) => [
-      ...(i > 0 ? [''] : []),
-      `${chalk.dim('¶')}  ${chalk.white(p)}`,
-    ]),
-  );
+  resultBox(`Lorem Ipsum (${count} paragraph${count > 1 ? 's' : ''})`,
+    text.split('\n\n').flatMap((p, i) => [...(i > 0 ? [''] : []), `${T.dim('¶')}  ${chalk.white(p)}`]));
   cliTip(`lorem -p ${count}`);
+  return text;
 }
 
-async function runText(): Promise<void> {
+async function runText(): Promise<string | null> {
   const text = await input({ message: 'Text to analyse:' });
   const s = countTextStats(text);
   resultBox('Text Analysis', [
-    `${chalk.cyan('Characters'.padEnd(22))} ${chalk.bold.yellow(String(s.characters))}`,
-    `${chalk.cyan('Chars (no spaces)'.padEnd(22))} ${chalk.bold.yellow(String(s.charactersNoSpaces))}`,
-    `${chalk.cyan('Words'.padEnd(22))} ${chalk.bold.yellow(String(s.words))}`,
-    `${chalk.cyan('Sentences'.padEnd(22))} ${chalk.bold.yellow(String(s.sentences))}`,
-    `${chalk.cyan('Lines'.padEnd(22))} ${chalk.bold.yellow(String(s.lines))}`,
-    `${chalk.cyan('Paragraphs'.padEnd(22))} ${chalk.bold.yellow(String(s.paragraphs))}`,
+    `${T.label('Characters'.padEnd(22))}       ${T.number(String(s.characters))}`,
+    `${T.label('Chars (no spaces)'.padEnd(22))} ${T.number(String(s.charactersNoSpaces))}`,
+    `${T.label('Words'.padEnd(22))}             ${T.number(String(s.words))}`,
+    `${T.label('Sentences'.padEnd(22))}         ${T.number(String(s.sentences))}`,
+    `${T.label('Lines'.padEnd(22))}             ${T.number(String(s.lines))}`,
+    `${T.label('Paragraphs'.padEnd(22))}        ${T.number(String(s.paragraphs))}`,
   ]);
-  cliTip(`text "${text.slice(0, 20)}…"`);
+  cliTip(`text "${text.slice(0, 20)}…"`); return null;
 }
 
-async function runEmail(): Promise<void> {
+async function runEmail(): Promise<string | null> {
   const email = await input({ message: 'Email address:' });
   const result = validateEmail(email);
   console.log();
-  if (result.valid) {
-    console.log(`  ${chalk.bold.green('✔')}  ${chalk.bold(email)}  ${chalk.green('is a valid email address')}`);
-  } else {
-    console.log(
-      `  ${chalk.bold.red('✗')}  ${chalk.bold(email)}  ${chalk.dim('—')}  ${chalk.red(result.reason ?? 'Invalid')}`,
-    );
-  }
-  console.log();
-  cliTip(`email ${email}`);
+  if (result.valid) console.log(`  ${T.success('✔')}  ${chalk.bold(email)}  ${chalk.green('is a valid email address')}`);
+  else console.log(`  ${T.error('✗')}  ${chalk.bold(email)}  ${T.dim('—')}  ${chalk.red(result.reason ?? 'Invalid')}`);
+  console.log(); cliTip(`email ${email}`); return null;
 }
 
-async function runSql(): Promise<void> {
+async function runSql(): Promise<string | null> {
   const operation = await select<SqlOperation>({
     message: 'SQL operation:',
     choices: [
-      { name: '  SELECT       — query rows', value: 'SELECT' },
-      { name: '  INSERT       — add a row', value: 'INSERT' },
-      { name: '  UPDATE       — modify rows', value: 'UPDATE' },
-      { name: '  DELETE       — remove rows', value: 'DELETE' },
-      { name: '  CREATE TABLE — define a table', value: 'CREATE_TABLE' },
+      { name: '  SELECT       — query rows',   value: 'SELECT'       },
+      { name: '  INSERT       — add a row',    value: 'INSERT'       },
+      { name: '  UPDATE       — modify rows',  value: 'UPDATE'       },
+      { name: '  DELETE       — remove rows',  value: 'DELETE'       },
+      { name: '  CREATE TABLE — define table', value: 'CREATE_TABLE' },
     ],
   });
   const tableName = await input({ message: 'Table name:' });
-
-  let columns: string[] | undefined;
-  let values: string[] | undefined;
-  let whereClause: string | undefined;
-  let orderBy: string | undefined;
-  let limit: number | undefined;
-
-  if (['SELECT', 'INSERT', 'UPDATE', 'CREATE_TABLE'].includes(operation)) {
-    const c = await input({
-      message:
-        operation === 'CREATE_TABLE'
-          ? 'Column definitions (comma-separated, e.g. "id INTEGER PRIMARY KEY,name TEXT"):'
-          : 'Columns (comma-separated, blank = all):',
-      default: '',
-    });
+  let columns: string[] | undefined, values: string[] | undefined,
+      whereClause: string | undefined, orderBy: string | undefined, limit: number | undefined;
+  if (['SELECT','INSERT','UPDATE','CREATE_TABLE'].includes(operation)) {
+    const c = await input({ message: operation === 'CREATE_TABLE' ? 'Column defs (e.g. id INTEGER PRIMARY KEY,name TEXT):' : 'Columns (blank = all):', default: '' });
     columns = c ? c.split(',').map((col) => col.trim()) : undefined;
   }
-  if (['INSERT', 'UPDATE'].includes(operation)) {
+  if (['INSERT','UPDATE'].includes(operation)) {
     const v = await input({ message: 'Values (comma-separated):' });
     values = v.split(',').map((val) => val.trim());
   }
-  if (['SELECT', 'UPDATE', 'DELETE'].includes(operation)) {
-    const w = await input({ message: 'WHERE clause  (blank to skip):', default: '' });
+  if (['SELECT','UPDATE','DELETE'].includes(operation)) {
+    const w = await input({ message: 'WHERE clause (blank to skip):', default: '' });
     whereClause = w || undefined;
   }
   if (operation === 'SELECT') {
-    const ob = await input({ message: 'ORDER BY column  (blank to skip):', default: '' });
-    orderBy = ob || undefined;
-    const lim = await input({ message: 'LIMIT  (blank to skip):', default: '' });
-    limit = lim ? parseInt(lim, 10) : undefined;
+    const ob = await input({ message: 'ORDER BY (blank to skip):', default: '' }); orderBy = ob || undefined;
+    const lim = await input({ message: 'LIMIT (blank to skip):', default: '' }); limit = lim ? parseInt(lim, 10) : undefined;
   }
-
   const sql = generateSql({ operation, tableName, columns, values, whereClause, orderBy, limit });
-  resultBox('Generated SQL', [chalk.bold.yellow(sql)]);
-  cliTip(`sql ${operation} --table ${tableName}`);
+  resultBox('Generated SQL', [T.number(sql)]);
+  cliTip(`sql ${operation} --table ${tableName}`); return sql;
 }
 
-async function runColor(): Promise<void> {
-  const colorInput = await input({
-    message: 'Color (#RRGGBB  |  #RGB  |  rgb(r, g, b)):',
-  });
+async function runColor(): Promise<string | null> {
+  const colorInput = await input({ message: 'Color (#RRGGBB | #RGB | rgb(r, g, b)):' });
   const result = convertColor(colorInput);
-  if (result.error) {
-    console.log(`\n  ${chalk.red('✗')}  ${chalk.red(result.error)}\n`);
-    return;
-  }
-  const { r, g, b } = result.rgb;
-  const { h, s, l } = result.hsl;
-  const swatch = chalk.bgHex(result.hex)('        ');
+  if (result.error) { console.log(`\n  ${T.error('✗')}  ${chalk.red(result.error)}\n`); return null; }
+  const { r, g, b } = result.rgb; const { h, s, l } = result.hsl;
   resultBox('Color Conversion', [
-    `${chalk.cyan('Swatch'.padEnd(10))} ${swatch}`,
-    `${chalk.cyan('HEX'.padEnd(10))} ${chalk.bold.yellow(result.hex)}`,
-    `${chalk.cyan('RGB'.padEnd(10))} ${chalk.white(`rgb(${r}, ${g}, ${b})`)}`,
-    `${chalk.cyan('HSL'.padEnd(10))} ${chalk.white(`hsl(${h}, ${s}%, ${l}%)`)}`,
+    `${T.label('Swatch'.padEnd(10))} ${chalk.bgHex(result.hex)('          ')}`,
+    `${T.label('HEX'.padEnd(10))} ${T.number(result.hex)}`,
+    `${T.label('RGB'.padEnd(10))} ${chalk.white(`rgb(${r}, ${g}, ${b})`)}`,
+    `${T.label('HSL'.padEnd(10))} ${chalk.white(`hsl(${h}, ${s}%, ${l}%)`)}`,
   ]);
-  cliTip(`color "${colorInput}"`);
+  cliTip(`color "${colorInput}"`); return result.hex;
 }
 
-async function runHtml(): Promise<void> {
+async function runHtml(): Promise<string | null> {
   const htmlInput = await input({ message: 'HTML to sanitize:' });
+  const sp = spin('Sanitizing…').start();
   const sanitized = sanitizeHtml(htmlInput);
-  resultBox('Sanitized HTML', [chalk.bold.yellow(sanitized)]);
-  cliTip(`html sanitize "${htmlInput.slice(0, 20)}…"`);
+  sp.stop();
+  resultBox('Sanitized HTML', [T.number(sanitized)]);
+  cliTip(`html sanitize "${htmlInput.slice(0, 20)}…"`); return sanitized;
 }
 
-async function runRandom(): Promise<void> {
-  const lengthStr = await input({
-    message: 'String length:',
-    default: '16',
-    validate: positiveInt('length'),
-  });
-  const countStr = await input({
-    message: 'How many strings?',
-    default: '1',
-    validate: positiveInt('count'),
-  });
-  const count = parseInt(countStr, 10);
-  const length = parseInt(lengthStr, 10);
+async function runRandom(): Promise<string | null> {
+  const lengthStr = await input({ message: 'String length:', default: '16', validate: positiveInt('length') });
+  const countStr  = await input({ message: 'How many strings?', default: '1', validate: positiveInt('count') });
+  const count = parseInt(countStr, 10); const length = parseInt(lengthStr, 10);
+  const sp = spin('Generating…').start();
   const strings = Array.from({ length: count }, () => generateRandomString(length));
-  resultBox(
-    `${count} Random String${count > 1 ? 's' : ''}`,
-    strings.map((s, i) => `${chalk.dim(`${String(i + 1).padStart(2)}.`)} ${chalk.bold.yellow(s)}`),
-  );
-  cliTip(`random -l ${length}${count > 1 ? ` -c ${count}` : ''}`);
+  sp.stop();
+  resultBox(`${count} Random String${count > 1 ? 's' : ''}`,
+    strings.map((s, i) => `${T.dim(`${String(i + 1).padStart(2)}.`)} ${T.number(s)}`));
+  cliTip(`random -l ${length}${count > 1 ? ` -c ${count}` : ''}`); return strings.join('\n');
+}
+
+// ── New tool runners ──────────────────────────────────────────────────────────
+
+async function runUrl(): Promise<string | null> {
+  const op = await select<'encode' | 'decode' | 'parse'>({
+    message: 'Operation:',
+    choices: [
+      { name: '  🔗  Encode  — percent-encode a string',        value: 'encode' },
+      { name: '  🔓  Decode  — decode a percent-encoded string', value: 'decode' },
+      { name: '  🔍  Parse   — break a URL into components',    value: 'parse'  },
+    ],
+  });
+  if (op === 'encode') {
+    const text = await input({ message: 'Text to encode:' });
+    const encoded = urlEncode(text);
+    resultBox('URL Encoded', [T.number(encoded)]);
+    cliTip(`url encode "${text.slice(0, 20)}"`); return encoded;
+  }
+  if (op === 'decode') {
+    const text = await input({ message: 'Percent-encoded string:' });
+    try {
+      const decoded = urlDecode(text);
+      resultBox('URL Decoded', [T.number(decoded)]);
+      cliTip(`url decode "${text.slice(0, 20)}"`); return decoded;
+    } catch (e) { console.log(`\n  ${T.error('✗')}  ${e instanceof Error ? e.message : 'Error'}\n`); return null; }
+  }
+  const rawUrl = await input({ message: 'URL to parse:' });
+  const sp = spin('Parsing…').start();
+  const { parsed, error } = parseUrl(rawUrl);
+  sp.stop();
+  if (error || !parsed) { console.log(`\n  ${T.error('✗')}  ${chalk.red(error ?? 'Invalid URL')}\n`); return null; }
+  const rows = [
+    `${T.label('Protocol'.padEnd(12))} ${chalk.white(parsed.protocol)}`,
+    `${T.label('Host'.padEnd(12))} ${chalk.white(parsed.host)}`,
+    `${T.label('Pathname'.padEnd(12))} ${chalk.white(parsed.pathname)}`,
+    `${T.label('Search'.padEnd(12))} ${chalk.white(parsed.search || T.dim('(none)'))}`,
+    `${T.label('Hash'.padEnd(12))} ${chalk.white(parsed.hash || T.dim('(none)'))}`,
+    ...(Object.keys(parsed.params).length > 0
+      ? ['', T.dim('  Query Parameters:'),
+         ...Object.entries(parsed.params).map(([k, v]) => `  ${T.label(k.padEnd(14))} ${chalk.white(v)}`)]
+      : []),
+  ];
+  resultBox('URL Components', rows);
+  cliTip(`url parse "${rawUrl.slice(0, 30)}"`); return rawUrl;
+}
+
+async function runRegex(): Promise<string | null> {
+  const pattern = await input({ message: 'Regex pattern:' });
+  const flags   = await input({ message: 'Flags (e.g., gi):', default: 'gi' });
+  const text    = await input({ message: 'Test string:' });
+  const sp = spin('Testing…').start();
+  const result = testRegex(pattern, flags, text);
+  sp.stop();
+  if (!result.valid) { console.log(`\n  ${T.error('✗')}  ${chalk.red(result.error ?? 'Invalid regex')}\n`); return null; }
+  if (result.count === 0) { console.log(`\n  ${T.warn('◈')}  ${chalk.yellow('No matches found')}\n`); return null; }
+  resultBox(`Regex — ${result.count} match${result.count > 1 ? 'es' : ''}`,
+    result.matches.flatMap((m, i) => [
+      `${T.dim(`${String(i + 1).padStart(2)}.`)} ${T.number(`"${m.match}"`)} ${T.dim(`@ index ${m.index}`)}`,
+      ...m.groups.filter((g) => g !== undefined).map(
+        (g, gi) => `     ${T.label(`group ${gi + 1}:`)} ${chalk.white(g ?? '')}`),
+    ]));
+  cliTip(`regex "${pattern}" "${text.slice(0, 20)}" --flags ${flags}`);
+  return result.matches.map((m) => m.match).join('\n');
+}
+
+async function runBase(): Promise<string | null> {
+  const value    = await input({ message: 'Number value:' });
+  const fromStr  = await input({ message: 'Source base (2–36):', default: '10' });
+  const fromBase = parseInt(fromStr, 10);
+  const showAll  = await select<'all' | 'custom'>({
+    message: 'Output:',
+    choices: [
+      { name: '  🔢  BIN / OCT / DEC / HEX  (all four)', value: 'all'    },
+      { name: '  ✏️   Custom target base',                value: 'custom' },
+    ],
+  });
+  const sp = spin('Converting…').start();
+  if (showAll === 'all') {
+    const targets: Array<[string, number]> = [['BIN', 2], ['OCT', 8], ['DEC', 10], ['HEX', 16]];
+    const rows = targets.map(([label, base]) => {
+      const r = convertBase(value, fromBase, base);
+      return r.error ? `${T.label(label.padEnd(4))} ${T.error(r.error)}` : `${T.label(label.padEnd(4))} ${T.number(r.result)}`;
+    });
+    sp.stop();
+    resultBox(`Base Conversion  (from base ${fromBase})`, rows);
+    cliTip(`base ${value} --from ${fromBase} --all`);
+    // eslint-disable-next-line no-control-regex
+    return rows.map((row) => row.replace(/\x1b\[[0-9;]*m/g, '')).join('\n');
+  }
+  const toStr = await input({ message: 'Target base (2–36):', default: '16' });
+  const toBase = parseInt(toStr, 10);
+  const r = convertBase(value, fromBase, toBase);
+  sp.stop();
+  if (r.error) { console.log(`\n  ${T.error('✗')}  ${chalk.red(r.error)}\n`); return null; }
+  resultBox(`Base ${fromBase} → Base ${toBase}`, [
+    `${T.label('Input'.padEnd(10))} ${chalk.white(value)}`,
+    `${T.label('Decimal'.padEnd(10))} ${T.number(String(r.decimal))}`,
+    `${T.label('Result'.padEnd(10))} ${T.number(r.result)}`,
+  ]);
+  cliTip(`base ${value} --from ${fromBase} --to ${toBase}`); return r.result;
+}
+
+async function runCase(): Promise<string | null> {
+  const text = await input({ message: 'Text to convert:' });
+  const to = await select<CaseType>({
+    message: 'Target case style:',
+    choices: CASE_TYPES.map((style) => ({
+      name: `  ${style.padEnd(10)} ${T.dim('→')}  ${convertCase(text || 'hello world', style)}`,
+      value: style,
+    })),
+  });
+  const result = convertCase(text, to);
+  resultBox(`Case → ${to}`, [T.number(result)]);
+  cliTip(`case "${text.slice(0, 20)}" --to ${to}`); return result;
+}
+
+async function runNanoId(): Promise<string | null> {
+  const sizeStr  = await input({ message: 'ID size (characters):', default: '21', validate: positiveInt('size') });
+  const countStr = await input({ message: 'How many IDs?', default: '1', validate: positiveInt('count') });
+  const size = parseInt(sizeStr, 10); const count = parseInt(countStr, 10);
+  const sp = spin('Generating…').start();
+  const ids = Array.from({ length: count }, () => generateNanoId(size));
+  sp.stop();
+  resultBox(`Generated ${count} NanoID${count > 1 ? 's' : ''}`,
+    ids.map((id, i) => `${T.dim(`${String(i + 1).padStart(2)}.`)} ${T.number(id)}`));
+  cliTip(`nanoid${size !== 21 ? ` -s ${size}` : ''}${count > 1 ? ` -c ${count}` : ''}`); return ids.join('\n');
 }
 
 // ── Tool registry ─────────────────────────────────────────────────────────────
-
 type ToolKey =
-  | 'uuid'
-  | 'base64'
-  | 'jwt'
-  | 'hash'
-  | 'password'
-  | 'timestamp'
-  | 'json'
-  | 'lorem'
-  | 'text'
-  | 'email'
-  | 'sql'
-  | 'color'
-  | 'html'
-  | 'random';
+  | 'uuid' | 'base64' | 'jwt' | 'hash' | 'password' | 'timestamp'
+  | 'json' | 'lorem' | 'text' | 'email' | 'sql' | 'color' | 'html'
+  | 'random' | 'url' | 'regex' | 'base' | 'case' | 'nanoid';
 
-const TOOLS: Record<ToolKey, { label: string; run: () => Promise<void> }> = {
-  uuid:      { label: 'UUID Generator',        run: runUuid },
-  base64:    { label: 'Base64 Encode/Decode',   run: runBase64 },
-  jwt:       { label: 'JWT Decoder',            run: runJwt },
-  hash:      { label: 'Hash Generator',         run: runHash },
-  password:  { label: 'Password Generator',     run: runPassword },
-  timestamp: { label: 'Timestamp Converter',    run: runTimestamp },
-  json:      { label: 'JSON Toolkit',           run: runJson },
-  lorem:     { label: 'Lorem Ipsum',            run: runLorem },
-  text:      { label: 'Text Analyser',          run: runText },
-  email:     { label: 'Email Validator',        run: runEmail },
-  sql:       { label: 'SQL Generator',          run: runSql },
-  color:     { label: 'Color Converter',        run: runColor },
-  html:      { label: 'HTML Sanitizer',         run: runHtml },
-  random:    { label: 'Random String',          run: runRandom },
+const TOOLS: Record<ToolKey, { label: string; run: () => Promise<string | null> }> = {
+  uuid:      { label: 'UUID Generator',       run: runUuid      },
+  nanoid:    { label: 'NanoID Generator',      run: runNanoId    },
+  base64:    { label: 'Base64 Encode/Decode',  run: runBase64    },
+  random:    { label: 'Random String',         run: runRandom    },
+  password:  { label: 'Password Generator',    run: runPassword  },
+  lorem:     { label: 'Lorem Ipsum',           run: runLorem     },
+  jwt:       { label: 'JWT Decoder',           run: runJwt       },
+  hash:      { label: 'Hash Generator',        run: runHash      },
+  text:      { label: 'Text Analyser',         run: runText      },
+  email:     { label: 'Email Validator',       run: runEmail     },
+  regex:     { label: 'Regex Tester',          run: runRegex     },
+  timestamp: { label: 'Timestamp Converter',   run: runTimestamp },
+  color:     { label: 'Color Converter',       run: runColor     },
+  url:       { label: 'URL Toolkit',           run: runUrl       },
+  base:      { label: 'Base Converter',        run: runBase      },
+  case:      { label: 'Case Converter',        run: runCase      },
+  json:      { label: 'JSON Toolkit',          run: runJson      },
+  sql:       { label: 'SQL Generator',         run: runSql       },
+  html:      { label: 'HTML Sanitizer',        run: runHtml      },
 };
 
-// ── Main menu ─────────────────────────────────────────────────────────────────
+const TOOL_COUNT = Object.keys(TOOLS).length;
 
-function menuDivider(): void {
-  console.log(chalk.dim(`  ${'─'.repeat(50)}`));
+// ── Session history ───────────────────────────────────────────────────────────
+const sessionHistory: ToolKey[] = [];
+function recordHistory(key: ToolKey): void {
+  const idx = sessionHistory.indexOf(key);
+  if (idx !== -1) sessionHistory.splice(idx, 1);
+  sessionHistory.unshift(key);
+  if (sessionHistory.length > 5) sessionHistory.pop();
 }
 
+// ── Main menu ─────────────────────────────────────────────────────────────────
 async function showMainMenu(): Promise<ToolKey | 'exit'> {
-  menuDivider();
-  return select<ToolKey | 'exit'>({
-    message: chalk.bold('Select a tool'),
-    pageSize: 22,
-    choices: [
-      new Separator(chalk.dim('  ── Generators ──────────────────────────────── ')),
-      {
-        name: '  🔑  UUID Generator',
-        value: 'uuid' as ToolKey | 'exit',
-        description: 'Generate one or more v4 UUIDs',
-      },
-      {
-        name: '  🔐  Base64 Encode / Decode',
-        value: 'base64' as ToolKey | 'exit',
-        description: 'Encode text to Base64 or decode Base64 back to text',
-      },
-      {
-        name: '  🎲  Random String',
-        value: 'random' as ToolKey | 'exit',
-        description: 'Cryptographically random alphanumeric strings',
-      },
-      {
-        name: '  🔒  Password Generator',
-        value: 'password' as ToolKey | 'exit',
-        description: 'Secure passwords with custom character classes',
-      },
-      {
-        name: '  📝  Lorem Ipsum',
-        value: 'lorem' as ToolKey | 'exit',
-        description: 'Generate Lorem Ipsum placeholder paragraphs',
-      },
-      new Separator(chalk.dim('  ── Analysers ───────────────────────────────── ')),
-      {
-        name: '  #   Hash Generator',
-        value: 'hash' as ToolKey | 'exit',
-        description: 'MD5, SHA-1, SHA-256, SHA-384, SHA-512',
-      },
-      {
-        name: '  🔏  JWT Decoder',
-        value: 'jwt' as ToolKey | 'exit',
-        description: 'Inspect header, payload, and expiry (no signature verify)',
-      },
-      {
-        name: '  📊  Text Analyser',
-        value: 'text' as ToolKey | 'exit',
-        description: 'Count chars, words, sentences, lines, paragraphs',
-      },
-      {
-        name: '  📧  Email Validator',
-        value: 'email' as ToolKey | 'exit',
-        description: 'Validate email address syntax',
-      },
-      new Separator(chalk.dim('  ── Converters ──────────────────────────────── ')),
-      {
-        name: '  ⏰  Timestamp Converter',
-        value: 'timestamp' as ToolKey | 'exit',
-        description: 'Unix epoch seconds/ms ↔ ISO 8601, UTC, local',
-      },
-      {
-        name: '  🎨  Color Converter',
-        value: 'color' as ToolKey | 'exit',
-        description: 'HEX ↔ RGB ↔ HSL with a colour swatch preview',
-      },
-      new Separator(chalk.dim('  ── Data Toolkit ────────────────────────────── ')),
-      {
-        name: '  📋  JSON Toolkit',
-        value: 'json' as ToolKey | 'exit',
-        description: 'Format (pretty-print), validate, or minify JSON',
-      },
-      {
-        name: '  🗄️  SQL Generator',
-        value: 'sql' as ToolKey | 'exit',
-        description: 'SELECT, INSERT, UPDATE, DELETE, CREATE TABLE',
-      },
-      {
-        name: '  🌐  HTML Sanitizer',
-        value: 'html' as ToolKey | 'exit',
-        description: 'Strip <script> tags and inline on* event handlers',
-      },
-      new Separator(chalk.dim('  ' + '─'.repeat(50))),
-      { name: '  👋  Exit', value: 'exit' as ToolKey | 'exit' },
-    ],
-  });
+  console.log(T.dim(`  ${'─'.repeat(62)}`));
+  type MenuItem = { name: string; value: ToolKey | 'exit'; description?: string };
+  const item = (icon: string, name: string, value: ToolKey | 'exit', desc: string): MenuItem =>
+    ({ name: `  ${icon}  ${name}`, value, description: desc });
+  const choices: Array<MenuItem | Separator> = [];
+  if (sessionHistory.length > 0) {
+    choices.push(new Separator(T.dim('  ── Recent ─────────────────────────────────────── ')));
+    sessionHistory.slice(0, 3).forEach((key) =>
+      choices.push({ name: `  ↩   ${TOOLS[key].label}  ${T.dim('(recent)')}`, value: key }));
+  }
+  choices.push(new Separator(T.dim('  ── Generators ─────────────────────────────────── ')));
+  choices.push(item('🔑', 'UUID Generator',       'uuid',     'Generate v4 UUIDs'));
+  choices.push(item('🆔', 'NanoID Generator',     'nanoid',   'Crypto-random NanoID-style identifiers'));
+  choices.push(item('🔐', 'Base64 Encode/Decode', 'base64',   'Encode text → Base64 or decode Base64 → text'));
+  choices.push(item('🎲', 'Random String',        'random',   'Cryptographically random alphanumeric strings'));
+  choices.push(item('🔒', 'Password Generator',   'password', 'Secure passwords with custom character classes'));
+  choices.push(item('📝', 'Lorem Ipsum',          'lorem',    'Placeholder paragraph text'));
+  choices.push(new Separator(T.dim('  ── Analysers ───────────────────────────────────── ')));
+  choices.push(item('#',  'Hash Generator',       'hash',     'MD5 · SHA-1 · SHA-256 · SHA-384 · SHA-512'));
+  choices.push(item('🔏', 'JWT Decoder',          'jwt',      'Inspect JWT header, payload, and expiry'));
+  choices.push(item('📊', 'Text Analyser',        'text',     'Chars · words · sentences · lines · paragraphs'));
+  choices.push(item('📧', 'Email Validator',      'email',    'Validate email address syntax'));
+  choices.push(item('🧪', 'Regex Tester',         'regex',    'Test a regex pattern and highlight all matches'));
+  choices.push(new Separator(T.dim('  ── Converters ──────────────────────────────────── ')));
+  choices.push(item('⏰', 'Timestamp Converter',  'timestamp', 'Unix epoch ↔ ISO 8601, UTC, local time'));
+  choices.push(item('🎨', 'Color Converter',      'color',     'HEX ↔ RGB ↔ HSL with swatch preview'));
+  choices.push(item('🔗', 'URL Toolkit',          'url',       'Encode, decode, or parse a URL'));
+  choices.push(item('🔢', 'Base Converter',       'base',      'Binary · Octal · Decimal · Hex · custom base'));
+  choices.push(item('🔡', 'Case Converter',       'case',      'camelCase · snake_case · PascalCase · and more'));
+  choices.push(new Separator(T.dim('  ── Data Toolkit ────────────────────────────────── ')));
+  choices.push(item('📋', 'JSON Toolkit',         'json',      'Format · validate · minify JSON'));
+  choices.push(item('🗄️', 'SQL Generator',        'sql',       'SELECT · INSERT · UPDATE · DELETE · CREATE TABLE'));
+  choices.push(item('🌐', 'HTML Sanitizer',       'html',      'Strip <script> tags and inline event handlers'));
+  choices.push(new Separator(T.dim('  ' + '─'.repeat(52))));
+  choices.push({ name: '  ✕   Exit', value: 'exit' });
+  return select<ToolKey | 'exit'>({ message: chalk.bold('  Select a tool'), pageSize: 25, choices });
 }
 
 // ── Interactive entry point ───────────────────────────────────────────────────
-
 export async function runInteractive(): Promise<void> {
-  printBanner();
-
+  const loader = spin('Initializing QA Utils CLI…').start();
+  await new Promise((r) => setTimeout(r, 280));
+  loader.stop();
+  printBanner(TOOL_COUNT);
   let currentTool: ToolKey | null = null;
-
   for (;;) {
     try {
       if (currentTool === null) {
@@ -576,28 +613,19 @@ export async function runInteractive(): Promise<void> {
         if (choice === 'exit') break;
         currentTool = choice;
       }
-
+      recordHistory(currentTool);
       const tool = TOOLS[currentTool];
-      await tool.run();
-
-      const next = await askNext(tool.label);
+      const copyText = await tool.run();
+      const next = await askNext(tool.label, copyText);
       if (next === 'exit') break;
-      if (next === 'menu') {
-        currentTool = null;
-        console.log(); // breathing room before menu redraws
-      }
-      // 'again' leaves currentTool unchanged → same tool reruns
+      if (next === 'menu') { currentTool = null; console.log(); }
     } catch (err) {
-      // Graceful exit on Ctrl+C
-      if (
-        err instanceof Error &&
-        (err.name === 'ExitPromptError' || err.message.includes('User force closed'))
-      ) {
-        break;
-      }
+      if (err instanceof Error &&
+        (err.name === 'ExitPromptError' ||
+         err.message.includes('User force closed') ||
+         err.message.includes('force closed the prompt'))) break;
       throw err;
     }
   }
-
-  console.log(chalk.dim('\n  Goodbye! 👋\n'));
+  console.log(T.dim('\n  Goodbye! 👋\n'));
 }

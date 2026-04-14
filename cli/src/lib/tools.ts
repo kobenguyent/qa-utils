@@ -549,3 +549,239 @@ export function sanitizeHtml(html: string): string {
 
   return result;
 }
+
+// ============================================================================
+// URL operations
+// ============================================================================
+
+/** Percent-encode a string using encodeURIComponent. */
+export function urlEncode(text: string): string {
+  return encodeURIComponent(text);
+}
+
+/** Decode a percent-encoded string. Throws if the input is malformed. */
+export function urlDecode(text: string): string {
+  try {
+    return decodeURIComponent(text);
+  } catch {
+    throw new Error('Invalid percent-encoded string');
+  }
+}
+
+export interface ParsedUrl {
+  protocol: string;
+  host: string;
+  hostname: string;
+  port: string;
+  pathname: string;
+  search: string;
+  hash: string;
+  params: Record<string, string>;
+}
+
+export interface UrlParseResult {
+  parsed: ParsedUrl | null;
+  error?: string;
+}
+
+/**
+ * Parse a URL into its components.
+ * Automatically prepends `https://` when no protocol is present.
+ */
+export function parseUrl(rawUrl: string): UrlParseResult {
+  try {
+    const normalized = /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(rawUrl)
+      ? rawUrl
+      : `https://${rawUrl}`;
+    const u = new URL(normalized);
+    const params: Record<string, string> = {};
+    u.searchParams.forEach((value, key) => {
+      params[key] = value;
+    });
+    return {
+      parsed: {
+        protocol: u.protocol,
+        host: u.host,
+        hostname: u.hostname,
+        port: u.port,
+        pathname: u.pathname,
+        search: u.search,
+        hash: u.hash,
+        params,
+      },
+    };
+  } catch {
+    return { parsed: null, error: 'Invalid URL' };
+  }
+}
+
+// ============================================================================
+// Regex tester
+// ============================================================================
+
+export interface RegexMatch {
+  index: number;
+  match: string;
+  groups: (string | undefined)[];
+}
+
+export interface RegexTestResult {
+  valid: boolean;
+  matches: RegexMatch[];
+  count: number;
+  error?: string;
+}
+
+/**
+ * Test a regular expression against text, returning all matches.
+ * Always adds the `g` flag so all matches are collected.
+ */
+export function testRegex(
+  pattern: string,
+  flags: string,
+  text: string,
+): RegexTestResult {
+  try {
+    const safeFlags = flags.replace(/[^gimsuy]/g, '');
+    const globalFlags = safeFlags.includes('g') ? safeFlags : `${safeFlags}g`;
+    const regex = new RegExp(pattern, globalFlags);
+    const matches: RegexMatch[] = [];
+    let m: RegExpExecArray | null;
+    while ((m = regex.exec(text)) !== null) {
+      matches.push({ index: m.index, match: m[0], groups: m.slice(1) });
+      // Prevent infinite loop on zero-length matches
+      if (m[0].length === 0) regex.lastIndex++;
+    }
+    return { valid: true, matches, count: matches.length };
+  } catch (e) {
+    return {
+      valid: false,
+      matches: [],
+      count: 0,
+      error: e instanceof Error ? e.message : 'Invalid regular expression',
+    };
+  }
+}
+
+// ============================================================================
+// Number base converter
+// ============================================================================
+
+export interface BaseConversionResult {
+  result: string;
+  decimal: number;
+  error?: string;
+}
+
+/**
+ * Convert a number string from one base to another (2–36).
+ * The result is returned in uppercase.
+ */
+export function convertBase(
+  value: string,
+  fromBase: number,
+  toBase: number,
+): BaseConversionResult {
+  if (
+    !Number.isInteger(fromBase) ||
+    fromBase < 2 ||
+    fromBase > 36 ||
+    !Number.isInteger(toBase) ||
+    toBase < 2 ||
+    toBase > 36
+  ) {
+    return { result: '', decimal: 0, error: 'Base must be an integer between 2 and 36' };
+  }
+  const clean = value.replace(/\s/g, '');
+  const decimal = parseInt(clean, fromBase);
+  if (isNaN(decimal)) {
+    return {
+      result: '',
+      decimal: 0,
+      error: `"${value}" is not a valid base-${fromBase} number`,
+    };
+  }
+  return { result: decimal.toString(toBase).toUpperCase(), decimal };
+}
+
+// ============================================================================
+// Case converter
+// ============================================================================
+
+export const CASE_TYPES = [
+  'upper',
+  'lower',
+  'title',
+  'camel',
+  'pascal',
+  'snake',
+  'kebab',
+  'constant',
+] as const;
+
+export type CaseType = (typeof CASE_TYPES)[number];
+
+/**
+ * Convert a string to a different case style.
+ * Handles camelCase, PascalCase, snake_case, kebab-case, and space-separated input.
+ */
+export function convertCase(text: string, to: CaseType): string {
+  const words = text
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
+    .replace(/[\s_-]+/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  switch (to) {
+    case 'upper':
+      return text.toUpperCase();
+    case 'lower':
+      return text.toLowerCase();
+    case 'title':
+      return words
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ');
+    case 'camel':
+      return words
+        .map((w, i) =>
+          i === 0
+            ? w.toLowerCase()
+            : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase(),
+        )
+        .join('');
+    case 'pascal':
+      return words
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join('');
+    case 'snake':
+      return words.map((w) => w.toLowerCase()).join('_');
+    case 'kebab':
+      return words.map((w) => w.toLowerCase()).join('-');
+    case 'constant':
+      return words.map((w) => w.toUpperCase()).join('_');
+    default:
+      return text;
+  }
+}
+
+// ============================================================================
+// NanoID generator (crypto-based)
+// ============================================================================
+
+const NANO_ALPHABET =
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-';
+
+/**
+ * Generate a cryptographically random NanoID-style identifier.
+ * @param size Length of the ID (1–128, default 21).
+ */
+export function generateNanoId(size = 21): string {
+  const safeSize = Math.max(1, Math.min(size, 128));
+  let id = '';
+  for (let i = 0; i < safeSize; i++) {
+    id += NANO_ALPHABET[randomInt(NANO_ALPHABET.length)];
+  }
+  return id;
+}
