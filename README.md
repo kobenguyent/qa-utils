@@ -476,6 +476,9 @@ qautils chat config
 qautils chat config --provider openai --api-key sk-xxxxxx
 qautils chat config --provider ollama --endpoint http://localhost:11434
 
+# List available models for the configured provider
+qautils chat models
+
 # Start a chat session
 qautils chat
 ```

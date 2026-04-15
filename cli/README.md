@@ -299,6 +299,13 @@ qautils chat config --show
 
 # Remove stored configuration
 qautils chat config --reset
+
+# List available models for the configured provider
+qautils chat models
+
+# List models for a specific provider (without saving config)
+qautils chat models --provider ollama --endpoint http://localhost:11434
+qautils chat models --provider google --api-key AIzaXXX
 ```
 
 **Supported providers:**
@@ -336,6 +343,22 @@ qautils chat
 | `/help`  | Show available commands |
 | `/exit`  | Exit the chat session |
 | `Ctrl+C` | Exit the chat session |
+
+### Fetch Available Models
+
+Query the available models for the configured provider (or override with flags):
+
+```bash
+# Use configured provider
+qautils chat models
+
+# Override provider ad-hoc
+qautils chat models --provider ollama --endpoint http://localhost:11434
+qautils chat models --provider openai --api-key sk-xxx
+qautils chat models --provider google --api-key AIzaXXX
+```
+
+> **Note:** Anthropic does not expose a public model-list API; `qautils chat models --provider anthropic` returns a curated static list of stable models.
 
 ### Interactive TUI
 

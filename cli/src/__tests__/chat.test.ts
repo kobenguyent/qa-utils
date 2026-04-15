@@ -17,6 +17,7 @@ import {
   DEFAULT_ENDPOINTS,
   type AIProviderConfig,
 } from '../lib/aiConfig.js';
+import { fetchModels } from '../lib/aiClient.js';
 
 // Use a temporary directory for config during tests
 const TEST_HOME = path.join(os.tmpdir(), `qautils-cli-test-${Math.random().toString(36).slice(2)}`);
@@ -242,5 +243,121 @@ describe('DEFAULT_ENDPOINTS', () => {
 
   it('has a default endpoint for openai', () => {
     expect(DEFAULT_ENDPOINTS['openai']).toContain('openai.com');
+  });
+});
+
+// ── fetchModels tests ─────────────────────────────────────────────────────────
+
+describe('fetchModels', () => {
+  it('returns a static list for anthropic without hitting the network', async () => {
+    const models = await fetchModels({ provider: 'anthropic', apiKey: 'test-key' });
+    expect(Array.isArray(models)).toBe(true);
+    expect(models.length).toBeGreaterThan(0);
+    // All entries should be non-empty strings
+    models.forEach((m) => expect(typeof m).toBe('string'));
+    // Should include at least one well-known Claude model
+    expect(models.some((m) => m.includes('claude'))).toBe(true);
+  });
+
+  it('throws when provider is unsupported', async () => {
+    await expect(
+      fetchModels({ provider: 'unknown' as AIProviderConfig['provider'] }),
+    ).rejects.toThrow(/unsupported provider/i);
+  });
+
+  it('throws when ollama endpoint is unreachable (network error)', async () => {
+    // Port 19999 is almost certainly not listening; this exercises the network-error path.
+    await expect(
+      fetchModels({ provider: 'ollama', endpoint: 'http://127.0.0.1:19999' }),
+    ).rejects.toThrow();
+  }, 10_000);
+
+  it('throws a descriptive error when openai apiKey is missing (401)', async () => {
+    // Real HTTP call – expect a non-2xx response to be caught and rethrown.
+    // We cannot guarantee network access in CI, so we mock fetch here.
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      json: async () => ({ error: { message: 'Incorrect API key' } }),
+    }) as unknown as typeof fetch;
+
+    await expect(
+      fetchModels({ provider: 'openai', apiKey: 'invalid-key' }),
+    ).rejects.toThrow();
+
+    globalThis.fetch = originalFetch;
+  });
+
+  it('parses ollama response and returns model names', async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        models: [{ name: 'llama2:latest' }, { name: 'mistral:latest' }],
+      }),
+    }) as unknown as typeof fetch;
+
+    const models = await fetchModels({ provider: 'ollama', endpoint: 'http://localhost:11434' });
+    expect(models).toContain('llama2:latest');
+    expect(models).toContain('mistral:latest');
+
+    globalThis.fetch = originalFetch;
+  });
+
+  it('parses openai response and returns sorted model ids', async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        data: [{ id: 'gpt-4' }, { id: 'gpt-3.5-turbo' }],
+      }),
+    }) as unknown as typeof fetch;
+
+    const models = await fetchModels({ provider: 'openai', apiKey: 'sk-test' });
+    expect(models).toEqual(['gpt-3.5-turbo', 'gpt-4']); // sorted
+
+    globalThis.fetch = originalFetch;
+  });
+
+  it('parses google response and filters generateContent models', async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        models: [
+          { name: 'models/gemini-1.5-flash', supportedGenerationMethods: ['generateContent'] },
+          { name: 'models/text-bison', supportedGenerationMethods: ['generateText'] },
+          { name: 'models/gemini-1.5-pro', supportedGenerationMethods: ['generateContent'] },
+        ],
+      }),
+    }) as unknown as typeof fetch;
+
+    const models = await fetchModels({ provider: 'google', apiKey: 'AIza-test' });
+    expect(models).toContain('gemini-1.5-flash');
+    expect(models).toContain('gemini-1.5-pro');
+    expect(models).not.toContain('text-bison'); // filtered out
+
+    globalThis.fetch = originalFetch;
+  });
+
+  it('parses azure-openai response and returns sorted model ids', async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        data: [{ id: 'gpt-4' }, { id: 'gpt-35-turbo' }],
+      }),
+    }) as unknown as typeof fetch;
+
+    const models = await fetchModels({
+      provider: 'azure-openai',
+      apiKey: 'key',
+      endpoint: 'https://resource.openai.azure.com',
+    });
+    expect(models).toContain('gpt-4');
+    expect(models).toContain('gpt-35-turbo');
+
+    globalThis.fetch = originalFetch;
   });
 });

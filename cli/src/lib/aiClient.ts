@@ -266,6 +266,103 @@ async function sendToOllama(
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /**
+ * Fetch available model IDs from the configured AI provider.
+ *
+ * - OpenAI        GET /v1/models
+ * - Anthropic     Returns a static curated list (no public model-list endpoint)
+ * - Google Gemini GET /v1beta/models
+ * - Azure OpenAI  GET /openai/models?api-version=…
+ * - Ollama        GET /api/tags
+ */
+export async function fetchModels(config: AIProviderConfig): Promise<string[]> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
+
+  try {
+    switch (config.provider) {
+      case 'openai': {
+        const base = (config.endpoint || 'https://api.openai.com/v1/chat/completions')
+          .replace(/\/chat\/completions$/, '')
+          .replace(/\/v1$/, '')
+          + '/v1';
+        const res = await fetch(`${base}/models`, {
+          headers: { Authorization: `Bearer ${config.apiKey || ''}` },
+          signal: controller.signal,
+        });
+        if (!res.ok) throw new Error(`OpenAI error ${res.status}`);
+        const data = (await res.json()) as { data: Array<{ id: string }> };
+        return data.data.map((m) => m.id).sort();
+      }
+
+      case 'anthropic': {
+        // Anthropic does not expose a public model-list REST endpoint;
+        // return the known stable models instead.
+        clearTimeout(timer);
+        return [
+          'claude-3-5-sonnet-20241022',
+          'claude-3-5-haiku-20241022',
+          'claude-3-opus-20240229',
+          'claude-3-sonnet-20240229',
+          'claude-3-haiku-20240307',
+        ];
+      }
+
+      case 'google': {
+        const apiKey = config.apiKey || '';
+        const base = (config.endpoint || 'https://generativelanguage.googleapis.com/v1beta')
+          .replace(/\/models\/[^/]+:generateContent.*/, '')
+          .replace(/\/models$/, '');
+        const res = await fetch(`${base}/models`, {
+          headers: { 'x-goog-api-key': apiKey },
+          signal: controller.signal,
+        });
+        if (!res.ok) throw new Error(`Google error ${res.status}`);
+        const data = (await res.json()) as {
+          models: Array<{ name: string; supportedGenerationMethods?: string[] }>;
+        };
+        return (data.models || [])
+          .filter((m) => m.supportedGenerationMethods?.includes('generateContent'))
+          .map((m) => m.name.replace(/^models\//, ''))
+          .sort();
+      }
+
+      case 'azure-openai': {
+        const endpoint = config.endpoint;
+        if (!endpoint) throw new Error('Azure OpenAI endpoint is required');
+        const apiVersion = config.azureApiVersion || '2024-02-15-preview';
+        const res = await fetch(
+          `${endpoint}/openai/models?api-version=${apiVersion}`,
+          {
+            headers: { 'api-key': config.apiKey || '' },
+            signal: controller.signal,
+          },
+        );
+        if (!res.ok) throw new Error(`Azure OpenAI error ${res.status}`);
+        const data = (await res.json()) as { data: Array<{ id: string }> };
+        return data.data.map((m) => m.id).sort();
+      }
+
+      case 'ollama': {
+        const base = config.endpoint || 'http://localhost:11434';
+        const res = await fetch(`${base}/api/tags`, { signal: controller.signal });
+        if (!res.ok) throw new Error(`Ollama error ${res.status}`);
+        const data = (await res.json()) as { models: Array<{ name: string }> };
+        return (data.models || []).map((m) => m.name).sort();
+      }
+
+      default:
+        throw new Error(`Unsupported provider: ${(config as AIProviderConfig).provider}`);
+    }
+  } catch (err) {
+    clearTimeout(timer);
+    if ((err as Error).name === 'AbortError') throw new Error('Request timed out');
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
  * Send a list of messages to the configured AI provider and return the reply.
  */
 export async function sendChat(

@@ -6,6 +6,8 @@
  *   qautils chat config            Configure AI provider (interactive wizard)
  *   qautils chat config --show     Show current AI provider configuration
  *   qautils chat config --reset    Remove the stored configuration
+ *   qautils chat models            List available models for the current provider
+ *   qautils chat models --provider ollama  List models for a specific provider
  */
 
 import readline from 'readline';
@@ -26,7 +28,7 @@ import {
   type AIProvider,
   type AIProviderConfig,
 } from '../lib/aiConfig.js';
-import { sendChat, KOBEAN_SYSTEM_PROMPT, type ChatMessage } from '../lib/aiClient.js';
+import { sendChat, fetchModels, KOBEAN_SYSTEM_PROMPT, type ChatMessage } from '../lib/aiClient.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -373,5 +375,57 @@ export function registerChatCommand(program: Command): void {
 
       // ── Interactive wizard ───────────────────────────────────────────────
       await runConfigWizard();
+    });
+
+  // ── chat models sub-command ──────────────────────────────────────────────
+  chatCmd
+    .command('models')
+    .description('List available models for the configured (or specified) AI provider')
+    .option('--provider <provider>', 'Provider to query (overrides saved config)')
+    .option('--api-key <key>', 'API key (overrides saved config)')
+    .option('--endpoint <url>', 'Endpoint (overrides saved config)')
+    .action(async (opts: { provider?: string; apiKey?: string; endpoint?: string }) => {
+      let config = readConfig();
+
+      // Allow ad-hoc overrides without a saved config
+      if (opts.provider) {
+        config = {
+          ...(config ?? {}),
+          provider: opts.provider as AIProvider,
+          ...(opts.apiKey   ? { apiKey: opts.apiKey }     : {}),
+          ...(opts.endpoint ? { endpoint: opts.endpoint } : {}),
+        };
+      }
+
+      if (!config) {
+        console.log(chalk.bold.yellow('\n  ⚠  AI provider not configured.'));
+        console.log(T.dim(`  Run ${chalk.cyan('qautils chat config')} to set up your provider first.\n`));
+        process.exit(1);
+      }
+
+      const spinner = ora({ text: T.dim(`  Fetching models from ${config.provider}…`), color: 'cyan' }).start();
+
+      try {
+        const models = await fetchModels(config);
+        spinner.stop();
+
+        if (models.length === 0) {
+          console.log(chalk.yellow(`\n  ⚠  No models returned by ${config.provider}.\n`));
+          return;
+        }
+
+        console.log();
+        console.log(T.title(`  Available models — ${config.provider}`));
+        console.log(T.dim('  ' + '─'.repeat(52)));
+        models.forEach((m) => console.log(`  ${chalk.cyan('·')}  ${m}`));
+        console.log();
+        console.log(T.dim(`  Total: ${models.length} model${models.length !== 1 ? 's' : ''}`));
+        console.log();
+      } catch (err) {
+        spinner.stop();
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(T.error(`\n  ✗  Error: ${message}\n`));
+        process.exit(1);
+      }
     });
 }

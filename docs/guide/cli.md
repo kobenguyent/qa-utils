@@ -122,6 +122,22 @@ qautils chat config --show
 qautils chat config --reset
 ```
 
+### Fetch Available Models
+
+```bash
+# Use the configured provider
+qautils chat models
+
+# Override ad-hoc (no saved config needed)
+qautils chat models --provider ollama --endpoint http://localhost:11434
+qautils chat models --provider openai --api-key sk-xxx
+qautils chat models --provider google --api-key AIzaXXX
+```
+
+::: tip Anthropic
+Anthropic has no public model-list API. `qautils chat models --provider anthropic` returns a curated static list of stable Claude models.
+:::
+
 ---
 
 ## All CLI Commands
@@ -151,6 +167,7 @@ Run `qautils --help` to see all commands, or `qautils <command> --help` for deta
 | | `html sanitize` | HTML sanitizer |
 | **AI** | `chat` | Kobean AI chat session |
 | | `chat config` | Configure AI provider |
+| | `chat models` | List available models for the provider |
 
 ---
 

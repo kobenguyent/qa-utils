@@ -103,6 +103,8 @@ ${chalk.bold('AI Chat (Kobean)')}:
   ${chalk.cyan('qautils chat config --show')}             Show current AI config
   ${chalk.cyan('qautils chat config --reset')}            Remove stored AI config
   ${chalk.cyan('qautils chat config --provider openai --api-key sk-xxx')}  Quick config
+  ${chalk.cyan('qautils chat models')}                    List available models (current provider)
+  ${chalk.cyan('qautils chat models --provider ollama')} List models for a specific provider
 `,
   );
 
