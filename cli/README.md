@@ -315,7 +315,11 @@ Configuration is stored at:
 - **Linux / macOS**: `~/.config/qautils-cli/config.json`
 - **Windows**: `%APPDATA%\qautils-cli\config.json`
 
-> ⚠️ API keys are stored in plain text. Ensure your config file has appropriate permissions.
+> ⚠️ API keys are stored in plain text. Ensure your config file has appropriate permissions:
+> ```bash
+> chmod 600 ~/.config/qautils-cli/config.json
+> ```
+> Alternatively, use environment variables if your shell/CI environment supports them.
 
 ### Start a Chat Session
 

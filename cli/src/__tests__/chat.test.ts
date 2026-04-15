@@ -19,7 +19,7 @@ import {
 } from '../lib/aiConfig.js';
 
 // Use a temporary directory for config during tests
-const TEST_HOME = path.join(os.tmpdir(), `qautils-cli-test-${Date.now()}`);
+const TEST_HOME = path.join(os.tmpdir(), `qautils-cli-test-${Math.random().toString(36).slice(2)}`);
 const REAL_HOME = os.homedir();
 const REAL_APPDATA = process.env.APPDATA;
 
@@ -144,12 +144,12 @@ describe('validateAIConfig', () => {
 });
 
 describe('formatConfigForDisplay', () => {
-  it('masks the API key via toDisplayConfig', () => {
+  it('shows [configured] when API key is present via toDisplayConfig', () => {
     const cfg: AIProviderConfig = { provider: 'openai', apiKey: 'sk-1234567890abcdef' };
     const display = formatConfigForDisplay(toDisplayConfig(cfg));
-    expect(display).toContain('sk-1');
-    expect(display).toContain('cdef');
+    expect(display).toContain('[configured]');
     expect(display).not.toContain('sk-1234567890abcdef');
+    expect(display).not.toContain('sk-1');
   });
 
   it('includes provider and model', () => {
@@ -171,9 +171,9 @@ describe('formatConfigForDisplay', () => {
     expect(display).toContain('http://localhost:11434');
   });
 
-  it('accepts maskedApiKey directly without raw apiKey', () => {
-    const display = formatConfigForDisplay({ provider: 'openai', maskedApiKey: 'sk-1****cdef' });
-    expect(display).toContain('sk-1****cdef');
+  it('omits API key line when no key present', () => {
+    const display = formatConfigForDisplay({ provider: 'ollama' });
+    expect(display).not.toContain('API Key');
   });
 });
 
@@ -197,12 +197,11 @@ describe('maskApiKey', () => {
 });
 
 describe('toDisplayConfig', () => {
-  it('removes apiKey and adds maskedApiKey', () => {
+  it('removes apiKey and adds hasApiKey flag', () => {
     const cfg: AIProviderConfig = { provider: 'openai', apiKey: 'sk-1234567890abcdef' };
     const display = toDisplayConfig(cfg);
     expect('apiKey' in display).toBe(false);
-    expect(display.maskedApiKey).toBeDefined();
-    expect(display.maskedApiKey).not.toBe('sk-1234567890abcdef');
+    expect(display.hasApiKey).toBe(true);
   });
 
   it('preserves non-sensitive fields', () => {
@@ -223,7 +222,7 @@ describe('toDisplayConfig', () => {
   it('handles config without apiKey', () => {
     const cfg: AIProviderConfig = { provider: 'ollama', endpoint: 'http://localhost:11434' };
     const display = toDisplayConfig(cfg);
-    expect(display.maskedApiKey).toBeUndefined();
+    expect(display.hasApiKey).toBeUndefined();
   });
 });
 

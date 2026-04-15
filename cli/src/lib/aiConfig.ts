@@ -112,16 +112,16 @@ export function maskApiKey(apiKey: string): string {
   return apiKey.slice(0, 4) + '****' + apiKey.slice(-4);
 }
 
-/** Format a config for display, masking the API key */
+/** Format a config for display, showing key presence without any key-derived data */
 export function formatConfigForDisplay(
-  config: Omit<AIProviderConfig, 'apiKey'> & { maskedApiKey?: string },
+  config: Omit<AIProviderConfig, 'apiKey'> & { hasApiKey?: boolean },
 ): string {
   const lines: string[] = [
     `  Provider  : ${config.provider}`,
     `  Model     : ${config.model || DEFAULT_MODELS[config.provider]}`,
   ];
-  if (config.maskedApiKey) {
-    lines.push(`  API Key   : ${config.maskedApiKey}`);
+  if (config.hasApiKey) {
+    lines.push(`  API Key   : [configured]`);
   }
   if (config.endpoint) {
     lines.push(`  Endpoint  : ${config.endpoint}`);
@@ -135,10 +135,10 @@ export function formatConfigForDisplay(
   return lines.join('\n');
 }
 
-/** Build a display-safe version of a config (API key masked, not passed to logger) */
+/** Build a display-safe version of a config (API key replaced with boolean indicator) */
 export function toDisplayConfig(
   config: AIProviderConfig,
-): Omit<AIProviderConfig, 'apiKey'> & { maskedApiKey?: string } {
+): Omit<AIProviderConfig, 'apiKey'> & { hasApiKey?: boolean } {
   const { apiKey, ...rest } = config;
-  return { ...rest, ...(apiKey ? { maskedApiKey: maskApiKey(apiKey) } : {}) };
+  return { ...rest, ...(apiKey ? { hasApiKey: true } : {}) };
 }
