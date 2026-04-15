@@ -34,4 +34,5 @@ jobs:
 
       - name: Publish to npm
         working-directory: cli
-        run: npm publish
+        # Add the --provenance flag to the publish command
+        run: npm publish --provenance
