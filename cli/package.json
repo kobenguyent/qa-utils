@@ -1,5 +1,5 @@
 {
-  "name": "@kobenguyent/qautils-cli",
+  "name": "qautils-cli",
   "version": "1.0.0",
   "description": "Command-line interface for QA Utils — utility tools for testing and automation workflows",
   "type": "module",
