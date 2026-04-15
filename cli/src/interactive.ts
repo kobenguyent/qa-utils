@@ -21,6 +21,7 @@ import {
   readConfig,
   validateAIConfig,
   formatConfigForDisplay,
+  toDisplayConfig,
   DEFAULT_MODELS,
 } from './lib/aiConfig.js';
 import { sendChat, KOBEAN_SYSTEM_PROMPT, type ChatMessage } from './lib/aiClient.js';
@@ -54,7 +55,7 @@ const BANNER_W = 62;
 export function printBanner(toolCount = 20): void {
   const bar = '─'.repeat(BANNER_W);
   const empty = ' '.repeat(BANNER_W);
-  const version = 'v2.0.0';
+  const version = 'v1.1.0';
   const vPad = BANNER_W - 18 - version.length - 2;
   const titleLine =
     '  ' + chalk.bold.yellow('◆') + '  ' + gradientTitle('QA UTILS CLI') +
@@ -589,7 +590,7 @@ async function runChat(): Promise<null> {
 
       if (userInput === '/model') {
         console.log();
-        console.log(formatConfigForDisplay(config));
+        console.log(formatConfigForDisplay(toDisplayConfig(config)));
         console.log();
         rl.prompt();
         return;

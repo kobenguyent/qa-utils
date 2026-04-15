@@ -20,6 +20,7 @@ import {
   deleteConfig,
   validateAIConfig,
   formatConfigForDisplay,
+  toDisplayConfig,
   DEFAULT_MODELS,
   DEFAULT_ENDPOINTS,
   type AIProvider,
@@ -164,7 +165,7 @@ async function runConfigWizard(): Promise<void> {
   console.log();
   console.log(T.success('  ✓  Configuration saved!'));
   console.log();
-  console.log(formatConfigForDisplay(config));
+  console.log(formatConfigForDisplay(toDisplayConfig(config)));
   console.log();
   console.log(T.dim(`  Run ${chalk.cyan('qautils chat')} to start a chat session.\n`));
 }
@@ -225,7 +226,7 @@ async function runChatSession(config: AIProviderConfig): Promise<void> {
 
     if (userInput === '/model') {
       console.log();
-      console.log(formatConfigForDisplay(config));
+      console.log(formatConfigForDisplay(toDisplayConfig(config)));
       console.log();
       rl.prompt();
       return;
@@ -333,7 +334,7 @@ export function registerChatCommand(program: Command): void {
           console.log(T.title('  Current AI Provider Configuration'));
           console.log(T.dim('  ─'.repeat(30)));
           console.log();
-          console.log(formatConfigForDisplay(config));
+          console.log(formatConfigForDisplay(toDisplayConfig(config)));
           console.log();
         }
         return;
@@ -365,7 +366,7 @@ export function registerChatCommand(program: Command): void {
         writeConfig(config);
         console.log(T.success('\n  ✓  Configuration saved!'));
         console.log();
-        console.log(formatConfigForDisplay(config));
+        console.log(formatConfigForDisplay(toDisplayConfig(config)));
         console.log();
         return;
       }

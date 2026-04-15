@@ -9,6 +9,8 @@ import {
   deleteConfig,
   validateAIConfig,
   formatConfigForDisplay,
+  toDisplayConfig,
+  maskApiKey,
   getConfigDir,
   getConfigFilePath,
   DEFAULT_MODELS,
@@ -142,27 +144,86 @@ describe('validateAIConfig', () => {
 });
 
 describe('formatConfigForDisplay', () => {
-  it('masks the API key', () => {
-    const display = formatConfigForDisplay({ provider: 'openai', apiKey: 'sk-1234567890abcdef' });
+  it('masks the API key via toDisplayConfig', () => {
+    const cfg: AIProviderConfig = { provider: 'openai', apiKey: 'sk-1234567890abcdef' };
+    const display = formatConfigForDisplay(toDisplayConfig(cfg));
     expect(display).toContain('sk-1');
     expect(display).toContain('cdef');
     expect(display).not.toContain('sk-1234567890abcdef');
   });
 
   it('includes provider and model', () => {
-    const display = formatConfigForDisplay({ provider: 'openai', model: 'gpt-4', apiKey: 'sk-test' });
+    const cfg: AIProviderConfig = { provider: 'openai', model: 'gpt-4', apiKey: 'sk-test' };
+    const display = formatConfigForDisplay(toDisplayConfig(cfg));
     expect(display).toContain('openai');
     expect(display).toContain('gpt-4');
   });
 
   it('uses default model when none specified', () => {
-    const display = formatConfigForDisplay({ provider: 'anthropic', apiKey: 'key' });
+    const cfg: AIProviderConfig = { provider: 'anthropic', apiKey: 'key' };
+    const display = formatConfigForDisplay(toDisplayConfig(cfg));
     expect(display).toContain(DEFAULT_MODELS['anthropic']);
   });
 
   it('shows endpoint when present', () => {
-    const display = formatConfigForDisplay({ provider: 'ollama', endpoint: 'http://localhost:11434' });
+    const cfg: AIProviderConfig = { provider: 'ollama', endpoint: 'http://localhost:11434' };
+    const display = formatConfigForDisplay(toDisplayConfig(cfg));
     expect(display).toContain('http://localhost:11434');
+  });
+
+  it('accepts maskedApiKey directly without raw apiKey', () => {
+    const display = formatConfigForDisplay({ provider: 'openai', maskedApiKey: 'sk-1****cdef' });
+    expect(display).toContain('sk-1****cdef');
+  });
+});
+
+describe('maskApiKey', () => {
+  it('masks short keys fully', () => {
+    expect(maskApiKey('abc')).toBe('****');
+  });
+
+  it('partially masks medium keys', () => {
+    const result = maskApiKey('abcde123');
+    expect(result).toContain('****');
+    expect(result.length).toBeLessThan('abcde123'.length);
+  });
+
+  it('shows first 4 and last 4 chars for long keys', () => {
+    const result = maskApiKey('sk-1234567890abcdef');
+    expect(result.startsWith('sk-1')).toBe(true);
+    expect(result.endsWith('cdef')).toBe(true);
+    expect(result).toContain('****');
+  });
+});
+
+describe('toDisplayConfig', () => {
+  it('removes apiKey and adds maskedApiKey', () => {
+    const cfg: AIProviderConfig = { provider: 'openai', apiKey: 'sk-1234567890abcdef' };
+    const display = toDisplayConfig(cfg);
+    expect('apiKey' in display).toBe(false);
+    expect(display.maskedApiKey).toBeDefined();
+    expect(display.maskedApiKey).not.toBe('sk-1234567890abcdef');
+  });
+
+  it('preserves non-sensitive fields', () => {
+    const cfg: AIProviderConfig = {
+      provider: 'openai',
+      apiKey: 'sk-test',
+      model: 'gpt-4',
+      temperature: 0.5,
+      endpoint: 'https://api.example.com',
+    };
+    const display = toDisplayConfig(cfg);
+    expect(display.model).toBe('gpt-4');
+    expect(display.temperature).toBe(0.5);
+    expect(display.endpoint).toBe('https://api.example.com');
+    expect(display.provider).toBe('openai');
+  });
+
+  it('handles config without apiKey', () => {
+    const cfg: AIProviderConfig = { provider: 'ollama', endpoint: 'http://localhost:11434' };
+    const display = toDisplayConfig(cfg);
+    expect(display.maskedApiKey).toBeUndefined();
   });
 });
 

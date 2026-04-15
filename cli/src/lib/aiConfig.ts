@@ -105,15 +105,23 @@ export function validateAIConfig(config: AIProviderConfig): string | null {
   return null;
 }
 
+/** Mask an API key for safe display */
+export function maskApiKey(apiKey: string): string {
+  if (apiKey.length <= 4) return '****';
+  if (apiKey.length <= 8) return apiKey.slice(0, 2) + '****';
+  return apiKey.slice(0, 4) + '****' + apiKey.slice(-4);
+}
+
 /** Format a config for display, masking the API key */
-export function formatConfigForDisplay(config: AIProviderConfig): string {
+export function formatConfigForDisplay(
+  config: Omit<AIProviderConfig, 'apiKey'> & { maskedApiKey?: string },
+): string {
   const lines: string[] = [
     `  Provider  : ${config.provider}`,
     `  Model     : ${config.model || DEFAULT_MODELS[config.provider]}`,
   ];
-  if (config.apiKey) {
-    const masked = config.apiKey.slice(0, 4) + '****' + config.apiKey.slice(-4);
-    lines.push(`  API Key   : ${masked}`);
+  if (config.maskedApiKey) {
+    lines.push(`  API Key   : ${config.maskedApiKey}`);
   }
   if (config.endpoint) {
     lines.push(`  Endpoint  : ${config.endpoint}`);
@@ -125,4 +133,12 @@ export function formatConfigForDisplay(config: AIProviderConfig): string {
     lines.push(`  API Version: ${config.azureApiVersion}`);
   }
   return lines.join('\n');
+}
+
+/** Build a display-safe version of a config (API key masked, not passed to logger) */
+export function toDisplayConfig(
+  config: AIProviderConfig,
+): Omit<AIProviderConfig, 'apiKey'> & { maskedApiKey?: string } {
+  const { apiKey, ...rest } = config;
+  return { ...rest, ...(apiKey ? { maskedApiKey: maskApiKey(apiKey) } : {}) };
 }

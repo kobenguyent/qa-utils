@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * qautils-cli — QA Utils Command-Line Interface  (v3)
+ * qautils-cli — QA Utils Command-Line Interface  (v1.1)
  *
  * No arguments  →  interactive TUI mode
  * With arguments →  direct CLI mode
@@ -52,7 +52,7 @@ program
       '\n' +
       chalk.dim('  https://github.com/kobenguyent/qa-utils'),
   )
-  .version('3.0.0', '-v, --version', 'print the current version')
+  .version('1.1.0', '-v, --version', 'print the current version')
   .option('-i, --interactive', 'launch the interactive TUI (default when no args given)')
   .helpOption('-h, --help', 'display help for command')
   .addHelpText(
