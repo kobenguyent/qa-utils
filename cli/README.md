@@ -1,6 +1,6 @@
 # qautils-cli
 
-> **Command-line interface for [QA Utils](https://github.com/kobenguyent/qa-utils)** — utility tools for daily testing and automation workflows.
+> **Command-line interface for [QA Utils](https://github.com/kobenguyent/qa-utils)** — utility tools for daily testing and automation workflows, plus an AI-powered Kobean chat assistant.
 
 ---
 
@@ -275,6 +275,98 @@ qautils random -l 64 -c 5             # 5 × 64-char strings
 
 ---
 
+## 🤖 Kobean AI Chat
+
+Kobean is an AI-powered chat assistant built into qautils-cli. It supports multiple providers and provides an interactive REPL-style chat experience right in your terminal.
+
+### Configure AI Provider
+
+Before starting a chat, configure your AI provider:
+
+```bash
+# Interactive wizard (recommended)
+qautils chat config
+
+# Quick non-interactive setup
+qautils chat config --provider openai --api-key sk-xxxxxx
+qautils chat config --provider ollama --endpoint http://localhost:11434 --model mistral
+qautils chat config --provider anthropic --api-key sk-ant-xxx
+qautils chat config --provider google --api-key AIzaXXX
+qautils chat config --provider azure-openai --api-key xxx --endpoint https://resource.openai.azure.com --model gpt-35-turbo
+
+# Show current configuration (API key is masked)
+qautils chat config --show
+
+# Remove stored configuration
+qautils chat config --reset
+
+# List available models for the configured provider
+qautils chat models
+
+# List models for a specific provider (without saving config)
+qautils chat models --provider ollama --endpoint http://localhost:11434
+qautils chat models --provider google --api-key AIzaXXX
+```
+
+**Supported providers:**
+
+| Provider | Requires | Default Model |
+|----------|----------|---------------|
+| `openai` | API key | gpt-3.5-turbo |
+| `anthropic` | API key | claude-3-sonnet-20240229 |
+| `google` | API key | gemini-1.5-flash |
+| `azure-openai` | API key + Endpoint | gpt-35-turbo |
+| `ollama` | Endpoint (local) | llama2 |
+
+Configuration is stored at:
+- **Linux / macOS**: `~/.config/qautils-cli/config.json`
+- **Windows**: `%APPDATA%\qautils-cli\config.json`
+
+> ⚠️ API keys are stored in plain text. Ensure your config file has appropriate permissions:
+> ```bash
+> chmod 600 ~/.config/qautils-cli/config.json
+> ```
+> Alternatively, use environment variables if your shell/CI environment supports them.
+
+### Start a Chat Session
+
+```bash
+qautils chat
+```
+
+**In-session commands:**
+
+| Command | Description |
+|---------|-------------|
+| `/clear` | Reset conversation history |
+| `/model` | Show current AI provider and model |
+| `/help`  | Show available commands |
+| `/exit`  | Exit the chat session |
+| `Ctrl+C` | Exit the chat session |
+
+### Fetch Available Models
+
+Query the available models for the configured provider (or override with flags):
+
+```bash
+# Use configured provider
+qautils chat models
+
+# Override provider ad-hoc
+qautils chat models --provider ollama --endpoint http://localhost:11434
+qautils chat models --provider openai --api-key sk-xxx
+qautils chat models --provider google --api-key AIzaXXX
+```
+
+> **Note:** Anthropic does not expose a public model-list API; `qautils chat models --provider anthropic` returns a curated static list of stable models.
+
+### Interactive TUI
+
+The chat is also available from the interactive TUI (launched by running `qautils` without arguments).
+Select **🤖 Kobean AI Chat** from the menu.
+
+---
+
 ## Piping & Scripting
 
 All commands print results to **stdout** with no trailing newlines from internal logic. Errors go to **stderr** and set exit code `1`.
@@ -324,8 +416,11 @@ cli/
 ├── .eslintrc.cjs
 └── src/
     ├── index.ts               ← CLI entry point (Commander.js)
+    ├── interactive.ts         ← Interactive TUI mode
     ├── lib/
-    │   └── tools.ts           ← Pure business logic (testable)
+    │   ├── tools.ts           ← Pure business logic (testable)
+    │   ├── aiConfig.ts        ← AI provider config file management
+    │   └── aiClient.ts        ← AI chat HTTP client (Node 18+ fetch)
     ├── utils/
     │   └── output.ts          ← Chalk-based formatting helpers
     ├── commands/
@@ -342,7 +437,8 @@ cli/
     │   ├── sql.ts
     │   ├── color.ts
     │   ├── html.ts
-    │   └── random.ts
+    │   ├── random.ts
+    │   └── chat.ts            ← Kobean AI chat command
     └── __tests__/
         ├── uuid.test.ts
         ├── base64.test.ts
@@ -357,7 +453,8 @@ cli/
         ├── sql.test.ts
         ├── color.test.ts
         ├── html.test.ts
-        └── random.test.ts
+        ├── random.test.ts
+        └── chat.test.ts       ← Tests for AI config and client
 ```
 
 ---

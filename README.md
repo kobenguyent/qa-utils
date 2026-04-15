@@ -454,6 +454,43 @@ Agent Mode (`/agent` route) turns QA Utils into an autonomous AI agent. Describe
 3. Enter a task description or pick a preset example
 4. Click **▶ Run Agent** and watch the step-by-step execution
 
+## 🖥️ CLI — Kobean Chat & qautils-cli
+
+QA Utils ships a full-featured **command-line interface** (`qautils-cli`) that includes all utility tools **plus an AI-powered Kobean chat assistant** right in your terminal.
+
+### Installation
+
+```bash
+npm install -g qautils-cli
+```
+
+### Kobean Chat
+
+Configure your AI provider once, then start chatting:
+
+```bash
+# Interactive configuration wizard
+qautils chat config
+
+# Quick setup (non-interactive)
+qautils chat config --provider openai --api-key sk-xxxxxx
+qautils chat config --provider ollama --endpoint http://localhost:11434
+
+# List available models for the configured provider
+qautils chat models
+
+# Start a chat session
+qautils chat
+```
+
+**Supported AI providers:** OpenAI · Anthropic Claude · Google Gemini · Azure OpenAI · Ollama (local)
+
+Config is persisted to `~/.config/qautils-cli/config.json` (Linux/macOS) or `%APPDATA%\qautils-cli\config.json` (Windows).
+
+See the [CLI README](./cli/README.md) for full documentation.
+
+---
+
 ## 🚀 Getting Started
 
 ### Prerequisites

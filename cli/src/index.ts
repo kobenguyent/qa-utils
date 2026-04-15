@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * qautils-cli — QA Utils Command-Line Interface  (v2)
+ * qautils-cli — QA Utils Command-Line Interface  (v1.1)
  *
  * No arguments  →  interactive TUI mode
  * With arguments →  direct CLI mode
@@ -37,6 +37,8 @@ import { registerRegexCommand }     from './commands/regex.js';
 import { registerBaseCommand }      from './commands/base.js';
 import { registerCaseCommand }      from './commands/case.js';
 import { registerNanoidCommand }    from './commands/nanoid.js';
+// ── AI (v3) ──────────────────────────────────────────────────────────────────
+import { registerChatCommand }      from './commands/chat.js';
 
 // ── Program ──────────────────────────────────────────────────────────────────
 
@@ -46,11 +48,11 @@ program
   .name('qautils')
   .description(
     chalk.bold('QA Utils CLI') +
-      chalk.dim(' — 19 utility tools for testing and automation workflows') +
+      chalk.dim(' — 20 utility tools for testing and automation workflows') +
       '\n' +
       chalk.dim('  https://github.com/kobenguyent/qa-utils'),
   )
-  .version('2.0.0', '-v, --version', 'print the current version')
+  .version('1.1.0', '-v, --version', 'print the current version')
   .option('-i, --interactive', 'launch the interactive TUI (default when no args given)')
   .helpOption('-h, --help', 'display help for command')
   .addHelpText(
@@ -94,6 +96,15 @@ ${chalk.bold('Data Toolkit')}:
   ${chalk.cyan('qautils json format data.json')}          Pretty-print JSON file
   ${chalk.cyan('qautils sql SELECT --table users')}       Generate SELECT SQL
   ${chalk.cyan('qautils html sanitize "<p>…</p>"')}      Sanitize HTML
+
+${chalk.bold('AI Chat (Kobean)')}:
+  ${chalk.cyan('qautils chat')}                           Start interactive AI chat session
+  ${chalk.cyan('qautils chat config')}                    Configure AI provider (wizard)
+  ${chalk.cyan('qautils chat config --show')}             Show current AI config
+  ${chalk.cyan('qautils chat config --reset')}            Remove stored AI config
+  ${chalk.cyan('qautils chat config --provider openai --api-key sk-xxx')}  Quick config
+  ${chalk.cyan('qautils chat models')}                    List available models (current provider)
+  ${chalk.cyan('qautils chat models --provider ollama')} List models for a specific provider
 `,
   );
 
@@ -119,6 +130,8 @@ registerRegexCommand(program);
 registerBaseCommand(program);
 registerCaseCommand(program);
 registerNanoidCommand(program);
+// v3 commands
+registerChatCommand(program);
 
 // ── Launch mode ───────────────────────────────────────────────────────────────
 
