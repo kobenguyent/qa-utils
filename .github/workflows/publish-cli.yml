@@ -1,4 +1,4 @@
-name: Publish qautils-cli to GitHub Packages
+name: Publish qautils-cli to npm
 
 on:
   release:
@@ -12,7 +12,6 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'cli-v')
     permissions:
       contents: read
-      packages: write
 
     steps:
       - name: Checkout code
@@ -22,7 +21,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          registry-url: 'https://npm.pkg.github.com'
+          registry-url: 'https://registry.npmjs.org'
           scope: '@kobenguyent'
 
       - name: Install dependencies
@@ -33,8 +32,8 @@ jobs:
         working-directory: cli
         run: npm run build
 
-      - name: Publish to GitHub Packages
+      - name: Publish to npm
         working-directory: cli
         run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
