@@ -13,6 +13,30 @@
 
 ## Installation
 
+### From GitHub Packages (recommended)
+
+```bash
+# Authenticate with GitHub Packages (one-time setup)
+npm login --registry=https://npm.pkg.github.com --scope=@kobenguyent
+
+# Install globally
+npm install -g @kobenguyent/qautils-cli --registry=https://npm.pkg.github.com
+
+qautils --help
+```
+
+Alternatively, add a `.npmrc` file to your project:
+
+```
+@kobenguyent:registry=https://npm.pkg.github.com
+```
+
+Then install:
+
+```bash
+npm install -g @kobenguyent/qautils-cli
+```
+
 ### Local development (inside this repo)
 ```bash
 cd cli

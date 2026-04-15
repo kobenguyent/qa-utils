@@ -1,10 +1,22 @@
 {
-  "name": "qautils-cli",
+  "name": "@kobenguyent/qautils-cli",
   "version": "1.0.0",
   "description": "Command-line interface for QA Utils — utility tools for testing and automation workflows",
   "type": "module",
   "bin": {
     "qautils": "dist/src/index.js"
+  },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kobenguyent/qa-utils.git",
+    "directory": "cli"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
     "build": "tsc",
