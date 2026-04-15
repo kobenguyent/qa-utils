@@ -13,7 +13,7 @@
 
 ## Installation
 
-### From GitHub Packages (recommended)
+### From GitHub Packages
 
 ```bash
 # Authenticate with GitHub Packages (one-time setup)
