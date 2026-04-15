@@ -11,6 +11,7 @@ jobs:
     # Only run on releases tagged as cli-v* or when triggered manually
     if: github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'cli-v')
     permissions:
+      id-token: write  # Required for OIDC
       contents: read
 
     steps:
@@ -20,9 +21,8 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           registry-url: 'https://registry.npmjs.org'
-          scope: '@kobenguyent'
 
       - name: Install dependencies
         working-directory: cli
