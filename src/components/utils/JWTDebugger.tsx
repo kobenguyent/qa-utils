@@ -22,7 +22,7 @@ import { AIAssistButton } from '../AIAssistButton';
 import { AIConfigureHint } from '../AIConfigureHint';
 
 export const JWTDebugger = () => {
-  const [postContent, setPostContent] = useState('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c');
+  const [postContent, setPostContent] = useState('');
   const [error, setError] = useState<string>('');
   const [isValidJWT, setIsValidJWT] = useState<boolean>(true);
   const [secretKey, setSecretKey] = useState<string>('');
