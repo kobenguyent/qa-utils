@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Install deps first (layer cache)
 COPY package*.json ./
-RUN npm ci --include=dev
+RUN npm i --include=dev
 
 # Copy source and compile
 COPY tsconfig.json ./
