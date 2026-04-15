@@ -27,6 +27,7 @@ export default defineConfig({
         text: 'Links',
         items: [
           { text: 'Live Demo', link: 'https://kobenguyent.github.io/qa-utils/#/' },
+          { text: 'API Docs', link: 'https://kobenguyent.github.io/qa-utils/api-docs/' },
           { text: 'GitHub', link: 'https://github.com/kobenguyent/qa-utils' },
         ],
       },

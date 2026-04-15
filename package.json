@@ -30,7 +30,8 @@
     "electron:build:all": "node scripts/bump-electron-version.cjs && cross-env ELECTRON=true npm run build && electron-builder -mwl",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "build:api-docs": "node scripts/build-swagger-ui.mjs"
   },
   "dependencies": {
     "@imgly/background-removal": "^1.7.0",
