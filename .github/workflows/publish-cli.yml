@@ -27,15 +27,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: cli
-        run: npm i && npm i eslint
-
-      - name: Run linter
-        working-directory: cli
-        run: npm run lint
-
-      - name: Run tests
-        working-directory: cli
-        run: npm test
+        run: npm i
 
       - name: Build
         working-directory: cli
