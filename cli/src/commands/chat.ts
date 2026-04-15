@@ -259,7 +259,7 @@ async function runChatSession(config: AIProviderConfig): Promise<void> {
   });
 
   // Handle Ctrl+C gracefully
-  process.on('SIGINT', () => {
+  process.once('SIGINT', () => {
     rl.close();
   });
 }

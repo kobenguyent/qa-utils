@@ -73,6 +73,14 @@ Config is stored at:
 - **Linux / macOS**: `~/.config/qautils-cli/config.json`
 - **Windows**: `%APPDATA%\qautils-cli\config.json`
 
+::: warning Security
+API keys are stored in **plain text**. Protect the config file with appropriate permissions:
+```bash
+chmod 600 ~/.config/qautils-cli/config.json
+```
+As an alternative, some users prefer to pass credentials via environment variables and configure them non-interactively in CI pipelines.
+:::
+
 ### 2. Start a Chat Session
 
 ```bash

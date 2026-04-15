@@ -105,7 +105,12 @@ export function validateAIConfig(config: AIProviderConfig): string | null {
   return null;
 }
 
-/** Mask an API key for safe display */
+/**
+ * Mask an API key for safe display.
+ * Useful when confirming a key entry without revealing the full value.
+ * Note: prefer `toDisplayConfig()` + `formatConfigForDisplay()` for logging
+ * to ensure no key-derived data reaches logging sinks.
+ */
 export function maskApiKey(apiKey: string): string {
   if (apiKey.length <= 4) return '****';
   if (apiKey.length <= 8) return apiKey.slice(0, 2) + '****';

@@ -125,9 +125,10 @@ async function sendToGoogle(
 ): Promise<ChatResponse> {
   const apiKey = config.apiKey || '';
   const model = config.model || DEFAULT_MODELS['google'];
+  // Use a custom endpoint if provided, otherwise use the default without key in URL
   const endpoint =
     config.endpoint ||
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
   const contents = messages
     .filter((m) => m.role !== 'system')
@@ -141,7 +142,10 @@ async function sendToGoogle(
   try {
     const res = await fetch(endpoint, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey,
+      },
       body: JSON.stringify({
         contents,
         ...(systemInstruction ? { systemInstruction: { parts: [{ text: systemInstruction }] } } : {}),
