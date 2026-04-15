@@ -7,6 +7,7 @@ import chalk from 'chalk';
 import { select, input, checkbox, Separator } from '@inquirer/prompts';
 import ora from 'ora';
 import clipboard from 'clipboardy';
+import readline from 'readline';
 
 import {
   generateUuids, base64Encode, base64Decode, decodeJwt, generateHash,
@@ -16,6 +17,13 @@ import {
   convertCase, generateNanoId, HASH_ALGORITHMS, CASE_TYPES,
   type HashAlgorithm, type SqlOperation, type CaseType,
 } from './lib/tools.js';
+import {
+  readConfig,
+  validateAIConfig,
+  formatConfigForDisplay,
+  DEFAULT_MODELS,
+} from './lib/aiConfig.js';
+import { sendChat, KOBEAN_SYSTEM_PROMPT, type ChatMessage } from './lib/aiClient.js';
 
 // ── Theme ─────────────────────────────────────────────────────────────────────
 const T = {
@@ -43,7 +51,7 @@ function gradientTitle(text: string): string {
 // ── Banner ─────────────────────────────────────────────────────────────────────
 const BANNER_W = 62;
 
-export function printBanner(toolCount = 19): void {
+export function printBanner(toolCount = 20): void {
   const bar = '─'.repeat(BANNER_W);
   const empty = ' '.repeat(BANNER_W);
   const version = 'v2.0.0';
@@ -520,11 +528,115 @@ async function runNanoId(): Promise<string | null> {
   cliTip(`nanoid${size !== 21 ? ` -s ${size}` : ''}${count > 1 ? ` -c ${count}` : ''}`); return ids.join('\n');
 }
 
+// ── Kobean Chat ───────────────────────────────────────────────────────────────
+async function runChat(): Promise<null> {
+  const config = readConfig();
+
+  if (!config) {
+    console.log();
+    console.log(chalk.bold.yellow('  ⚠  AI provider not configured.'));
+    console.log(T.dim('  Run: ') + chalk.cyan('qautils chat config') + T.dim(' to set up your provider.'));
+    console.log();
+    return null;
+  }
+
+  const validationError = validateAIConfig(config);
+  if (validationError) {
+    console.error(chalk.red(`  ✗  Config error: ${validationError}`));
+    console.log(T.dim('  Run: ') + chalk.cyan('qautils chat config') + T.dim(' to fix the configuration.'));
+    console.log();
+    return null;
+  }
+
+  console.log();
+  console.log(T.dim(`  Connected to: ${chalk.cyan(config.provider)} / ${chalk.cyan(config.model || DEFAULT_MODELS[config.provider])}`));
+  console.log(T.dim(`  Type ${chalk.cyan('/clear')} to reset, ${chalk.cyan('/exit')} or ${chalk.cyan('Ctrl+C')} to return to menu.`));
+  console.log();
+
+  const history: ChatMessage[] = [
+    { role: 'system', content: KOBEAN_SYSTEM_PROMPT },
+  ];
+
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    terminal: true,
+    prompt: chalk.cyan('  You › '),
+  });
+
+  rl.prompt();
+
+  await new Promise<void>((resolve) => {
+    rl.on('line', async (line: string) => {
+      const userInput = line.trim();
+
+      if (!userInput) {
+        rl.prompt();
+        return;
+      }
+
+      if (userInput === '/exit' || userInput === '/quit') {
+        rl.close();
+        return;
+      }
+
+      if (userInput === '/clear') {
+        history.splice(1);
+        console.log(T.dim('  ↺  History cleared.\n'));
+        rl.prompt();
+        return;
+      }
+
+      if (userInput === '/model') {
+        console.log();
+        console.log(formatConfigForDisplay(config));
+        console.log();
+        rl.prompt();
+        return;
+      }
+
+      history.push({ role: 'user', content: userInput });
+
+      const sp = spin('Kobean is thinking…').start();
+      try {
+        const response = await sendChat(history, config);
+        sp.stop();
+        history.push({ role: 'assistant', content: response.message });
+        console.log();
+        const lines = response.message.split('\n');
+        lines.forEach((l, i) => {
+          if (i === 0) console.log(chalk.bold.magenta('  Kobean  › ') + l);
+          else console.log('            ' + l);
+        });
+        console.log();
+      } catch (err) {
+        sp.stop();
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error(T.error(`  ✗  Error: ${msg}\n`));
+        history.pop();
+      }
+
+      rl.prompt();
+    });
+
+    rl.on('close', () => {
+      console.log(T.dim('\n  Returning to menu…\n'));
+      resolve();
+    });
+
+    process.once('SIGINT', () => {
+      rl.close();
+    });
+  });
+
+  return null;
+}
+
 // ── Tool registry ─────────────────────────────────────────────────────────────
 type ToolKey =
   | 'uuid' | 'base64' | 'jwt' | 'hash' | 'password' | 'timestamp'
   | 'json' | 'lorem' | 'text' | 'email' | 'sql' | 'color' | 'html'
-  | 'random' | 'url' | 'regex' | 'base' | 'case' | 'nanoid';
+  | 'random' | 'url' | 'regex' | 'base' | 'case' | 'nanoid' | 'chat';
 
 const TOOLS: Record<ToolKey, { label: string; run: () => Promise<string | null> }> = {
   uuid:      { label: 'UUID Generator',       run: runUuid      },
@@ -546,6 +658,7 @@ const TOOLS: Record<ToolKey, { label: string; run: () => Promise<string | null> 
   json:      { label: 'JSON Toolkit',          run: runJson      },
   sql:       { label: 'SQL Generator',         run: runSql       },
   html:      { label: 'HTML Sanitizer',        run: runHtml      },
+  chat:      { label: 'Kobean AI Chat',        run: runChat      },
 };
 
 const TOOL_COUNT = Object.keys(TOOLS).length;
@@ -594,6 +707,8 @@ async function showMainMenu(): Promise<ToolKey | 'exit'> {
   choices.push(item('📋', 'JSON Toolkit',         'json',      'Format · validate · minify JSON'));
   choices.push(item('🗄️', 'SQL Generator',        'sql',       'SELECT · INSERT · UPDATE · DELETE · CREATE TABLE'));
   choices.push(item('🌐', 'HTML Sanitizer',       'html',      'Strip <script> tags and inline event handlers'));
+  choices.push(new Separator(T.dim('  ── AI ─────────────────────────────────────────── ')));
+  choices.push(item('🤖', 'Kobean AI Chat',       'chat',      'Interactive AI chat (OpenAI, Anthropic, Gemini, Ollama…)'));
   choices.push(new Separator(T.dim('  ' + '─'.repeat(52))));
   choices.push({ name: '  ✕   Exit', value: 'exit' });
   return select<ToolKey | 'exit'>({ message: chalk.bold('  Select a tool'), pageSize: 25, choices });

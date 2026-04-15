@@ -12,6 +12,7 @@ export default defineConfig({
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Guide', link: '/guide/getting-started' },
+      { text: 'CLI', link: '/guide/cli' },
       {
         text: 'Tools',
         items: [
@@ -41,6 +42,7 @@ export default defineConfig({
             { text: 'Getting Started', link: '/guide/getting-started' },
             { text: 'Installation', link: '/guide/installation' },
             { text: 'Desktop App', link: '/guide/desktop-app' },
+            { text: 'CLI (qautils-cli)', link: '/guide/cli' },
           ],
         },
         {

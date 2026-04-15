@@ -115,3 +115,21 @@ Alternative AI assistant interface with focused capabilities.
    ollama serve
    ```
 4. Select **Ollama (Local)** provider
+
+---
+
+## 💻 CLI — Kobean Chat (qautils-cli)
+
+Kobean chat is also available directly from your terminal via the **qautils-cli** package.
+
+```bash
+npm install -g qautils-cli
+
+# Configure provider (interactive wizard)
+qautils chat config
+
+# Start chatting
+qautils chat
+```
+
+See the [CLI documentation](/guide/cli) for full setup instructions and all supported providers.
