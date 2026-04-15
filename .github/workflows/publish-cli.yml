@@ -27,7 +27,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: cli
-        run: npm install
+        run: npm i && npm i eslint
 
       - name: Run linter
         working-directory: cli
