@@ -34,12 +34,16 @@ jobs:
           node-version: '20'
       - name: Install dependencies
         run: npm i
+      - name: Install API dependencies
+        run: cd api && npm i
       - name: Build
         run: npm run build:github
       - name: Build docs
         run: npm run docs:build
       - name: Copy docs to dist
         run: cp -r docs/.vitepress/dist dist/docs
+      - name: Build API docs (static Swagger UI)
+        run: npm run build:api-docs
       - name: Upload static files as artifact
         id: deployment
         uses: actions/upload-pages-artifact@v3 # or specific "vX.X.X" version tag for this action

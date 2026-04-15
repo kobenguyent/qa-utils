@@ -1,0 +1,1519 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "QA Utils API",
+    "version": "1.0.0",
+    "description": "REST API for QA Utils — exposes all tool functions as HTTP endpoints. Use the Swagger UI below to explore and test every endpoint interactively, or import the OpenAPI spec into your automation framework.",
+    "contact": {
+      "name": "KobeT",
+      "url": "https://github.com/kobenguyent/qa-utils"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3333",
+      "description": "Local development"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Generators",
+      "description": "Generate UUIDs, passwords, NanoIDs, lorem ipsum, random strings"
+    },
+    {
+      "name": "Converters",
+      "description": "Base64, URL, hash, color, timestamp, base and case converters"
+    },
+    {
+      "name": "Analysers",
+      "description": "Text stats, email validation, JWT decoding, regex testing"
+    },
+    {
+      "name": "Formatters",
+      "description": "JSON formatting, HTML sanitization, SQL generation"
+    },
+    {
+      "name": "Health",
+      "description": "Service health check"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "responses": {
+      "ValidationError": {
+        "description": "Request body failed schema validation",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Validation failed"
+                },
+                "details": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/analysers/text-stats": {
+      "post": {
+        "tags": [
+          "Analysers"
+        ],
+        "summary": "Count characters, words, sentences, lines and paragraphs",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "value"
+                ],
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "example": "Hello world. How are you?\nI am fine."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Text statistics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "characters": {
+                      "type": "integer"
+                    },
+                    "charactersNoSpaces": {
+                      "type": "integer"
+                    },
+                    "words": {
+                      "type": "integer"
+                    },
+                    "sentences": {
+                      "type": "integer"
+                    },
+                    "lines": {
+                      "type": "integer"
+                    },
+                    "paragraphs": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/api/analysers/email": {
+      "post": {
+        "tags": [
+          "Analysers"
+        ],
+        "summary": "Validate an email address",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "user@example.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email validation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "valid": {
+                      "type": "boolean"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/api/analysers/jwt": {
+      "post": {
+        "tags": [
+          "Analysers"
+        ],
+        "summary": "Decode a JWT token (without signature verification)",
+        "description": "Decodes the header and payload of a JWT token.\n**WARNING:** This does NOT verify the signature. Do not use decoded\nclaims to make security decisions in production code.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyXzEyMyIsIm5hbWUiOiJKYW5lIERvZSJ9.EXAMPLE_SIGNATURE_NOT_REAL"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Decoded JWT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "header": {
+                      "type": "object",
+                      "nullable": true
+                    },
+                    "payload": {
+                      "type": "object",
+                      "nullable": true
+                    },
+                    "signature": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "expired": {
+                      "type": "boolean",
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/api/analysers/regex": {
+      "post": {
+        "tags": [
+          "Analysers"
+        ],
+        "summary": "Test a regular expression against text",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "pattern",
+                  "text"
+                ],
+                "properties": {
+                  "pattern": {
+                    "type": "string",
+                    "example": "\\d+"
+                  },
+                  "text": {
+                    "type": "string",
+                    "example": "Order 123 and item 456"
+                  },
+                  "flags": {
+                    "type": "string",
+                    "default": "gi",
+                    "example": "gi"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Regex test results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "valid": {
+                      "type": "boolean"
+                    },
+                    "count": {
+                      "type": "integer"
+                    },
+                    "matches": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "index": {
+                            "type": "integer"
+                          },
+                          "match": {
+                            "type": "string"
+                          },
+                          "groups": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "nullable": true
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/api/converters/base64/encode": {
+      "post": {
+        "tags": [
+          "Converters"
+        ],
+        "summary": "Encode a string to Base64",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "value"
+                ],
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "example": "Hello, World!"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Base64 encoded result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "encoded": {
+                      "type": "string",
+                      "example": "SGVsbG8sIFdvcmxkIQ=="
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/api/converters/base64/decode": {
+      "post": {
+        "tags": [
+          "Converters"
+        ],
+        "summary": "Decode a Base64 string",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "value"
+                ],
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "example": "SGVsbG8sIFdvcmxkIQ=="
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Decoded string",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "decoded": {
+                      "type": "string",
+                      "example": "Hello, World!"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "422": {
+            "description": "Invalid Base64 input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/converters/url/encode": {
+      "post": {
+        "tags": [
+          "Converters"
+        ],
+        "summary": "Percent-encode a URL string",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "text"
+                ],
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "example": "hello world & more"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "URL-encoded result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "encoded": {
+                      "type": "string",
+                      "example": "hello%20world%20%26%20more"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/api/converters/url/decode": {
+      "post": {
+        "tags": [
+          "Converters"
+        ],
+        "summary": "Decode a percent-encoded URL string",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "text"
+                ],
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "example": "hello%20world%20%26%20more"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Decoded result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "decoded": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "422": {
+            "description": "Invalid percent-encoded string",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/converters/url/parse": {
+      "post": {
+        "tags": [
+          "Converters"
+        ],
+        "summary": "Parse a URL into its components",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "url"
+                ],
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "example": "https://example.com/path?foo=bar&baz=1#section"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Parsed URL components",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "protocol": {
+                      "type": "string"
+                    },
+                    "host": {
+                      "type": "string"
+                    },
+                    "hostname": {
+                      "type": "string"
+                    },
+                    "port": {
+                      "type": "string"
+                    },
+                    "pathname": {
+                      "type": "string"
+                    },
+                    "search": {
+                      "type": "string"
+                    },
+                    "hash": {
+                      "type": "string"
+                    },
+                    "params": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "422": {
+            "description": "Invalid URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/converters/hash": {
+      "post": {
+        "tags": [
+          "Converters"
+        ],
+        "summary": "Generate a hash of a string",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "value"
+                ],
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "example": "hello world"
+                  },
+                  "algorithm": {
+                    "type": "string",
+                    "enum": [
+                      "md5",
+                      "sha1",
+                      "sha256",
+                      "sha384",
+                      "sha512"
+                    ],
+                    "default": "sha256"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Hash result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "hash": {
+                      "type": "string"
+                    },
+                    "algorithm": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/api/converters/color": {
+      "post": {
+        "tags": [
+          "Converters"
+        ],
+        "summary": "Convert a color between HEX, RGB, and HSL",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "input"
+                ],
+                "properties": {
+                  "input": {
+                    "type": "string",
+                    "example": "#FF5733",
+                    "description": "Accepts: #RRGGBB, #RGB, rgb(r, g, b)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Color in all formats",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "hex": {
+                      "type": "string"
+                    },
+                    "rgb": {
+                      "type": "object",
+                      "properties": {
+                        "r": {
+                          "type": "integer"
+                        },
+                        "g": {
+                          "type": "integer"
+                        },
+                        "b": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "hsl": {
+                      "type": "object",
+                      "properties": {
+                        "h": {
+                          "type": "integer"
+                        },
+                        "s": {
+                          "type": "integer"
+                        },
+                        "l": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "422": {
+            "description": "Unsupported color format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/converters/timestamp": {
+      "post": {
+        "tags": [
+          "Converters"
+        ],
+        "summary": "Convert a Unix timestamp or ISO string to multiple formats",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Unix timestamp (seconds or ms) or ISO 8601 string. Omit for current time.",
+                    "example": 1700000000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Timestamp in multiple formats",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "timestamp": {
+                      "type": "integer",
+                      "description": "Unix timestamp in seconds"
+                    },
+                    "iso": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "utc": {
+                      "type": "string"
+                    },
+                    "local": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/converters/base": {
+      "post": {
+        "tags": [
+          "Converters"
+        ],
+        "summary": "Convert a number between bases (2–36)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "value"
+                ],
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "example": "255"
+                  },
+                  "from": {
+                    "type": "integer",
+                    "minimum": 2,
+                    "maximum": 36,
+                    "default": 10
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 2,
+                    "maximum": 36,
+                    "default": 16
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Base conversion result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "string",
+                      "example": "FF"
+                    },
+                    "decimal": {
+                      "type": "integer"
+                    },
+                    "from": {
+                      "type": "integer"
+                    },
+                    "to": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "422": {
+            "description": "Invalid number for given base",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/converters/case": {
+      "post": {
+        "tags": [
+          "Converters"
+        ],
+        "summary": "Convert text to a different case style",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "text",
+                  "to"
+                ],
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "example": "hello world example"
+                  },
+                  "to": {
+                    "type": "string",
+                    "enum": [
+                      "upper",
+                      "lower",
+                      "title",
+                      "camel",
+                      "pascal",
+                      "snake",
+                      "kebab",
+                      "constant"
+                    ],
+                    "example": "camelCase"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Converted text",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "string",
+                      "example": "helloWorldExample"
+                    },
+                    "style": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/api/formatters/json": {
+      "post": {
+        "tags": [
+          "Formatters"
+        ],
+        "summary": "Parse and pretty-print JSON",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "input"
+                ],
+                "properties": {
+                  "input": {
+                    "type": "string",
+                    "example": "{\"name\":\"Alice\",\"age\":30}"
+                  },
+                  "indent": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 8,
+                    "default": 2
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Formatted JSON result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "formatted": {
+                      "type": "string"
+                    },
+                    "valid": {
+                      "type": "boolean"
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/api/formatters/html-sanitize": {
+      "post": {
+        "tags": [
+          "Formatters"
+        ],
+        "summary": "Strip script tags and inline event handlers from HTML",
+        "description": "Removes `<script>` blocks and `on*` event attributes from HTML.\n**Note:** For production sanitization use a dedicated library like DOMPurify.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "html"
+                ],
+                "properties": {
+                  "html": {
+                    "type": "string",
+                    "example": "<p onclick=\"alert(1)\">Hello</p><script>alert(2)</script>"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sanitized HTML",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sanitized": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/api/formatters/sql": {
+      "post": {
+        "tags": [
+          "Formatters"
+        ],
+        "summary": "Generate a SQL statement",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "operation",
+                  "tableName"
+                ],
+                "properties": {
+                  "operation": {
+                    "type": "string",
+                    "enum": [
+                      "SELECT",
+                      "INSERT",
+                      "UPDATE",
+                      "DELETE",
+                      "CREATE_TABLE"
+                    ],
+                    "example": "SELECT"
+                  },
+                  "tableName": {
+                    "type": "string",
+                    "example": "users"
+                  },
+                  "columns": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "id",
+                      "name",
+                      "email"
+                    ]
+                  },
+                  "values": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "1",
+                      "Alice",
+                      "alice@example.com"
+                    ]
+                  },
+                  "whereClause": {
+                    "type": "string",
+                    "example": "id = 1"
+                  },
+                  "orderBy": {
+                    "type": "string",
+                    "example": "name ASC"
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 10
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Generated SQL statement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sql": {
+                      "type": "string",
+                      "example": "SELECT id, name, email FROM users WHERE id = 1 ORDER BY name ASC LIMIT 10;"
+                    },
+                    "operation": {
+                      "type": "string"
+                    },
+                    "tableName": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/api/generators/uuid": {
+      "post": {
+        "tags": [
+          "Generators"
+        ],
+        "summary": "Generate UUIDs (v4)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100,
+                    "default": 1,
+                    "example": 3
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Generated UUIDs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "uuids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "uuid"
+                      }
+                    },
+                    "count": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/api/generators/password": {
+      "post": {
+        "tags": [
+          "Generators"
+        ],
+        "summary": "Generate a cryptographically secure password",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "length": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 256,
+                    "default": 16
+                  },
+                  "uppercase": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "lowercase": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "numbers": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "symbols": {
+                    "type": "boolean",
+                    "default": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Generated password",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "password": {
+                      "type": "string",
+                      "example": "aB3!xK9@"
+                    },
+                    "length": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/api/generators/nanoid": {
+      "post": {
+        "tags": [
+          "Generators"
+        ],
+        "summary": "Generate NanoID-style IDs",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "size": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 128,
+                    "default": 21
+                  },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100,
+                    "default": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Generated NanoIDs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "count": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/api/generators/lorem": {
+      "post": {
+        "tags": [
+          "Generators"
+        ],
+        "summary": "Generate Lorem Ipsum placeholder text",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "paragraphs": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 20,
+                    "default": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Lorem ipsum text",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string"
+                    },
+                    "paragraphs": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/api/generators/random-string": {
+      "post": {
+        "tags": [
+          "Generators"
+        ],
+        "summary": "Generate a cryptographically random alphanumeric string",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "length": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1024,
+                    "default": 16
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Random string",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "string"
+                    },
+                    "length": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/openapi.json": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Raw OpenAPI 3.0 spec (JSON)",
+        "responses": {
+          "200": {
+            "description": "OpenAPI spec",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Service health check",
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "version": {
+                      "type": "string",
+                      "example": "1.0.0"
+                    },
+                    "uptime": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

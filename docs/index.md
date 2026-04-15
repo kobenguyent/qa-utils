@@ -16,6 +16,9 @@ hero:
       text: Live Demo
       link: https://kobenguyent.github.io/qa-utils/#/
     - theme: alt
+      text: API Docs
+      link: https://kobenguyent.github.io/qa-utils/api-docs/
+    - theme: alt
       text: GitHub
       link: https://github.com/kobenguyent/qa-utils
 
