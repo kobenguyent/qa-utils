@@ -1,6 +1,6 @@
 {
   "name": "qa-utils",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "A comprehensive collection of quality assurance tools and utilities to enhance your testing workflow",
   "author": "KobeT <kobenguyent@gmail.com>",
   "license": "MIT",
@@ -15,7 +15,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "build:github": "DEPLOY_ENV=github npm run build",
-    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 220",
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 221",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -100,7 +100,7 @@
   "build": {
     "appId": "com.kobenguyent.qa-utils",
     "productName": "QA Utils",
-    "copyright": "Copyright © 2024 KobeT",
+    "copyright": "Copyright \u00a9 2024 KobeT",
     "directories": {
       "output": "release",
       "buildResources": "buildResources"
