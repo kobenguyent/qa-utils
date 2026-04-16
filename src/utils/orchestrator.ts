@@ -112,6 +112,12 @@ export interface AutoTeamPlan {
   agents: AutoTeamMember[];
 }
 
+/** Maximum character length for a task description passed to auto-orchestration */
+const MAX_AUTO_TASK_LENGTH = 4000;
+
+/** Max characters to use as the ephemeral pipeline description */
+const MAX_PIPELINE_DESCRIPTION_LENGTH = 120;
+
 /**
  * Extract an auto-team plan emitted by the meta-orchestrator.
  *
@@ -173,12 +179,15 @@ export async function runAutoOrchestratedPipeline(
 ): Promise<AutoPipelineRunResult> {
   const pipelineStart = Date.now();
 
+  // Truncate the task to prevent excessively long prompts
+  const safeTask = task.slice(0, MAX_AUTO_TASK_LENGTH);
+
   // ── Step 1: meta-orchestrator assembles the team ────────────────────────────
 
   const teamPlanningTask = `You are a meta-orchestrator.  Your job is to read a task description and decide which specialist AI agents should work on it together.
 
 ## Task
-${task}
+${safeTask}
 
 ## Available Roles
 - planner      — breaks down a complex task into an ordered plan of action
@@ -271,7 +280,7 @@ Respond with ONLY the following JSON block — no other text:
   const ephemeralPipeline: AgentPipeline = {
     id: `auto-pipeline-${now}`,
     name: 'Auto-assembled pipeline',
-    description: task.slice(0, 120),
+    description: task.slice(0, MAX_PIPELINE_DESCRIPTION_LENGTH),
     mode: 'orchestrated',
     orchestratorId: orchestratorProfile.id,
     agents: workerProfiles.map((p, i) => ({ profileId: p.id, order: i })),
@@ -283,7 +292,7 @@ Respond with ONLY the following JSON block — no other text:
 
   // ── Step 3: run the standard orchestrated pipeline ──────────────────────────
 
-  const result = await runOrchestratedPipeline(task, ephemeralPipeline, allProfiles, onEvent);
+  const result = await runOrchestratedPipeline(safeTask, ephemeralPipeline, allProfiles, onEvent);
 
   return { ...result, autoTeam };
 }

@@ -616,7 +616,7 @@ function QuickOrchestrate() {
                       <Badge bg={ROLE_BADGE_COLORS[member.role] as string} className="mb-1">
                         {AGENT_ROLE_LABELS[member.role]}
                       </Badge>
-                      <div className="text-muted" style={{ fontSize: '0.7rem' }}>{member.specialty}</div>
+                      <div className="text-muted" style={{ fontSize: '0.75rem' }}>{member.specialty}</div>
                     </div>
                   );
                 })}
