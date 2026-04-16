@@ -15,6 +15,7 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 
+import { version as CLI_VERSION } from './version.js';
 import { runInteractive, printBanner } from './interactive.js';
 
 import { registerUuidCommand }      from './commands/uuid.js';
@@ -54,7 +55,7 @@ program
       '\n' +
       chalk.dim('  https://github.com/kobenguyent/qa-utils'),
   )
-  .version('1.3.0', '-v, --version', 'print the current version')
+  .version(CLI_VERSION, '-v, --version', 'print the current version')
   .option('-i, --interactive', 'launch the interactive TUI (default when no args given)')
   .helpOption('-h, --help', 'display help for command')
   .addHelpText(
