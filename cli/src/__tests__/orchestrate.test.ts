@@ -192,7 +192,8 @@ describe('runOrchestratedPipeline', () => {
     mockSendChat.mockRejectedValueOnce(new Error('Orchestrator crash'));
     const result = await runOrchestratedPipeline('task', orchestrator, workers);
     expect(result.success).toBe(false);
-    // runCliAgent catches the error; error is propagated via orcRunError
+    // runCliAgent catches the AI error; orcRunError is propagated via the no-plan fallback
+    expect(result.error).toBeDefined();
     expect(result.error).toContain('Orchestrator crash');
   });
 });
@@ -200,7 +201,7 @@ describe('runOrchestratedPipeline', () => {
 // ── runAutoOrchestratedPipeline ───────────────────────────────────────────────
 
 describe('runAutoOrchestratedPipeline', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   it('assembles a team from meta-orchestrator response and runs pipeline', async () => {
     const teamBlock = '```team\n{"agents": [{"name": "Planner", "role": "planner", "specialty": "Plans the work"}, {"name": "Coder", "role": "coder", "specialty": "Writes code"}]}\n```';
@@ -238,11 +239,16 @@ describe('runAutoOrchestratedPipeline', () => {
   });
 
   it('returns error when meta-orchestrator throws', async () => {
+    // sendChat rejects on the first call (meta-orchestrator); the fallback team
+    // [Planner, Executor] is used.  Subsequent sendChat calls also fail
+    // (undefined return → TypeError) so the orchestration phase errors out.
     mockSendChat.mockRejectedValueOnce(new Error('Meta failure'));
     const result = await runAutoOrchestratedPipeline('task', BASE_CONFIG);
-    // runCliAgent catches the error internally; the fallback 2-agent team is used
+    // runCliAgent catches the error internally; the fallback 2-agent team is used.
+    // The orchestration phase then also fails (no further mocks), so result.error is set.
     expect(result.success).toBe(false);
     expect(result.autoTeam).toHaveLength(2); // fallback team
+    expect(result.error).toBeDefined();
   });
 
   it('emits pipeline_start and agent_start events', async () => {
