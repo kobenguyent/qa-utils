@@ -51,6 +51,15 @@ function printTeam(team: AutoTeamMember[]): void {
   console.log();
 }
 
+// ── Shared types ──────────────────────────────────────────────────────────────
+
+interface OrchestrateOpts {
+  maxIterations: string;
+  provider?: string;
+  model?: string;
+  verbose?: boolean;
+}
+
 export function registerOrchestrateCommand(program: Command): void {
   const orchestrateCmd = program
     .command('orchestrate [task]')
@@ -59,12 +68,7 @@ export function registerOrchestrateCommand(program: Command): void {
     .option('--provider <provider>', 'AI provider (overrides saved config)')
     .option('--model <model>', 'Model (overrides saved config)')
     .option('--verbose', 'Show step-by-step agent reasoning and tool calls')
-    .action(async (task: string | undefined, opts: {
-      maxIterations: string;
-      provider?: string;
-      model?: string;
-      verbose?: boolean;
-    }) => {
+    .action(async (task: string | undefined, opts: OrchestrateOpts) => {
       if (!task) {
         orchestrateCmd.help();
         return;
@@ -210,12 +214,7 @@ export function registerOrchestrateCommand(program: Command): void {
     .option('--provider <provider>', 'AI provider (overrides saved config)')
     .option('--model <model>', 'Model (overrides saved config)')
     .option('--verbose', 'Show step-by-step agent reasoning and tool calls')
-    .action(async (opts: {
-      maxIterations: string;
-      provider?: string;
-      model?: string;
-      verbose?: boolean;
-    }) => {
+    .action(async (opts: OrchestrateOpts) => {
       let config = readConfig();
 
       if (opts.provider) {
