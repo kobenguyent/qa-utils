@@ -9,6 +9,7 @@ import ora from 'ora';
 import clipboard from 'clipboardy';
 import readline from 'readline';
 
+import { version as CLI_VERSION } from './version.js';
 import {
   generateUuids, base64Encode, base64Decode, decodeJwt, generateHash,
   generatePassword, generateRandomString, generateLoremIpsum, countTextStats,
@@ -32,7 +33,7 @@ const T = {
   title:   (s: string) => chalk.bold.yellow(s),
   value:   (s: string) => chalk.bold.white(s),
   label:   (s: string) => chalk.cyan(s),
-  dim:     (s: string) => chalk.dim(s),
+  dim:     (s: string) => chalk.gray(s),
   success: (s: string) => chalk.bold.green(s),
   error:   (s: string) => chalk.bold.red(s),
   warn:    (s: string) => chalk.bold.yellow(s),
@@ -55,7 +56,7 @@ const BANNER_W = 62;
 export function printBanner(toolCount = 20): void {
   const bar = '─'.repeat(BANNER_W);
   const empty = ' '.repeat(BANNER_W);
-  const version = 'v1.1.0';
+  const version = `v${CLI_VERSION}`;
   const vPad = BANNER_W - 18 - version.length - 2;
   const titleLine =
     '  ' + chalk.bold.yellow('◆') + '  ' + gradientTitle('QA UTILS CLI') +

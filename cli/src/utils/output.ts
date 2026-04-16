@@ -60,7 +60,7 @@ export function printOk(message: string): void {
  * Print a dim informational message.
  */
 export function printInfo(message: string): void {
-  console.log(chalk.dim(`   ${message}`));
+  console.log(chalk.gray(`   ${message}`));
 }
 
 // ── Section headings ─────────────────────────────────────────────────────────
@@ -76,7 +76,7 @@ export function printHeading(text: string): void {
  * Print a dim horizontal rule.
  */
 export function printDivider(): void {
-  console.log(chalk.dim('   ' + '─'.repeat(52)));
+  console.log(chalk.gray('   ' + '─'.repeat(52)));
 }
 
 // ── Framed box ────────────────────────────────────────────────────────────────
