@@ -1,7 +1,7 @@
 {
   "name": "qautils-cli",
   "version": "1.2.0",
-  "description": "Command-line interface for QA Utils \u2014 utility tools for testing and automation workflows",
+  "description": "Command-line interface for QA Utils — utility tools for testing and automation workflows",
   "type": "module",
   "bin": {
     "qautils": "dist/src/index.js"
@@ -54,8 +54,11 @@
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
+    "@typescript-eslint/eslint-plugin": "^8.58.2",
+    "@typescript-eslint/parser": "^8.58.2",
     "@vitest/coverage-v8": "^1.0.4",
+    "eslint": "^8.57.1",
     "typescript": "^5.0.2",
-    "vitest": "^1.0.4"
+    "vitest": "^1.6.1"
   }
 }

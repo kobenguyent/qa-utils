@@ -38,8 +38,9 @@ import { registerBaseCommand }      from './commands/base.js';
 import { registerCaseCommand }      from './commands/case.js';
 import { registerNanoidCommand }    from './commands/nanoid.js';
 // ── AI (v3) ──────────────────────────────────────────────────────────────────
-import { registerChatCommand }      from './commands/chat.js';
-import { registerAgentCommand }     from './commands/agent.js';
+import { registerChatCommand }        from './commands/chat.js';
+import { registerAgentCommand }       from './commands/agent.js';
+import { registerOrchestrateCommand } from './commands/orchestrate.js';
 
 // ── Program ──────────────────────────────────────────────────────────────────
 
@@ -111,6 +112,10 @@ ${chalk.bold('AI Agent (v4)')}:
   ${chalk.cyan('qautils agent run "Generate a UUID"')}    Run an autonomous agent task
   ${chalk.cyan('qautils agent run "Hash hello" --verbose')} Run with step-by-step output
   ${chalk.cyan('qautils agent list')}                     List available agent tools
+
+${chalk.bold('AI Orchestrator (v5)')}:
+  ${chalk.cyan('qautils orchestrate "Design a test plan"')}  Auto-assemble a team and run pipeline
+  ${chalk.cyan('qautils orchestrate "Refactor code" --verbose')} Show step-by-step pipeline output
 `,
   );
 
@@ -139,6 +144,7 @@ registerNanoidCommand(program);
 // v3 commands
 registerChatCommand(program);
 registerAgentCommand(program);
+registerOrchestrateCommand(program);
 
 // ── Launch mode ───────────────────────────────────────────────────────────────
 
