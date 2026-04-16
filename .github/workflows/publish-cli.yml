@@ -33,43 +33,34 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Read local CLI version
-        id: local_version
+      - name: Check whether publish is needed
+        id: version_check
         working-directory: cli
-        run: echo "version=$(node -p \"require('./package.json').version\")" >> "$GITHUB_OUTPUT"
-
-      - name: Read published npm version
-        id: npm_version
         run: |
+          LOCAL=$(node -p "require('./package.json').version")
           PUBLISHED=$(npm view qautils-cli version 2>/dev/null || echo "0.0.0")
-          echo "version=$PUBLISHED" >> "$GITHUB_OUTPUT"
-
-      - name: Skip if version already published
-        if: |
-          github.event_name == 'push' &&
-          steps.local_version.outputs.version == steps.npm_version.outputs.version
-        run: |
-          echo "Version ${{ steps.local_version.outputs.version }} is already published on npm. Skipping."
-          exit 0
+          echo "local=$LOCAL" >> "$GITHUB_OUTPUT"
+          echo "published=$PUBLISHED" >> "$GITHUB_OUTPUT"
+          if [ "$LOCAL" = "$PUBLISHED" ] && [ "${{ github.event_name }}" = "push" ]; then
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+            echo "Version $LOCAL is already published on npm. Skipping."
+          else
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+            echo "Will publish version $LOCAL (currently $PUBLISHED on npm)."
+          fi
 
       - name: Install dependencies
-        if: |
-          github.event_name != 'push' ||
-          steps.local_version.outputs.version != steps.npm_version.outputs.version
+        if: steps.version_check.outputs.should_publish == 'true'
         working-directory: cli
         run: npm install -g npm@latest && npm i
 
       - name: Build
-        if: |
-          github.event_name != 'push' ||
-          steps.local_version.outputs.version != steps.npm_version.outputs.version
+        if: steps.version_check.outputs.should_publish == 'true'
         working-directory: cli
         run: npm run build
 
       - name: Publish to npm
-        if: |
-          github.event_name != 'push' ||
-          steps.local_version.outputs.version != steps.npm_version.outputs.version
+        if: steps.version_check.outputs.should_publish == 'true'
         working-directory: cli
         run: npm publish --provenance
         env:

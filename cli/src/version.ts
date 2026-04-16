@@ -5,9 +5,15 @@
  * the version string is always in sync with cli/package.json.
  */
 
-import { createRequire } from 'module';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-const _require = createRequire(import.meta.url);
-const { version } = _require('../../package.json') as { version: string };
+// Resolve package.json relative to this compiled file's directory.
+// Compiled output: dist/src/version.js → package.json is at ../../package.json
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const { version } = JSON.parse(
+  readFileSync(join(__dirname, '../../package.json'), 'utf-8'),
+) as { version: string };
 
 export { version };
