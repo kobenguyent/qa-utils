@@ -11,6 +11,10 @@ import {
   Col,
   Spinner,
   Collapse,
+  Nav,
+  Tab,
+  ListGroup,
+  ProgressBar,
 } from 'react-bootstrap';
 import { runAgent, AgentStep, AgentConfig } from '../../utils/agentExecutor';
 import {
@@ -20,12 +24,31 @@ import {
   createProfile,
   getRuns,
   createRun,
+  getPipelines,
+  savePipeline,
+  deletePipeline,
+  createPipeline,
+  getPipelineRuns,
+  createPipelineRun,
   AgentProfile,
   AgentRun,
+  AgentPipeline,
+  PipelineAgentResult,
+  PipelineRun,
   AIProvider,
+  AgentRole,
+  PipelineMode,
+  AGENT_ROLE_LABELS,
 } from '../../utils/agentStorage';
+import {
+  runSequentialPipeline,
+  runOrchestratedPipeline,
+  OrchestratorEvent,
+} from '../../utils/orchestrator';
 
 const PROVIDERS: AIProvider[] = ['ollama', 'openai', 'anthropic', 'google', 'azure-openai'];
+const ROLES: AgentRole[] = ['orchestrator', 'planner', 'researcher', 'coder', 'reviewer', 'tester', 'synthesizer', 'custom'];
+const PIPELINE_MODES: PipelineMode[] = ['sequential', 'orchestrated'];
 
 const STEP_BADGES: Record<AgentStep['type'], { bg: string; label: string }> = {
   thinking:    { bg: 'secondary', label: '💭 Thinking' },
@@ -35,9 +58,22 @@ const STEP_BADGES: Record<AgentStep['type'], { bg: string; label: string }> = {
   error:       { bg: 'danger',    label: '❌ Error' },
 };
 
-const EMPTY_FORM: Omit<AgentProfile, 'id' | 'createdAt' | 'updatedAt'> = {
+const ROLE_BADGE_COLORS: Record<AgentRole, string> = {
+  orchestrator: 'warning',
+  planner:      'info',
+  researcher:   'primary',
+  coder:        'dark',
+  reviewer:     'secondary',
+  tester:       'success',
+  synthesizer:  'danger',
+  custom:       'light',
+};
+
+const EMPTY_PROFILE_FORM: Omit<AgentProfile, 'id' | 'createdAt' | 'updatedAt'> = {
   name: '',
   description: '',
+  role: 'custom',
+  specialty: '',
   provider: 'ollama',
   endpoint: 'http://localhost:11434',
   apiKey: '',
@@ -47,7 +83,7 @@ const EMPTY_FORM: Omit<AgentProfile, 'id' | 'createdAt' | 'updatedAt'> = {
   systemPromptOverride: '',
 };
 
-// ── Sub-component: inline runner ─────────────────────────────────────────────
+// ── Single-agent runner ────────────────────────────────────────────────────────
 
 interface RunnerProps {
   profile: AgentProfile;
@@ -85,7 +121,6 @@ function ProfileRunner({ profile, onRunSaved }: RunnerProps) {
         setSteps(prev => [...prev, step]);
         setTimeout(() => stepsEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
       });
-
       if (result.success) {
         setFinalAnswer(result.answer);
         createRun({ profileId: profile.id, task, result: 'success', answer: result.answer, iterationCount: result.iterationCount, timestamp: Date.now() });
@@ -107,21 +142,10 @@ function ProfileRunner({ profile, onRunSaved }: RunnerProps) {
   return (
     <div className="mt-2">
       <Form.Group className="mb-2">
-        <Form.Control
-          as="textarea"
-          rows={2}
-          placeholder="Describe a task for this agent…"
-          value={task}
-          onChange={e => setTask(e.target.value)}
-          disabled={running}
-        />
+        <Form.Control as="textarea" rows={2} placeholder="Describe a task for this agent…" value={task}
+          onChange={e => setTask(e.target.value)} disabled={running} />
       </Form.Group>
-      <Button
-        size="sm"
-        variant="primary"
-        onClick={handleRun}
-        disabled={!task.trim() || running}
-      >
+      <Button size="sm" variant="primary" onClick={handleRun} disabled={!task.trim() || running}>
         {running ? <><Spinner size="sm" animation="border" className="me-1" />Running…</> : '▶ Run'}
       </Button>
       {steps.length > 0 && (
@@ -146,65 +170,250 @@ function ProfileRunner({ profile, onRunSaved }: RunnerProps) {
       </Collapse>
       {finalAnswer && (
         <Alert variant="success" className="mt-2 small">
-          <strong>✅ Done:</strong>{' '}
-          <span style={{ whiteSpace: 'pre-wrap' }}>{finalAnswer}</span>
+          <strong>✅ Done:</strong> <span style={{ whiteSpace: 'pre-wrap' }}>{finalAnswer}</span>
         </Alert>
       )}
       {runError && (
-        <Alert variant="danger" className="mt-2 small">
-          <strong>Error:</strong> {runError}
-        </Alert>
+        <Alert variant="danger" className="mt-2 small"><strong>Error:</strong> {runError}</Alert>
       )}
     </div>
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
+// ── Pipeline event log ─────────────────────────────────────────────────────────
 
-export function AgentManager() {
-  const [profiles, setProfiles] = useState<AgentProfile[]>(() => getProfiles());
-  const [runHistory, setRunHistory] = useState<Record<string, AgentRun[]>>({});
+interface PipelineEventEntry {
+  id: string;
+  type: OrchestratorEvent['type'];
+  agentName?: string;
+  agentRole?: string;
+  step?: AgentStep;
+  result?: PipelineAgentResult;
+  summary?: string;
+}
 
-  // Modal state
+// ── Pipeline runner ────────────────────────────────────────────────────────────
+
+interface PipelineRunnerProps {
+  pipeline: AgentPipeline;
+  profiles: AgentProfile[];
+  onRunSaved: () => void;
+}
+
+function PipelineRunner({ pipeline, profiles, onRunSaved }: PipelineRunnerProps) {
+  const [task, setTask] = useState('');
+  const [running, setRunning] = useState(false);
+  const [events, setEvents] = useState<PipelineEventEntry[]>([]);
+  const [summary, setSummary] = useState<string | null>(null);
+  const [runError, setRunError] = useState<string | null>(null);
+  const [agentStatuses, setAgentStatuses] = useState<Record<string, 'idle' | 'running' | 'done' | 'error'>>({});
+  const [showEvents, setShowEvents] = useState(false);
+  const endRef = useRef<HTMLDivElement>(null);
+  const evtId = useRef(0);
+
+  const profileMap = new Map(profiles.map(p => [p.id, p]));
+
+  const addEvent = (evt: Omit<PipelineEventEntry, 'id'>) => {
+    const entry: PipelineEventEntry = { ...evt, id: String(evtId.current++) };
+    setEvents(prev => [...prev, entry]);
+    setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+  };
+
+  const handleRun = useCallback(async () => {
+    if (!task.trim() || running) return;
+    setRunning(true);
+    setEvents([]);
+    setSummary(null);
+    setRunError(null);
+    setAgentStatuses({});
+    setShowEvents(true);
+
+    const onEvent = (evt: OrchestratorEvent) => {
+      if (evt.type === 'agent_start') {
+        setAgentStatuses(prev => ({ ...prev, [evt.agentName ?? '']: 'running' }));
+      } else if (evt.type === 'agent_done') {
+        setAgentStatuses(prev => ({ ...prev, [evt.agentName ?? '']: evt.result?.success ? 'done' : 'error' }));
+        if (evt.result) addEvent({ type: 'agent_done', agentName: evt.agentName, agentRole: evt.agentRole, result: evt.result });
+        return;
+      } else if (evt.type === 'pipeline_done') {
+        setSummary(evt.summary ?? '');
+      }
+      addEvent({ type: evt.type, agentName: evt.agentName, agentRole: evt.agentRole, step: evt.step, summary: evt.summary });
+    };
+
+    try {
+      const runner = pipeline.mode === 'orchestrated'
+        ? runOrchestratedPipeline
+        : runSequentialPipeline;
+
+      const result = await runner(task, pipeline, profiles, onEvent);
+
+      createPipelineRun({
+        pipelineId: pipeline.id,
+        task,
+        result: result.success ? 'success' : 'error',
+        summary: result.summary,
+        agentResults: result.agentResults,
+        totalDuration: result.totalDuration,
+        timestamp: Date.now(),
+      });
+      onRunSaved();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unexpected error';
+      setRunError(msg);
+    } finally {
+      setRunning(false);
+    }
+  }, [task, running, pipeline, profiles, onRunSaved]);
+
+  // Build the visual pipeline flow
+  const orderedAgents = pipeline.mode === 'orchestrated'
+    ? [
+        pipeline.orchestratorId ? profileMap.get(pipeline.orchestratorId) : null,
+        ...pipeline.agents.map(a => profileMap.get(a.profileId)),
+      ].filter(Boolean)
+    : [...pipeline.agents].sort((a, b) => a.order - b.order).map(a => profileMap.get(a.profileId)).filter(Boolean);
+
+  return (
+    <div className="mt-2">
+      {/* Visual pipeline flow */}
+      <div className="d-flex align-items-center flex-wrap gap-1 mb-3 p-2 bg-light rounded">
+        {orderedAgents.map((p, i) => {
+          if (!p) return null;
+          const status = agentStatuses[p.name];
+          const isOrchestrator = pipeline.mode === 'orchestrated' && p.id === pipeline.orchestratorId;
+          return (
+            <React.Fragment key={p.id}>
+              <div className="text-center" style={{ minWidth: 80 }}>
+                <div
+                  className={`rounded p-1 small border ${
+                    status === 'running' ? 'border-primary bg-primary text-white' :
+                    status === 'done' ? 'border-success bg-success text-white' :
+                    status === 'error' ? 'border-danger bg-danger text-white' :
+                    'border-secondary bg-white'
+                  }`}
+                >
+                  {status === 'running' && <Spinner size="sm" animation="border" className="me-1" />}
+                  {status === 'done' && '✅ '}
+                  {status === 'error' && '❌ '}
+                  <strong>{isOrchestrator ? '🎯 ' : ''}{p.name}</strong>
+                </div>
+                <div className="text-muted" style={{ fontSize: '0.65rem' }}>
+                  {AGENT_ROLE_LABELS[p.role as AgentRole]}
+                </div>
+              </div>
+              {i < orderedAgents.length - 1 && (
+                <span className="text-muted fw-bold">{pipeline.mode === 'orchestrated' ? '⇄' : '→'}</span>
+              )}
+            </React.Fragment>
+          );
+        })}
+        {orderedAgents.length === 0 && (
+          <span className="text-muted small">No agents in this pipeline yet.</span>
+        )}
+      </div>
+
+      <Form.Group className="mb-2">
+        <Form.Control as="textarea" rows={2}
+          placeholder="Describe the complex task for this pipeline…"
+          value={task} onChange={e => setTask(e.target.value)} disabled={running} />
+      </Form.Group>
+      <Button size="sm" variant="success" onClick={handleRun} disabled={!task.trim() || running || orderedAgents.length === 0}>
+        {running
+          ? <><Spinner size="sm" animation="border" className="me-1" />Orchestrating…</>
+          : `▶ Run ${pipeline.mode === 'orchestrated' ? 'Orchestrated' : 'Sequential'} Pipeline`}
+      </Button>
+
+      {running && (
+        <ProgressBar animated now={100} className="mt-2" style={{ height: 4 }} />
+      )}
+
+      {events.length > 0 && (
+        <Button size="sm" variant="link" className="ms-2" onClick={() => setShowEvents(v => !v)}>
+          {showEvents ? 'Hide log' : `Show ${events.length} events`}
+        </Button>
+      )}
+
+      <Collapse in={showEvents}>
+        <div className="mt-2 small" style={{ maxHeight: 300, overflowY: 'auto' }}>
+          {events.map(evt => {
+            if (evt.type === 'agent_done' && evt.result) {
+              return (
+                <div key={evt.id} className={`mb-1 p-2 border rounded ${evt.result.success ? 'border-success' : 'border-danger'}`}>
+                  <Badge bg={evt.result.success ? 'success' : 'danger'} className="me-1">
+                    {evt.result.success ? '✅' : '❌'}
+                  </Badge>
+                  <strong>{evt.result.agentName}</strong>
+                  <span className="text-muted ms-1">({AGENT_ROLE_LABELS[evt.result.role as AgentRole]})</span>
+                  {evt.result.output && (
+                    <div className="text-muted mt-1" style={{ whiteSpace: 'pre-wrap' }}>
+                      {evt.result.output.slice(0, 200)}{evt.result.output.length > 200 ? '…' : ''}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+            if (evt.type === 'agent_start') {
+              return (
+                <div key={evt.id} className="mb-1 text-muted">
+                  <Spinner size="sm" animation="border" className="me-1" />
+                  <strong>{evt.agentName}</strong> is working…
+                </div>
+              );
+            }
+            if (evt.type === 'orchestrator_plan') {
+              return (
+                <div key={evt.id} className="mb-1 p-1 border border-warning rounded">
+                  <Badge bg="warning" text="dark" className="me-1">📋 Plan</Badge>
+                  Orchestrator created delegation plan
+                </div>
+              );
+            }
+            return null;
+          })}
+          <div ref={endRef} />
+        </div>
+      </Collapse>
+
+      {summary && (
+        <Alert variant="success" className="mt-2 small">
+          <strong>✅ Pipeline complete:</strong>
+          <div style={{ whiteSpace: 'pre-wrap' }}>{summary}</div>
+        </Alert>
+      )}
+      {runError && (
+        <Alert variant="danger" className="mt-2 small"><strong>Error:</strong> {runError}</Alert>
+      )}
+    </div>
+  );
+}
+
+// ── Agents Tab ────────────────────────────────────────────────────────────────
+
+interface AgentsTabProps {
+  profiles: AgentProfile[];
+  onRefresh: () => void;
+}
+
+function AgentsTab({ profiles, onRefresh }: AgentsTabProps) {
   const [showModal, setShowModal] = useState(false);
   const [editingProfile, setEditingProfile] = useState<AgentProfile | null>(null);
-  const [form, setForm] = useState(EMPTY_FORM);
-
-  // Expanded runners
+  const [form, setForm] = useState(EMPTY_PROFILE_FORM);
+  const [deleteTarget, setDeleteTarget] = useState<AgentProfile | null>(null);
   const [expandedRunner, setExpandedRunner] = useState<string | null>(null);
   const [expandedHistory, setExpandedHistory] = useState<string | null>(null);
-
-  // Delete confirmation
-  const [deleteTarget, setDeleteTarget] = useState<AgentProfile | null>(null);
-
-  const refreshProfiles = useCallback(() => {
-    setProfiles(getProfiles());
-  }, []);
+  const [runHistory, setRunHistory] = useState<Record<string, AgentRun[]>>({});
 
   const refreshHistory = useCallback((profileId: string) => {
     setRunHistory(prev => ({ ...prev, [profileId]: getRuns(profileId) }));
   }, []);
 
-  // ── Open create/edit modal ──
-  const openCreate = () => {
-    setEditingProfile(null);
-    setForm(EMPTY_FORM);
-    setShowModal(true);
-  };
-
-  const openEdit = (profile: AgentProfile) => {
-    setEditingProfile(profile);
-    setForm({
-      name: profile.name,
-      description: profile.description,
-      provider: profile.provider,
-      endpoint: profile.endpoint ?? '',
-      apiKey: profile.apiKey ?? '',
-      model: profile.model ?? '',
-      maxIterations: profile.maxIterations,
-      temperature: profile.temperature,
-      systemPromptOverride: profile.systemPromptOverride ?? '',
-    });
+  const openCreate = () => { setEditingProfile(null); setForm(EMPTY_PROFILE_FORM); setShowModal(true); };
+  const openEdit = (p: AgentProfile) => {
+    setEditingProfile(p);
+    setForm({ name: p.name, description: p.description, role: p.role, specialty: p.specialty ?? '',
+      provider: p.provider, endpoint: p.endpoint ?? '', apiKey: p.apiKey ?? '', model: p.model ?? '',
+      maxIterations: p.maxIterations, temperature: p.temperature, systemPromptOverride: p.systemPromptOverride ?? '' });
     setShowModal(true);
   };
 
@@ -216,48 +425,29 @@ export function AgentManager() {
       createProfile(form);
     }
     setShowModal(false);
-    refreshProfiles();
+    onRefresh();
   };
-
-  const confirmDelete = (profile: AgentProfile) => setDeleteTarget(profile);
 
   const handleDelete = () => {
     if (!deleteTarget) return;
     deleteProfile(deleteTarget.id);
     setDeleteTarget(null);
-    refreshProfiles();
-  };
-
-  const handleRunSaved = useCallback((profileId: string) => {
-    refreshHistory(profileId);
-    refreshProfiles();
-  }, [refreshHistory, refreshProfiles]);
-
-  const toggleRunner = (id: string) =>
-    setExpandedRunner(prev => (prev === id ? null : id));
-
-  const toggleHistory = (id: string) => {
-    if (expandedHistory !== id) refreshHistory(id);
-    setExpandedHistory(prev => (prev === id ? null : id));
+    onRefresh();
   };
 
   return (
-    <Container className="py-4">
-      <div className="d-flex justify-content-between align-items-start mb-3">
-        <div>
-          <h2 className="mb-1">🤖 Agent Manager</h2>
-          <p className="text-muted mb-0">
-            Create and manage reusable AI agent profiles. Each profile stores an AI configuration
-            that you can reuse across tasks.
-          </p>
-        </div>
-        <Button variant="primary" onClick={openCreate}>+ New Profile</Button>
+    <>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <p className="text-muted mb-0 small">
+          Agents are individual AI models with a specific role. Use them standalone or assemble them into a Pipeline.
+        </p>
+        <Button variant="primary" size="sm" onClick={openCreate}>+ New Agent</Button>
       </div>
 
       {profiles.length === 0 && (
         <Alert variant="info">
-          No agent profiles yet.{' '}
-          <Alert.Link onClick={openCreate}>Create your first profile</Alert.Link> to get started.
+          No agents yet.{' '}
+          <Alert.Link onClick={openCreate}>Create your first agent</Alert.Link> to get started.
         </Alert>
       )}
 
@@ -266,92 +456,71 @@ export function AgentManager() {
           <Card.Header className="d-flex justify-content-between align-items-center">
             <div>
               <span className="fw-semibold">{profile.name}</span>
-              <Badge bg="secondary" className="ms-2">{profile.provider}</Badge>
+              <Badge bg={ROLE_BADGE_COLORS[profile.role] as string} className="ms-2">
+                {AGENT_ROLE_LABELS[profile.role]}
+              </Badge>
+              <Badge bg="secondary" className="ms-1">{profile.provider}</Badge>
               {profile.model && <Badge bg="dark" className="ms-1">{profile.model}</Badge>}
             </div>
             <div className="d-flex gap-2">
-              <Button size="sm" variant="outline-secondary" onClick={() => openEdit(profile)}>
-                ✏️ Edit
-              </Button>
-              <Button size="sm" variant="outline-danger" onClick={() => confirmDelete(profile)}>
-                🗑️ Delete
-              </Button>
+              <Button size="sm" variant="outline-secondary" onClick={() => openEdit(profile)}>✏️ Edit</Button>
+              <Button size="sm" variant="outline-danger" onClick={() => setDeleteTarget(profile)}>🗑️ Delete</Button>
             </div>
           </Card.Header>
           <Card.Body>
-            {profile.description && (
-              <p className="text-muted small mb-2">{profile.description}</p>
-            )}
+            {profile.specialty && <p className="text-muted small mb-2"><em>Specialty: {profile.specialty}</em></p>}
+            {profile.description && !profile.specialty && <p className="text-muted small mb-2">{profile.description}</p>}
             <Row className="small text-muted mb-2">
               <Col xs="auto">Max iterations: <strong>{profile.maxIterations}</strong></Col>
               <Col xs="auto">Temperature: <strong>{profile.temperature}</strong></Col>
-              {profile.endpoint && <Col xs="auto">Endpoint: <strong>{profile.endpoint}</strong></Col>}
+              {profile.endpoint && <Col xs="auto" className="text-truncate" style={{ maxWidth: 200 }}>Endpoint: <strong>{profile.endpoint}</strong></Col>}
             </Row>
-
-            {/* Run section */}
-            <Button
-              size="sm"
-              variant="success"
-              onClick={() => toggleRunner(profile.id)}
-              className="me-2"
-            >
-              {expandedRunner === profile.id ? '▾ Hide Runner' : '▶ Run Task'}
+            <Button size="sm" variant="success" onClick={() => setExpandedRunner(prev => prev === profile.id ? null : profile.id)} className="me-2">
+              {expandedRunner === profile.id ? '▾ Hide' : '▶ Run Standalone'}
             </Button>
-            <Button
-              size="sm"
-              variant="outline-secondary"
-              onClick={() => toggleHistory(profile.id)}
-            >
+            <Button size="sm" variant="outline-secondary" onClick={() => {
+              if (expandedHistory !== profile.id) refreshHistory(profile.id);
+              setExpandedHistory(prev => prev === profile.id ? null : profile.id);
+            }}>
               📋 History ({getRuns(profile.id).length})
             </Button>
-
             <Collapse in={expandedRunner === profile.id}>
               <div>
-                <ProfileRunner
-                  profile={profile}
-                  onRunSaved={() => handleRunSaved(profile.id)}
-                />
+                <ProfileRunner profile={profile} onRunSaved={() => { refreshHistory(profile.id); onRefresh(); }} />
               </div>
             </Collapse>
-
             <Collapse in={expandedHistory === profile.id}>
               <div className="mt-2">
-                {(runHistory[profile.id] ?? getRuns(profile.id)).length === 0 ? (
-                  <p className="text-muted small">No runs yet.</p>
-                ) : (
-                  <div>
-                    {(runHistory[profile.id] ?? getRuns(profile.id)).map(run => (
-                      <div key={run.id} className="border rounded p-2 mb-1 small">
-                        <div className="d-flex justify-content-between">
-                          <span>
-                            <Badge bg={run.result === 'success' ? 'success' : 'danger'} className="me-1">
-                              {run.result === 'success' ? '✅' : '❌'}
-                            </Badge>
-                            {run.task}
-                          </span>
-                          <span className="text-muted">
-                            {new Date(run.timestamp).toLocaleString()}
-                          </span>
-                        </div>
-                        {run.answer && (
-                          <div className="text-muted mt-1" style={{ whiteSpace: 'pre-wrap' }}>
-                            {run.answer.slice(0, 200)}{run.answer.length > 200 ? '…' : ''}
-                          </div>
-                        )}
+                {(runHistory[profile.id] ?? getRuns(profile.id)).length === 0
+                  ? <p className="text-muted small">No runs yet.</p>
+                  : (runHistory[profile.id] ?? getRuns(profile.id)).map(run => (
+                    <div key={run.id} className="border rounded p-2 mb-1 small">
+                      <div className="d-flex justify-content-between">
+                        <span>
+                          <Badge bg={run.result === 'success' ? 'success' : 'danger'} className="me-1">
+                            {run.result === 'success' ? '✅' : '❌'}
+                          </Badge>
+                          {run.task}
+                        </span>
+                        <span className="text-muted">{new Date(run.timestamp).toLocaleString()}</span>
                       </div>
-                    ))}
-                  </div>
-                )}
+                      {run.answer && (
+                        <div className="text-muted mt-1" style={{ whiteSpace: 'pre-wrap' }}>
+                          {run.answer.slice(0, 200)}{run.answer.length > 200 ? '…' : ''}
+                        </div>
+                      )}
+                    </div>
+                  ))}
               </div>
             </Collapse>
           </Card.Body>
         </Card>
       ))}
 
-      {/* Create/Edit Modal */}
+      {/* Agent create/edit modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>{editingProfile ? 'Edit Profile' : 'New Agent Profile'}</Modal.Title>
+          <Modal.Title>{editingProfile ? 'Edit Agent' : 'New Agent'}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -359,22 +528,326 @@ export function AgentManager() {
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>Name <span className="text-danger">*</span></Form.Label>
-                  <Form.Control
-                    value={form.name}
-                    onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                    placeholder="e.g. GPT-4 QA Agent"
-                  />
+                  <Form.Control value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                    placeholder="e.g. Code Reviewer" />
+                </Form.Group>
+              </Col>
+              <Col md={3}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Role</Form.Label>
+                  <Form.Select value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value as AgentRole }))}>
+                    {ROLES.map(r => <option key={r} value={r}>{AGENT_ROLE_LABELS[r]}</option>)}
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col md={3}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Provider</Form.Label>
+                  <Form.Select value={form.provider} onChange={e => setForm(f => ({ ...f, provider: e.target.value as AIProvider }))}>
+                    {PROVIDERS.map(p => <option key={p} value={p}>{p}</option>)}
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+            </Row>
+            <Form.Group className="mb-3">
+              <Form.Label>Specialty <span className="text-muted small">(shown to orchestrator when delegating)</span></Form.Label>
+              <Form.Control value={form.specialty} onChange={e => setForm(f => ({ ...f, specialty: e.target.value }))}
+                placeholder="e.g. Analyses TypeScript code for bugs and performance issues" />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Description</Form.Label>
+              <Form.Control value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                placeholder="What does this agent do?" />
+            </Form.Group>
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Model</Form.Label>
+                  <Form.Control value={form.model} onChange={e => setForm(f => ({ ...f, model: e.target.value }))}
+                    placeholder="e.g. gpt-4o-mini, llama2" />
                 </Form.Group>
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Provider</Form.Label>
-                  <Form.Select
-                    value={form.provider}
-                    onChange={e => setForm(f => ({ ...f, provider: e.target.value as AIProvider }))}
-                  >
-                    {PROVIDERS.map(p => (
-                      <option key={p} value={p}>{p}</option>
+                  <Form.Label>Endpoint</Form.Label>
+                  <Form.Control value={form.endpoint} onChange={e => setForm(f => ({ ...f, endpoint: e.target.value }))}
+                    placeholder="http://localhost:11434" />
+                </Form.Group>
+              </Col>
+            </Row>
+            <Form.Group className="mb-3">
+              <Form.Label>API Key</Form.Label>
+              <Form.Control type="password" value={form.apiKey} onChange={e => setForm(f => ({ ...f, apiKey: e.target.value }))}
+                placeholder="Leave blank for Ollama" />
+            </Form.Group>
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Max Iterations</Form.Label>
+                  <Form.Control type="number" min={1} max={25} value={form.maxIterations}
+                    onChange={e => setForm(f => ({ ...f, maxIterations: Number(e.target.value) }))} />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Temperature</Form.Label>
+                  <Form.Control type="number" min={0} max={1} step={0.1} value={form.temperature}
+                    onChange={e => setForm(f => ({ ...f, temperature: Number(e.target.value) }))} />
+                </Form.Group>
+              </Col>
+            </Row>
+            <Form.Group className="mb-3">
+              <Form.Label>System Prompt Override <span className="text-muted small">(optional)</span></Form.Label>
+              <Form.Control as="textarea" rows={3} value={form.systemPromptOverride}
+                onChange={e => setForm(f => ({ ...f, systemPromptOverride: e.target.value }))}
+                placeholder="Leave blank to use the default agent system prompt" />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
+          <Button variant="primary" onClick={handleSave} disabled={!form.name.trim()}>
+            {editingProfile ? 'Save Changes' : 'Create Agent'}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Delete confirmation */}
+      <Modal show={!!deleteTarget} onHide={() => setDeleteTarget(null)}>
+        <Modal.Header closeButton><Modal.Title>Delete Agent</Modal.Title></Modal.Header>
+        <Modal.Body>Delete <strong>{deleteTarget?.name}</strong>? This removes all run history too.</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+          <Button variant="danger" onClick={handleDelete}>Delete</Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+}
+
+// ── Pipelines Tab ─────────────────────────────────────────────────────────────
+
+interface PipelinesTabProps {
+  pipelines: AgentPipeline[];
+  profiles: AgentProfile[];
+  onRefresh: () => void;
+}
+
+const EMPTY_PIPELINE_FORM: Omit<AgentPipeline, 'id' | 'createdAt' | 'updatedAt'> = {
+  name: '',
+  description: '',
+  mode: 'sequential',
+  orchestratorId: '',
+  agents: [],
+};
+
+function PipelinesTab({ pipelines, profiles, onRefresh }: PipelinesTabProps) {
+  const [showModal, setShowModal] = useState(false);
+  const [editingPipeline, setEditingPipeline] = useState<AgentPipeline | null>(null);
+  const [form, setForm] = useState(EMPTY_PIPELINE_FORM);
+  const [deleteTarget, setDeleteTarget] = useState<AgentPipeline | null>(null);
+  const [expandedRunner, setExpandedRunner] = useState<string | null>(null);
+  const [expandedHistory, setExpandedHistory] = useState<string | null>(null);
+  const [pipelineHistory, setPipelineHistory] = useState<Record<string, PipelineRun[]>>({});
+
+  const profileMap = new Map(profiles.map(p => [p.id, p]));
+
+  const openCreate = () => {
+    setEditingPipeline(null);
+    setForm(EMPTY_PIPELINE_FORM);
+    setShowModal(true);
+  };
+
+  const openEdit = (p: AgentPipeline) => {
+    setEditingPipeline(p);
+    setForm({ name: p.name, description: p.description, mode: p.mode, orchestratorId: p.orchestratorId ?? '', agents: p.agents });
+    setShowModal(true);
+  };
+
+  const handleSave = () => {
+    if (!form.name.trim()) return;
+    const pipeline = { ...form, orchestratorId: form.orchestratorId || undefined };
+    if (editingPipeline) {
+      savePipeline({ ...editingPipeline, ...pipeline, updatedAt: Date.now() });
+    } else {
+      createPipeline(pipeline);
+    }
+    setShowModal(false);
+    onRefresh();
+  };
+
+  const toggleAgent = (profileId: string) => {
+    setForm(f => {
+      const exists = f.agents.some(a => a.profileId === profileId);
+      if (exists) {
+        const filtered = f.agents.filter(a => a.profileId !== profileId)
+          .map((a, i) => ({ ...a, order: i }));
+        return { ...f, agents: filtered };
+      } else {
+        return { ...f, agents: [...f.agents, { profileId, order: f.agents.length }] };
+      }
+    });
+  };
+
+  const handleDelete = () => {
+    if (!deleteTarget) return;
+    deletePipeline(deleteTarget.id);
+    setDeleteTarget(null);
+    onRefresh();
+  };
+
+  const refreshHistory = (id: string) => {
+    setPipelineHistory(prev => ({ ...prev, [id]: getPipelineRuns(id) }));
+  };
+
+  return (
+    <>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <p className="text-muted mb-0 small">
+          Pipelines coordinate multiple agents on complex tasks. Choose <strong>Sequential</strong> (chain) or
+          <strong> Orchestrated</strong> (orchestrator delegates to specialists).
+        </p>
+        <Button variant="primary" size="sm" onClick={openCreate} disabled={profiles.length === 0}>
+          + New Pipeline
+        </Button>
+      </div>
+
+      {profiles.length === 0 && (
+        <Alert variant="warning">
+          Create at least one agent in the <strong>Agents</strong> tab before building a pipeline.
+        </Alert>
+      )}
+
+      {profiles.length > 0 && pipelines.length === 0 && (
+        <Alert variant="info">
+          No pipelines yet.{' '}
+          <Alert.Link onClick={openCreate}>Create your first pipeline</Alert.Link> to start orchestrating agents.
+        </Alert>
+      )}
+
+      {pipelines.map(pipeline => {
+        const workerProfiles = pipeline.agents.map(a => profileMap.get(a.profileId)).filter(Boolean);
+        const orchestratorProfile = pipeline.orchestratorId ? profileMap.get(pipeline.orchestratorId) : null;
+
+        return (
+          <Card key={pipeline.id} className="mb-3">
+            <Card.Header className="d-flex justify-content-between align-items-center">
+              <div>
+                <span className="fw-semibold">{pipeline.name}</span>
+                <Badge bg={pipeline.mode === 'orchestrated' ? 'warning' : 'info'} text="dark" className="ms-2">
+                  {pipeline.mode === 'orchestrated' ? '🎯 Orchestrated' : '🔗 Sequential'}
+                </Badge>
+                <Badge bg="secondary" className="ms-1">{pipeline.agents.length} agent{pipeline.agents.length !== 1 ? 's' : ''}</Badge>
+              </div>
+              <div className="d-flex gap-2">
+                <Button size="sm" variant="outline-secondary" onClick={() => openEdit(pipeline)}>✏️ Edit</Button>
+                <Button size="sm" variant="outline-danger" onClick={() => setDeleteTarget(pipeline)}>🗑️ Delete</Button>
+              </div>
+            </Card.Header>
+            <Card.Body>
+              {pipeline.description && <p className="text-muted small mb-2">{pipeline.description}</p>}
+
+              {/* Pipeline flow diagram */}
+              <div className="d-flex align-items-center flex-wrap gap-1 mb-3 p-2 bg-light rounded small">
+                {pipeline.mode === 'orchestrated' && orchestratorProfile && (
+                  <>
+                    <div className="text-center">
+                      <Badge bg="warning" text="dark">🎯 {orchestratorProfile.name}</Badge>
+                      <div className="text-muted" style={{ fontSize: '0.6rem' }}>orchestrator</div>
+                    </div>
+                    {workerProfiles.length > 0 && <span className="text-muted">⇄</span>}
+                  </>
+                )}
+                {pipeline.mode === 'sequential' && workerProfiles.map((p, i) => p && (
+                  <React.Fragment key={p.id}>
+                    <div className="text-center">
+                      <Badge bg={ROLE_BADGE_COLORS[p.role as AgentRole] as string}>{p.name}</Badge>
+                      <div className="text-muted" style={{ fontSize: '0.6rem' }}>{AGENT_ROLE_LABELS[p.role as AgentRole]}</div>
+                    </div>
+                    {i < workerProfiles.length - 1 && <span className="text-muted fw-bold">→</span>}
+                  </React.Fragment>
+                ))}
+                {pipeline.mode === 'orchestrated' && (
+                  <div className="d-flex flex-wrap gap-1">
+                    {workerProfiles.map(p => p && (
+                      <div key={p.id} className="text-center">
+                        <Badge bg={ROLE_BADGE_COLORS[p.role as AgentRole] as string}>{p.name}</Badge>
+                        <div className="text-muted" style={{ fontSize: '0.6rem' }}>{AGENT_ROLE_LABELS[p.role as AgentRole]}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <Button size="sm" variant="success" className="me-2"
+                onClick={() => setExpandedRunner(prev => prev === pipeline.id ? null : pipeline.id)}>
+                {expandedRunner === pipeline.id ? '▾ Hide Runner' : '▶ Run Pipeline'}
+              </Button>
+              <Button size="sm" variant="outline-secondary"
+                onClick={() => { if (expandedHistory !== pipeline.id) refreshHistory(pipeline.id); setExpandedHistory(prev => prev === pipeline.id ? null : pipeline.id); }}>
+                📋 History ({getPipelineRuns(pipeline.id).length})
+              </Button>
+
+              <Collapse in={expandedRunner === pipeline.id}>
+                <div>
+                  <PipelineRunner pipeline={pipeline} profiles={profiles} onRunSaved={() => { refreshHistory(pipeline.id); onRefresh(); }} />
+                </div>
+              </Collapse>
+
+              <Collapse in={expandedHistory === pipeline.id}>
+                <div className="mt-2">
+                  {(pipelineHistory[pipeline.id] ?? getPipelineRuns(pipeline.id)).length === 0
+                    ? <p className="text-muted small">No runs yet.</p>
+                    : (pipelineHistory[pipeline.id] ?? getPipelineRuns(pipeline.id)).map(run => (
+                      <div key={run.id} className="border rounded p-2 mb-1 small">
+                        <div className="d-flex justify-content-between mb-1">
+                          <span>
+                            <Badge bg={run.result === 'success' ? 'success' : run.result === 'partial' ? 'warning' : 'danger'} className="me-1">
+                              {run.result === 'success' ? '✅' : run.result === 'partial' ? '⚠️' : '❌'}
+                            </Badge>
+                            {run.task}
+                          </span>
+                          <span className="text-muted">{new Date(run.timestamp).toLocaleString()}</span>
+                        </div>
+                        <div className="text-muted">{run.agentResults.length} agents · {(run.totalDuration / 1000).toFixed(1)}s</div>
+                        {run.summary && (
+                          <div className="mt-1" style={{ whiteSpace: 'pre-wrap' }}>
+                            {run.summary.slice(0, 300)}{run.summary.length > 300 ? '…' : ''}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  }
+                </div>
+              </Collapse>
+            </Card.Body>
+          </Card>
+        );
+      })}
+
+      {/* Pipeline create/edit modal */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>{editingPipeline ? 'Edit Pipeline' : 'New Pipeline'}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Row>
+              <Col md={8}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Name <span className="text-danger">*</span></Form.Label>
+                  <Form.Control value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                    placeholder="e.g. Full-Stack Code Review Pipeline" />
+                </Form.Group>
+              </Col>
+              <Col md={4}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Execution Mode</Form.Label>
+                  <Form.Select value={form.mode} onChange={e => setForm(f => ({ ...f, mode: e.target.value as PipelineMode }))}>
+                    {PIPELINE_MODES.map(m => (
+                      <option key={m} value={m}>
+                        {m === 'sequential' ? '🔗 Sequential (chain)' : '🎯 Orchestrated (hub & spoke)'}
+                      </option>
                     ))}
                   </Form.Select>
                 </Form.Group>
@@ -382,104 +855,121 @@ export function AgentManager() {
             </Row>
             <Form.Group className="mb-3">
               <Form.Label>Description</Form.Label>
-              <Form.Control
-                value={form.description}
-                onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                placeholder="What does this agent do?"
-              />
+              <Form.Control value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                placeholder="What complex task does this pipeline solve?" />
             </Form.Group>
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Model</Form.Label>
-                  <Form.Control
-                    value={form.model}
-                    onChange={e => setForm(f => ({ ...f, model: e.target.value }))}
-                    placeholder="e.g. gpt-4o-mini, llama2"
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Endpoint</Form.Label>
-                  <Form.Control
-                    value={form.endpoint}
-                    onChange={e => setForm(f => ({ ...f, endpoint: e.target.value }))}
-                    placeholder="http://localhost:11434"
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-            <Form.Group className="mb-3">
-              <Form.Label>API Key</Form.Label>
-              <Form.Control
-                type="password"
-                value={form.apiKey}
-                onChange={e => setForm(f => ({ ...f, apiKey: e.target.value }))}
-                placeholder="Leave blank for Ollama"
-              />
-            </Form.Group>
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Max Iterations</Form.Label>
-                  <Form.Control
-                    type="number"
-                    min={1}
-                    max={25}
-                    value={form.maxIterations}
-                    onChange={e => setForm(f => ({ ...f, maxIterations: Number(e.target.value) }))}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Temperature</Form.Label>
-                  <Form.Control
-                    type="number"
-                    min={0}
-                    max={1}
-                    step={0.1}
-                    value={form.temperature}
-                    onChange={e => setForm(f => ({ ...f, temperature: Number(e.target.value) }))}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-            <Form.Group className="mb-3">
-              <Form.Label>System Prompt Override <span className="text-muted small">(optional)</span></Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                value={form.systemPromptOverride}
-                onChange={e => setForm(f => ({ ...f, systemPromptOverride: e.target.value }))}
-                placeholder="Leave blank to use the default agent system prompt"
-              />
+
+            {form.mode === 'orchestrated' && (
+              <Form.Group className="mb-3">
+                <Form.Label>Orchestrator Agent <span className="text-danger">*</span></Form.Label>
+                <Form.Select value={form.orchestratorId} onChange={e => setForm(f => ({ ...f, orchestratorId: e.target.value }))}>
+                  <option value="">— Select orchestrator —</option>
+                  {profiles.map(p => <option key={p.id} value={p.id}>{p.name} ({AGENT_ROLE_LABELS[p.role]})</option>)}
+                </Form.Select>
+                <Form.Text className="text-muted">
+                  The orchestrator breaks down the task and delegates to worker agents.
+                </Form.Text>
+              </Form.Group>
+            )}
+
+            <Form.Group className="mb-1">
+              <Form.Label>
+                {form.mode === 'sequential' ? 'Agents (ordered — output flows to next)' : 'Worker Agents'}
+              </Form.Label>
+              <Form.Text className="text-muted d-block mb-2">
+                {form.mode === 'sequential'
+                  ? 'Select agents in the order you want them to run.'
+                  : 'Select specialist agents the orchestrator can delegate to.'}
+              </Form.Text>
+              <ListGroup>
+                {profiles.map(p => {
+                  const selected = form.agents.some(a => a.profileId === p.id);
+                  const idx = form.agents.findIndex(a => a.profileId === p.id);
+                  return (
+                    <ListGroup.Item key={p.id} action active={selected} onClick={() => toggleAgent(p.id)}
+                      className="d-flex justify-content-between align-items-center">
+                      <div>
+                        {selected && form.mode === 'sequential' && (
+                          <Badge bg="light" text="dark" className="me-2">{idx + 1}</Badge>
+                        )}
+                        <strong>{p.name}</strong>
+                        <Badge bg={ROLE_BADGE_COLORS[p.role] as string} className="ms-2">{AGENT_ROLE_LABELS[p.role]}</Badge>
+                        {p.specialty && <span className="text-muted ms-2 small">{p.specialty}</span>}
+                      </div>
+                      {selected && <span>✓</span>}
+                    </ListGroup.Item>
+                  );
+                })}
+              </ListGroup>
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button variant="primary" onClick={handleSave} disabled={!form.name.trim()}>
-            {editingProfile ? 'Save Changes' : 'Create Profile'}
+          <Button variant="primary" onClick={handleSave}
+            disabled={!form.name.trim() || form.agents.length === 0 || (form.mode === 'orchestrated' && !form.orchestratorId)}>
+            {editingPipeline ? 'Save Changes' : 'Create Pipeline'}
           </Button>
         </Modal.Footer>
       </Modal>
 
-      {/* Delete confirmation modal */}
+      {/* Delete confirmation */}
       <Modal show={!!deleteTarget} onHide={() => setDeleteTarget(null)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Delete Profile</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          Are you sure you want to delete <strong>{deleteTarget?.name}</strong>? This will also
-          remove all run history for this profile.
-        </Modal.Body>
+        <Modal.Header closeButton><Modal.Title>Delete Pipeline</Modal.Title></Modal.Header>
+        <Modal.Body>Delete pipeline <strong>{deleteTarget?.name}</strong>? This removes all run history too.</Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setDeleteTarget(null)}>Cancel</Button>
           <Button variant="danger" onClick={handleDelete}>Delete</Button>
         </Modal.Footer>
       </Modal>
+    </>
+  );
+}
+
+// ── Main AgentManager component ───────────────────────────────────────────────
+
+export function AgentManager() {
+  const [profiles, setProfiles] = useState<AgentProfile[]>(() => getProfiles());
+  const [pipelines, setPipelines] = useState<AgentPipeline[]>(() => getPipelines());
+
+  const refreshAll = useCallback(() => {
+    setProfiles(getProfiles());
+    setPipelines(getPipelines());
+  }, []);
+
+  return (
+    <Container className="py-4">
+      <div className="mb-4">
+        <h2 className="mb-1">🎭 Agent Orchestration</h2>
+        <p className="text-muted mb-0">
+          Coordinate multiple specialized AI agents to tackle complex multi-step tasks.
+          Create agents with distinct roles, then wire them into a pipeline.
+        </p>
+      </div>
+
+      <Tab.Container defaultActiveKey="agents">
+        <Nav variant="tabs" className="mb-3">
+          <Nav.Item>
+            <Nav.Link eventKey="agents">
+              🤖 Agents <Badge bg="secondary" className="ms-1">{profiles.length}</Badge>
+            </Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link eventKey="pipelines">
+              🔗 Pipelines <Badge bg="secondary" className="ms-1">{pipelines.length}</Badge>
+            </Nav.Link>
+          </Nav.Item>
+        </Nav>
+        <Tab.Content>
+          <Tab.Pane eventKey="agents">
+            <AgentsTab profiles={profiles} onRefresh={refreshAll} />
+          </Tab.Pane>
+          <Tab.Pane eventKey="pipelines">
+            <PipelinesTab pipelines={pipelines} profiles={profiles} onRefresh={refreshAll} />
+          </Tab.Pane>
+        </Tab.Content>
+      </Tab.Container>
     </Container>
   );
 }
+

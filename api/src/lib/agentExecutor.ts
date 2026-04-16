@@ -377,3 +377,171 @@ export async function runApiAgent(
   const lastAnswer = steps.filter(s => s.type === 'answer').pop()?.content ?? '';
   return { success: false, answer: lastAnswer, steps, iterationCount: maxIter, error: 'Max iterations reached' };
 }
+
+// ── Pipeline orchestration ────────────────────────────────────────────────────
+
+export interface PipelineAgentConfig extends AgentConfig {
+  profileId: string;
+  name: string;
+  role: string;
+  specialty?: string;
+  order?: number;
+}
+
+export interface PipelineConfig {
+  mode: 'sequential' | 'orchestrated';
+  orchestrator?: AgentConfig & { name: string; role: string };
+  agents: PipelineAgentConfig[];
+}
+
+export interface PipelineAgentResult {
+  profileId: string;
+  agentName: string;
+  role: string;
+  input: string;
+  output: string;
+  success: boolean;
+  duration: number;
+}
+
+export interface PipelineRunResult {
+  success: boolean;
+  summary: string;
+  agentResults: PipelineAgentResult[];
+  totalDuration: number;
+  error?: string;
+}
+
+/** Parse a delegation plan block from an orchestrator response */
+function parseDelegationPlan(text: string): Array<{ profileId: string; subTask: string }> | null {
+  const match = text.match(/```delegate\s*\n?([\s\S]*?)```/);
+  if (match) {
+    try {
+      const parsed = JSON.parse(match[1].trim()) as { plan?: Array<{ profileId: string; subTask: string }> };
+      if (parsed && Array.isArray(parsed.plan)) return parsed.plan;
+    } catch {
+      // fall through
+    }
+  }
+  return null;
+}
+
+/** Sequential pipeline: each agent receives context from all previous agents */
+export async function runSequentialApiPipeline(
+  task: string,
+  pipelineConfig: PipelineConfig,
+): Promise<PipelineRunResult> {
+  const ordered = [...pipelineConfig.agents].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  const agentResults: PipelineAgentResult[] = [];
+  let contextSoFar = '';
+  const pipelineStart = Date.now();
+
+  for (const agentCfg of ordered) {
+    const input = contextSoFar
+      ? `${task}\n\n---\n**Context from previous agents:**\n${contextSoFar}`
+      : task;
+
+    const start = Date.now();
+    try {
+      const result = await runApiAgent(input, agentCfg);
+      const ar: PipelineAgentResult = {
+        profileId: agentCfg.profileId, agentName: agentCfg.name, role: agentCfg.role,
+        input, output: result.answer, success: result.success, duration: Date.now() - start,
+      };
+      agentResults.push(ar);
+      if (result.answer) contextSoFar += `\n**${agentCfg.name} (${agentCfg.role}):**\n${result.answer}\n`;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      agentResults.push({ profileId: agentCfg.profileId, agentName: agentCfg.name, role: agentCfg.role,
+        input, output: `Error: ${msg}`, success: false, duration: Date.now() - start });
+    }
+  }
+
+  const lastSuccess = [...agentResults].reverse().find(r => r.success);
+  const summary = lastSuccess?.output ?? agentResults.map(r => `**${r.agentName}**: ${r.output}`).join('\n\n');
+  return {
+    success: agentResults.some(r => r.success),
+    summary,
+    agentResults,
+    totalDuration: Date.now() - pipelineStart,
+  };
+}
+
+/** Orchestrated pipeline: orchestrator delegates sub-tasks, workers execute, orchestrator synthesizes */
+export async function runOrchestratedApiPipeline(
+  task: string,
+  pipelineConfig: PipelineConfig,
+): Promise<PipelineRunResult> {
+  const { orchestrator, agents } = pipelineConfig;
+  if (!orchestrator) {
+    return { success: false, summary: 'No orchestrator configured', agentResults: [], totalDuration: 0, error: 'No orchestrator' };
+  }
+
+  const pipelineStart = Date.now();
+  const agentMap = new Map(agents.map(a => [a.profileId, a]));
+
+  // Step 1: orchestrator produces delegation plan
+  const workerDescriptions = agents.map(a =>
+    `- profileId: ${a.profileId}\n  Name: ${a.name}\n  Role: ${a.role}\n  Specialty: ${a.specialty ?? a.role}`
+  ).join('\n');
+
+  const planningTask = `You are the Orchestrator. Your team:\n${workerDescriptions}\n\nTask: ${task}\n\nCreate a delegation plan:\n\`\`\`delegate\n{"plan": [{"profileId": "<id>", "subTask": "<task>"}]}\n\`\`\``;
+  const planStart = Date.now();
+  let planResult: PipelineAgentResult;
+  let delegations: Array<{ profileId: string; subTask: string }> | null = null;
+
+  try {
+    const orcResult = await runApiAgent(planningTask, orchestrator);
+    delegations = parseDelegationPlan(orcResult.answer);
+    planResult = { profileId: 'orchestrator', agentName: orchestrator.name, role: 'orchestrator',
+      input: planningTask, output: orcResult.answer, success: !!delegations, duration: Date.now() - planStart };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    return { success: false, summary: `Orchestrator failed: ${msg}`, agentResults: [], totalDuration: Date.now() - pipelineStart, error: msg };
+  }
+
+  if (!delegations || delegations.length === 0) {
+    return { success: planResult.success, summary: planResult.output, agentResults: [planResult], totalDuration: Date.now() - pipelineStart };
+  }
+
+  // Step 2: execute worker sub-tasks in parallel
+  const workerResults: PipelineAgentResult[] = await Promise.all(
+    delegations.map(async (d) => {
+      const agentCfg = agentMap.get(d.profileId);
+      if (!agentCfg) return { profileId: d.profileId, agentName: 'Unknown', role: 'custom', input: d.subTask, output: 'Agent not found', success: false, duration: 0 };
+      const start = Date.now();
+      try {
+        const result = await runApiAgent(d.subTask, agentCfg);
+        return { profileId: agentCfg.profileId, agentName: agentCfg.name, role: agentCfg.role,
+          input: d.subTask, output: result.answer, success: result.success, duration: Date.now() - start };
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Unknown error';
+        return { profileId: agentCfg.profileId, agentName: agentCfg.name, role: agentCfg.role,
+          input: d.subTask, output: `Error: ${msg}`, success: false, duration: Date.now() - start };
+      }
+    })
+  );
+
+  // Step 3: orchestrator synthesizes
+  const workerOutputs = workerResults.map(r => `**${r.agentName} (${r.role}):**\n${r.output}`).join('\n\n---\n\n');
+  const synthesisTask = `Your team completed their work:\n\n${workerOutputs}\n\n---\nSynthesize into a final answer for: ${task}`;
+  const synthStart = Date.now();
+  let synthResult: PipelineAgentResult;
+
+  try {
+    const result = await runApiAgent(synthesisTask, { ...orchestrator, maxIterations: 3 });
+    synthResult = { profileId: 'orchestrator', agentName: `${orchestrator.name} (synthesis)`, role: 'synthesizer',
+      input: synthesisTask, output: result.answer, success: result.success, duration: Date.now() - synthStart };
+  } catch {
+    synthResult = { profileId: 'orchestrator', agentName: `${orchestrator.name} (synthesis)`, role: 'synthesizer',
+      input: synthesisTask, output: workerOutputs, success: false, duration: Date.now() - synthStart };
+  }
+
+  const allResults = [planResult, ...workerResults, synthResult];
+  return {
+    success: allResults.some(r => r.success),
+    summary: synthResult.output,
+    agentResults: allResults,
+    totalDuration: Date.now() - pipelineStart,
+  };
+}
