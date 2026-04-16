@@ -46,7 +46,7 @@ export const AGENT_ROLE_COLORS: Record<AgentRole, string> = {
   coder:        'dark',
   reviewer:     'secondary',
   tester:       'success',
-  synthesizer:  'purple',
+  synthesizer:  'danger',
   custom:       'light',
 };
 

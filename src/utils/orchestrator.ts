@@ -129,10 +129,7 @@ export async function runSequentialPipeline(
       : task;
 
     // If the profile has a systemPromptOverride, use it; otherwise let runAgent use default
-    const config: AgentConfig = {
-      ...profileToConfig(profile),
-      ...(profile.systemPromptOverride ? {} : {}), // runAgent handles system prompt internally
-    };
+    const config: AgentConfig = profileToConfig(profile);
 
     const agentStart = Date.now();
     let agentResult: PipelineAgentResult;
@@ -179,8 +176,6 @@ export async function runSequentialPipeline(
     ?? agentResults.map(r => `**${r.agentName}**: ${r.output}`).join('\n\n');
 
   const anySuccess = agentResults.some(r => r.success);
-  const allSuccess = agentResults.every(r => r.success);
-  const overallResult = allSuccess ? 'success' : anySuccess ? 'partial' : 'error';
 
   onEvent?.({ type: 'pipeline_done', summary });
   return {
@@ -188,7 +183,7 @@ export async function runSequentialPipeline(
     summary,
     agentResults,
     totalDuration: Date.now() - pipelineStart,
-    ...(overallResult === 'error' ? { error: 'All agents failed' } : {}),
+    ...(!anySuccess ? { error: 'All agents failed' } : {}),
   };
 }
 
@@ -391,8 +386,7 @@ ${task}`;
       success: result.success,
       duration: Date.now() - synthStart,
     };
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Unknown error';
+  } catch {
     synthResult = {
       profileId: orchestrator.id,
       agentName: `${orchestrator.name} (synthesis)`,
@@ -402,7 +396,6 @@ ${task}`;
       success: false,
       duration: Date.now() - synthStart,
     };
-    void msg;
   }
 
   onEvent?.({ type: 'agent_done', agentName: orchestrator.name, result: synthResult });

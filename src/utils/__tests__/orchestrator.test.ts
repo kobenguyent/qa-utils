@@ -14,10 +14,10 @@ describe('orchestrator', () => {
 \`\`\``;
       const result = parseDelegationPlan(text);
       expect(result).not.toBeNull();
-      expect(result!.plan).toHaveLength(2);
-      expect(result!.plan[0].profileId).toBe('abc-123');
-      expect(result!.plan[0].subTask).toBe('Research the topic');
-      expect(result!.plan[1].profileId).toBe('def-456');
+      expect(result?.plan).toHaveLength(2);
+      expect(result?.plan[0].profileId).toBe('abc-123');
+      expect(result?.plan[0].subTask).toBe('Research the topic');
+      expect(result?.plan[1].profileId).toBe('def-456');
     });
 
     it('returns null when no delegate block is present', () => {
@@ -38,14 +38,14 @@ describe('orchestrator', () => {
       const text = `\`\`\`delegate\n{"plan": []}\n\`\`\``;
       const result = parseDelegationPlan(text);
       expect(result).not.toBeNull();
-      expect(result!.plan).toHaveLength(0);
+      expect(result?.plan).toHaveLength(0);
     });
 
     it('parses plan with extra whitespace around the JSON', () => {
       const text = `\`\`\`delegate\n\n  {"plan": [{"profileId": "x", "subTask": "Do thing"}]}  \n\n\`\`\``;
       const result = parseDelegationPlan(text);
       expect(result).not.toBeNull();
-      expect(result!.plan[0].profileId).toBe('x');
+      expect(result?.plan[0].profileId).toBe('x');
     });
   });
 });
