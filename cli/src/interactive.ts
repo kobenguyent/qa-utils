@@ -26,6 +26,7 @@ import {
   DEFAULT_MODELS,
 } from './lib/aiConfig.js';
 import { sendChat, KOBEAN_SYSTEM_PROMPT, type ChatMessage } from './lib/aiClient.js';
+import { runAutoOrchestratedPipeline, type AutoOrchestrateEvent } from './lib/cliOrchestrator.js';
 
 // ── Theme ─────────────────────────────────────────────────────────────────────
 const T = {
@@ -634,33 +635,105 @@ async function runChat(): Promise<null> {
   return null;
 }
 
+// ── Kobean AI Orchestrator ─────────────────────────────────────────────────────
+async function runOrchestrate(): Promise<null> {
+  const config = readConfig();
+
+  if (!config) {
+    console.log();
+    console.log(chalk.bold.yellow('  ⚠  AI provider not configured.'));
+    console.log(T.dim('  Run: ') + chalk.cyan('qautils chat config') + T.dim(' to set up your provider.'));
+    console.log();
+    return null;
+  }
+
+  const validationError = validateAIConfig(config);
+  if (validationError) {
+    console.error(chalk.red(`  ✗  Config error: ${validationError}`));
+    console.log(T.dim('  Run: ') + chalk.cyan('qautils chat config') + T.dim(' to fix the configuration.'));
+    console.log();
+    return null;
+  }
+
+  const task = await input({ message: 'Task description:' });
+  if (!task.trim()) {
+    console.log(T.dim('\n  No task provided.\n'));
+    return null;
+  }
+
+  console.log();
+  console.log(T.dim(`  Connected to: ${chalk.cyan(config.provider)} / ${chalk.cyan(config.model || DEFAULT_MODELS[config.provider])}`));
+  console.log();
+
+  const spinner = spin('Assembling team and running pipeline…').start();
+
+  const onEvent = (event: AutoOrchestrateEvent) => {
+    if (event.type === 'agent_start' && event.agentName) {
+      spinner.text = T.dim(` [${event.agentName}] working…`);
+    }
+    if (event.type === 'agent_done' && event.agentName === 'Meta-Orchestrator' && event.autoTeam) {
+      spinner.stop();
+      console.log(T.dim('  Auto-assembled team:'));
+      event.autoTeam.forEach(m => {
+        console.log(`    ${chalk.cyan('·')}  ${chalk.bold.cyan(m.name.padEnd(16))} ${chalk.magenta(`[${m.role}]`.padEnd(14))} ${T.dim(m.specialty)}`);
+      });
+      console.log();
+      spinner.start(T.dim('  Running orchestrated pipeline…'));
+    }
+  };
+
+  try {
+    const result = await runAutoOrchestratedPipeline(task.trim(), { ...config, maxIterations: 10 }, onEvent);
+    spinner.stop();
+
+    if (result.success) {
+      console.log(T.success('  ✓  Orchestration complete!\n'));
+    } else {
+      console.log(T.error('  ✗  Orchestration finished with errors.\n'));
+    }
+
+    console.log(chalk.white('  ' + result.summary.split('\n').join('\n  ')));
+    console.log();
+    console.log(T.dim(`  Duration: ${(result.totalDuration / 1000).toFixed(1)}s  ·  Agents: ${result.agentResults.length}`));
+    console.log();
+  } catch (err) {
+    spinner.stop();
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(T.error(`  ✗  Error: ${msg}\n`));
+  }
+
+  return null;
+}
+
 // ── Tool registry ─────────────────────────────────────────────────────────────
 type ToolKey =
   | 'uuid' | 'base64' | 'jwt' | 'hash' | 'password' | 'timestamp'
   | 'json' | 'lorem' | 'text' | 'email' | 'sql' | 'color' | 'html'
-  | 'random' | 'url' | 'regex' | 'base' | 'case' | 'nanoid' | 'chat';
+  | 'random' | 'url' | 'regex' | 'base' | 'case' | 'nanoid' | 'chat'
+  | 'orchestrate';
 
 const TOOLS: Record<ToolKey, { label: string; run: () => Promise<string | null> }> = {
-  uuid:      { label: 'UUID Generator',       run: runUuid      },
-  nanoid:    { label: 'NanoID Generator',      run: runNanoId    },
-  base64:    { label: 'Base64 Encode/Decode',  run: runBase64    },
-  random:    { label: 'Random String',         run: runRandom    },
-  password:  { label: 'Password Generator',    run: runPassword  },
-  lorem:     { label: 'Lorem Ipsum',           run: runLorem     },
-  jwt:       { label: 'JWT Decoder',           run: runJwt       },
-  hash:      { label: 'Hash Generator',        run: runHash      },
-  text:      { label: 'Text Analyser',         run: runText      },
-  email:     { label: 'Email Validator',       run: runEmail     },
-  regex:     { label: 'Regex Tester',          run: runRegex     },
-  timestamp: { label: 'Timestamp Converter',   run: runTimestamp },
-  color:     { label: 'Color Converter',       run: runColor     },
-  url:       { label: 'URL Toolkit',           run: runUrl       },
-  base:      { label: 'Base Converter',        run: runBase      },
-  case:      { label: 'Case Converter',        run: runCase      },
-  json:      { label: 'JSON Toolkit',          run: runJson      },
-  sql:       { label: 'SQL Generator',         run: runSql       },
-  html:      { label: 'HTML Sanitizer',        run: runHtml      },
-  chat:      { label: 'Kobean AI Chat',        run: runChat      },
+  uuid:        { label: 'UUID Generator',        run: runUuid        },
+  nanoid:      { label: 'NanoID Generator',       run: runNanoId      },
+  base64:      { label: 'Base64 Encode/Decode',   run: runBase64      },
+  random:      { label: 'Random String',          run: runRandom      },
+  password:    { label: 'Password Generator',     run: runPassword    },
+  lorem:       { label: 'Lorem Ipsum',            run: runLorem       },
+  jwt:         { label: 'JWT Decoder',            run: runJwt         },
+  hash:        { label: 'Hash Generator',         run: runHash        },
+  text:        { label: 'Text Analyser',          run: runText        },
+  email:       { label: 'Email Validator',        run: runEmail       },
+  regex:       { label: 'Regex Tester',           run: runRegex       },
+  timestamp:   { label: 'Timestamp Converter',    run: runTimestamp   },
+  color:       { label: 'Color Converter',        run: runColor       },
+  url:         { label: 'URL Toolkit',            run: runUrl         },
+  base:        { label: 'Base Converter',         run: runBase        },
+  case:        { label: 'Case Converter',         run: runCase        },
+  json:        { label: 'JSON Toolkit',           run: runJson        },
+  sql:         { label: 'SQL Generator',          run: runSql         },
+  html:        { label: 'HTML Sanitizer',         run: runHtml        },
+  chat:        { label: 'Kobean AI Chat',         run: runChat        },
+  orchestrate: { label: 'AI Orchestrator',        run: runOrchestrate },
 };
 
 const TOOL_COUNT = Object.keys(TOOLS).length;
@@ -710,10 +783,11 @@ async function showMainMenu(): Promise<ToolKey | 'exit'> {
   choices.push(item('🗄️', 'SQL Generator',        'sql',       'SELECT · INSERT · UPDATE · DELETE · CREATE TABLE'));
   choices.push(item('🌐', 'HTML Sanitizer',       'html',      'Strip <script> tags and inline event handlers'));
   choices.push(new Separator(T.dim('  ── AI ─────────────────────────────────────────── ')));
-  choices.push(item('🤖', 'Kobean AI Chat',       'chat',      'Interactive AI chat (OpenAI, Anthropic, Gemini, Ollama…)'));
+  choices.push(item('🤖', 'Kobean AI Chat',       'chat',        'Interactive AI chat (OpenAI, Anthropic, Gemini, Ollama…)'));
+  choices.push(item('🧩', 'AI Orchestrator',      'orchestrate', 'Multi-agent pipeline — describe a task and let the AI team handle it'));
   choices.push(new Separator(T.dim('  ' + '─'.repeat(52))));
   choices.push({ name: '  ✕   Exit', value: 'exit' });
-  return select<ToolKey | 'exit'>({ message: chalk.bold('  Select a tool'), pageSize: 25, choices });
+  return select<ToolKey | 'exit'>({ message: chalk.bold('  Select a tool'), pageSize: 26, choices });
 }
 
 // ── Interactive entry point ───────────────────────────────────────────────────

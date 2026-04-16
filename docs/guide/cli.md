@@ -140,6 +140,70 @@ Anthropic has no public model-list API. `qautils chat models --provider anthropi
 
 ---
 
+## 🤖 Agent Orchestrator (CLI)
+
+Run an **autonomous multi-agent pipeline** from the terminal. A meta-orchestrator automatically assembles a team of specialist AI agents, delegates sub-tasks to them, and synthesises a final answer.
+
+### One-shot run
+
+```bash
+qautils orchestrate "Design a test plan for a user login flow"
+qautils orchestrate "Refactor the auth module" --verbose
+qautils orchestrate "Write unit tests" --provider openai --model gpt-4o
+```
+
+### Persistent Session
+
+Start a **session** so you can run multiple tasks back-to-back without restarting:
+
+```bash
+qautils orchestrate session
+```
+
+```
+  Task › Design a test plan for the login flow
+  ...orchestration runs...
+
+  Task › Now write unit tests for it
+  ...orchestration runs...
+
+  Task › /exit
+```
+
+**In-session commands:**
+
+| Command | Description |
+|---------|-------------|
+| `/verbose` | Toggle step-by-step output on/off |
+| `/config`  | Show current AI provider configuration |
+| `/help`    | List available session commands |
+| `/exit`    | Exit the session |
+| `Ctrl+C`   | Exit the session |
+
+### How it works
+
+1. **Team planning** — a meta-orchestrator selects 2–4 specialist agents suited to the task.
+2. **Delegation** — the orchestrator assigns each worker a focused sub-task.
+3. **Parallel execution** — workers run concurrently.
+4. **Synthesis** — all outputs are combined into a final answer.
+
+### Agent Roles
+
+`planner` · `researcher` · `coder` · `reviewer` · `tester` · `synthesizer` · `analyst` · `writer` · `debugger` · `designer` · `validator` · `custom`
+
+### Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--max-iterations <n>` | `10` | Max tool-calling loops per agent (max: 25) |
+| `--provider <p>` | saved config | Override AI provider |
+| `--model <m>` | saved config | Override model |
+| `--verbose` | — | Print per-agent steps and delegation plan |
+
+> Prerequisite: configure an AI provider with `qautils chat config`.
+
+---
+
 ## All CLI Commands
 
 Run `qautils --help` to see all commands, or `qautils <command> --help` for details.
@@ -168,12 +232,14 @@ Run `qautils --help` to see all commands, or `qautils <command> --help` for deta
 | **AI** | `chat` | Kobean AI chat session |
 | | `chat config` | Configure AI provider |
 | | `chat models` | List available models for the provider |
+| | `orchestrate <task>` | Run a one-shot multi-agent orchestration pipeline |
+| | `orchestrate session` | Start a persistent orchestration session |
 
 ---
 
 ## Interactive TUI
 
-Run `qautils` (or `qautils -i`) to launch the interactive menu-driven TUI. All tools — including **Kobean AI Chat** — are available from the menu.
+Run `qautils` (or `qautils -i`) to launch the interactive menu-driven TUI. All tools — including **Kobean AI Chat** and **AI Orchestrator** — are available from the menu.
 
 ---
 
