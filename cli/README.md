@@ -1,6 +1,6 @@
 # qautils-cli
 
-> **Command-line interface for [QA Utils](https://github.com/kobenguyent/qa-utils)** — utility tools for daily testing and automation workflows, plus an AI-powered Kobean chat assistant.
+> **Command-line interface for [QA Utils](https://github.com/kobenguyent/qa-utils)** — utility tools for daily testing and automation workflows, plus an AI-powered Kobean chat assistant and multi-agent orchestration system.
 
 ---
 
@@ -367,6 +367,46 @@ Select **🤖 Kobean AI Chat** from the menu.
 
 ---
 
+## 🤖 Agent Orchestrator (CLI)
+
+Run an **autonomous multi-agent pipeline** from the terminal.  A meta-orchestrator automatically assembles a team of specialist AI agents (planner, coder, reviewer, tester, etc.), delegates sub-tasks to them, and synthesises a final answer — all in one command.
+
+### Quick start
+
+```bash
+# Auto-assemble a team and run the full pipeline:
+qautils orchestrate "Design a test plan for a user login flow"
+
+# Show step-by-step reasoning, delegation plan, and tool calls:
+qautils orchestrate "Refactor the auth module to use async/await" --verbose
+
+# Override provider or model for this run:
+qautils orchestrate "Write unit tests for the payment service" --provider openai --model gpt-4o
+
+# Cap the number of iterations each agent may take:
+qautils orchestrate "Analyse this codebase for security issues" --max-iterations 5
+```
+
+### How it works
+
+1. **Team planning** — a meta-orchestrator calls the configured AI provider and asks it to select 2–4 specialist agents best suited to the task (roles: `planner`, `researcher`, `coder`, `reviewer`, `tester`, `synthesizer`, `custom`).
+2. **Delegation** — the orchestrator produces a `delegate` plan assigning a focused sub-task to each worker.
+3. **Parallel execution** — workers run their sub-tasks concurrently.
+4. **Synthesis** — the orchestrator combines all worker outputs into a single, cohesive final answer.
+
+### Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--max-iterations <n>` | `10` | Maximum tool-calling loops per agent (max: 25) |
+| `--provider <p>` | saved config | Override AI provider for this run |
+| `--model <m>` | saved config | Override model for this run |
+| `--verbose` | — | Print per-agent steps, delegation plan, and tool calls |
+
+> **Prerequisite**: configure an AI provider first with `qautils chat config`.
+
+---
+
 ## 🤖 Agent Mode (CLI)
 
 Run autonomous multi-step AI tasks from the terminal. The agent uses the same AI config as the chat command.
@@ -462,7 +502,9 @@ cli/
     ├── lib/
     │   ├── tools.ts           ← Pure business logic (testable)
     │   ├── aiConfig.ts        ← AI provider config file management
-    │   └── aiClient.ts        ← AI chat HTTP client (Node 18+ fetch)
+    │   ├── aiClient.ts        ← AI chat HTTP client (Node 18+ fetch)
+    │   ├── cliAgentExecutor.ts ← Autonomous single-agent executor
+    │   └── cliOrchestrator.ts ← Multi-agent orchestration engine
     ├── utils/
     │   └── output.ts          ← Chalk-based formatting helpers
     ├── commands/
@@ -480,7 +522,9 @@ cli/
     │   ├── color.ts
     │   ├── html.ts
     │   ├── random.ts
-    │   └── chat.ts            ← Kobean AI chat command
+    │   ├── chat.ts            ← Kobean AI chat command
+    │   ├── agent.ts           ← Autonomous agent command
+    │   └── orchestrate.ts     ← Multi-agent orchestration command
     └── __tests__/
         ├── uuid.test.ts
         ├── base64.test.ts
@@ -496,7 +540,9 @@ cli/
         ├── color.test.ts
         ├── html.test.ts
         ├── random.test.ts
-        └── chat.test.ts       ← Tests for AI config and client
+        ├── chat.test.ts       ← Tests for AI config and client
+        ├── agent.test.ts      ← Tests for the agent executor
+        └── orchestrate.test.ts ← Tests for the orchestration engine
 ```
 
 ---

@@ -54,7 +54,7 @@ program
       '\n' +
       chalk.dim('  https://github.com/kobenguyent/qa-utils'),
   )
-  .version('1.2.0', '-v, --version', 'print the current version')
+  .version('1.3.0', '-v, --version', 'print the current version')
   .option('-i, --interactive', 'launch the interactive TUI (default when no args given)')
   .helpOption('-h, --help', 'display help for command')
   .addHelpText(
