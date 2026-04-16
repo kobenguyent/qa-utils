@@ -43,7 +43,10 @@ import {
 import {
   runSequentialPipeline,
   runOrchestratedPipeline,
+  runAutoOrchestratedPipeline,
   OrchestratorEvent,
+  AutoTeamMember,
+  AutoOrchestrateEvent,
 } from '../../utils/orchestrator';
 
 const PROVIDERS: AIProvider[] = ['ollama', 'openai', 'anthropic', 'google', 'azure-openai'];
@@ -384,6 +387,258 @@ function PipelineRunner({ pipeline, profiles, onRunSaved }: PipelineRunnerProps)
       {runError && (
         <Alert variant="danger" className="mt-2 small"><strong>Error:</strong> {runError}</Alert>
       )}
+    </div>
+  );
+}
+
+// ── Quick Orchestrate ─────────────────────────────────────────────────────────
+
+const QUICK_PROVIDERS: AIProvider[] = ['ollama', 'openai', 'anthropic', 'google', 'azure-openai'];
+
+const PROVIDER_DEFAULTS: Record<AIProvider, { endpoint: string; modelPlaceholder: string }> = {
+  ollama:       { endpoint: 'http://localhost:11434', modelPlaceholder: 'e.g. llama3' },
+  openai:       { endpoint: '',                       modelPlaceholder: 'e.g. gpt-4o-mini' },
+  anthropic:    { endpoint: '',                       modelPlaceholder: 'e.g. claude-3-haiku-20240307' },
+  google:       { endpoint: '',                       modelPlaceholder: 'e.g. gemini-1.5-flash' },
+  'azure-openai': { endpoint: '',                     modelPlaceholder: 'e.g. gpt-4o' },
+};
+
+function QuickOrchestrate() {
+  const [task, setTask] = useState('');
+  const [provider, setProvider] = useState<AIProvider>('ollama');
+  const [model, setModel] = useState('');
+  const [endpoint, setEndpoint] = useState('http://localhost:11434');
+  const [apiKey, setApiKey] = useState('');
+  const [showAdvancedConfig, setShowAdvancedConfig] = useState(false);
+
+  const [running, setRunning] = useState(false);
+  const [phase, setPhase] = useState<'idle' | 'planning' | 'running' | 'done' | 'error'>('idle');
+  const [autoTeam, setAutoTeam] = useState<AutoTeamMember[]>([]);
+  const [agentStatuses, setAgentStatuses] = useState<Record<string, 'idle' | 'running' | 'done' | 'error'>>({});
+  const [summary, setSummary] = useState<string | null>(null);
+  const [runError, setRunError] = useState<string | null>(null);
+  const endRef = useRef<HTMLDivElement>(null);
+
+  // Keep endpoint in sync with provider default when user hasn't overridden it
+  const handleProviderChange = (p: AIProvider) => {
+    setProvider(p);
+    setEndpoint(PROVIDER_DEFAULTS[p].endpoint);
+  };
+
+  const handleRun = useCallback(async () => {
+    if (!task.trim() || running) return;
+    setRunning(true);
+    setPhase('planning');
+    setAutoTeam([]);
+    setAgentStatuses({});
+    setSummary(null);
+    setRunError(null);
+
+    const config: AgentConfig = {
+      provider,
+      model: model.trim() || undefined,
+      endpoint: endpoint.trim() || undefined,
+      apiKey: apiKey.trim() || undefined,
+      maxIterations: 10,
+      temperature: 0.3,
+    };
+
+    const onEvent = (evt: AutoOrchestrateEvent) => {
+      // After meta-orchestrator reveals team
+      if (evt.autoTeam && evt.autoTeam.length > 0) {
+        setAutoTeam(evt.autoTeam);
+        setPhase('running');
+      }
+      if (evt.type === 'agent_start') {
+        setAgentStatuses(prev => ({ ...prev, [evt.agentName ?? '']: 'running' }));
+      } else if (evt.type === 'agent_done') {
+        setAgentStatuses(prev => ({
+          ...prev,
+          [evt.agentName ?? '']: evt.result?.success !== false ? 'done' : 'error',
+        }));
+      } else if (evt.type === 'pipeline_done') {
+        setSummary(evt.summary ?? '');
+      }
+      setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+    };
+
+    try {
+      const result = await runAutoOrchestratedPipeline(task, config, onEvent);
+      if (result.autoTeam.length > 0) setAutoTeam(result.autoTeam);
+      setSummary(result.summary);
+      setPhase(result.success ? 'done' : 'error');
+      if (!result.success) setRunError(result.error ?? 'Pipeline did not complete.');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unexpected error';
+      setRunError(msg);
+      setPhase('error');
+    } finally {
+      setRunning(false);
+    }
+  }, [task, running, provider, model, endpoint, apiKey]);
+
+  const canRun = task.trim().length > 0 && !running;
+
+  return (
+    <div>
+      {/* Hero prompt area */}
+      <Card className="mb-4 border-primary">
+        <Card.Body>
+          <Form.Group className="mb-3">
+            <Form.Label className="fw-semibold fs-6">
+              ✨ What do you want to accomplish?
+            </Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={4}
+              placeholder={
+                'Describe your task in plain language.\n\nExamples:\n' +
+                '• Write end-to-end tests for our login page\n' +
+                '• Review this code for security vulnerabilities and suggest fixes\n' +
+                '• Research best practices for React performance and write a summary'
+              }
+              value={task}
+              onChange={e => setTask(e.target.value)}
+              disabled={running}
+              style={{ resize: 'vertical' }}
+            />
+          </Form.Group>
+
+          {/* Minimal provider config */}
+          <Row className="g-2 mb-3">
+            <Col xs={12} sm={4} md={3}>
+              <Form.Select
+                size="sm"
+                value={provider}
+                onChange={e => handleProviderChange(e.target.value as AIProvider)}
+                disabled={running}
+              >
+                {QUICK_PROVIDERS.map(p => <option key={p} value={p}>{p}</option>)}
+              </Form.Select>
+            </Col>
+            <Col xs={12} sm={8} md={5}>
+              <Form.Control
+                size="sm"
+                value={model}
+                onChange={e => setModel(e.target.value)}
+                placeholder={PROVIDER_DEFAULTS[provider].modelPlaceholder}
+                disabled={running}
+              />
+            </Col>
+            <Col xs={12} md={4} className="d-flex align-items-center">
+              <Button
+                variant="link"
+                size="sm"
+                className="p-0 text-muted"
+                onClick={() => setShowAdvancedConfig(v => !v)}
+              >
+                {showAdvancedConfig ? '▲ Hide advanced config' : '▼ API key / endpoint'}
+              </Button>
+            </Col>
+          </Row>
+
+          <Collapse in={showAdvancedConfig}>
+            <div>
+              <Row className="g-2 mb-3">
+                <Col xs={12} md={6}>
+                  <Form.Control
+                    size="sm"
+                    value={endpoint}
+                    onChange={e => setEndpoint(e.target.value)}
+                    placeholder="API endpoint (leave blank for cloud providers)"
+                    disabled={running}
+                  />
+                </Col>
+                <Col xs={12} md={6}>
+                  <Form.Control
+                    size="sm"
+                    type="password"
+                    value={apiKey}
+                    onChange={e => setApiKey(e.target.value)}
+                    placeholder="API key (leave blank for Ollama)"
+                    disabled={running}
+                  />
+                </Col>
+              </Row>
+            </div>
+          </Collapse>
+
+          <Button
+            variant="primary"
+            onClick={handleRun}
+            disabled={!canRun}
+          >
+            {running
+              ? <><Spinner size="sm" animation="border" className="me-2" />
+                  {phase === 'planning' ? 'Assembling team…' : 'Orchestrating…'}
+                </>
+              : '🚀 Auto-Orchestrate'}
+          </Button>
+        </Card.Body>
+      </Card>
+
+      {/* Team assembly visualisation */}
+      {(running || autoTeam.length > 0) && (
+        <Card className="mb-3">
+          <Card.Header className="d-flex align-items-center gap-2">
+            {phase === 'planning'
+              ? <><Spinner size="sm" animation="border" className="me-1" /> Assembling specialist team…</>
+              : <>🤝 Auto-assembled team</>
+            }
+          </Card.Header>
+          <Card.Body>
+            {phase === 'planning' && autoTeam.length === 0 && (
+              <p className="text-muted small mb-0">
+                Analysing your task and selecting the best specialist agents…
+              </p>
+            )}
+            {autoTeam.length > 0 && (
+              <div className="d-flex flex-wrap gap-2">
+                {autoTeam.map(member => {
+                  const status = agentStatuses[member.name];
+                  return (
+                    <div
+                      key={member.name}
+                      className={`border rounded p-2 small flex-shrink-0 ${
+                        status === 'running' ? 'border-primary bg-primary bg-opacity-10' :
+                        status === 'done'    ? 'border-success bg-success bg-opacity-10' :
+                        status === 'error'   ? 'border-danger bg-danger bg-opacity-10' :
+                        'border-secondary'
+                      }`}
+                      style={{ minWidth: 140 }}
+                    >
+                      <div className="d-flex align-items-center gap-1 mb-1">
+                        {status === 'running' && <Spinner size="sm" animation="border" />}
+                        {status === 'done'    && <span>✅</span>}
+                        {status === 'error'   && <span>❌</span>}
+                        <strong>{member.name}</strong>
+                      </div>
+                      <Badge bg={ROLE_BADGE_COLORS[member.role] as string} className="mb-1">
+                        {AGENT_ROLE_LABELS[member.role]}
+                      </Badge>
+                      <div className="text-muted" style={{ fontSize: '0.7rem' }}>{member.specialty}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </Card.Body>
+        </Card>
+      )}
+
+      {/* Result */}
+      {summary && phase === 'done' && (
+        <Alert variant="success">
+          <Alert.Heading>✅ Done</Alert.Heading>
+          <div style={{ whiteSpace: 'pre-wrap' }}>{summary}</div>
+        </Alert>
+      )}
+      {runError && (
+        <Alert variant="danger">
+          <strong>Error:</strong> {runError}
+        </Alert>
+      )}
+      <div ref={endRef} />
     </div>
   );
 }
@@ -943,12 +1198,18 @@ export function AgentManager() {
         <h2 className="mb-1">🎭 Agent Orchestration</h2>
         <p className="text-muted mb-0">
           Coordinate multiple specialized AI agents to tackle complex multi-step tasks.
-          Create agents with distinct roles, then wire them into a pipeline.
+          Use <strong>Quick Orchestrate</strong> to get started instantly, or configure
+          custom agents and pipelines in the <strong>Advanced</strong> tabs.
         </p>
       </div>
 
-      <Tab.Container defaultActiveKey="agents">
+      <Tab.Container defaultActiveKey="quick">
         <Nav variant="tabs" className="mb-3">
+          <Nav.Item>
+            <Nav.Link eventKey="quick">
+              🚀 Quick Orchestrate
+            </Nav.Link>
+          </Nav.Item>
           <Nav.Item>
             <Nav.Link eventKey="agents">
               🤖 Agents <Badge bg="secondary" className="ms-1">{profiles.length}</Badge>
@@ -961,6 +1222,14 @@ export function AgentManager() {
           </Nav.Item>
         </Nav>
         <Tab.Content>
+          <Tab.Pane eventKey="quick">
+            <p className="text-muted small mb-3">
+              Enter a task in plain language. The system will automatically assemble the right
+              specialist agents, delegate sub-tasks, and synthesise a final answer — no setup
+              required.
+            </p>
+            <QuickOrchestrate />
+          </Tab.Pane>
           <Tab.Pane eventKey="agents">
             <AgentsTab profiles={profiles} onRefresh={refreshAll} />
           </Tab.Pane>

@@ -18,6 +18,7 @@ import {
   AgentProfile,
   AgentPipeline,
   PipelineAgentResult,
+  AgentRole,
 } from './agentStorage';
 
 // ── Event types ────────────────────────────────────────────────────────────────
@@ -93,6 +94,198 @@ export function parseDelegationPlan(text: string): DelegationPlan | null {
     }
   }
   return null;
+}
+
+// ── Auto-team plan (for autonomous orchestration) ─────────────────────────────
+
+/**
+ * Describes a single agent that the AI has selected to handle a portion of the
+ * task.  All fields are produced by the meta-orchestrator prompt.
+ */
+export interface AutoTeamMember {
+  name: string;
+  role: AgentRole;
+  specialty: string;
+}
+
+export interface AutoTeamPlan {
+  agents: AutoTeamMember[];
+}
+
+/**
+ * Extract an auto-team plan emitted by the meta-orchestrator.
+ *
+ * The AI is prompted to respond with a `\`\`\`team\`\`\`` block containing JSON:
+ * ```team
+ * {"agents": [
+ *   {"name": "Planner", "role": "planner", "specialty": "…"},
+ *   …
+ * ]}
+ * ```
+ */
+export function parseTeamPlan(text: string): AutoTeamPlan | null {
+  const match = text.match(/```team\s*\n?([\s\S]*?)```/);
+  if (match) {
+    try {
+      const parsed = JSON.parse(match[1].trim()) as { agents?: AutoTeamMember[] };
+      if (parsed?.agents && Array.isArray(parsed.agents) && parsed.agents.length > 0) {
+        return { agents: parsed.agents };
+      }
+    } catch {
+      // fall through
+    }
+  }
+  return null;
+}
+
+// ── Autonomous orchestration ──────────────────────────────────────────────────
+
+export interface AutoOrchestrateEvent extends OrchestratorEvent {
+  /** The auto-assembled team plan, emitted after meta-planning */
+  autoTeam?: AutoTeamMember[];
+}
+
+export type OnAutoOrchestrateEvent = (event: AutoOrchestrateEvent) => void;
+
+export interface AutoPipelineRunResult extends PipelineRunResult {
+  /** The agent team that was automatically assembled for the task */
+  autoTeam: AutoTeamMember[];
+}
+
+/**
+ * Autonomous pipeline execution — no pre-configured agents or pipelines needed.
+ *
+ * Step 1 — **Team planning**: a meta-orchestrator (using `config`) analyses the
+ *   task and picks the right specialist roles (planner, researcher, tester, etc.)
+ *   together with a one-sentence specialty for each.
+ *
+ * Step 2 — **Orchestrated run**: the same pipeline engine delegates sub-tasks to
+ *   the ephemeral worker agents and synthesises a final answer, exactly as
+ *   `runOrchestratedPipeline` does.
+ *
+ * All agents share the same `config` (provider / model / API key / endpoint) so
+ * the user only needs to configure one AI connection.
+ */
+export async function runAutoOrchestratedPipeline(
+  task: string,
+  config: AgentConfig,
+  onEvent?: OnAutoOrchestrateEvent,
+): Promise<AutoPipelineRunResult> {
+  const pipelineStart = Date.now();
+
+  // ── Step 1: meta-orchestrator assembles the team ────────────────────────────
+
+  const teamPlanningTask = `You are a meta-orchestrator.  Your job is to read a task description and decide which specialist AI agents should work on it together.
+
+## Task
+${task}
+
+## Available Roles
+- planner      — breaks down a complex task into an ordered plan of action
+- researcher   — gathers information, analyses requirements, and produces research notes
+- coder        — writes, refactors, or debugs code
+- reviewer     — reviews work for quality, correctness, security, or style
+- tester       — writes automated tests (unit, integration, end-to-end)
+- synthesizer  — combines work from multiple agents into a cohesive final output
+- custom       — a general-purpose agent for any work that doesn't fit the above
+
+## Instructions
+Choose 2–4 agents from the roles above that best cover the task.  Assign each a short, specific specialty description (one sentence).
+
+Respond with ONLY the following JSON block — no other text:
+
+\`\`\`team
+{"agents": [
+  {"name": "<display name>", "role": "<role>", "specialty": "<one-sentence specialty>"},
+  ...
+]}
+\`\`\``;
+
+  onEvent?.({ type: 'pipeline_start' });
+  onEvent?.({ type: 'agent_start', agentName: 'Meta-Orchestrator', agentRole: 'orchestrator' });
+
+  let autoTeam: AutoTeamMember[] = [];
+
+  try {
+    const metaResult = await runAgent(
+      teamPlanningTask,
+      { ...config, maxIterations: 3 },
+      (step) => onEvent?.({ type: 'agent_step', agentName: 'Meta-Orchestrator', step }),
+    );
+
+    const parsed = parseTeamPlan(metaResult.answer);
+    if (parsed && parsed.agents.length > 0) {
+      autoTeam = parsed.agents;
+    } else {
+      // Fallback: generic 2-agent team
+      autoTeam = [
+        { name: 'Planner', role: 'planner', specialty: 'Breaks the task into a clear, step-by-step plan' },
+        { name: 'Executor', role: 'custom', specialty: 'Carries out the plan and produces the final deliverable' },
+      ];
+    }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    return {
+      success: false,
+      summary: `Meta-orchestrator failed to assemble a team: ${msg}`,
+      agentResults: [],
+      totalDuration: Date.now() - pipelineStart,
+      autoTeam: [],
+      error: msg,
+    };
+  }
+
+  onEvent?.({ type: 'agent_done', agentName: 'Meta-Orchestrator', autoTeam });
+
+  // ── Step 2: build ephemeral profiles + pipeline ─────────────────────────────
+
+  const now = Date.now();
+
+  // Orchestrator profile (uses the same config — acts as the hub)
+  const orchestratorProfile: AgentProfile = {
+    id: `auto-orchestrator-${now}`,
+    name: 'Orchestrator',
+    description: 'Auto-assembled orchestrator',
+    role: 'orchestrator',
+    specialty: 'Delegates sub-tasks to specialist workers and synthesises the final answer',
+    ...config,
+    maxIterations: config.maxIterations ?? 10,
+    temperature: config.temperature ?? 0.3,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  const workerProfiles: AgentProfile[] = autoTeam.map((member, i) => ({
+    id: `auto-worker-${now}-${i}`,
+    name: member.name,
+    description: member.specialty,
+    role: member.role,
+    specialty: member.specialty,
+    ...config,
+    maxIterations: config.maxIterations ?? 10,
+    temperature: config.temperature ?? 0.3,
+    createdAt: now,
+    updatedAt: now,
+  }));
+
+  const ephemeralPipeline: AgentPipeline = {
+    id: `auto-pipeline-${now}`,
+    name: 'Auto-assembled pipeline',
+    description: task.slice(0, 120),
+    mode: 'orchestrated',
+    orchestratorId: orchestratorProfile.id,
+    agents: workerProfiles.map((p, i) => ({ profileId: p.id, order: i })),
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  const allProfiles = [orchestratorProfile, ...workerProfiles];
+
+  // ── Step 3: run the standard orchestrated pipeline ──────────────────────────
+
+  const result = await runOrchestratedPipeline(task, ephemeralPipeline, allProfiles, onEvent);
+
+  return { ...result, autoTeam };
 }
 
 // ── Sequential pipeline ───────────────────────────────────────────────────────
