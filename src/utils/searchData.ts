@@ -72,6 +72,22 @@ export const searchData: SearchItem[] = [
     icon: '🤖'
   },
   {
+    title: 'Agent Mode',
+    description: 'Run autonomous AI agent tasks with multi-step tool execution',
+    path: '#/agent',
+    category: 'AI',
+    keywords: ['agent', 'ai', 'autonomous', 'task', 'tools', 'loop', 'executor', 'kobean'],
+    icon: '🤖'
+  },
+  {
+    title: 'Agent Manager',
+    description: 'Create and manage reusable AI agent profiles with run history',
+    path: '#/agent-manager',
+    category: 'AI',
+    keywords: ['agent', 'manager', 'profile', 'ai', 'autonomous', 'history', 'create', 'reusable'],
+    icon: '🗂️'
+  },
+  {
     title: 'Test Frameworks Comparison',
     description: 'Compare test automation frameworks and choose the right one',
     path: '#/test-frameworks-comparison',

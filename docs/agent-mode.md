@@ -116,3 +116,7 @@ The agent system prompt includes:
 - **Token Usage** — Each iteration consumes AI tokens; complex tasks may use significant tokens
 - **Tool Scope** — The agent can only use tools registered in the QA Utils tool registry
 - **No Persistence** — Agent state is not saved between sessions
+
+## See Also
+
+- [Agent Manager](./agent-manager.md) — Create and save reusable agent profiles, view run history, and run agents from the web UI, REST API, or CLI

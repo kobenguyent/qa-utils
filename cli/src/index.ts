@@ -39,6 +39,7 @@ import { registerCaseCommand }      from './commands/case.js';
 import { registerNanoidCommand }    from './commands/nanoid.js';
 // ── AI (v3) ──────────────────────────────────────────────────────────────────
 import { registerChatCommand }      from './commands/chat.js';
+import { registerAgentCommand }     from './commands/agent.js';
 
 // ── Program ──────────────────────────────────────────────────────────────────
 
@@ -52,7 +53,7 @@ program
       '\n' +
       chalk.dim('  https://github.com/kobenguyent/qa-utils'),
   )
-  .version('1.1.0', '-v, --version', 'print the current version')
+  .version('1.2.0', '-v, --version', 'print the current version')
   .option('-i, --interactive', 'launch the interactive TUI (default when no args given)')
   .helpOption('-h, --help', 'display help for command')
   .addHelpText(
@@ -105,6 +106,11 @@ ${chalk.bold('AI Chat (Kobean)')}:
   ${chalk.cyan('qautils chat config --provider openai --api-key sk-xxx')}  Quick config
   ${chalk.cyan('qautils chat models')}                    List available models (current provider)
   ${chalk.cyan('qautils chat models --provider ollama')} List models for a specific provider
+
+${chalk.bold('AI Agent (v4)')}:
+  ${chalk.cyan('qautils agent run "Generate a UUID"')}    Run an autonomous agent task
+  ${chalk.cyan('qautils agent run "Hash hello" --verbose')} Run with step-by-step output
+  ${chalk.cyan('qautils agent list')}                     List available agent tools
 `,
   );
 
@@ -132,6 +138,7 @@ registerCaseCommand(program);
 registerNanoidCommand(program);
 // v3 commands
 registerChatCommand(program);
+registerAgentCommand(program);
 
 // ── Launch mode ───────────────────────────────────────────────────────────────
 

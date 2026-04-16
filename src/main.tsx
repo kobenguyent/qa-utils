@@ -56,6 +56,7 @@ const ImageEditor = lazy(() => import('./components/utils/ImageEditor.tsx').then
 const SequenceDiagramGenerator = lazy(() => import('./components/utils/SequenceDiagramGenerator.tsx').then(module => ({ default: module.SequenceDiagramGenerator })));
 const CollectionVisualizer = lazy(() => import('./components/utils/CollectionVisualizer.tsx').then(module => ({ default: module.CollectionVisualizer })));
 const AgentMode = lazy(() => import('./components/utils/AgentMode.tsx').then(module => ({ default: module.AgentMode })));
+const AgentManager = lazy(() => import('./components/utils/AgentManager.tsx').then(module => ({ default: module.AgentManager })));
 const QAPalace = lazy(() => import('./components/utils/QAPalace.tsx').then(module => ({ default: module.QAPalace })));
 const Flashcards = lazy(() => import('./components/utils/Flashcards.tsx').then(module => ({ default: module.Flashcards })));
 const CoveragePalace = lazy(() => import('./components/utils/CoveragePalace.tsx').then(module => ({ default: module.CoveragePalace })));
@@ -278,6 +279,10 @@ const router = createHashRouter([
   {
     path: 'agent',
     element: <RouteWrapper><AgentMode /></RouteWrapper>
+  },
+  {
+    path: 'agent-manager',
+    element: <RouteWrapper><AgentManager /></RouteWrapper>
   },
   {
     path: 'palace',

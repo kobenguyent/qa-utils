@@ -163,6 +163,8 @@ export const Header: React.FC = () => {
             >
               <NavDropdown.Item href="#/image-editor">🎨 Image Editor</NavDropdown.Item>
               <NavDropdown.Item href="#/kobean">🤖 Kobean Assistant</NavDropdown.Item>
+              <NavDropdown.Item href="#/agent">🤖 Agent Mode</NavDropdown.Item>
+              <NavDropdown.Item href="#/agent-manager">🗂️ Agent Manager</NavDropdown.Item>
               <NavDropdown.Item href="#/prompt-enhancer">✨ Prompt Enhancer</NavDropdown.Item>
               <NavDropdown.Item href="#/website-scanner">🔍 Website Scanner</NavDropdown.Item>
               <NavDropdown.Item href="#/ai-website-tester">🤖 AI Website Tester</NavDropdown.Item>

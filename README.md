@@ -427,9 +427,11 @@ Add to your Claude Desktop config:
 
 For more details, see the [MCP Server README](mcp-server/README.md).
 
-## 🤖 Agent Mode
+## 🤖 Agent Mode & Agent Manager
 
 Agent Mode (`/agent` route) turns QA Utils into an autonomous AI agent. Describe a task in natural language and the agent will plan and execute the necessary tools to accomplish it.
+
+The **Agent Manager** (`/agent-manager`) lets you create reusable named agent profiles so you don't have to reconfigure your AI provider each time. Profiles can be run from the web UI, the REST API, or the CLI.
 
 ### How It Works
 
@@ -443,16 +445,34 @@ Agent Mode (`/agent` route) turns QA Utils into an autonomous AI agent. Describe
 
 - **Observe-Think-Act loop** with configurable max iterations (1–25)
 - **Step-by-step timeline** showing thinking, tool calls, results, and final answer
+- **Agent Manager** — save named profiles with custom AI configs and review run history
+- **REST API** — run agent tasks programmatically via `POST /api/agents/run`
+- **CLI** — run agent tasks from the terminal with `qautils agent run "<task>"`
 - **Preset examples** to get started quickly
-- **Shared AI config** — reuses provider settings from Kobean Assistant
 - **All providers supported** — OpenAI, Claude, Gemini, Azure OpenAI, Ollama
 
 ### Getting Started with Agent Mode
 
 1. Configure an AI provider in [Kobean Assistant](#-ai-provider-setup) (`/kobean`)
-2. Navigate to Agent Mode (`/agent`)
+2. Navigate to Agent Mode (`/agent`) or Agent Manager (`/agent-manager`)
 3. Enter a task description or pick a preset example
 4. Click **▶ Run Agent** and watch the step-by-step execution
+
+### CLI Agent
+
+```bash
+qautils agent run "Generate a UUID and base64-encode it"
+qautils agent run "Hash 'hello' with SHA-256" --verbose
+qautils agent list   # show available tools
+```
+
+### API Agent
+
+```bash
+curl -X POST http://localhost:3333/api/agents/run \
+  -H 'Content-Type: application/json' \
+  -d '{"task": "Generate a UUID", "provider": "ollama", "endpoint": "http://localhost:11434"}'
+```
 
 ## 🖥️ CLI — Kobean Chat & qautils-cli
 

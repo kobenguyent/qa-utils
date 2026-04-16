@@ -367,6 +367,48 @@ Select **🤖 Kobean AI Chat** from the menu.
 
 ---
 
+## 🤖 Agent Mode (CLI)
+
+Run autonomous multi-step AI tasks from the terminal. The agent uses the same AI config as the chat command.
+
+### Run a task
+
+```bash
+qautils agent run "Generate a UUID and base64-encode it"
+```
+
+With verbose step-by-step output:
+```bash
+qautils agent run "Hash 'hello world' with SHA-256" --verbose
+```
+
+Override the provider or model for a single run:
+```bash
+qautils agent run "Generate 3 UUIDs" --provider openai --model gpt-4o-mini
+```
+
+Limit iterations:
+```bash
+qautils agent run "Complex task" --max-iterations 5
+```
+
+### List available tools
+
+```bash
+qautils agent list
+```
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `--max-iterations <n>` | Maximum tool-calling loops (default: 10, max: 25) |
+| `--provider <p>` | Override AI provider for this run |
+| `--model <m>` | Override model for this run |
+| `--verbose` | Print each step to the terminal |
+
+---
+
 ## Piping & Scripting
 
 All commands print results to **stdout** with no trailing newlines from internal logic. Errors go to **stderr** and set exit code `1`.

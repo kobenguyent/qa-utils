@@ -10,6 +10,7 @@ import { generatorsRouter } from './routes/generators';
 import { convertersRouter } from './routes/converters';
 import { analysersRouter } from './routes/analysers';
 import { formattersRouter } from './routes/formatters';
+import { agentsRouter } from './routes/agents';
 
 // ── Swagger / OpenAPI spec ────────────────────────────────────────────────────
 
@@ -40,6 +41,7 @@ const swaggerOptions: swaggerJsdoc.Options = {
       { name: 'Converters', description: 'Base64, URL, hash, color, timestamp, base and case converters' },
       { name: 'Analysers', description: 'Text stats, email validation, JWT decoding, regex testing' },
       { name: 'Formatters', description: 'JSON formatting, HTML sanitization, SQL generation' },
+      { name: 'Agents', description: 'Autonomous AI agent — run multi-step tasks with built-in tools' },
       { name: 'Health', description: 'Service health check' },
     ],
     components: {
@@ -193,6 +195,7 @@ export function createApp() {
   app.use('/api/converters', convertersRouter);
   app.use('/api/analysers', analysersRouter);
   app.use('/api/formatters', formattersRouter);
+  app.use('/api/agents', agentsRouter);
 
   // ── 404 handler ─────────────────────────────────────────────────────────────
   app.use((_req, res) => {
