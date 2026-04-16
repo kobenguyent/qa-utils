@@ -387,12 +387,66 @@ qautils orchestrate "Write unit tests for the payment service" --provider openai
 qautils orchestrate "Analyse this codebase for security issues" --max-iterations 5
 ```
 
+### Persistent Session
+
+Start a **persistent orchestration session** so you can run multiple tasks without restarting the CLI:
+
+```bash
+qautils orchestrate session
+```
+
+You'll enter an interactive prompt where you can type tasks one after another:
+
+```
+  Task › Design a test plan for the login flow
+  ...orchestration runs...
+
+  Task › Now write unit tests for it
+  ...orchestration runs...
+
+  Task › /exit
+```
+
+**In-session commands:**
+
+| Command | Description |
+|---------|-------------|
+| `/verbose` | Toggle step-by-step output on/off |
+| `/config`  | Show current AI provider configuration |
+| `/help`    | List available session commands |
+| `/exit`    | Exit the session |
+| `Ctrl+C`   | Exit the session |
+
+Options also apply to sessions:
+
+```bash
+# Session with verbose output and a custom provider:
+qautils orchestrate session --verbose --provider openai --model gpt-4o
+```
+
 ### How it works
 
-1. **Team planning** — a meta-orchestrator calls the configured AI provider and asks it to select 2–4 specialist agents best suited to the task (roles: `planner`, `researcher`, `coder`, `reviewer`, `tester`, `synthesizer`, `custom`).
+1. **Team planning** — a meta-orchestrator calls the configured AI provider and asks it to select 2–4 specialist agents best suited to the task (roles: `planner`, `researcher`, `coder`, `reviewer`, `tester`, `synthesizer`, `analyst`, `writer`, `debugger`, `designer`, `validator`, `custom`).
 2. **Delegation** — the orchestrator produces a `delegate` plan assigning a focused sub-task to each worker.
 3. **Parallel execution** — workers run their sub-tasks concurrently.
 4. **Synthesis** — the orchestrator combines all worker outputs into a single, cohesive final answer.
+
+### Agent Roles
+
+| Role | Specialty |
+|------|-----------|
+| `planner` | Breaks down a complex task into an ordered plan |
+| `researcher` | Gathers information and produces research notes |
+| `coder` | Writes, refactors, or debugs code |
+| `reviewer` | Reviews work for quality, correctness, or style |
+| `tester` | Writes automated tests (unit, integration, e2e) |
+| `synthesizer` | Combines outputs into a cohesive final answer |
+| `analyst` | Analyses data, metrics, or requirements |
+| `writer` | Writes documentation, reports, or content |
+| `debugger` | Debugs issues and performs root cause analysis |
+| `designer` | Designs architecture, APIs, or system structure |
+| `validator` | Validates outputs and checks quality |
+| `custom` | General-purpose agent for anything else |
 
 ### Options
 

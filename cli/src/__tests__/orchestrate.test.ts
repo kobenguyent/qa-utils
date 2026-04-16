@@ -268,3 +268,76 @@ describe('runAutoOrchestratedPipeline', () => {
     expect(events).toContain('pipeline_done');
   });
 });
+
+// ── AgentRole — new roles ──────────────────────────────────────────────────────
+
+describe('AgentRole new roles', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('accepts analyst role in sequential pipeline', async () => {
+    mockSendChat.mockResolvedValue({ message: 'Analysis complete.', model: 'llama2' });
+    const agents = [{ name: 'DataAnalyst', role: 'analyst' as const, specialty: 'Analyses metrics', config: BASE_CONFIG }];
+    const result = await runSequentialPipeline('Analyse data', agents);
+    expect(result.success).toBe(true);
+    expect(result.agentResults[0].role).toBe('analyst');
+  });
+
+  it('accepts writer role in sequential pipeline', async () => {
+    mockSendChat.mockResolvedValue({ message: 'Documentation written.', model: 'llama2' });
+    const agents = [{ name: 'TechWriter', role: 'writer' as const, specialty: 'Writes docs', config: BASE_CONFIG }];
+    const result = await runSequentialPipeline('Write docs', agents);
+    expect(result.success).toBe(true);
+    expect(result.agentResults[0].role).toBe('writer');
+  });
+
+  it('accepts debugger role in sequential pipeline', async () => {
+    mockSendChat.mockResolvedValue({ message: 'Bug found.', model: 'llama2' });
+    const agents = [{ name: 'Debugger', role: 'debugger' as const, specialty: 'Debugs issues', config: BASE_CONFIG }];
+    const result = await runSequentialPipeline('Debug issue', agents);
+    expect(result.success).toBe(true);
+    expect(result.agentResults[0].role).toBe('debugger');
+  });
+
+  it('accepts designer role in sequential pipeline', async () => {
+    mockSendChat.mockResolvedValue({ message: 'Architecture designed.', model: 'llama2' });
+    const agents = [{ name: 'Architect', role: 'designer' as const, specialty: 'Designs architecture', config: BASE_CONFIG }];
+    const result = await runSequentialPipeline('Design system', agents);
+    expect(result.success).toBe(true);
+    expect(result.agentResults[0].role).toBe('designer');
+  });
+
+  it('accepts validator role in sequential pipeline', async () => {
+    mockSendChat.mockResolvedValue({ message: 'Output validated.', model: 'llama2' });
+    const agents = [{ name: 'QAValidator', role: 'validator' as const, specialty: 'Validates quality', config: BASE_CONFIG }];
+    const result = await runSequentialPipeline('Validate output', agents);
+    expect(result.success).toBe(true);
+    expect(result.agentResults[0].role).toBe('validator');
+  });
+
+  it('parses team plan with new roles', () => {
+    const text = '```team\n{"agents": [{"name": "Analyst", "role": "analyst", "specialty": "analyses data"}, {"name": "Writer", "role": "writer", "specialty": "writes reports"}, {"name": "Validator", "role": "validator", "specialty": "validates output"}]}\n```';
+    const result = parseTeamPlan(text);
+    expect(result?.agents).toHaveLength(3);
+    expect(result?.agents[0].role).toBe('analyst');
+    expect(result?.agents[1].role).toBe('writer');
+    expect(result?.agents[2].role).toBe('validator');
+  });
+
+  it('auto-orchestrates with new roles in the team', async () => {
+    const teamBlock = '```team\n{"agents": [{"name": "Analyst", "role": "analyst", "specialty": "Analyses requirements"}, {"name": "Designer", "role": "designer", "specialty": "Designs architecture"}]}\n```';
+    const delegatePlan = '```delegate\n{"plan": [{"agentName": "Analyst", "subTask": "Analyse requirements"}, {"agentName": "Designer", "subTask": "Design the architecture"}]}\n```';
+
+    mockSendChat
+      .mockResolvedValueOnce({ message: teamBlock, model: 'llama2' })
+      .mockResolvedValueOnce({ message: delegatePlan, model: 'llama2' })
+      .mockResolvedValueOnce({ message: 'Analyst output.', model: 'llama2' })
+      .mockResolvedValueOnce({ message: 'Designer output.', model: 'llama2' })
+      .mockResolvedValueOnce({ message: 'Final answer.', model: 'llama2' });
+
+    const result = await runAutoOrchestratedPipeline('Design a system', BASE_CONFIG);
+    expect(result.success).toBe(true);
+    expect(result.autoTeam[0].role).toBe('analyst');
+    expect(result.autoTeam[1].role).toBe('designer');
+    expect(result.summary).toBe('Final answer.');
+  });
+});

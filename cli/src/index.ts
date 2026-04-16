@@ -117,6 +117,8 @@ ${chalk.bold('AI Agent (v4)')}:
 ${chalk.bold('AI Orchestrator (v5)')}:
   ${chalk.cyan('qautils orchestrate "Design a test plan"')}  Auto-assemble a team and run pipeline
   ${chalk.cyan('qautils orchestrate "Refactor code" --verbose')} Show step-by-step pipeline output
+  ${chalk.cyan('qautils orchestrate session')}              Start a persistent orchestration session
+  ${chalk.cyan('qautils orchestrate session --verbose')}   Session with step-by-step output
 `,
   );
 

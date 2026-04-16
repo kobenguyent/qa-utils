@@ -33,6 +33,11 @@ export type AgentRole =
   | 'reviewer'
   | 'tester'
   | 'synthesizer'
+  | 'analyst'
+  | 'writer'
+  | 'debugger'
+  | 'designer'
+  | 'validator'
   | 'custom';
 
 // ── Event types ────────────────────────────────────────────────────────────────
@@ -474,6 +479,11 @@ ${safeTask}
 - reviewer     — reviews work for quality, correctness, security, or style
 - tester       — writes automated tests (unit, integration, end-to-end)
 - synthesizer  — combines work from multiple agents into a cohesive final output
+- analyst      — analyses data, metrics, or requirements and produces insights
+- writer       — writes documentation, reports, or other written content
+- debugger     — debugs issues, performs root cause analysis, and proposes fixes
+- designer     — designs architecture, API contracts, or system structure
+- validator    — validates outputs, checks quality, and verifies correctness
 - custom       — a general-purpose agent for any work that doesn't fit the above
 
 ## Instructions
