@@ -33,7 +33,7 @@ const T = {
   agent:   (s: string) => chalk.bold.cyan(s),
   role:    (s: string) => chalk.magenta(s),
   step:    (s: string) => chalk.bold.blue(s),
-  summary: (s: string) => chalk.bold(s), 
+  summary: (s: string) => chalk.black(s), 
 };
 
 const STEP_ICONS: Record<string, string> = {

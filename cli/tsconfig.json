@@ -4,7 +4,6 @@
     "module": "Node16",
     "moduleResolution": "Node16",
     "outDir": "./dist",
-    "rootDir": ".",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -15,6 +14,6 @@
     "sourceMap": true,
     "types": ["node"]
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "../src/utils/sharedTools.ts", "../src/utils/sharedToolsNode.ts"],
   "exclude": ["node_modules", "dist", "src/**/__tests__/**"]
 }

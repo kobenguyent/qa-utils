@@ -1,13 +1,13 @@
 {
   "name": "qautils-api",
-  "version": "1.1.0",
+  "version": "1.4.3",
   "description": "REST API for QA Utils \u2014 powers Swagger UI for automation test consumption",
   "license": "MIT",
   "type": "commonjs",
-  "main": "dist/index.js",
+  "main": "dist/api/src/index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "start": "node dist/index.js",
+    "start": "node dist/api/src/index.js",
     "build": "tsc",
     "lint": "eslint src --ext ts --report-unused-disable-directives --max-warnings 0",
     "test": "vitest run",
