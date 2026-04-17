@@ -48,6 +48,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <ErrorBoundary>
+      {/* CSS-Tricks: scroll-driven progress bar */}
+      <div className="scroll-progress" aria-hidden="true" />
       <Container fluid className="d-flex flex-column min-vh-100">
         <Header />
         <main className="flex-grow-1">

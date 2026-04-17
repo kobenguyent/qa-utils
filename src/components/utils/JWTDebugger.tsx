@@ -104,10 +104,14 @@ export const JWTDebugger = () => {
   const isExpired = isJWTExpired(payload);
 
   return(
-    <Container>
-      <div className="text-center mb-4">
-        <h1>JWT Debugger</h1>
-        <p className="text-muted">Decode and analyze JSON Web Tokens (JWT)</p>
+    <Container className="py-4">
+      {/* Header */}
+      <div className="tool-header">
+        <div className="tool-header-icon">🔑</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">JWT Debugger</h1>
+          <p className="tool-header-desc">Decode and analyze JSON Web Tokens — header, payload, signature &amp; claims.</p>
+        </div>
       </div>
 
       {error && (

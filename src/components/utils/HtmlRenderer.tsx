@@ -1,18 +1,21 @@
 import { useState } from 'react';
-import { Container, Form, Button, Row, Col, Alert } from 'react-bootstrap';
+import { Container, Form, Button, Row, Col } from 'react-bootstrap';
 import { sanitizeHtml } from '../../utils/htmlRenderer';
 import { useAIAssistant } from '../../utils/useAIAssistant';
 import { AIAssistButton } from '../AIAssistButton';
 import { AIConfigureHint } from '../AIConfigureHint';
 
+const PLACEHOLDER_HTML = `<h2 style="color:#6366f1">Hello World 👋</h2>
+<p>Edit the HTML on the left to see a live preview here.</p>
+<ul>
+  <li>Supports <strong>any HTML</strong></li>
+  <li>Including inline <code>styles</code></li>
+</ul>`;
+
 export const HtmlRenderer = () => {
   const [htmlCode, setHtmlCode] = useState('');
   const [showPreview, setShowPreview] = useState(false);
   const ai = useAIAssistant();
-
-  const handleRender = () => {
-    setShowPreview(true);
-  };
 
   const handleAIGenerate = async () => {
     try {
@@ -27,69 +30,122 @@ export const HtmlRenderer = () => {
     }
   };
 
+  const hasContent = htmlCode.trim().length > 0;
+
   return (
-    <Container>
-      <div className="text-center mb-4">
-        <h1>HTML Renderer</h1>
-        <p className="text-muted">Preview HTML code in real-time</p>
+    <Container className="py-4">
+      {/* Header */}
+      <div className="tool-header">
+        <div className="tool-header-icon">🌐</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">HTML Renderer</h1>
+          <p className="tool-header-desc">
+            Write or generate HTML and preview it live in a sandboxed frame.
+          </p>
+        </div>
       </div>
 
-      <Form>
-        <Form.Group as={Row} className="mb-3">
-          <Form.Label column sm="2">HTML Code</Form.Label>
-          <Col sm="10">
-            <Form.Control
-              as="textarea"
-              rows={10}
-              placeholder="<h1>Hello World</h1>"
-              value={htmlCode}
-              onChange={(e) => setHtmlCode(e.target.value)}
-            />
-            {ai.isConfigured ? (
-              <AIAssistButton
-                label="Generate HTML from Description"
-                onClick={handleAIGenerate}
-                isLoading={ai.isLoading}
-                disabled={!htmlCode.trim()}
-                error={ai.error}
-                onClear={ai.clear}
-                className="mt-2"
-              />
-            ) : (
-              <AIConfigureHint className="mt-2" />
-            )}
-          </Col>
-        </Form.Group>
-
-        <div className="mb-3">
-          <Button onClick={handleRender} className="me-2">Render HTML</Button>
-          <Button variant="secondary" onClick={() => {
-            setHtmlCode('');
-            setShowPreview(false);
-          }}>Clear</Button>
-        </div>
-
-        {showPreview && htmlCode && (
-          <Alert variant="info">
-            <div className="d-flex justify-content-between align-items-start mb-2">
-              <strong>Preview:</strong>
-              <Button size="sm" variant="outline-secondary" onClick={() => setShowPreview(false)}>
-                Hide Preview
-              </Button>
+      <Row className="g-3">
+        {/* Editor */}
+        <Col xs={12} lg={6}>
+          <div className="tool-card h-100">
+            <div className="tool-card-header">
+              <span>✏️</span>
+              <span>HTML Editor</span>
+              {hasContent && (
+                <span className="tool-badge tool-badge-info ms-auto">
+                  {htmlCode.length} chars
+                </span>
+              )}
             </div>
-            <div 
-              style={{ 
-                border: '1px solid #dee2e6', 
-                padding: '1rem', 
-                backgroundColor: 'white',
-                color: 'black',
-                minHeight: '100px'
-              }}
-              dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlCode) }}
-            />
-          </Alert>
-        )}
-      </Form>
+            <div className="tool-card-body d-flex flex-column gap-3">
+              <Form.Control
+                as="textarea"
+                rows={14}
+                className="tool-textarea"
+                placeholder={'<h1>Hello World</h1>\n<p>Start typing HTML…</p>'}
+                value={htmlCode}
+                onChange={(e) => setHtmlCode(e.target.value)}
+              />
+              <div className="tool-action-row">
+                <Button
+                  variant="primary"
+                  onClick={() => setShowPreview(true)}
+                  disabled={!hasContent}
+                >
+                  ▶️ Render
+                </Button>
+                <Button
+                  variant="outline-secondary"
+                  onClick={() => {
+                    setHtmlCode('');
+                    setShowPreview(false);
+                  }}
+                  disabled={!hasContent}
+                >
+                  🗑️ Clear
+                </Button>
+                {showPreview && (
+                  <Button variant="outline-secondary" onClick={() => setShowPreview(false)}>
+                    🙈 Hide Preview
+                  </Button>
+                )}
+                {ai.isConfigured ? (
+                  <AIAssistButton
+                    label="Generate with AI"
+                    onClick={handleAIGenerate}
+                    isLoading={ai.isLoading}
+                    disabled={!hasContent}
+                    error={ai.error}
+                    onClear={ai.clear}
+                  />
+                ) : (
+                  <AIConfigureHint />
+                )}
+              </div>
+            </div>
+          </div>
+        </Col>
+
+        {/* Preview */}
+        <Col xs={12} lg={6}>
+          <div className="tool-card h-100">
+            <div className="tool-card-header">
+              <span>👁️</span>
+              <span>Live Preview</span>
+              {showPreview && hasContent && (
+                <span className="tool-badge tool-badge-success ms-auto">✓ Rendered</span>
+              )}
+            </div>
+            <div className="tool-card-body" style={{ minHeight: '340px' }}>
+              {showPreview && hasContent ? (
+                <div
+                  style={{
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '10px',
+                    padding: '1.25rem',
+                    backgroundColor: '#ffffff',
+                    color: '#1e293b',
+                    minHeight: '300px',
+                    overflow: 'auto',
+                  }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlCode) }}
+                />
+              ) : (
+                <div
+                  className="d-flex align-items-center justify-content-center text-muted"
+                  style={{ minHeight: '300px', fontSize: '0.9rem' }}
+                  dangerouslySetInnerHTML={{
+                    __html: hasContent
+                      ? `<div style="text-align:center;padding:2rem;color:#6c757d">Click <strong>▶️ Render</strong> to see the preview</div>`
+                      : `<div style="opacity:0.35;pointer-events:none;padding:1rem">${PLACEHOLDER_HTML}</div>`
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        </Col>
+      </Row>
     </Container>
   );
 };

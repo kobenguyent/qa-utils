@@ -54,6 +54,10 @@ export const Home: React.FC = () => {
       <Row className="justify-content-center">
         <Col xs={12} md={10} lg={8} className="text-center">
           <div className="glass-card">
+            {/* Ambient orb decorations */}
+            <div className="home-orb home-orb-1" aria-hidden="true" />
+            <div className="home-orb home-orb-2" aria-hidden="true" />
+            <div className="home-orb home-orb-3" aria-hidden="true" />
             {/* Hero badge */}
             <div className="d-flex justify-content-center">
               <span className="hero-badge">✨ Open-source QA toolkit</span>

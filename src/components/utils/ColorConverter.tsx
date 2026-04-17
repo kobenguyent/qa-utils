@@ -163,10 +163,13 @@ export const ColorConverter: React.FC = () => {
   };
 
   return (
-    <Container>
-      <div className="text-center mb-4">
-        <h1>🎨 Color Converter</h1>
-        <p className="text-muted">Convert between different color formats with high precision</p>
+    <Container className="py-4">
+      <div className="tool-header">
+        <div className="tool-header-icon">🎨</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">Color Converter</h1>
+          <p className="tool-header-desc">Convert between HEX, RGB, HSL, HSV, CMYK and LAB with palette generation and accessibility analysis.</p>
+        </div>
       </div>
 
       {error && (

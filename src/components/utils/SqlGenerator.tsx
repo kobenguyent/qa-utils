@@ -53,10 +53,13 @@ export const SqlGenerator = () => {
   };
 
   return (
-    <Container>
-      <div className="text-center mb-4">
-        <h1>SQL Command Generator</h1>
-        <p className="text-muted">Generate SQL commands with a visual interface</p>
+    <Container className="py-4">
+      <div className="tool-header">
+        <div className="tool-header-icon">🗄️</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">SQL Command Generator</h1>
+          <p className="tool-header-desc">Build SELECT, INSERT, UPDATE, DELETE and more with a visual interface.</p>
+        </div>
       </div>
 
       {ai.isConfigured ? (
