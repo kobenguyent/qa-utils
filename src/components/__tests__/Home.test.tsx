@@ -35,7 +35,8 @@ describe('Home Component', () => {
     
     render(<Home />);
     
-    expect(screen.getByText('Welcome to QA Utils')).toBeDefined();
+    // Title is rendered with a child span for the gradient effect; use heading role to match full accessible name
+    expect(screen.getByRole('heading', { name: /Welcome to QA Utils/i })).toBeDefined();
     expect(screen.getByText(/A comprehensive collection of quality assurance tools/)).toBeDefined();
   });
 

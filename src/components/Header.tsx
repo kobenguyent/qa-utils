@@ -59,8 +59,8 @@ export const Header: React.FC = () => {
   return (
     <Navbar expand="lg" className="glass-navbar shadow-sm" style={{ backgroundColor: 'var(--navbar-bg)' }}>
       <Container>
-        <Navbar.Brand href='#' data-testid="logo" className="fw-bold">
-          QA Utils
+        <Navbar.Brand href='#' data-testid="logo" className="navbar-brand-gradient">
+          ⚙️ QA Utils
         </Navbar.Brand>
         <Navbar.Toggle
           aria-controls="basic-navbar-nav"

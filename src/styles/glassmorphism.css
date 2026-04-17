@@ -51,12 +51,20 @@
   color: var(--text);
 }
 
+/* Navbar glass effect */
+.glass-navbar {
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 2px 16px 0 var(--shadow-color);
+}
+
 /* Footer glass effect */
 footer.glass-footer {
   background: var(--card-bg) !important;
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  border-top: 1px solid var(--border-color);
   box-shadow: 0 -4px 24px 0 rgba(31, 38, 135, 0.08);
   color: var(--text);
 }
@@ -89,21 +97,141 @@ footer.glass-footer {
   padding: 1rem;
 }
 
-/* Home page specific styles */
+/* ── Home page hero styles ───────────────────────────────────────────────── */
 .home-title {
-  color: var(--text);
-  font-weight: 700;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+/* Gradient text — works on title and accent spans */
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 60%, #db2777 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="dark"] .gradient-text {
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 60%, #f472b6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .home-description {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   color: var(--muted);
   line-height: 1.8;
-  margin-top: 1rem;
+  margin-top: 0.75rem;
+  max-width: 540px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .home-image {
-  margin-bottom: 2rem;
-  max-height: 400px;
+  margin-bottom: 1.5rem;
+  max-height: 220px;
   object-fit: contain;
+  filter: drop-shadow(0 8px 24px rgba(13, 110, 253, 0.18));
+}
+
+[data-theme="dark"] .home-image {
+  filter: drop-shadow(0 8px 24px rgba(96, 165, 250, 0.22));
+}
+
+/* ── Feature category cards ─────────────────────────────────────────────── */
+.feature-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 1.1rem 1rem;
+  transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.18s ease;
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  color: var(--text);
+  height: 100%;
+}
+
+.feature-card:hover,
+.feature-card:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px 0 var(--shadow-color);
+  border-color: var(--primary);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.feature-card-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.feature-card-title {
+  font-size: 0.925rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.feature-card-desc {
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* ── Navbar brand gradient ──────────────────────────────────────────────── */
+.navbar-brand-gradient {
+  background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+[data-theme="dark"] .navbar-brand-gradient {
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Section divider with gradient ────────────────────────────────────────*/
+.section-divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--primary) 30%, #7c3aed 70%, transparent 100%);
+  border: none;
+  opacity: 0.35;
+  margin: 1.5rem 0;
+}
+
+/* ── Hero badge pill ────────────────────────────────────────────────────── */
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: linear-gradient(135deg, rgba(13, 110, 253, 0.12) 0%, rgba(124, 58, 237, 0.12) 100%);
+  border: 1px solid rgba(13, 110, 253, 0.25);
+  border-radius: 999px;
+  padding: 0.3rem 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--primary);
+  letter-spacing: 0.3px;
+  margin-bottom: 1rem;
+}
+
+[data-theme="dark"] .hero-badge {
+  background: linear-gradient(135deg, rgba(96, 165, 250, 0.15) 0%, rgba(167, 139, 250, 0.15) 100%);
+  border-color: rgba(96, 165, 250, 0.3);
+  color: #93c5fd;
 }
