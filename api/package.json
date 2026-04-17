@@ -1,6 +1,6 @@
 {
   "name": "qautils-api",
-  "version": "1.1.0",
+  "version": "1.4.3",
   "description": "REST API for QA Utils \u2014 powers Swagger UI for automation test consumption",
   "license": "MIT",
   "type": "commonjs",
