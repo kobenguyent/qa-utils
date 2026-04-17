@@ -5,6 +5,7 @@ import './index.css'
 import { createHashRouter, RouterProvider } from "react-router-dom";
 import { LoadingSpinner } from './components/LoadingSpinner.tsx';
 import { Layout } from './components/Layout.tsx';
+import { ThemeProvider } from './contexts/ThemeContext.tsx';
 
 // Lazy load components for better performance
 const InteractiveVoiceResponse = lazy(() => import('./components/terms/InteractiveVoiceResponse.tsx').then(module => ({ default: module.InteractiveVoiceResponse })));
@@ -304,6 +305,8 @@ const router = createHashRouter([
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <ThemeProvider>
+      <RouterProvider router={router} />
+    </ThemeProvider>
   </React.StrictMode>
 );
