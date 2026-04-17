@@ -134,6 +134,13 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Contain stacking contexts from elements with filter/transform inside main
+   so that navbar dropdowns (z-index: 1000 in root context) always paint above
+   page content regardless of CSS effects applied to hero images or cards. */
+main {
+    isolation: isolate;
+}
+
 /* Dark theme adjustments for Bootstrap components */
 [data-theme="dark"] .navbar {
     background-color: var(--navbar-bg) !important;
