@@ -7,17 +7,21 @@ FROM ${NODE_IMAGE} AS builder
 
 WORKDIR /app
 
-# Install deps first (layer cache)
-COPY package*.json ./
-RUN npm i --include=dev
+# Install API deps first (layer cache)
+COPY api/package*.json ./api/
+RUN cd api && npm i --include=dev
 
-# Copy source and compile
-COPY tsconfig.json ./
-COPY src/ ./src/
-RUN npm run build
+# Copy API source and shared utils required for compilation
+COPY api/tsconfig.json ./api/
+COPY api/src/ ./api/src/
+COPY src/utils/sharedTools.ts ./src/utils/
+COPY src/utils/sharedToolsNode.ts ./src/utils/
+
+# Compile TypeScript
+RUN cd api && npm run build
 
 # Prune dev deps
-RUN npm prune --omit=dev
+RUN cd api && npm prune --omit=dev
 
 # ── Stage 2: runtime ─────────────────────────────────────────────────────────
 FROM ${NODE_IMAGE} AS runtime
@@ -36,9 +40,9 @@ RUN addgroup -S qautils && adduser -S qautils -G qautils
 WORKDIR /app
 
 # Copy only what's needed to run
-COPY --from=builder --chown=qautils:qautils /app/dist ./dist
-COPY --from=builder --chown=qautils:qautils /app/node_modules ./node_modules
-COPY --chown=qautils:qautils package.json ./
+COPY --from=builder --chown=qautils:qautils /app/api/dist ./dist
+COPY --from=builder --chown=qautils:qautils /app/api/node_modules ./node_modules
+COPY --chown=qautils:qautils api/package.json ./
 
 USER qautils
 
@@ -50,4 +54,4 @@ EXPOSE ${APP_PORT}
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget -qO- http://localhost:${APP_PORT}/health || exit 1
 
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/api/src/index.js"]
