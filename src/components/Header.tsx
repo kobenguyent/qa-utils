@@ -1,35 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container, Nav, Navbar, NavDropdown, Form, Dropdown } from "react-bootstrap";
 import { searchItems, SearchItem } from '../utils/searchData';
-import { Theme, getStoredTheme, setStoredTheme, applyTheme } from '../utils/themeManager';
+import { navigationConfig, NAV_GROUP_ORDER, NAV_GROUP_META, NavGroup } from '../config/navigationConfig';
+import { useTheme } from '../contexts/ThemeContext';
+
+// Pre-group nav items by NavGroup for efficient rendering.
+const navItemsByGroup = NAV_GROUP_ORDER.reduce<Record<NavGroup, typeof navigationConfig>>((acc, group) => {
+  acc[group] = navigationConfig.filter(item => item.navGroups.includes(group));
+  return acc;
+}, {} as Record<NavGroup, typeof navigationConfig>);
 
 export const Header: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchItem[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
-  const [theme, setTheme] = useState<Theme>('auto');
   const searchRef = useRef<HTMLDivElement>(null);
 
-  // Initialize theme on mount
-  useEffect(() => {
-    const storedTheme = getStoredTheme();
-    setTheme(storedTheme);
-    applyTheme(storedTheme);
-
-    // Listen for system theme changes when in auto mode
-    const handleChange = () => {
-      const currentTheme = getStoredTheme();
-      if (currentTheme === 'auto') {
-        applyTheme('auto');
-      }
-    };
-
-    if (typeof window !== 'undefined' && window.matchMedia) {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      mediaQuery.addEventListener('change', handleChange);
-      return () => mediaQuery.removeEventListener('change', handleChange);
-    }
-  }, []); // Empty dependency array - only run once on mount
+  const { theme, setTheme } = useTheme();
 
   // Handle search
   useEffect(() => {
@@ -54,33 +41,12 @@ export const Header: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Handle theme change
-  const handleThemeChange = (newTheme: Theme) => {
-    setTheme(newTheme);
-    setStoredTheme(newTheme);
-    applyTheme(newTheme);
-  };
-
   // Handle search result click
   const handleSearchResultClick = (path: string) => {
     window.location.hash = path;
     setSearchQuery('');
     setShowSearchResults(false);
   };
-
-  // Handle keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Cmd/Ctrl + K to focus search
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        const searchInput = document.getElementById('navbar-search') as HTMLInputElement;
-        searchInput?.focus();
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
 
   const getThemeIcon = () => {
     switch (theme) {
@@ -106,111 +72,27 @@ export const Header: React.FC = () => {
               🏠 Home
             </Nav.Link>
 
-            {/* Converters & Formatters */}
-            <NavDropdown
-              title="🔄 Converters"
-              id="nav-dropdown-converters"
-              aria-label="Converters menu"
-            >
-              <NavDropdown.Item href="#/jwtDebugger">🔑 JWT Debugger</NavDropdown.Item>
-              <NavDropdown.Item href="#/base64">🛸 Base64</NavDropdown.Item>
-              <NavDropdown.Item href="#/timestamp">⏰ Timestamp</NavDropdown.Item>
-              <NavDropdown.Item href="#/jsonFormatter">﹛﹜ JSON</NavDropdown.Item>
-              <NavDropdown.Item href="#/color-converter">🎨 Color Converter</NavDropdown.Item>
-              <NavDropdown.Item href="#/sql-generator">🗄️ SQL Generator</NavDropdown.Item>
-              <NavDropdown.Item href="#/html-renderer">🌐 HTML Renderer</NavDropdown.Item>
-              <NavDropdown.Item href="#/media-converter">🔄 Media Converter</NavDropdown.Item>
-            </NavDropdown>
-
-            {/* Generators */}
-            <NavDropdown
-              title="🎲 Generators"
-              id="nav-dropdown-generators"
-              aria-label="Generators menu"
-            >
-              <NavDropdown.Item href="#/uuid">🆔 UUID</NavDropdown.Item>
-              <NavDropdown.Item href="#/otp">🔐 OTP</NavDropdown.Item>
-              <NavDropdown.Item href="#/password">🔑 Password</NavDropdown.Item>
-              <NavDropdown.Item href="#/hash">🔐 Hash</NavDropdown.Item>
-              <NavDropdown.Item href="#/htpasswd">🔒 HTPasswd</NavDropdown.Item>
-              <NavDropdown.Item href="#/lorem-ipsum">📝 Lorem Ipsum</NavDropdown.Item>
-              <NavDropdown.Item href="#/jiraComment">📋 JIRA</NavDropdown.Item>
-              <NavDropdown.Item href="#/character-counter">🔢 Counter</NavDropdown.Item>
-              <NavDropdown.Item href="#/test-file-generator">📁 Test Files</NavDropdown.Item>
-              <NavDropdown.Item href="#/github-pr-generator">🚀 GitHub PR Script</NavDropdown.Item>
-              <NavDropdown.Item href="#/qr-code">📱 QR Code Generator</NavDropdown.Item>
-              <NavDropdown.Item href="#/dummy-data">🎭 Dummy Data</NavDropdown.Item>
-            </NavDropdown>
-
-            {/* API Testing */}
-            <NavDropdown
-              title="🌐 API"
-              id="nav-dropdown-api"
-              aria-label="API Testing menu"
-            >
-              <NavDropdown.Item href="#/rest-client">🌐 REST</NavDropdown.Item>
-              <NavDropdown.Item href="#/websocket-client">🔌 WebSocket</NavDropdown.Item>
-              <NavDropdown.Item href="#/grpc-client">⚡ gRPC</NavDropdown.Item>
-              <NavDropdown.Item href="#/collection-manager">📦 Collection Manager</NavDropdown.Item>
-              <NavDropdown.Item href="#/collection-visualizer">🗺️ Collection Visualizer</NavDropdown.Item>
-            </NavDropdown>
-
-            {/* Developer Tools */}
-            <NavDropdown
-              title="🔧 Tools"
-              id="nav-dropdown-tools"
-              aria-label="Developer Tools menu"
-            >
-              <NavDropdown.Item href="#/image-editor">🎨 Image Editor</NavDropdown.Item>
-              <NavDropdown.Item href="#/kobean">🤖 Kobean Assistant</NavDropdown.Item>
-              <NavDropdown.Item href="#/agent">🤖 Agent Mode</NavDropdown.Item>
-              <NavDropdown.Item href="#/agent-manager">🗂️ Agent Manager</NavDropdown.Item>
-              <NavDropdown.Item href="#/prompt-enhancer">✨ Prompt Enhancer</NavDropdown.Item>
-              <NavDropdown.Item href="#/website-scanner">🔍 Website Scanner</NavDropdown.Item>
-              <NavDropdown.Item href="#/ai-website-tester">🤖 AI Website Tester</NavDropdown.Item>
-              <NavDropdown.Item href="#/file-processor">📁 File Processor</NavDropdown.Item>
-              <NavDropdown.Item href="#/encryption">🔒 Encryption</NavDropdown.Item>
-              <NavDropdown.Item href="#/playwright2codecept">🎭 Test Converter</NavDropdown.Item>
-              <NavDropdown.Item href="#/sequence-diagram">📊 Sequence Diagram</NavDropdown.Item>
-              <NavDropdown.Item href="#/workflow-generator">🚀 CI/CD</NavDropdown.Item>
-              <NavDropdown.Item href="#/kanban">📋 Kanban Board</NavDropdown.Item>
-            </NavDropdown>
-
-            {/* Learning */}
-            <NavDropdown
-              title="📚 Learn"
-              id="nav-dropdown-learn"
-              aria-label="Learning menu"
-            >
-              <NavDropdown.Item href="#/command-book">📖 Command Book</NavDropdown.Item>
-              <NavDropdown.Item href="#/codeceptjs">🔥 Testing Hints</NavDropdown.Item>
-              <NavDropdown.Item href="#/cicd-infographic">🔄 CI/CD Infographic</NavDropdown.Item>
-              <NavDropdown.Item href="#/ai-agents-infographic">🤖 AI Agents & MCP</NavDropdown.Item>
-              <NavDropdown.Item href="#/test-frameworks-comparison">⚖️ Test Frameworks</NavDropdown.Item>
-              <NavDropdown.Divider />
-              <NavDropdown.Item href="#/web-testing-checklist">✅ Web Testing</NavDropdown.Item>
-              <NavDropdown.Item href="#/api-testing-checklist">✅ API Testing</NavDropdown.Item>
-              <NavDropdown.Item href="#/mobile-testing-checklist">✅ Mobile Testing</NavDropdown.Item>
-              <NavDropdown.Divider />
-              <NavDropdown.Item href="#/ivr">📞 IVR</NavDropdown.Item>
-              <NavDropdown.Item href="#/blf">💡 BLF</NavDropdown.Item>
-              <NavDropdown.Item href="#/sip">📡 SIP</NavDropdown.Item>
-              <NavDropdown.Divider />
-              <NavDropdown.Item href="#/ctfl">🎓 ISTQB CTFL</NavDropdown.Item>
-              <NavDropdown.Item href="#/flashcards">🃏 Flashcards</NavDropdown.Item>
-            </NavDropdown>
-
-            {/* Memory Palace */}
-            <NavDropdown
-              title="🏛️ Palace"
-              id="nav-dropdown-palace"
-              aria-label="Memory Palace menu"
-            >
-              <NavDropdown.Item href="#/palace">🗺️ QA Palace</NavDropdown.Item>
-              <NavDropdown.Item href="#/my-palace">🏠 My Palace</NavDropdown.Item>
-              <NavDropdown.Item href="#/flashcards">🃏 Flashcards</NavDropdown.Item>
-              <NavDropdown.Item href="#/coverage-palace">🗺️ Coverage Palace</NavDropdown.Item>
-            </NavDropdown>
+            {NAV_GROUP_ORDER.map(group => {
+              const meta = NAV_GROUP_META[group];
+              const items = navItemsByGroup[group];
+              return (
+                <NavDropdown
+                  key={group}
+                  title={meta.title}
+                  id={meta.id}
+                  aria-label={meta.ariaLabel}
+                >
+                  {items.map(item => (
+                    <React.Fragment key={item.path + group}>
+                      {item.dividerBefore && <NavDropdown.Divider />}
+                      <NavDropdown.Item href={item.path}>
+                        {item.navIcon ?? item.icon} {item.navLabel ?? item.title}
+                      </NavDropdown.Item>
+                    </React.Fragment>
+                  ))}
+                </NavDropdown>
+              );
+            })}
           </Nav>
 
           {/* Search */}
@@ -274,19 +156,19 @@ export const Header: React.FC = () => {
               borderColor: 'var(--border-color)'
             }}>
               <Dropdown.Item
-                onClick={() => handleThemeChange('light')}
+                onClick={() => setTheme('light')}
                 active={theme === 'light'}
               >
                 ☀️ Light
               </Dropdown.Item>
               <Dropdown.Item
-                onClick={() => handleThemeChange('dark')}
+                onClick={() => setTheme('dark')}
                 active={theme === 'dark'}
               >
                 🌙 Dark
               </Dropdown.Item>
               <Dropdown.Item
-                onClick={() => handleThemeChange('auto')}
+                onClick={() => setTheme('auto')}
                 active={theme === 'auto'}
               >
                 💫 Auto
