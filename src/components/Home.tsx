@@ -83,8 +83,8 @@ export const Home: React.FC = () => {
                   const desc = FEATURE_GROUP_DESC[group] ?? '';
                   return (
                     <Col xs={6} sm={4} key={group}>
-                      <div className="feature-card" role="region" aria-label={`${group} tools category`}>
-                        <span className="feature-card-icon">{meta.title.split(' ')[0]}</span>
+                      <div className="feature-card">
+                        <span className="feature-card-icon">{meta.icon}</span>
                         <span className="feature-card-title">{group}</span>
                         <span className="feature-card-desc">{desc}</span>
                         <Badge bg="primary" pill style={{ marginTop: '0.35rem', fontSize: '0.7rem' }}>

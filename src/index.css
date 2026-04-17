@@ -51,6 +51,14 @@
     /* light red for danger */
     --danger-text: #842029;
     /* dark red text */
+    /* gradient accent colors used in hero/badge/brand */
+    --accent-violet: #7c3aed;
+    --accent-pink: #db2777;
+    --hero-image-shadow: rgba(13, 110, 253, 0.18);
+    --hero-badge-bg: rgba(13, 110, 253, 0.12);
+    --hero-badge-bg-end: rgba(124, 58, 237, 0.12);
+    --hero-badge-border: rgba(13, 110, 253, 0.25);
+    --hero-badge-color: var(--primary);
 }
 
 /* Dark theme colors */
@@ -108,6 +116,14 @@
     /* dark red for danger */
     --danger-text: #fca5a5;
     /* light red text */
+    /* gradient accent colors (dark overrides) */
+    --accent-violet: #a78bfa;
+    --accent-pink: #f472b6;
+    --hero-image-shadow: rgba(96, 165, 250, 0.22);
+    --hero-badge-bg: rgba(96, 165, 250, 0.15);
+    --hero-badge-bg-end: rgba(167, 139, 250, 0.15);
+    --hero-badge-border: rgba(96, 165, 250, 0.3);
+    --hero-badge-color: #93c5fd;
 }
 
 body {

@@ -107,14 +107,14 @@ footer.glass-footer {
 
 /* Gradient text — works on title and accent spans */
 .gradient-text {
-  background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 60%, #db2777 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent-violet) 60%, var(--accent-pink) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 [data-theme="dark"] .gradient-text {
-  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 60%, #f472b6 100%);
+  background: linear-gradient(135deg, #60a5fa 0%, var(--accent-violet) 60%, var(--accent-pink) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -134,11 +134,11 @@ footer.glass-footer {
   margin-bottom: 1.5rem;
   max-height: 220px;
   object-fit: contain;
-  filter: drop-shadow(0 8px 24px rgba(13, 110, 253, 0.18));
+  filter: drop-shadow(0 8px 24px var(--hero-image-shadow));
 }
 
 [data-theme="dark"] .home-image {
-  filter: drop-shadow(0 8px 24px rgba(96, 165, 250, 0.22));
+  filter: drop-shadow(0 8px 24px var(--hero-image-shadow));
 }
 
 /* ── Feature category cards ─────────────────────────────────────────────── */
@@ -189,7 +189,7 @@ footer.glass-footer {
 
 /* ── Navbar brand gradient ──────────────────────────────────────────────── */
 .navbar-brand-gradient {
-  background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent-violet) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -199,7 +199,7 @@ footer.glass-footer {
 }
 
 [data-theme="dark"] .navbar-brand-gradient {
-  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+  background: linear-gradient(135deg, #60a5fa 0%, var(--accent-violet) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -208,7 +208,7 @@ footer.glass-footer {
 /* ── Section divider with gradient ────────────────────────────────────────*/
 .section-divider {
   height: 2px;
-  background: linear-gradient(90deg, transparent 0%, var(--primary) 30%, #7c3aed 70%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, var(--primary) 30%, var(--accent-violet) 70%, transparent 100%);
   border: none;
   opacity: 0.35;
   margin: 1.5rem 0;
@@ -219,19 +219,13 @@ footer.glass-footer {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  background: linear-gradient(135deg, rgba(13, 110, 253, 0.12) 0%, rgba(124, 58, 237, 0.12) 100%);
-  border: 1px solid rgba(13, 110, 253, 0.25);
+  background: linear-gradient(135deg, var(--hero-badge-bg) 0%, var(--hero-badge-bg-end) 100%);
+  border: 1px solid var(--hero-badge-border);
   border-radius: 999px;
   padding: 0.3rem 0.85rem;
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--primary);
+  color: var(--hero-badge-color);
   letter-spacing: 0.3px;
   margin-bottom: 1rem;
-}
-
-[data-theme="dark"] .hero-badge {
-  background: linear-gradient(135deg, rgba(96, 165, 250, 0.15) 0%, rgba(167, 139, 250, 0.15) 100%);
-  border-color: rgba(96, 165, 250, 0.3);
-  color: #93c5fd;
 }

@@ -65,6 +65,8 @@ export interface NavGroupMeta {
   id: string;
   /** Accessible aria-label for the dropdown toggle. */
   ariaLabel: string;
+  /** Emoji icon for the group, used separately from the title label. */
+  icon: string;
 }
 
 /** Ordered list of nav groups — determines left-to-right display in the header. */
@@ -83,31 +85,37 @@ export const NAV_GROUP_META: Record<NavGroup, NavGroupMeta> = {
     title: '🔄 Converters',
     id: 'nav-dropdown-converters',
     ariaLabel: 'Converters menu',
+    icon: '🔄',
   },
   Generators: {
     title: '🎲 Generators',
     id: 'nav-dropdown-generators',
     ariaLabel: 'Generators menu',
+    icon: '🎲',
   },
   API: {
     title: '🌐 API',
     id: 'nav-dropdown-api',
     ariaLabel: 'API Testing menu',
+    icon: '🌐',
   },
   Tools: {
     title: '🔧 Tools',
     id: 'nav-dropdown-tools',
     ariaLabel: 'Developer Tools menu',
+    icon: '🔧',
   },
   Learn: {
     title: '📚 Learn',
     id: 'nav-dropdown-learn',
     ariaLabel: 'Learning menu',
+    icon: '📚',
   },
   Palace: {
     title: '🏛️ Palace',
     id: 'nav-dropdown-palace',
     ariaLabel: 'Memory Palace menu',
+    icon: '🏛️',
   },
 };
 
