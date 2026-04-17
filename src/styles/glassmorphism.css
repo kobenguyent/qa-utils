@@ -57,6 +57,8 @@
   -webkit-backdrop-filter: blur(16px) saturate(180%);
   border-bottom: 1px solid var(--border-color);
   box-shadow: 0 2px 16px 0 var(--shadow-color);
+  position: relative;
+  z-index: 1030;
 }
 
 /* Footer glass effect */
