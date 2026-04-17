@@ -553,12 +553,23 @@ export interface RegexTestResult {
 /**
  * Test a regular expression against text, returning all matches.
  * Always adds the `g` flag so all matches are collected.
+ *
+ * NOTE: The pattern is user-supplied by design — this is a regex tester tool.
+ * A maximum pattern length is enforced to limit ReDoS exposure.
  */
 export function testRegex(
   pattern: string,
   flags: string,
   text: string,
 ): RegexTestResult {
+  if (pattern.length > 2048) {
+    return {
+      valid: false,
+      matches: [],
+      count: 0,
+      error: 'Pattern is too long (max 2048 characters)',
+    };
+  }
   try {
     const safeFlags = flags.replace(/[^gimsuy]/g, '');
     const globalFlags = safeFlags.includes('g') ? safeFlags : `${safeFlags}g`;
