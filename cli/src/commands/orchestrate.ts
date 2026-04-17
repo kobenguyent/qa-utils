@@ -33,6 +33,7 @@ const T = {
   agent:   (s: string) => chalk.bold.cyan(s),
   role:    (s: string) => chalk.magenta(s),
   step:    (s: string) => chalk.bold.blue(s),
+  summary: (s: string) => chalk.bold(s), 
 };
 
 const STEP_ICONS: Record<string, string> = {
@@ -184,7 +185,7 @@ export function registerOrchestrateCommand(program: Command): void {
         }
 
         // Print final answer
-        console.log(chalk.white('  ' + result.summary.split('\n').join('\n  ')));
+        console.log(T.summary('  ' + result.summary.split('\n').join('\n  ')));
 
         // Stats
         console.log();
@@ -392,7 +393,7 @@ export function registerOrchestrateCommand(program: Command): void {
             console.log(T.error('\n  ✗  Orchestration finished with errors.\n'));
           }
 
-          console.log(chalk.white('  ' + result.summary.split('\n').join('\n  ')));
+          console.log(T.summary('  ' + result.summary.split('\n').join('\n  ')));
           console.log();
           console.log(T.dim('  ── Stats ─────────────────────────────────────────────'));
           console.log(T.dim(`  Total duration : ${(result.totalDuration / 1000).toFixed(1)}s`));
