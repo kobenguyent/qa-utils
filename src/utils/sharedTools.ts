@@ -36,6 +36,7 @@ export function generateLoremIpsum(paragraphs = 1): string {
 
 export interface TextStats {
   characters: number;
+  charactersNoSpaces: number;
   words: number;
   sentences: number;
   lines: number;
@@ -49,6 +50,7 @@ export function countTextStats(value: string): TextStats {
   const trimmed = value.trim();
   return {
     characters: value.length,
+    charactersNoSpaces: value.replace(/\s/g, '').length,
     words: trimmed === '' ? 0 : trimmed.split(/\s+/).length,
     sentences:
       trimmed === '' ? 0 : trimmed.split(/[.!?]+/).filter(Boolean).length,
@@ -77,7 +79,7 @@ export function validateEmail(email: string): EmailValidationResult {
   if (!email || email.trim() === '') {
     return { valid: false, reason: 'Email is empty' };
   }
-  if (!emailRegex.test(email)) {
+  if (!emailRegex.test(email.trim())) {
     return { valid: false, reason: 'Invalid email format' };
   }
   return { valid: true };
@@ -162,6 +164,14 @@ export type SqlOperation =
   | 'DELETE'
   | 'CREATE_TABLE';
 
+export const SQL_OPERATIONS: SqlOperation[] = [
+  'SELECT',
+  'INSERT',
+  'UPDATE',
+  'DELETE',
+  'CREATE_TABLE',
+];
+
 /**
  * Generate SQL commands.
  *
@@ -196,7 +206,7 @@ export function generateSql(options: {
       let sql = `SELECT ${cols} FROM ${tableName}`;
       if (whereClause) sql += ` WHERE ${whereClause}`;
       if (orderBy) sql += ` ORDER BY ${orderBy}`;
-      if (limit) sql += ` LIMIT ${limit}`;
+      if (limit !== undefined) sql += ` LIMIT ${limit}`;
       return sql + ';';
     }
     case 'INSERT': {
@@ -249,18 +259,21 @@ export interface HSLColor {
   l: number;
 }
 
-export interface SimpleColorResult {
+export interface ColorResult {
   hex: string;
   rgb: RGBColor;
   hsl: HSLColor;
   error?: string;
 }
 
+/** @deprecated Use ColorResult instead */
+export type SimpleColorResult = ColorResult;
+
 /**
  * Convert colors between hex, RGB, and HSL formats.
  */
-export function convertSimpleColor(input: string): SimpleColorResult {
-  const defaultResult: SimpleColorResult = {
+export function convertSimpleColor(input: string): ColorResult {
+  const defaultResult: ColorResult = {
     hex: '#000000',
     rgb: { r: 0, g: 0, b: 0 },
     hsl: { h: 0, s: 0, l: 0 },
@@ -407,8 +420,8 @@ export function decodeJwt(
     const signature = parts[2];
 
     let expired: boolean | null = null;
-    if (payload.exp) {
-      expired = Date.now() / 1000 > payload.exp;
+    if (typeof payload['exp'] === 'number') {
+      expired = Date.now() / 1000 > payload['exp'];
     }
 
     return { header, payload, signature, expired };
@@ -420,5 +433,256 @@ export function decodeJwt(
       expired: null,
       error: e instanceof Error ? e.message : 'Failed to decode JWT',
     };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Password options (shared types)
+// ---------------------------------------------------------------------------
+
+export interface PasswordOptions {
+  uppercase?: boolean;
+  lowercase?: boolean;
+  numbers?: boolean;
+  symbols?: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Hash algorithm types (shared constants)
+// ---------------------------------------------------------------------------
+
+export type HashAlgorithm = 'md5' | 'sha1' | 'sha256' | 'sha384' | 'sha512';
+
+export const HASH_ALGORITHMS: HashAlgorithm[] = [
+  'md5',
+  'sha1',
+  'sha256',
+  'sha384',
+  'sha512',
+];
+
+// ---------------------------------------------------------------------------
+// NanoID alphabet (shared constant, generation is platform-specific)
+// ---------------------------------------------------------------------------
+
+export const NANO_ALPHABET =
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-';
+
+// ---------------------------------------------------------------------------
+// URL utilities
+// ---------------------------------------------------------------------------
+
+/** Percent-encode a string using encodeURIComponent. */
+export function urlEncode(text: string): string {
+  return encodeURIComponent(text);
+}
+
+/** Decode a percent-encoded string. Throws if the input is malformed. */
+export function urlDecode(text: string): string {
+  try {
+    return decodeURIComponent(text);
+  } catch {
+    throw new Error('Invalid percent-encoded string');
+  }
+}
+
+export interface ParsedUrl {
+  protocol: string;
+  host: string;
+  hostname: string;
+  port: string;
+  pathname: string;
+  search: string;
+  hash: string;
+  params: Record<string, string>;
+}
+
+export interface UrlParseResult {
+  parsed: ParsedUrl | null;
+  error?: string;
+}
+
+/**
+ * Parse a URL into its components.
+ * Automatically prepends `https://` when no protocol is present.
+ */
+export function parseUrl(rawUrl: string): UrlParseResult {
+  try {
+    const normalized = /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(rawUrl)
+      ? rawUrl
+      : `https://${rawUrl}`;
+    const u = new URL(normalized);
+    const params: Record<string, string> = {};
+    u.searchParams.forEach((value, key) => {
+      params[key] = value;
+    });
+    return {
+      parsed: {
+        protocol: u.protocol,
+        host: u.host,
+        hostname: u.hostname,
+        port: u.port,
+        pathname: u.pathname,
+        search: u.search,
+        hash: u.hash,
+        params,
+      },
+    };
+  } catch {
+    return { parsed: null, error: 'Invalid URL' };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Regex tester
+// ---------------------------------------------------------------------------
+
+export interface RegexMatch {
+  index: number;
+  match: string;
+  groups: (string | undefined)[];
+}
+
+export interface RegexTestResult {
+  valid: boolean;
+  matches: RegexMatch[];
+  count: number;
+  error?: string;
+}
+
+/**
+ * Test a regular expression against text, returning all matches.
+ * Always adds the `g` flag so all matches are collected.
+ */
+export function testRegex(
+  pattern: string,
+  flags: string,
+  text: string,
+): RegexTestResult {
+  try {
+    const safeFlags = flags.replace(/[^gimsuy]/g, '');
+    const globalFlags = safeFlags.includes('g') ? safeFlags : `${safeFlags}g`;
+    const regex = new RegExp(pattern, globalFlags);
+    const matches: RegexMatch[] = [];
+    let m: RegExpExecArray | null;
+    while ((m = regex.exec(text)) !== null) {
+      matches.push({ index: m.index, match: m[0], groups: m.slice(1) });
+      if (m[0].length === 0) regex.lastIndex++;
+    }
+    return { valid: true, matches, count: matches.length };
+  } catch (e) {
+    return {
+      valid: false,
+      matches: [],
+      count: 0,
+      error: e instanceof Error ? e.message : 'Invalid regular expression',
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Number base converter
+// ---------------------------------------------------------------------------
+
+export interface BaseConversionResult {
+  result: string;
+  decimal: number;
+  error?: string;
+}
+
+/**
+ * Convert a number string from one base to another (2–36).
+ * The result is returned in uppercase.
+ */
+export function convertBase(
+  value: string,
+  fromBase: number,
+  toBase: number,
+): BaseConversionResult {
+  if (
+    !Number.isInteger(fromBase) ||
+    fromBase < 2 ||
+    fromBase > 36 ||
+    !Number.isInteger(toBase) ||
+    toBase < 2 ||
+    toBase > 36
+  ) {
+    return {
+      result: '',
+      decimal: 0,
+      error: 'Base must be an integer between 2 and 36',
+    };
+  }
+  const clean = value.replace(/\s/g, '');
+  const decimal = parseInt(clean, fromBase);
+  if (isNaN(decimal)) {
+    return {
+      result: '',
+      decimal: 0,
+      error: `"${value}" is not a valid base-${fromBase} number`,
+    };
+  }
+  return { result: decimal.toString(toBase).toUpperCase(), decimal };
+}
+
+// ---------------------------------------------------------------------------
+// Case converter
+// ---------------------------------------------------------------------------
+
+export const CASE_TYPES = [
+  'upper',
+  'lower',
+  'title',
+  'camel',
+  'pascal',
+  'snake',
+  'kebab',
+  'constant',
+] as const;
+
+export type CaseType = (typeof CASE_TYPES)[number];
+
+/**
+ * Convert a string to a different case style.
+ * Handles camelCase, PascalCase, snake_case, kebab-case, and space-separated input.
+ */
+export function convertCase(text: string, to: CaseType): string {
+  const words = text
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
+    .replace(/[\s_-]+/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  switch (to) {
+    case 'upper':
+      return text.toUpperCase();
+    case 'lower':
+      return text.toLowerCase();
+    case 'title':
+      return words
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ');
+    case 'camel':
+      return words
+        .map((w, i) =>
+          i === 0
+            ? w.toLowerCase()
+            : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase(),
+        )
+        .join('');
+    case 'pascal':
+      return words
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join('');
+    case 'snake':
+      return words.map((w) => w.toLowerCase()).join('_');
+    case 'kebab':
+      return words.map((w) => w.toLowerCase()).join('-');
+    case 'constant':
+      return words.map((w) => w.toUpperCase()).join('_');
+    default:
+      return text;
   }
 }

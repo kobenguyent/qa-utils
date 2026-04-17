@@ -13,6 +13,6 @@
     "declarationMap": true,
     "sourceMap": true
   },
-  "include": ["src/**/*.ts", "../src/utils/sharedTools.ts"],
+  "include": ["src/**/*.ts", "../src/utils/sharedTools.ts", "../src/utils/sharedToolsNode.ts"],
   "exclude": ["node_modules", "dist", "src/**/__tests__/**"]
 }
