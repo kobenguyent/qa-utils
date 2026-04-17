@@ -65,7 +65,7 @@ footer.glass-footer {
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
   border-top: 1px solid var(--border-color);
-  box-shadow: 0 -4px 24px 0 rgba(31, 38, 135, 0.08);
+  box-shadow: 0 -4px 24px 0 var(--shadow-color);
   color: var(--text);
 }
 
@@ -137,20 +137,14 @@ footer.glass-footer {
   filter: drop-shadow(0 8px 24px var(--hero-image-shadow));
 }
 
-[data-theme="dark"] .home-image {
-  filter: drop-shadow(0 8px 24px var(--hero-image-shadow));
-}
-
 /* ── Feature category cards ─────────────────────────────────────────────── */
 .feature-card {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: 14px;
   padding: 1.1rem 1rem;
-  transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+  transition: box-shadow 0.18s cubic-bezier(0.4, 0, 0.2, 1),
               border-color 0.18s ease;
-  cursor: pointer;
   text-decoration: none;
   display: flex;
   flex-direction: column;
@@ -160,10 +154,8 @@ footer.glass-footer {
   height: 100%;
 }
 
-.feature-card:hover,
-.feature-card:focus-visible {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 28px 0 var(--shadow-color);
+.feature-card:hover {
+  box-shadow: 0 6px 20px 0 var(--shadow-color);
   border-color: var(--primary);
   color: var(--text);
   text-decoration: none;
