@@ -1,31 +1,46 @@
-import {Container} from "react-bootstrap";
-import { useState } from 'react';
+import { Container, Row, Col, Form, Button } from "react-bootstrap";
+import { useState, useMemo } from 'react';
 // @ts-ignore
 import {JSONViewer} from 'react-json-editor-viewer';
 import { jsonStyles } from '../../styles/jsonStyles.ts';
-import Form from 'react-bootstrap/Form';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 import CopyWithToast from '../CopyWithToast.tsx';
 import { useAIAssistant } from '../../utils/useAIAssistant';
 import { AIAssistButton } from '../AIAssistButton';
 import { AIConfigureHint } from '../AIConfigureHint';
 
+const DEFAULT_JSON = `{
+  "sub": "1234567890",
+  "name": "John Doe",
+  "iat": 1516239022
+}`;
+
 export const JSONFormatter = () => {
-  const [postContent, setPostContent] = useState('{\n' +
-    '  "sub": "1234567890",\n' +
-    '  "name": "John Doe",\n' +
-    '  "iat": 1516239022\n' +
-    '}');
+  const [postContent, setPostContent] = useState(DEFAULT_JSON);
   const ai = useAIAssistant();
 
-  function jsonParse (string: string) {
+  // Derive parsed value and error without touching state during render
+  const { parsed, parseError } = useMemo(() => {
+    if (!postContent.trim()) return { parsed: null, parseError: null };
     try {
-      return JSON.parse(string)
+      return { parsed: JSON.parse(postContent), parseError: null };
     } catch (e: unknown) {
-      return { error: e instanceof Error ? e.message : 'Unknown error' }
+      return { parsed: null, parseError: e instanceof Error ? e.message : 'Unknown error' };
     }
-  }
+  }, [postContent]);
+
+  const isValid = postContent.trim() ? parsed !== null : null;
+
+  const handlePrettify = () => {
+    if (parsed) setPostContent(JSON.stringify(parsed, null, 2));
+  };
+
+  const handleMinify = () => {
+    if (parsed) setPostContent(JSON.stringify(parsed));
+  };
+
+  const handleClear = () => {
+    setPostContent('');
+  };
 
   const handleAIFix = async () => {
     try {
@@ -39,50 +54,99 @@ export const JSONFormatter = () => {
     }
   };
 
-  return(
-    <Container>      <div className="text-center">
-        <h1>JSON Formatter</h1>
+  return (
+    <Container className="py-4">
+      {/* Header */}
+      <div className="tool-header">
+        <div className="tool-header-icon">﹛﹜</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">JSON Formatter</h1>
+          <p className="tool-header-desc">
+            Format, validate, and explore JSON data with a collapsible tree viewer.
+          </p>
+        </div>
       </div>
 
-      <Form>
-        <Form.Group as={Row} className="mb-3" controlId="input">
-          <Form.Label column sm="2">
-            Enter JSON here to format:
-          </Form.Label>
-          <Col sm="10">
-            {/*
-// @ts-ignore */}
-            <Form.Control id="json-input" value={postContent} onChange={e => setPostContent(e.target.value)}></Form.Control>
-            {ai.isConfigured ? (
-              <AIAssistButton
-                label="Fix JSON with AI"
-                onClick={handleAIFix}
-                isLoading={ai.isLoading}
-                disabled={!postContent.trim()}
-                error={ai.error}
-                onClear={ai.clear}
-                className="mt-2"
+      <Row className="g-3">
+        {/* Input */}
+        <Col xs={12} lg={6}>
+          <div className="tool-card h-100">
+            <div className="tool-card-header">
+              <span>📥</span>
+              <span>Input</span>
+              {postContent.trim() && (
+                isValid
+                  ? <span className="tool-badge tool-badge-success ms-auto">✓ Valid JSON</span>
+                  : <span className="tool-badge tool-badge-danger ms-auto">✗ Invalid JSON</span>
+              )}
+            </div>
+            <div className="tool-card-body d-flex flex-column gap-3">
+              <Form.Control
+                as="textarea"
+                rows={14}
+                className={`tool-textarea${!isValid && postContent.trim() ? ' is-invalid' : ''}`}
+                placeholder="Paste your JSON here…"
+                value={postContent}
+                onChange={(e) => setPostContent(e.target.value)}
               />
-            ) : (
-              <AIConfigureHint className="mt-2" />
-            )}
-          </Col>
-        </Form.Group>
+              {parseError && (
+                <div style={{ fontSize: '0.8rem', color: 'var(--danger)', background: 'rgba(220,53,69,0.08)', border: '1px solid rgba(220,53,69,0.2)', borderRadius: '8px', padding: '0.5rem 0.75rem' }}>
+                  <strong>⚠️ Parse error:</strong> {parseError}
+                </div>
+              )}
+              <div className="tool-action-row">
+                <Button variant="primary" size="sm" onClick={handlePrettify} disabled={!postContent.trim() || !isValid}>
+                  ✨ Prettify
+                </Button>
+                <Button variant="outline-secondary" size="sm" onClick={handleMinify} disabled={!postContent.trim() || !isValid}>
+                  📦 Minify
+                </Button>
+                <Button variant="outline-secondary" size="sm" onClick={handleClear} disabled={!postContent}>
+                  🗑️ Clear
+                </Button>
+                {ai.isConfigured ? (
+                  <AIAssistButton
+                    label="Fix with AI"
+                    onClick={handleAIFix}
+                    isLoading={ai.isLoading}
+                    disabled={!postContent.trim()}
+                    error={ai.error}
+                    onClear={ai.clear}
+                  />
+                ) : (
+                  <AIConfigureHint />
+                )}
+              </div>
+            </div>
+          </div>
+        </Col>
 
-        <Form.Group as={Row} className="mb-3" controlId="result">
-          <Form.Label column sm="2">
-            Results
-          </Form.Label>
-          <Col sm="10">
-            <JSONViewer data={jsonParse(postContent)} collapsible styles={jsonStyles}/>
-          </Col>
-        </Form.Group>
-
-        <Form.Group as={Row} className="mb-3" controlId="copy-to-clipboard">
-          <Col sm="10">
-            <CopyWithToast text={JSON.stringify(jsonParse(postContent), null, 2) || ''}></CopyWithToast>
-          </Col>
-        </Form.Group>
-      </Form>    </Container>
-  )
-}
+        {/* Output tree */}
+        <Col xs={12} lg={6}>
+          <div className="tool-card h-100">
+            <div className="tool-card-header">
+              <span>🌲</span>
+              <span>Tree View</span>
+              {isValid && postContent.trim() && (
+                <div className="ms-auto">
+                  <CopyWithToast text={JSON.stringify(parsed, null, 2)} />
+                </div>
+              )}
+            </div>
+            <div className="tool-card-body">
+              {parsed && isValid ? (
+                <div style={{ maxHeight: '460px', overflowY: 'auto' }}>
+                  <JSONViewer data={parsed} collapsible styles={jsonStyles} />
+                </div>
+              ) : (
+                <div className="d-flex align-items-center justify-content-center text-muted" style={{ minHeight: '200px', fontSize: '0.9rem' }}>
+                  {postContent.trim() ? '⚠️ Fix JSON to see the tree view' : '🌲 Tree view will appear here'}
+                </div>
+              )}
+            </div>
+          </div>
+        </Col>
+      </Row>
+    </Container>
+  );
+};

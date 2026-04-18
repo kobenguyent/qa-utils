@@ -251,11 +251,12 @@ const MediaConverter: React.FC = () => {
 
     return (
         <Container className="py-4">
-            <div className="text-center mb-4">
-                <h1>🔄 Media Converter</h1>
-                <p className="text-muted">
-                    Convert between image formats and PDF documents
-                </p>
+            <div className="tool-header">
+                <div className="tool-header-icon">🔄</div>
+                <div className="tool-header-content">
+                  <h1 className="tool-header-title">Media Converter</h1>
+                  <p className="tool-header-desc">Convert between image formats and PDF documents, and remove backgrounds.</p>
+                </div>
             </div>
 
             {error && (

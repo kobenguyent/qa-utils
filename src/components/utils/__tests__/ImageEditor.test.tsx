@@ -12,7 +12,7 @@ describe('ImageEditor Component', () => {
   it('should render the component with initial state', () => {
     render(<ImageEditor />);
     
-    expect(screen.getByText('🎨 Image Editor')).toBeDefined();
+    expect(screen.getByText('Image Editor')).toBeDefined();
     expect(screen.getByText(/Upload and edit your images/)).toBeDefined();
   });
 
@@ -78,7 +78,7 @@ describe('ImageEditor Component', () => {
     render(<ImageEditor />);
     
     // These would only appear after image upload, so we just verify component structure
-    const component = screen.getByText('🎨 Image Editor');
+    const component = screen.getByText('Image Editor');
     expect(component).toBeDefined();
   });
 });

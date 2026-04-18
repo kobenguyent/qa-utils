@@ -23,7 +23,7 @@ export const Footer: React.FC = () => {
                 <button 
                   className="btn btn-link btn-sm text-muted p-0"
                   onClick={() => setShowPrivacy(true)}
-                  style={{ textDecoration: 'none', fontSize: 'inherit' }}
+                  style={{ textDecoration: 'none', fontSize: 'inherit', minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}
                 >
                   🔒 Privacy
                 </button>
@@ -39,7 +39,7 @@ export const Footer: React.FC = () => {
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="btn btn-link btn-sm p-0 text-decoration-none"
-                  style={{ fontSize: 'inherit' }}
+                  style={{ fontSize: 'inherit', minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}
                 >
                   💖 GitHub Sponsors
                 </a>
@@ -49,7 +49,7 @@ export const Footer: React.FC = () => {
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="btn btn-link btn-sm p-0 text-decoration-none"
-                  style={{ fontSize: 'inherit' }}
+                  style={{ fontSize: 'inherit', minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}
                 >
                   ☕ Buy Me a Coffee
                 </a>

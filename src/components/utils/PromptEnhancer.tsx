@@ -145,14 +145,13 @@ export const PromptEnhancer: React.FC = () => {
 
     return (
         <Container className="py-4">
-            <Row>
-                <Col>
-                    <h1 className="mb-3">✨ Prompt Enhancer</h1>
-                    <p className="text-muted mb-4">
-                        Transform your basic prompts into detailed, structured, and effective versions for ChatGPT, Claude, Gemini, and other AI models.
-                    </p>
-                </Col>
-            </Row>
+            <div className="tool-header">
+                <div className="tool-header-icon">✨</div>
+                <div className="tool-header-content">
+                    <h1 className="tool-header-title">Prompt Enhancer</h1>
+                    <p className="tool-header-desc">Transform your basic prompts into detailed, structured, and effective versions for ChatGPT, Claude, Gemini, and other AI models.</p>
+                </div>
+            </div>
 
             <Row>
                 {/* Input Section */}

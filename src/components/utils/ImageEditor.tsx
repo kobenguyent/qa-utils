@@ -465,14 +465,13 @@ export const ImageEditor: React.FC = () => {
 
   return (
     <Container className="py-4">
-      <Row className="mb-4">
-        <Col>
-          <h1 className="h2 mb-2">🎨 Image Editor</h1>
-          <p className="text-muted">
-            Upload and edit your images with filters, rotations, and more
-          </p>
-        </Col>
-      </Row>
+      <div className="tool-header">
+        <div className="tool-header-icon">🎨</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">Image Editor</h1>
+          <p className="tool-header-desc">Upload and edit your images with filters, rotations, and more</p>
+        </div>
+      </div>
 
       <Row className="mb-4">
         <Col>

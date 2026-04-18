@@ -5,6 +5,22 @@ import { getRandomTool } from '../utils/randomTool';
 import { SearchItem } from '../utils/searchData';
 import { getRandomQuote, Quote } from '../utils/quotes';
 import { loadAnchors, PalaceAnchor } from '../utils/palaceStorage';
+import { NAV_GROUP_ORDER, NAV_GROUP_META, navigationConfig } from '../config/navigationConfig';
+
+// Build a count of tools per nav group for the feature cards
+const toolCountByGroup = NAV_GROUP_ORDER.reduce<Record<string, number>>((acc, group) => {
+  acc[group] = navigationConfig.filter(item => item.navGroups.includes(group)).length;
+  return acc;
+}, {});
+
+const FEATURE_GROUP_DESC: Record<string, string> = {
+  Converters: 'Base64, JWT, JSON, timestamps & more',
+  Generators: 'UUIDs, passwords, lorem ipsum & more',
+  API: 'REST client, WebSocket, gRPC tools',
+  Tools: 'Hash, encryption, QR code & dev utilities',
+  Learn: 'ISTQB terms, flashcards, quizzes & more',
+  Palace: 'Memory palace, kanban, coverage map',
+};
 
 export const Home: React.FC = () => {
   const [randomTool, setRandomTool] = useState<SearchItem | null>(null);
@@ -38,19 +54,52 @@ export const Home: React.FC = () => {
       <Row className="justify-content-center">
         <Col xs={12} md={10} lg={8} className="text-center">
           <div className="glass-card">
+            {/* Ambient orb decorations */}
+            <div className="home-orb home-orb-1" aria-hidden="true" />
+            <div className="home-orb home-orb-2" aria-hidden="true" />
+            <div className="home-orb home-orb-3" aria-hidden="true" />
+            {/* Hero badge */}
+            <div className="d-flex justify-content-center">
+              <span className="hero-badge">✨ Open-source QA toolkit</span>
+            </div>
+
             <Image 
               src={qaHeroImage} 
               alt="QA Utils - Quality Assurance Tools"
               className="img-fluid shadow-sm rounded animated-home-image home-image"
             />
-            <div className="mt-4">
-              <h1 className="h2 glass-text home-title">
-                Welcome to QA Utils
+            <div className="mt-3">
+              <h1 className="home-title glass-text">
+                Welcome to{' '}
+                <span className="gradient-text">QA Utils</span>
               </h1>
-              <p className="lead glass-text home-description">
+              <p className="home-description">
                 A comprehensive collection of quality assurance tools and utilities 
                 to enhance your testing workflow.
               </p>
+
+              {/* Feature category cards */}
+              <hr className="section-divider" />
+              <Row className="g-2 mt-1 mb-3 text-start">
+                {NAV_GROUP_ORDER.map(group => {
+                  const meta = NAV_GROUP_META[group];
+                  const count = toolCountByGroup[group] ?? 0;
+                  const desc = FEATURE_GROUP_DESC[group] ?? '';
+                  return (
+                    <Col xs={6} sm={4} key={group}>
+                      <div className="feature-card">
+                        <span className="feature-card-icon">{meta.icon}</span>
+                        <span className="feature-card-title">{group}</span>
+                        <span className="feature-card-desc">{desc}</span>
+                        <Badge bg="primary" pill style={{ marginTop: '0.35rem', fontSize: '0.7rem' }}>
+                          {count} tools
+                        </Badge>
+                      </div>
+                    </Col>
+                  );
+                })}
+              </Row>
+              <hr className="section-divider" />
 
               {quote && (
                 <div className="mt-4 p-4" style={{ 

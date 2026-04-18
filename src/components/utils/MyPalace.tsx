@@ -52,11 +52,12 @@ export const MyPalace: React.FC = () => {
   return (
     <Container className="py-4">
       <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-        <div>
-          <h1 className="mb-1">🏠 My Palace</h1>
-          <p className="text-muted mb-0">
-            Your personal collection of pinned tools, organised into rooms for instant spatial recall.
-          </p>
+        <div className="tool-header">
+          <div className="tool-header-icon">🏠</div>
+          <div className="tool-header-content">
+            <h1 className="tool-header-title">My Palace</h1>
+            <p className="tool-header-desc">Your personal collection of pinned tools, organised into rooms for instant spatial recall.</p>
+          </div>
         </div>
         <Button variant="primary" onClick={() => setShowAddModal(true)} aria-label="Add tool to palace">
           ⚓ Pin a Tool

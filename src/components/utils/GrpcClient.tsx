@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Container, Form, Row, Col, Alert, Badge, Card, Tab, Tabs } from 'react-bootstrap';
+import { Button, Container, Form, Badge } from 'react-bootstrap';
 import CopyWithToast from '../CopyWithToast';
 import {
   GrpcClient,
@@ -237,336 +237,289 @@ export const GrpcClientComponent: React.FC = () => {
     }
   };
 
-  const getStatusBadge = (status: number) => {
-    if (status === 0) return <Badge bg="danger">No Response</Badge>;
-    if (status >= 200 && status < 300) return <Badge bg="success">{status}</Badge>;
-    if (status >= 400) return <Badge bg="danger">{status}</Badge>;
-    return <Badge bg="warning">{status}</Badge>;
+  const getStatusColor = (status: number) => {
+    if (status === 0) return '#f87171';
+    if (status >= 200 && status < 300) return '#34d399';
+    if (status >= 400) return '#f87171';
+    return '#fbbf24';
   };
 
-  const getMessageBadge = (type: GrpcMessage['type']) => {
-    switch (type) {
-      case 'request': return <Badge bg="primary">REQUEST</Badge>;
-      case 'response': return <Badge bg="success">RESPONSE</Badge>;
-      case 'error': return <Badge bg="danger">ERROR</Badge>;
-      case 'stream': return <Badge bg="info">STREAM</Badge>;
-      default: return <Badge bg="secondary">{String(type).toUpperCase()}</Badge>;
-    }
+  const getMsgColor = (type: GrpcMessage['type']) => {
+    const map: Record<string, { bg: string; color: string }> = {
+      request:  { bg: 'rgba(96,165,250,0.15)',  color: '#60a5fa' },
+      response: { bg: 'rgba(52,211,153,0.15)',  color: '#34d399' },
+      error:    { bg: 'rgba(248,113,113,0.15)', color: '#f87171' },
+      stream:   { bg: 'rgba(56,189,248,0.15)',  color: '#38bdf8' },
+    };
+    return map[type] ?? { bg: 'rgba(148,163,184,0.12)', color: '#94a3b8' };
+  };
+
+  const Pill = ({ type, label }: { type: string; label: string }) => {
+    const c = getMsgColor(type as GrpcMessage['type']);
+    return (
+      <span style={{
+        display: 'inline-flex', alignItems: 'center', padding: '0.15rem 0.55rem',
+        borderRadius: '999px', background: c.bg, color: c.color,
+        fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em',
+      }}>{label}</span>
+    );
+  };
+
+  const codeStyle: React.CSSProperties = {
+    background: 'var(--code-bg)', borderRadius: 'var(--radius-md)', padding: '0.75rem 1rem',
+    fontFamily: 'var(--font-mono)', fontSize: '0.8rem', lineHeight: 1.7, color: 'var(--text)',
+    whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0, overflowX: 'auto',
   };
 
   return (
-    <Container fluid className="mt-3">      <div className="text-center mb-4">
-        <h1>⚡ gRPC Client</h1>
-        <p className="text-muted">Test gRPC services with gRPC-Web support</p>
+    <Container className="py-4">
+      {/* ── Header ── */}
+      <div className="tool-header">
+        <div className="tool-header-icon">⚡</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">gRPC Client</h1>
+          <p className="tool-header-desc">Test gRPC services with gRPC-Web support</p>
+        </div>
+        {response && (() => {
+          const sc = getStatusColor(response.status);
+          return (
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+              padding: '0.3rem 0.75rem', borderRadius: '999px',
+              background: `${sc}18`, border: `1px solid ${sc}44`, color: sc,
+              fontSize: '0.8rem', fontWeight: 700, flexShrink: 0,
+            }}>
+              {response.status === 0 ? 'No Response' : response.status}
+              <span style={{ fontWeight: 400, fontSize: '0.72rem', opacity: 0.8 }}>· {response.duration}ms</span>
+            </span>
+          );
+        })()}
       </div>
 
+      {/* ── Error banner ── */}
       {error && (
-        <Alert variant="danger" dismissible onClose={() => setError('')}>
-          {error}
-        </Alert>
+        <div style={{
+          background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.25)',
+          borderRadius: 'var(--radius-md)', padding: '0.65rem 1rem', marginBottom: '1rem',
+          color: '#f87171', fontSize: '0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        }}>
+          <span>⚠️ {error}</span>
+          <button onClick={() => setError('')} style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '1rem' }}>×</button>
+        </div>
       )}
 
-      <Tabs
-        activeKey={activeTab}
-        onSelect={(k) => setActiveTab(k || 'manual')}
-        className="mb-4"
-      >
-        <Tab eventKey="manual" title="Manual Configuration">
-          <Card className="mb-4">
-            <Card.Header>
-              <h5 className="mb-0">gRPC Configuration</h5>
-            </Card.Header>
-            <Card.Body>
-              <Row>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>gRPC Server URL *</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={config.url}
-                      onChange={(e) => setConfig({ ...config, url: e.target.value })}
-                      placeholder="https://api.example.com"
-                    />
-                    <Form.Text className="text-muted">
-                      gRPC-Web endpoint URL (http:// or https://)
-                    </Form.Text>
-                  </Form.Group>
-                </Col>
-                <Col md={3}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Service Name *</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={config.service}
-                      onChange={(e) => setConfig({ ...config, service: e.target.value })}
-                      placeholder="UserService"
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={3}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Method Name *</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={config.method}
-                      onChange={(e) => setConfig({ ...config, method: e.target.value })}
-                      placeholder="GetUser"
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
+      {/* ── Tab switcher ── */}
+      <div style={{ display: 'flex', gap: '0.35rem', marginBottom: '1rem' }}>
+        {(['manual', 'proto'] as const).map(tab => {
+          const labels: Record<string, string> = { manual: '⚙️ Manual Configuration', proto: '📋 Protobuf Definition' };
+          return (
+            <button key={tab} onClick={() => setActiveTab(tab)}
+              style={{
+                padding: '0.4rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)',
+                background: activeTab === tab ? 'var(--primary)' : 'transparent',
+                color: activeTab === tab ? '#fff' : 'var(--muted)',
+                fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s ease',
+              }}>
+              {labels[tab]}
+            </button>
+          );
+        })}
+      </div>
 
-              <Row>
-                <Col md={8}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Metadata (one per line: key: value)</Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      rows={3}
-                      value={config.metadata}
-                      onChange={(e) => setConfig({ ...config, metadata: e.target.value })}
-                      placeholder={`authorization: Bearer token\nuser-id: 12345\ncontent-type: application/grpc`}
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Timeout (ms)</Form.Label>
-                    <Form.Control
-                      type="number"
-                      value={config.timeout}
-                      onChange={(e) => setConfig({ ...config, timeout: parseInt(e.target.value) || 30000 })}
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-            </Card.Body>
-          </Card>
+      {/* ── Manual Configuration Tab ── */}
+      {activeTab === 'manual' && (
+        <>
+          <div className="tool-card" style={{ marginBottom: '1rem' }}>
+            <div className="tool-card-header">🛰️ gRPC Configuration</div>
+            <div className="tool-card-body">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--muted)', marginBottom: '0.25rem', display: 'block' }}>Server URL *</label>
+                  <Form.Control type="text" value={config.url} onChange={(e) => setConfig({ ...config, url: e.target.value })}
+                    placeholder="https://api.example.com" className="tool-textarea" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }} />
+                </div>
+                <div style={{ minWidth: '140px' }}>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--muted)', marginBottom: '0.25rem', display: 'block' }}>Service *</label>
+                  <Form.Control type="text" value={config.service} onChange={(e) => setConfig({ ...config, service: e.target.value })}
+                    placeholder="UserService" className="tool-textarea" style={{ fontSize: '0.85rem' }} />
+                </div>
+                <div style={{ minWidth: '140px' }}>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--muted)', marginBottom: '0.25rem', display: 'block' }}>Method *</label>
+                  <Form.Control type="text" value={config.method} onChange={(e) => setConfig({ ...config, method: e.target.value })}
+                    placeholder="GetUser" className="tool-textarea" style={{ fontSize: '0.85rem' }} />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.75rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--muted)', marginBottom: '0.25rem', display: 'block' }}>Metadata (key: value per line)</label>
+                  <textarea className="tool-textarea" rows={3} value={config.metadata}
+                    onChange={(e) => setConfig({ ...config, metadata: e.target.value })}
+                    placeholder={`authorization: Bearer token\nuser-id: 12345`}
+                    style={{ fontFamily: 'var(--font-mono)', fontSize: '0.82rem' }} />
+                </div>
+                <div style={{ minWidth: '120px' }}>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--muted)', marginBottom: '0.25rem', display: 'block' }}>Timeout (ms)</label>
+                  <Form.Control type="number" value={config.timeout} onChange={(e) => setConfig({ ...config, timeout: parseInt(e.target.value) || 30000 })}
+                    className="tool-textarea" style={{ fontSize: '0.85rem' }} />
+                </div>
+              </div>
+            </div>
+          </div>
 
-          <Card className="mb-4">
-            <Card.Header>
-              <h5 className="mb-0">Request</h5>
-            </Card.Header>
-            <Card.Body>
-              <Form.Group className="mb-3">
-                <Form.Label>Request Body (JSON) *</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={8}
-                  value={request}
-                  onChange={(e) => setRequest(e.target.value)}
-                  placeholder={`{
-  "id": 123,
-  "name": "John Doe"
-}`}
+          <div className="tool-card" style={{ marginBottom: '1rem' }}>
+            <div className="tool-card-header">📤 Request</div>
+            <div className="tool-card-body">
+              <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--muted)', marginBottom: '0.25rem', display: 'block' }}>Request Body (JSON) *</label>
+              <textarea className="tool-textarea" rows={8} value={request} onChange={(e) => setRequest(e.target.value)}
+                placeholder={`{\n  "id": 123,\n  "name": "John Doe"\n}`}
+                style={{ fontFamily: 'var(--font-mono)', fontSize: '0.82rem', marginBottom: '0.6rem' }} />
+              {ai.isConfigured ? (
+                <AIAssistButton
+                  label="Generate Request Body"
+                  onClick={async () => {
+                    try {
+                      const r = await ai.sendRequest(
+                        'You are a gRPC expert. Generate a JSON request body for the given gRPC service and method. Return ONLY the JSON without any explanation or markdown formatting.',
+                        `Generate a gRPC JSON request body for service "${config.service}", method "${config.method}". ${protoDefinition ? `Proto definition:\n${protoDefinition}` : 'Generate a reasonable sample request.'}`
+                      );
+                      setRequest(r);
+                    } catch { /* error displayed by AIAssistButton */ }
+                  }}
+                  isLoading={ai.isLoading}
+                  error={ai.error}
+                  onClear={ai.clear}
+                  className="mt-2"
                 />
-                <Form.Text className="text-muted">
-                  JSON representation of the protobuf message
-                </Form.Text>
-                {ai.isConfigured ? (
-                  <AIAssistButton
-                    label="Generate Request Body"
-                    onClick={async () => {
-                      try {
-                        const response = await ai.sendRequest(
-                          'You are a gRPC expert. Generate a JSON request body for the given gRPC service and method. Return ONLY the JSON without any explanation or markdown formatting.',
-                          `Generate a gRPC JSON request body for service "${config.service}", method "${config.method}". ${protoDefinition ? `Proto definition:\n${protoDefinition}` : 'Generate a reasonable sample request.'}`
-                        );
-                        setRequest(response);
-                      } catch {
-                        // error displayed by AIAssistButton
-                      }
-                    }}
-                    isLoading={ai.isLoading}
-                    error={ai.error}
-                    onClear={ai.clear}
-                    className="mt-2"
-                  />
-                ) : (
-                  <AIConfigureHint className="mt-2" />
-                )}
-              </Form.Group>
-
-              <div className="d-flex gap-2">
-                <Button
-                  variant="primary"
-                  onClick={handleUnaryCall}
-                  disabled={loading}
-                >
-                  {loading ? 'Calling...' : 'Unary Call'}
+              ) : (
+                <AIConfigureHint className="mt-2" />
+              )}
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
+                <Button size="sm" onClick={handleUnaryCall} disabled={loading}
+                  style={{ background: 'var(--primary)', border: 'none', fontWeight: 600, padding: '0.4rem 1.2rem', borderRadius: 'var(--radius-md)' }}>
+                  {loading ? '⏳ Calling…' : '📡 Unary Call'}
                 </Button>
-                <Button
-                  variant="info"
-                  onClick={handleStreamingCall}
-                  disabled={loading}
-                >
-                  {loading ? 'Streaming...' : 'Streaming Call'}
+                <Button size="sm" onClick={handleStreamingCall} disabled={loading}
+                  style={{ background: '#38bdf8', border: 'none', fontWeight: 600, padding: '0.4rem 1.2rem', borderRadius: 'var(--radius-md)', color: '#000' }}>
+                  {loading ? '⏳ Streaming…' : '🌊 Streaming Call'}
                 </Button>
                 {loading && (
-                  <Button variant="outline-danger" onClick={handleCancel}>
-                    Cancel
+                  <Button size="sm" variant="outline-danger" onClick={handleCancel}
+                    style={{ fontWeight: 600, padding: '0.4rem 1.2rem', borderRadius: 'var(--radius-md)' }}>
+                    ✕ Cancel
                   </Button>
                 )}
               </div>
-            </Card.Body>
-          </Card>
-        </Tab>
-
-        <Tab eventKey="proto" title="Protobuf Definition">
-          <Card className="mb-4">
-            <Card.Header>
-              <h5 className="mb-0">Parse Protobuf Definition</h5>
-            </Card.Header>
-            <Card.Body>
-              <Form.Group className="mb-3">
-                <Form.Label>Protobuf Definition (.proto file content)</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={12}
-                  value={protoDefinition}
-                  onChange={(e) => setProtoDefinition(e.target.value)}
-                  placeholder={`syntax = "proto3";
-
-service UserService {
-  rpc GetUser(GetUserRequest) returns (GetUserResponse);
-  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
-}
-
-message GetUserRequest {
-  int32 id = 1;
-}
-
-message GetUserResponse {
-  User user = 1;
-}`}
-                />
-              </Form.Group>
-              <Button variant="primary" onClick={parseProtoFile}>
-                Parse & Configure
-              </Button>
-            </Card.Body>
-          </Card>
-        </Tab>
-      </Tabs>
-
-      {/* Response */}
-      {response && (
-        <Card className="mb-4">
-          <Card.Header className="d-flex justify-content-between align-items-center">
-            <div>
-              <h5 className="mb-0">Response</h5>
-              {getStatusBadge(response.status)}
-              <span className="ms-2 text-muted">
-                Duration: {response.duration}ms
-              </span>
             </div>
-            <CopyWithToast
-              text={JSON.stringify(response, null, 2)}
-            />
-          </Card.Header>
-          <Card.Body>
-            <Tabs defaultActiveKey="messages" className="mb-3">
-              <Tab eventKey="messages" title="Messages">
-                {response.messages.map((message) => (
-                  <div key={message.id} className="mb-3 border-bottom pb-2">
-                    <div className="d-flex justify-content-between align-items-center mb-1">
-                      <div>
-                        {getMessageBadge(message.type)}
-                        <span className="ms-2 text-muted small">
-                          {new Date(message.timestamp).toLocaleTimeString()}
-                        </span>
-                        {message.duration && (
-                          <span className="ms-2 text-muted small">
-                            ({message.duration}ms)
-                          </span>
-                        )}
-                      </div>
-                      <CopyWithToast
-                        text={formatGrpcMessage(message)}
-                      />
-                    </div>
-                    <pre className="theme-code-block p-2 rounded small">
-                      <code>{message.data}</code>
-                    </pre>
-                  </div>
-                ))}
-              </Tab>
-              <Tab eventKey="metadata" title="Response Metadata">
-                <pre className="bg-light p-2 rounded">
-                  <code>
-                    {Object.entries(response.metadata)
-                      .map(([key, value]) => `${key}: ${value}`)
-                      .join('\n') || 'No metadata'}
-                  </code>
-                </pre>
-              </Tab>
-            </Tabs>
-          </Card.Body>
-        </Card>
+          </div>
+        </>
       )}
 
-      {/* Streaming Messages */}
-      {streamingMessages.length > 0 && (
-        <Card className="mb-4">
-          <Card.Header>
-            <h5 className="mb-0">Streaming Messages ({streamingMessages.length})</h5>
-          </Card.Header>
-          <Card.Body style={{ maxHeight: '400px', overflowY: 'auto' }}>
-            {streamingMessages.map((message) => (
-              <div key={message.id} className="mb-2 p-2 border-bottom">
-                <div className="d-flex justify-content-between align-items-center mb-1">
-                  {getMessageBadge(message.type)}
-                  <span className="text-muted small">
-                    {new Date(message.timestamp).toLocaleTimeString()}
-                  </span>
+      {/* ── Protobuf Definition Tab ── */}
+      {activeTab === 'proto' && (
+        <div className="tool-card" style={{ marginBottom: '1rem' }}>
+          <div className="tool-card-header">📋 Parse Protobuf Definition</div>
+          <div className="tool-card-body">
+            <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--muted)', marginBottom: '0.25rem', display: 'block' }}>
+              .proto file content
+            </label>
+            <textarea className="tool-textarea" rows={12} value={protoDefinition} onChange={(e) => setProtoDefinition(e.target.value)}
+              placeholder={`syntax = "proto3";\n\nservice UserService {\n  rpc GetUser(GetUserRequest) returns (GetUserResponse);\n}\n\nmessage GetUserRequest {\n  int32 id = 1;\n}`}
+              style={{ fontFamily: 'var(--font-mono)', fontSize: '0.82rem', marginBottom: '0.6rem' }} />
+            <Button size="sm" onClick={parseProtoFile}
+              style={{ background: 'var(--primary)', border: 'none', fontWeight: 600, padding: '0.4rem 1.2rem', borderRadius: 'var(--radius-md)' }}>
+              ⚙️ Parse & Configure
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Response ── */}
+      {response && (
+        <div className="tool-card" style={{ marginBottom: '1rem' }}>
+          <div className="tool-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>📥 Response</span>
+            <CopyWithToast text={JSON.stringify(response, null, 2)} />
+          </div>
+          <div className="tool-card-body">
+            <div style={{ marginBottom: '0.75rem' }}>
+              {response.messages.map((message) => (
+                <div key={message.id} style={{ padding: '0.5rem 0', borderBottom: '1px solid var(--border-color)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Pill type={message.type} label={message.type} />
+                      <span style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>{new Date(message.timestamp).toLocaleTimeString()}</span>
+                      {message.duration && <span style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>({message.duration}ms)</span>}
+                    </div>
+                    <CopyWithToast text={formatGrpcMessage(message)} />
+                  </div>
+                  <pre style={codeStyle}><code>{message.data}</code></pre>
                 </div>
-                <pre className="theme-code-block p-1 rounded small mb-0">
-                  <code>{message.data}</code>
-                </pre>
+              ))}
+            </div>
+            {Object.keys(response.metadata).length > 0 && (
+              <div>
+                <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--muted)', marginBottom: '0.25rem', display: 'block' }}>Response Metadata</label>
+                <pre style={codeStyle}><code>{Object.entries(response.metadata).map(([k, v]) => `${k}: ${v}`).join('\n')}</code></pre>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Streaming Messages ── */}
+      {streamingMessages.length > 0 && (
+        <div className="tool-card" style={{ marginBottom: '1rem' }}>
+          <div className="tool-card-header">
+            🌊 Streaming Messages <Badge pill bg="" style={{ background: 'var(--primary)', fontSize: '0.7rem', marginLeft: '0.4rem' }}>{streamingMessages.length}</Badge>
+          </div>
+          <div className="tool-card-body" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+            {streamingMessages.map((message) => (
+              <div key={message.id} style={{ padding: '0.4rem 0', borderBottom: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                  <Pill type={message.type} label={message.type} />
+                  <span style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>{new Date(message.timestamp).toLocaleTimeString()}</span>
+                </div>
+                <pre style={{ ...codeStyle, padding: '0.5rem 0.75rem' }}><code>{message.data}</code></pre>
               </div>
             ))}
-          </Card.Body>
-        </Card>
+          </div>
+        </div>
       )}
 
-      {/* Request History */}
+      {/* ── Request History ── */}
       {history.length > 0 && (
-        <Card className="mb-4">
-          <Card.Header>
-            <h5 className="mb-0">Request History</h5>
-          </Card.Header>
-          <Card.Body>
-            {history.map((entry) => (
-              <div key={entry.id} className="mb-2 p-2 border rounded">
-                <div className="d-flex justify-content-between align-items-center mb-1">
-                  <div>
-                    {entry.error ? (
-                      <Badge bg="danger">ERROR</Badge>
-                    ) : (
-                      getStatusBadge(entry.response?.status || 0)
-                    )}
-                    <span className="ms-2 fw-bold">
+        <div className="tool-card">
+          <div className="tool-card-header">🕐 Request History</div>
+          <div className="tool-card-body" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            {history.map((entry) => {
+              const ok = !entry.error;
+              return (
+                <div key={entry.id} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-md)',
+                  background: ok ? 'rgba(52,211,153,0.06)' : 'rgba(248,113,113,0.06)',
+                  border: `1px solid ${ok ? 'rgba(52,211,153,0.15)' : 'rgba(248,113,113,0.15)'}`,
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Pill type={ok ? 'response' : 'error'} label={entry.error ? 'ERROR' : String(entry.response?.status ?? '')} />
+                    <span style={{ fontWeight: 600, fontSize: '0.82rem', color: 'var(--text)' }}>
                       {entry.config.service}.{entry.config.method}
                     </span>
-                    <span className="ms-2 text-muted">{entry.config.url}</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>{entry.config.url}</span>
                   </div>
-                  <div className="d-flex gap-2">
-                    <Button
-                      variant="outline-primary"
-                      size="sm"
-                      onClick={() => loadFromHistory(entry)}
-                    >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <button onClick={() => loadFromHistory(entry)}
+                      style={{ background: 'none', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '0.2rem 0.6rem', fontSize: '0.72rem', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600 }}>
                       Load
-                    </Button>
-                    <small className="text-muted align-self-center">
-                      {new Date(entry.timestamp).toLocaleString()}
-                    </small>
+                    </button>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>{new Date(entry.timestamp).toLocaleString()}</span>
                   </div>
                 </div>
-              </div>
-            ))}
-          </Card.Body>
-        </Card>
-      )}    </Container>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </Container>
   );
 };

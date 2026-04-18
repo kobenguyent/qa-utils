@@ -109,7 +109,15 @@ export default defineConfig(({ mode }) => {
       cssMinify: true,
     },
     optimizeDeps: {
-      include: ['react', 'react-dom', 'react-router-dom'],
+      include: [
+        'react',
+        'react-dom',
+        'react-router-dom',
+        'react-markdown',
+        'style-to-js',
+        'style-to-object',
+        'hast-util-to-jsx-runtime',
+      ],
     },
     define: {
       __COMMIT_HASH__: JSON.stringify(commitHash),

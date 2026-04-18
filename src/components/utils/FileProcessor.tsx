@@ -176,10 +176,13 @@ const FileProcessor: React.FC = () => {
 
   return (
     <div className="container mt-4">
-      <h2>📁 File Processor</h2>
-      <p className="text-muted">
-        Professional file processing with batch operations, smart optimization, and browser storage.
-      </p>
+      <div className="tool-header">
+        <div className="tool-header-icon">📁</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">File Processor</h1>
+          <p className="tool-header-desc">Professional file processing with batch operations, smart optimization, and browser storage.</p>
+        </div>
+      </div>
 
       <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k || 'upload')} className="mb-3">
         <Tab eventKey="upload" title="📤 Upload & Process">

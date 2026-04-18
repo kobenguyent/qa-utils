@@ -1,282 +1,352 @@
 import { useState, useEffect } from "react";
-import { Button, Container, Toast, Table, Form, Row, Col } from "react-bootstrap";
-import { CopyToClipboard } from "react-copy-to-clipboard";
-import { CircularProgressbar } from "react-circular-progressbar";
+import { Button, Container } from "react-bootstrap";
+import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
+import CopyWithToast from "../CopyWithToast";
+
+type SecretEntry = { name: string; key: string; timestamp: string };
 
 export const OtpGenerator = () => {
   const [otp, setOtp] = useState("");
-  const [show, setShow] = useState(false);
-  const [secret, setSecret] = useState('');
-  const [isSecretValid, setIsSecretValid] = useState(false);
-  const [secretKeys, setSecretKeys] = useState(() => {
-    const storedKeys = localStorage.getItem("secretKeys");
-    return storedKeys ? JSON.parse(storedKeys) : [];
-  });
+  const [secret, setSecret] = useState("");
   const [name, setName] = useState("");
+  const [isSecretValid, setIsSecretValid] = useState(false);
   const [showSecret, setShowSecret] = useState(false);
   const [showTableSecrets, setShowTableSecrets] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(30);
-
-  const generateOtp = (secretKey?: string) => {
-    const keyToUse = secretKey || secret;
-    if (keyToUse) {
-      // @ts-ignore
-      const newOtp = window.otplib.authenticator.generate(keyToUse.trim());
-      setOtp(newOtp);
-      setIsSecretValid(true);
-
-      const keyExists = secretKeys.some((key: any) => key.key === keyToUse.trim());
-      if (!keyExists) {
-        const newSecret = {
-          name: name.trim() || "Unnamed",
-          key: keyToUse.trim(),
-          timestamp: new Date().toLocaleString()
-        };
-        const updatedKeys = [...secretKeys, newSecret];
-        setSecretKeys(updatedKeys);
-        localStorage.setItem("secretKeys", JSON.stringify(updatedKeys));
-      }
-    } else {
-      setOtp("");
-      setIsSecretValid(false);
-    }
-  };
+  const [secretKeys, setSecretKeys] = useState<SecretEntry[]>(() => {
+    try { return JSON.parse(localStorage.getItem("secretKeys") ?? "[]"); } catch { return []; }
+  });
 
   const validateSecretKey = (key: string) => {
-    const formattedSecret = key.replace(/\s/g, "");
-    return formattedSecret.length === 16 || formattedSecret.length === 32;
+    const clean = key.replace(/\s/g, "");
+    return clean.length === 16 || clean.length === 32;
   };
 
-  const handleSecretChange = (e: any) => {
-    const cleanedSecret = e.target.value.replace(/\s/g, "");
-    setSecret(cleanedSecret);
-    setIsSecretValid(validateSecretKey(cleanedSecret));
-    if (!validateSecretKey(cleanedSecret)) {
-      setOtp("");
+  const generateOtp = (secretKey?: string) => {
+    const keyToUse = (secretKey || secret).replace(/\s/g, "");
+    if (!keyToUse) return;
+    // @ts-ignore
+    const newOtp = window.otplib.authenticator.generate(keyToUse);
+    setOtp(newOtp);
+    setIsSecretValid(true);
+    const exists = secretKeys.some(k => k.key === keyToUse);
+    if (!exists) {
+      const updated = [...secretKeys, { name: name.trim() || "Unnamed", key: keyToUse, timestamp: new Date().toLocaleString() }];
+      setSecretKeys(updated);
+      localStorage.setItem("secretKeys", JSON.stringify(updated));
     }
+  };
+
+  const handleSecretChange = (val: string) => {
+    const clean = val.replace(/\s/g, "");
+    setSecret(clean);
+    setIsSecretValid(validateSecretKey(clean));
+    if (!validateSecretKey(clean)) setOtp("");
   };
 
   useEffect(() => {
-    const timerId = setInterval(() => {
-      setTimeRemaining((prevTime) => {
-        if (prevTime <= 0) {
-          if (isSecretValid && secret) {
-            generateOtp();
-            return 30;
-          } else {
-            return 0;
-          }
-        } else {
-          return prevTime - 1;
+    const id = setInterval(() => {
+      setTimeRemaining(prev => {
+        if (prev <= 1) {
+          if (isSecretValid && secret) generateOtp();
+          return 30;
         }
+        return prev - 1;
       });
     }, 1000);
-    return () => clearInterval(timerId);
+    return () => clearInterval(id);
   }, [secret, isSecretValid]);
 
-  const handleRegenerateClick = () => {
-    if (isSecretValid && secret) {
-      generateOtp();
-    }
-  };
-
-  const handleClearSecret = () => {
-    setSecret("");
-    setName("");
-    setOtp("");
-    setIsSecretValid(false);
+  const handleSetCurrentSecret = (key: string, keyName: string) => {
+    setSecret(key); setName(keyName); setOtp(""); setTimeRemaining(30);
+    if (validateSecretKey(key)) { setIsSecretValid(true); generateOtp(key); }
   };
 
   const handleClearAll = () => {
-    setSecretKeys([]);
-    localStorage.removeItem("secretKeys");
+    setSecretKeys([]); localStorage.removeItem("secretKeys");
   };
 
-  const handleSetCurrentSecret = (key: any, name: string) => {
-    const isValid = validateSecretKey(key);
-    setSecret(key);
-    setIsSecretValid(isValid);
-    setName(name);
-    setOtp("");
-    setTimeRemaining(30);
-    if (isValid) {
-      generateOtp(key);
-    }
-  };
+  const timerPct = (timeRemaining / 30) * 100;
+  const timerColor = timeRemaining > 15 ? "#34d399" : timeRemaining > 8 ? "#f59e0b" : "#f87171";
 
   return (
-    <Container>
-      <div className="text-center mb-4">
-        <h1>OTP Generator</h1>
-        <p className="text-muted">Generate Time-based One-Time Passwords (TOTP) for 2FA authentication</p>
+    <Container className="py-4">
+      <div className="tool-header">
+        <div className="tool-header-icon">🔐</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">OTP Generator</h1>
+          <p className="tool-header-desc">Generate Time-based One-Time Passwords (TOTP) for 2FA authentication.</p>
+        </div>
+        {isSecretValid && otp && (
+          <span className="tool-badge tool-badge-success" style={{ flexShrink: 0 }}>Active</span>
+        )}
       </div>
 
-      {/* Explanation Section */}
-      <Row className="mb-4">
-        <Col>
-          <div className="alert alert-info">
-            <h5 className="alert-heading">📖 How to Use This Tool</h5>
-            <hr />
-            
-            <h6 className="mt-3">🔑 What is OTP?</h6>
-            <p className="mb-2">
-              <strong>OTP (One-Time Password)</strong> is a temporary code that changes every 30 seconds, 
-              used for two-factor authentication (2FA) to secure your accounts.
-            </p>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", alignItems: "start" }}>
 
-            <h6 className="mt-3">📝 Step-by-Step Guide:</h6>
-            <ol className="mb-2">
-              <li><strong>Get Your Secret Key:</strong> When enabling 2FA on a service (Google, GitHub, etc.), 
-                  you'll receive a secret key (usually 16 or 32 characters)</li>
-              <li><strong>Enter Name:</strong> Give it a recognizable name (e.g., "GitHub Account", "Google Work")</li>
-              <li><strong>Enter Secret Key:</strong> Paste your 16 or 32 character secret key</li>
-              <li><strong>Generate OTP:</strong> The tool automatically generates a 6-digit code</li>
-              <li><strong>Use the Code:</strong> Copy and paste the OTP into the service's 2FA prompt</li>
-              <li><strong>Auto-Refresh:</strong> The code refreshes every 30 seconds (watch the timer)</li>
-            </ol>
+        {/* Input card */}
+        <div className="tool-card">
+          <div className="tool-card-header">⚙️ Setup</div>
+          <div className="tool-card-body" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
 
-            <h6 className="mt-3">💡 Key Features:</h6>
-            <ul className="mb-2">
-              <li><strong>Auto-Save:</strong> Secret keys are saved locally in your browser</li>
-              <li><strong>Multiple Accounts:</strong> Store and manage multiple 2FA accounts</li>
-              <li><strong>Timer:</strong> Visual countdown shows when the code expires</li>
-              <li><strong>Quick Switch:</strong> Click "Set as Current" to switch between accounts</li>
-              <li><strong>Privacy:</strong> All data stays in your browser (localStorage)</li>
-            </ul>
-
-            <h6 className="mt-3">⚠️ Important Notes:</h6>
-            <ul className="mb-0">
-              <li><strong>Secret Key Format:</strong> Must be exactly 16 or 32 characters (spaces are removed automatically)</li>
-              <li><strong>Keep Secrets Safe:</strong> Your secret keys are sensitive - don't share them</li>
-              <li><strong>Backup:</strong> Save your secret keys somewhere safe in case you clear browser data</li>
-              <li><strong>Time Sync:</strong> Ensure your device time is accurate for codes to work</li>
-            </ul>
-          </div>
-        </Col>
-      </Row>
-
-      <Form>
-        <Form.Group as={Row} className="mb-3">
-          <Form.Label column sm="2">
-            Name:
-          </Form.Label>
-          <Col sm="10">
-            <Form.Control
-              type="text"
-              placeholder="Enter a name for the secret key"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </Col>
-        </Form.Group>
-
-        <Form.Group as={Row} className="mb-3">
-          <Form.Label column sm="2">
-            Secret Key:
-          </Form.Label>
-          <Col sm="8">
-            <Form.Control
-              type={showSecret ? "text" : "password"}
-              placeholder="Enter your secret key"
-              value={secret}
-              onChange={handleSecretChange}
-              isInvalid={secret.length > 0 && !isSecretValid}
-            />
-            <Form.Control.Feedback type="invalid">
-              Secret key must be 16 or 32 characters long.
-            </Form.Control.Feedback>
-          </Col>
-          <Col sm="2">
-            <Button variant="secondary" onClick={() => setShowSecret(!showSecret)}>
-              {showSecret ? "Hide" : "Show"}
-            </Button>
-          </Col>
-        </Form.Group>
-
-        <Form.Group as={Row} className="mb-3">
-          <Col sm="2">
-            <Button variant="danger" onClick={handleClearSecret}>Clear Secret</Button>
-          </Col>
-        </Form.Group>
-
-        <Form.Group as={Row} className="mb-3">
-          <Form.Label column sm="2">
-            Your OTP:
-          </Form.Label>
-          <Col sm="10">
-            <Form.Control id="otp" readOnly plaintext value={otp} placeholder="No OTP generated" />
-          </Col>
-        </Form.Group>
-
-        <Form.Group as={Row} className="mb-3" controlId="copy-to-clipboard">
-          <Col sm="10">
-            <Button onClick={handleRegenerateClick} disabled={!isSecretValid}>
-              {isSecretValid ? "New OTP" : "Invalid Secret Key"}
-            </Button>
-            <CopyToClipboard text={otp}>
-              <Button onClick={() => setShow(true)} disabled={!isSecretValid || otp === ""}>
-                Copy to clipboard
-              </Button>
-            </CopyToClipboard>
-          </Col>
-        </Form.Group>
-      </Form>
-
-      {secret && isSecretValid && (
-        <Row className="justify-content-center mt-4">
-          <Col xs="auto">
-            <div style={{ width: 100, height: 100 }}>
-              <CircularProgressbar value={(timeRemaining / 30) * 100} text={`${timeRemaining}s`} />
+            {/* Name */}
+            <div>
+              <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.5px", display: "block", marginBottom: "0.4rem" }}>
+                Account Name
+              </label>
+              <input
+                className="tool-textarea"
+                style={{ padding: "0.5rem 0.75rem", borderRadius: "var(--radius-sm)", height: "auto", minHeight: "unset" }}
+                type="text"
+                placeholder="e.g. GitHub, Google, AWS…"
+                value={name}
+                onChange={e => setName(e.target.value)}
+              />
             </div>
-          </Col>
-        </Row>
-      )}
 
-      <Row>
-        <Col xs={12}>
-          <Button variant="info" onClick={() => setShowTableSecrets(!showTableSecrets)} className="mb-2">
-            {showTableSecrets ? "Hide Secrets" : "Show Secrets"}
-          </Button>
-          <Table striped bordered hover>
-            <thead>
-            <tr>
-              <th>#</th>
-              <th>Name</th>
-              <th>Secret Key</th>
-              <th>Timestamp</th>
-              <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            {secretKeys.map((key: any, index: number) => (
-              <tr key={index}>
-                <td>{index + 1}</td>
-                <td>{key.name}</td>
-                <td>{showTableSecrets ? key.key : "••••••••••••"}</td>
-                <td>{key.timestamp}</td>
-                <td>
-                  <Button variant="primary" onClick={() => handleSetCurrentSecret(key.key, key.name)}>
-                    Set as Current
-                  </Button>
-                </td>
-              </tr>
+            {/* Secret key */}
+            <div>
+              <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.5px", display: "block", marginBottom: "0.4rem" }}>
+                Secret Key
+              </label>
+              <div style={{ display: "flex", gap: "0.4rem" }}>
+                <input
+                  className="tool-textarea"
+                  style={{
+                    flex: 1, padding: "0.5rem 0.75rem", borderRadius: "var(--radius-sm)", height: "auto", minHeight: "unset",
+                    borderColor: secret && !isSecretValid ? "#f87171" : undefined,
+                    fontFamily: showSecret ? "var(--font-mono)" : undefined,
+                    letterSpacing: showSecret ? "1px" : undefined,
+                  }}
+                  type={showSecret ? "text" : "password"}
+                  placeholder="16 or 32 character key"
+                  value={secret}
+                  onChange={e => handleSecretChange(e.target.value)}
+                />
+                <button
+                  onClick={() => setShowSecret(s => !s)}
+                  style={{
+                    padding: "0.45rem 0.85rem",
+                    borderRadius: "var(--radius-sm)",
+                    border: "1px solid var(--border-color)",
+                    background: "var(--bg-secondary)",
+                    color: "var(--muted)",
+                    fontSize: "0.78rem",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                  }}
+                >{showSecret ? "Hide" : "Show"}</button>
+              </div>
+              {secret && !isSecretValid && (
+                <div style={{ fontSize: "0.72rem", color: "#f87171", marginTop: "0.3rem" }}>Must be 16 or 32 characters</div>
+              )}
+            </div>
+
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+              <Button variant="primary" onClick={() => generateOtp()} disabled={!isSecretValid} style={{ flex: 1 }}>
+                ⟳ Generate OTP
+              </Button>
+              <button
+                onClick={() => { setSecret(""); setName(""); setOtp(""); setIsSecretValid(false); }}
+                style={{
+                  padding: "0.45rem 0.85rem",
+                  borderRadius: "var(--radius-sm)",
+                  border: "1px solid #f8717133",
+                  background: "color-mix(in srgb, #f87171 10%, transparent)",
+                  color: "#f87171",
+                  fontWeight: 600,
+                  fontSize: "0.83rem",
+                  cursor: "pointer",
+                }}
+              >Clear</button>
+            </div>
+          </div>
+        </div>
+
+        {/* OTP display */}
+        <div className="tool-card">
+          <div className="tool-card-header">
+            🔑 Your OTP
+            {otp && <div className="tool-action-row ms-auto"><CopyWithToast text={otp} /></div>}
+          </div>
+          <div className="tool-card-body" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1.25rem", padding: "1.5rem" }}>
+            {otp ? (
+              <>
+                {/* Large OTP display */}
+                <div style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "2.8rem",
+                  fontWeight: 800,
+                  letterSpacing: "0.3em",
+                  color: "var(--primary)",
+                  background: "var(--bg-secondary)",
+                  border: "1px solid var(--border-hover)",
+                  borderRadius: "var(--radius-lg)",
+                  padding: "0.75rem 1.5rem",
+                  userSelect: "all",
+                }}>
+                  {otp.slice(0, 3)} {otp.slice(3)}
+                </div>
+
+                {/* Timer */}
+                <div style={{ width: "80px", height: "80px" }}>
+                  <CircularProgressbar
+                    value={timerPct}
+                    text={`${timeRemaining}s`}
+                    styles={buildStyles({
+                      pathColor: timerColor,
+                      textColor: timerColor,
+                      trailColor: "var(--border-color)",
+                      textSize: "28px",
+                    })}
+                  />
+                </div>
+                <div style={{ fontSize: "0.72rem", color: "var(--muted)", textAlign: "center" }}>
+                  Code refreshes every 30 seconds
+                </div>
+              </>
+            ) : (
+              <div style={{ textAlign: "center", padding: "2rem 1rem", color: "var(--muted)" }}>
+                <div style={{ fontSize: "2.5rem", marginBottom: "0.5rem" }}>🔐</div>
+                <div style={{ fontSize: "0.9rem" }}>Enter a valid secret key to generate your OTP</div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Saved accounts */}
+      <div className="tool-card" style={{ marginTop: "1rem" }}>
+        <div className="tool-card-header">
+          📚 Saved Accounts
+          <div className="tool-action-row ms-auto" style={{ display: "flex", gap: "0.5rem" }}>
+            <button
+              onClick={() => setShowTableSecrets(s => !s)}
+              style={{
+                padding: "0.25rem 0.65rem",
+                borderRadius: "var(--radius-sm)",
+                border: "1px solid var(--border-color)",
+                background: "transparent",
+                color: "var(--muted)",
+                fontSize: "0.72rem",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >{showTableSecrets ? "Hide Keys" : "Reveal Keys"}</button>
+            {secretKeys.length > 0 && (
+              <button
+                onClick={handleClearAll}
+                style={{
+                  padding: "0.25rem 0.65rem",
+                  borderRadius: "var(--radius-sm)",
+                  border: "1px solid #f8717133",
+                  background: "color-mix(in srgb, #f87171 10%, transparent)",
+                  color: "#f87171",
+                  fontSize: "0.72rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >Clear All</button>
+            )}
+          </div>
+        </div>
+        <div className="tool-card-body" style={{ padding: "0.5rem" }}>
+          {secretKeys.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "1.5rem", color: "var(--muted)", fontSize: "0.85rem" }}>
+              No saved accounts. Generate an OTP to auto-save.
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+              {secretKeys.map((entry, i) => {
+                const isCurrent = entry.key === secret;
+                return (
+                  <div
+                    key={i}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.65rem",
+                      padding: "0.6rem 0.85rem",
+                      borderRadius: "var(--radius-md)",
+                      background: isCurrent ? "var(--primary-light)" : "var(--bg-secondary)",
+                      border: `1px solid ${isCurrent ? "var(--border-hover)" : "transparent"}`,
+                    }}
+                  >
+                    <span style={{
+                      width: "32px", height: "32px", borderRadius: "var(--radius-sm)",
+                      background: isCurrent ? "var(--primary-light)" : "var(--bg)",
+                      border: "1px solid var(--border-color)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: "1rem", flexShrink: 0,
+                    }}>🔑</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: "0.84rem", color: isCurrent ? "var(--primary)" : "var(--text)" }}>
+                        {entry.name}
+                      </div>
+                      <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--muted)" }}>
+                        {showTableSecrets ? entry.key : "••••••••••••••••"}
+                      </div>
+                    </div>
+                    <div style={{ fontSize: "0.68rem", color: "var(--muted)", flexShrink: 0, textAlign: "right" }}>
+                      {entry.timestamp}
+                    </div>
+                    {!isCurrent && (
+                      <button
+                        onClick={() => handleSetCurrentSecret(entry.key, entry.name)}
+                        style={{
+                          padding: "0.3rem 0.7rem",
+                          borderRadius: "var(--radius-sm)",
+                          border: "1px solid var(--primary)",
+                          background: "var(--primary-light)",
+                          color: "var(--primary)",
+                          fontSize: "0.72rem",
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          flexShrink: 0,
+                        }}
+                      >Use</button>
+                    )}
+                    {isCurrent && (
+                      <span style={{
+                        width: "8px", height: "8px", borderRadius: "50%",
+                        background: "var(--primary)", flexShrink: 0,
+                      }} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Info card */}
+      <div className="tool-card" style={{ marginTop: "1rem" }}>
+        <div className="tool-card-header">📖 How It Works</div>
+        <div className="tool-card-body">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "0.75rem" }}>
+            {[
+              { icon: "🔑", title: "Get Secret Key", desc: "Enable 2FA on your service (GitHub, Google…) to receive your 16 or 32 character secret." },
+              { icon: "⏱️", title: "Auto-Refresh", desc: "Codes change every 30 seconds. The timer shows how long the current code is valid." },
+              { icon: "💾", title: "Auto-Save", desc: "Keys are saved locally in your browser. No data is ever sent to any server." },
+              { icon: "⚡", title: "Quick Switch", desc: "Saved accounts let you switch 2FA contexts instantly with one click." },
+            ].map(tip => (
+              <div key={tip.title} style={{
+                padding: "0.75rem",
+                borderRadius: "var(--radius-md)",
+                background: "var(--bg-secondary)",
+                border: "1px solid var(--border-color)",
+              }}>
+                <div style={{ fontSize: "1.3rem", marginBottom: "0.35rem" }}>{tip.icon}</div>
+                <div style={{ fontWeight: 700, fontSize: "0.82rem", color: "var(--text)", marginBottom: "0.2rem" }}>{tip.title}</div>
+                <div style={{ fontSize: "0.72rem", color: "var(--muted)", lineHeight: 1.5 }}>{tip.desc}</div>
+              </div>
             ))}
-            </tbody>
-          </Table>
-          <Button variant="danger" onClick={handleClearAll} className="mt-2">Clear All Secrets</Button>
-        </Col>
-      </Row>
-
-      <Row>
-        <Col xs={6}>
-          <Toast onClose={() => setShow(false)} show={show} delay={3000} autohide>
-            <Toast.Header>
-              <strong className="me-auto">Info</strong>
-            </Toast.Header>
-            <Toast.Body>Woohoo, your OTP is copied!</Toast.Body>
-          </Toast>
-        </Col>
-      </Row>    </Container>
+          </div>
+        </div>
+      </div>
+    </Container>
   );
 };

@@ -586,13 +586,12 @@ const CommandBook: React.FC = () => {
 
     return (
         <Container className="py-4">
-            <div className="text-center mb-4">
-                <h1 className="display-5 fw-bold" style={{ color: 'var(--text)' }}>
-                    📖 Command Book
-                </h1>
-                <p className="lead text-muted">
-                    Hands-on reference for Git, Docker, Bash, and CodeceptJS commands
-                </p>
+            <div className="tool-header">
+                <div className="tool-header-icon">📖</div>
+                <div className="tool-header-content">
+                    <h1 className="tool-header-title">Command Book</h1>
+                    <p className="tool-header-desc">Hands-on reference for Git, Docker, Bash, and CodeceptJS commands</p>
+                </div>
             </div>
 
             {/* Search Bar */}

@@ -6,7 +6,7 @@ describe('FileProcessor Component', () => {
   it('renders file processor interface', () => {
     render(<FileProcessor />);
     
-    expect(screen.getByText('📁 File Processor')).toBeInTheDocument();
+    expect(screen.getByText('File Processor')).toBeInTheDocument();
     expect(screen.getByText('Professional file processing with batch operations, smart optimization, and browser storage.')).toBeInTheDocument();
     expect(screen.getByText('Select Files')).toBeInTheDocument();
   });

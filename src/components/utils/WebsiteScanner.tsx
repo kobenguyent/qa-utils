@@ -74,11 +74,12 @@ export const WebsiteScanner: React.FC = () => {
 
   return (
     <Container>
-      <div className="text-center mb-4">
-        <h1>🔍 Website Scanner</h1>
-        <p className="text-muted">
-          Comprehensive website analysis for broken links, accessibility, performance, SEO, and security
-        </p>
+      <div className="tool-header">
+        <div className="tool-header-icon">🔍</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">Website Scanner</h1>
+          <p className="tool-header-desc">Comprehensive website analysis for broken links, accessibility, performance, SEO, and security</p>
+        </div>
       </div>
 
       <Card className="mb-4">

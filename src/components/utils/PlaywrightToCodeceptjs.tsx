@@ -327,8 +327,13 @@ Return ONLY the converted CodeceptJS code without any explanations or markdown f
   return (
     <Container>
       <div style={{padding: '20px', fontFamily: 'Arial, sans-serif'}}>
-        <h2>Test Automation Code Converter</h2>
-        <p className="text-muted">Convert test automation code between different framework formats</p>
+        <div className="tool-header">
+          <div className="tool-header-icon">🔄</div>
+          <div className="tool-header-content">
+            <h1 className="tool-header-title">Test Automation Code Converter</h1>
+            <p className="tool-header-desc">Convert test automation code between different framework formats</p>
+          </div>
+        </div>
         {/* Conversion Method Selection */}
         <Row className="mb-3">
           <Col>

@@ -1039,46 +1039,65 @@ export const CollectionManager: React.FC = () => {
 
   return (
     <Container className="py-4">
-      <h1 className="mb-4">📦 Collection Manager</h1>
-      <p className="lead">Parse, edit, and convert REST API collections between multiple popular API client formats.</p>
+      {/* ── Header ── */}
+      <div className="tool-header">
+        <div className="tool-header-icon">📦</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">Collection Manager</h1>
+          <p className="tool-header-desc">Parse, edit, and convert REST API collections between multiple popular API client formats.</p>
+        </div>
+        {collections.length > 0 && (
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+            padding: '0.3rem 0.75rem', borderRadius: '999px',
+            background: 'rgba(96,165,250,0.15)', border: '1px solid rgba(96,165,250,0.3)',
+            color: '#60a5fa', fontSize: '0.8rem', fontWeight: 700, flexShrink: 0,
+          }}>
+            {collections.length} collection{collections.length !== 1 ? 's' : ''}
+          </span>
+        )}
+      </div>
 
-      {error && <Alert variant="danger" dismissible onClose={() => setError('')}>{error}</Alert>}
+      {error && (
+        <div style={{
+          background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.25)',
+          borderRadius: 'var(--radius-md)', padding: '0.65rem 1rem', marginBottom: '1rem',
+          color: '#f87171', fontSize: '0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        }}>
+          <span>⚠️ {error}</span>
+          <button onClick={() => setError('')} style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '1rem' }}>×</button>
+        </div>
+      )}
 
-      <Card className="mb-4">
-        <Card.Body>
-          <Form.Group>
-            <Form.Label>Upload Collection/Environment Files</Form.Label>
-            <Form.Control
-              ref={fileInputRef}
-              type="file"
-              accept=".json,.env,.csv"
-              onChange={handleFileUpload}
-              multiple
-            />
-            <Form.Text>Supports: Postman-Format, Insomnia-Format, Thunder Client-Format collections, plus .env, .csv, and generic JSON files. Select multiple files to import both collections and environments.</Form.Text>
-          </Form.Group>
-        </Card.Body>
-      </Card>
+      <div className="tool-card" style={{ marginBottom: '1rem' }}>
+        <div className="tool-card-header">📤 Upload Collection / Environment Files</div>
+        <div className="tool-card-body">
+          <Form.Control
+            ref={fileInputRef}
+            type="file"
+            accept=".json,.env,.csv"
+            onChange={handleFileUpload}
+            multiple
+            className="tool-textarea"
+            style={{ fontSize: '0.85rem' }}
+          />
+          <p style={{ fontSize: '0.78rem', color: 'var(--muted)', marginTop: '0.4rem', marginBottom: 0 }}>
+            Supports: Postman, Insomnia, Thunder Client collections, plus .env, .csv, and generic JSON files. Select multiple files to import both collections and environments.
+          </p>
+        </div>
+      </div>
 
       {collections.length > 0 && (
         <>
-          <Card className="mb-3 border-primary">
-            <Card.Header className="bg-primary text-white">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h5 className="mb-0">📚 Collections & Environments ({collections.length})</h5>
-                  <small>💾 Auto-saved to browser storage</small>
-                </div>
-                <Button 
-                  variant="outline-light" 
-                  size="sm"
-                  onClick={handleClearAll}
-                >
-                  🗑️ Clear All
-                </Button>
-              </div>
-            </Card.Header>
-            <Card.Body className="bg-light">
+          <div className="tool-card" style={{ marginBottom: '1rem' }}>
+            <div className="tool-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>📚 Collections & Environments ({collections.length}) <span style={{ fontSize: '0.72rem', fontWeight: 400, color: 'var(--muted)' }}>· Auto-saved to browser</span></span>
+              <button onClick={handleClearAll}
+                style={{ background: 'none', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '0.2rem 0.6rem', fontSize: '0.72rem', color: 'var(--muted)', cursor: 'pointer', fontWeight: 600 }}>
+                🗑️ Clear All
+              </button>
+            </div>
+            <div className="tool-card-body">
               <div className="d-flex flex-wrap gap-2">
                 {collections.map((col, idx) => (
                   <div key={col.id} className="position-relative">
@@ -1120,8 +1139,8 @@ export const CollectionManager: React.FC = () => {
                   </div>
                 ))}
               </div>
-            </Card.Body>
-          </Card>
+            </div>
+          </div>
         </>
       )}
 

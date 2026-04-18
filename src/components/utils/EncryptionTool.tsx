@@ -172,9 +172,14 @@ export const EncryptionTool = () => {
   };
 
   return (
-    <Container>      <div className="text-center">
-        <h1>🔐 Encryption/Decryption Tool</h1>
-        <p className="text-muted">Secure AES-256-GCM encryption and decryption</p>
+    <Container>
+      {/* ── Header ── */}
+      <div className="tool-header">
+        <div className="tool-header-icon">🔐</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">Encryption / Decryption Tool</h1>
+          <p className="tool-header-desc">Secure AES-256-GCM encryption and decryption</p>
+        </div>
       </div>
 
       {error && (

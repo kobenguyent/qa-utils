@@ -65,6 +65,8 @@ export interface NavGroupMeta {
   id: string;
   /** Accessible aria-label for the dropdown toggle. */
   ariaLabel: string;
+  /** Emoji icon for the group, used separately from the title label. */
+  icon: string;
 }
 
 /** Ordered list of nav groups — determines left-to-right display in the header. */
@@ -83,31 +85,37 @@ export const NAV_GROUP_META: Record<NavGroup, NavGroupMeta> = {
     title: '🔄 Converters',
     id: 'nav-dropdown-converters',
     ariaLabel: 'Converters menu',
+    icon: '🔄',
   },
   Generators: {
     title: '🎲 Generators',
     id: 'nav-dropdown-generators',
     ariaLabel: 'Generators menu',
+    icon: '🎲',
   },
   API: {
     title: '🌐 API',
     id: 'nav-dropdown-api',
     ariaLabel: 'API Testing menu',
+    icon: '🌐',
   },
   Tools: {
     title: '🔧 Tools',
     id: 'nav-dropdown-tools',
     ariaLabel: 'Developer Tools menu',
+    icon: '🔧',
   },
   Learn: {
     title: '📚 Learn',
     id: 'nav-dropdown-learn',
     ariaLabel: 'Learning menu',
+    icon: '📚',
   },
   Palace: {
     title: '🏛️ Palace',
     id: 'nav-dropdown-palace',
     ariaLabel: 'Memory Palace menu',
+    icon: '🏛️',
   },
 };
 
@@ -536,6 +544,16 @@ export const navigationConfig: NavItem[] = [
 
   // ── Learn ─────────────────────────────────────────────────────────────────
   {
+    title: 'AI Instructions Guide',
+    description: 'Markdown structure & best practices for Claude, ChatGPT, Gemini, Copilot, Cursor & Windsurf',
+    path: '#/ai-instructions',
+    category: 'Hints',
+    keywords: ['ai', 'instructions', 'claude', 'chatgpt', 'gemini', 'copilot', 'cursor', 'windsurf', 'prompt', 'markdown', 'system prompt', 'rules', 'best practices', 'llm', 'context'],
+    icon: '🤖',
+    navGroups: ['Learn'],
+    navLabel: 'AI Instructions',
+  },
+  {
     title: 'Command Book',
     description: 'Hands-on reference for Git, Docker, Bash, and CodeceptJS commands',
     path: '#/command-book',
@@ -545,11 +563,11 @@ export const navigationConfig: NavItem[] = [
     navGroups: ['Learn'],
   },
   {
-    title: 'CodeceptJS Hints',
-    description: 'Best practices and tips for CodeceptJS testing',
+    title: 'Testing Cheat Sheet',
+    description: 'Quick-reference commands for Playwright, Pytest, CodeceptJS, Cypress, Jest, Vitest & more',
     path: '#/codeceptjs',
     category: 'Hints',
-    keywords: ['codeceptjs', 'hints', 'tips', 'best practices', 'testing'],
+    keywords: ['codeceptjs', 'playwright', 'pytest', 'cypress', 'jest', 'vitest', 'selenium', 'robot', 'k6', 'newman', 'postman', 'testing', 'cheat sheet', 'commands', 'hints'],
     icon: '🔥💡',
     navGroups: ['Learn'],
     navIcon: '🔥',

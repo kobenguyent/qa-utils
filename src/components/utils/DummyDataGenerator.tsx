@@ -225,8 +225,13 @@ export const DummyDataGenerator: React.FC = () => {
 
     return (
         <Container className="py-4">
-            <h1 className="h3 mb-2">🎭 Dummy Data Generator</h1>
-            <p className="text-muted mb-4">Generate realistic fake data for testing, development, and prototyping</p>
+            <div className="tool-header">
+                <div className="tool-header-icon">🎭</div>
+                <div className="tool-header-content">
+                    <h1 className="tool-header-title">Dummy Data Generator</h1>
+                    <p className="tool-header-desc">Generate realistic fake data for testing, development, and prototyping</p>
+                </div>
+            </div>
 
             {/* Category Tabs */}
             <Tabs

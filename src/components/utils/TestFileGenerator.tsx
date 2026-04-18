@@ -76,8 +76,13 @@ export const TestFileGenerator: React.FC = () => {
 
   return (
     <Container className="py-4">
-      <h1 className="h3 mb-4">📁 Test File Generator</h1>
-      <p className="text-muted">Generate test files like images, documents, and audio files for testing purposes</p>
+      <div className="tool-header">
+        <div className="tool-header-icon">📁</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">Test File Generator</h1>
+          <p className="tool-header-desc">Generate test files like images, documents, and audio files for testing purposes</p>
+        </div>
+      </div>
 
       <Row>
         <Col md={4}>

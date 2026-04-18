@@ -1,121 +1,168 @@
 /* Global styles */
 :root {
-    /* Light theme colors */
-    --bg: #ffffff;
-    --text: #1e293b;
-    /* slate-800 - default readable body text */
-    --muted: #6c757d;
-    /* muted text */
-    --primary: #0d6efd;
-    /* bootstrap primary (good contrast for links) */
-    --success: #198754;
-    /* green (accessible) */
-    --danger: #dc3545;
-    /* red (accessible) */
-    --warning: #ffc107;
-    /* yellow/orange */
-    --info: #0dcaf0;
-    /* cyan */
-    --card-bg: rgba(255, 255, 255, 0.95);
-    /* glass card background fallback */
-    --glass-border: rgba(255, 255, 255, 0.35);
-    --navbar-bg: #f8f9fa;
-    --dropdown-bg: rgba(255, 255, 255, 0.95);
-    --dropdown-hover: rgba(13, 110, 253, 0.15);
-    --border-color: rgba(0, 0, 0, 0.1);
-    --shadow-color: rgba(0, 0, 0, 0.1);
-    --glass-nav-hover: rgba(255, 255, 255, 0.6);
-    --glass-nav-active: rgba(13, 110, 253, 0.1);
+    /* ── Light theme ─────────────────────────────────── */
+    --bg: #f8fafc;                          /* cool near-white */
+    --bg-secondary: #f1f5f9;               /* subtle surface tint */
+    --text: #0f172a;                        /* slate-950 */
+    --muted: #64748b;                       /* slate-500 */
+    --primary: #2563eb;                     /* blue-600 */
+    --primary-light: rgba(37,99,235,0.10);
+    --success: #059669;                     /* emerald-600 */
+    --danger: #dc2626;                      /* red-600 */
+    --warning: #d97706;                     /* amber-600 */
+    --info: #0284c7;                        /* sky-600 */
+    --card-bg: rgba(255,255,255,0.92);
+    --glass-border: rgba(255,255,255,0.5);
+    --navbar-bg: rgba(248,250,252,0.85);
+    --dropdown-bg: rgba(255,255,255,0.97);
+    --dropdown-hover: rgba(37,99,235,0.07);
+    --border-color: rgba(15,23,42,0.08);    /* very thin */
+    --border-hover: rgba(37,99,235,0.3);
+    --shadow-color: rgba(15,23,42,0.06);
+    --shadow-md: 0 4px 24px rgba(15,23,42,0.08);
+    --shadow-lg: 0 8px 40px rgba(15,23,42,0.10);
+    --glass-nav-hover: rgba(15,23,42,0.04);
+    --glass-nav-active: rgba(37,99,235,0.08);
     --input-bg: #ffffff;
-    --input-border: #ced4da;
-    --table-color: #212529;
+    --input-border: rgba(15,23,42,0.14);
+    --input-focus-ring: rgba(37,99,235,0.15);
+    --table-color: #0f172a;
     --table-bg: transparent;
-    --table-striped-bg: rgba(0, 0, 0, 0.05);
-    --code-bg: #f8f9fa;
-    /* light gray for code blocks */
-    --code-text: #1e293b;
-    /* dark text for code in light mode */
-    --info-bg: #e7f3ff;
-    /* light blue for info sections */
-    --info-text: #004085;
-    /* dark blue text */
-    --warning-bg: #fff3cd;
-    /* light yellow for warnings */
-    --warning-text: #856404;
-    /* dark yellow-brown text */
-    --success-bg: #d1e7dd;
-    /* light green for success */
-    --success-text: #0f5132;
-    /* dark green text */
-    --danger-bg: #f8d7da;
-    /* light red for danger */
-    --danger-text: #842029;
-    /* dark red text */
+    --table-striped-bg: rgba(0,0,0,0.025);
+    --code-bg: #f1f5f9;
+    --code-text: #0f172a;
+    --info-bg: #eff6ff;
+    --info-text: #1d4ed8;
+    --warning-bg: #fffbeb;
+    --warning-text: #92400e;
+    --success-bg: #ecfdf5;
+    --success-text: #065f46;
+    --danger-bg: #fef2f2;
+    --danger-text: #991b1b;
+    /* gradient accents */
+    --accent-violet: #7c3aed;
+    --accent-pink: #db2777;
+    --grad-start: #2563eb;
+    --grad-end: #7c3aed;
+    --hero-image-shadow: rgba(37,99,235,0.15);
+    --hero-badge-bg: rgba(37,99,235,0.08);
+    --hero-badge-bg-end: rgba(124,58,237,0.08);
+    --hero-badge-border: rgba(37,99,235,0.18);
+    --hero-badge-color: var(--primary);
+    /* typography */
+    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace;
+    /* radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    /* transitions */
+    --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    --duration: 180ms;
 }
 
 /* Dark theme colors */
 [data-theme="dark"] {
-    --bg: #0f172a;
-    /* slate-900 */
-    --text: #e2e8f0;
-    /* slate-200 */
-    --muted: #94a3b8;
-    /* slate-400 */
-    --primary: #3b82f6;
-    /* blue-500 */
-    --success: #10b981;
-    /* green-500 */
-    --danger: #ef4444;
-    /* red-500 */
-    --warning: #f59e0b;
-    /* amber-500 */
-    --info: #3b82f6;
-    /* blue-500 */
-    --card-bg: rgba(30, 41, 59, 0.95);
-    /* slate-800 with opacity */
-    --glass-border: rgba(100, 116, 139, 0.3);
-    /* slate-500 */
-    --navbar-bg: #1e293b;
-    /* slate-800 */
-    --dropdown-bg: rgba(30, 41, 59, 0.98);
-    --dropdown-hover: rgba(59, 130, 246, 0.2);
-    --border-color: rgba(100, 116, 139, 0.3);
-    --shadow-color: rgba(0, 0, 0, 0.5);
-    --glass-nav-hover: rgba(255, 255, 255, 0.05);
-    --glass-nav-active: rgba(59, 130, 246, 0.2);
-    --input-bg: #1e293b;
-    --input-border: #475569;
+    --bg: #080d17;                          /* near-black slate */
+    --bg-secondary: #0d1526;
+    --text: #e2e8f0;                        /* slate-200 */
+    --muted: #94a3b8;                       /* slate-400 */
+    --primary: #60a5fa;                     /* blue-400 */
+    --primary-light: rgba(96,165,250,0.12);
+    --success: #34d399;                     /* emerald-400 */
+    --danger: #f87171;                      /* red-400 */
+    --warning: #fbbf24;                     /* amber-400 */
+    --info: #38bdf8;                        /* sky-400 */
+    --card-bg: rgba(15,23,42,0.85);
+    --glass-border: rgba(255,255,255,0.07);
+    --navbar-bg: rgba(8,13,23,0.88);
+    --dropdown-bg: rgba(13,20,38,0.98);
+    --dropdown-hover: rgba(96,165,250,0.1);
+    --border-color: rgba(255,255,255,0.07);
+    --border-hover: rgba(96,165,250,0.35);
+    --shadow-color: rgba(0,0,0,0.4);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.3);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.4);
+    --glass-nav-hover: rgba(255,255,255,0.04);
+    --glass-nav-active: rgba(96,165,250,0.12);
+    --input-bg: rgba(15,23,42,0.7);
+    --input-border: rgba(255,255,255,0.1);
+    --input-focus-ring: rgba(96,165,250,0.2);
     --table-color: #e2e8f0;
     --table-bg: transparent;
-    --table-striped-bg: rgba(255, 255, 255, 0.05);
-    --code-bg: #1e293b;
-    /* slate-800 for code blocks in dark mode */
+    --table-striped-bg: rgba(255,255,255,0.03);
+    --code-bg: rgba(15,23,42,0.9);
     --code-text: #e2e8f0;
-    /* light text for code in dark mode */
-    --info-bg: #1e3a5f;
-    /* dark blue for info sections */
+    --info-bg: rgba(30,58,138,0.3);
     --info-text: #93c5fd;
-    /* light blue text with good contrast */
-    --warning-bg: #78350f;
-    /* dark amber for warnings */
+    --warning-bg: rgba(120,53,15,0.3);
     --warning-text: #fde68a;
-    /* light yellow text */
-    --success-bg: #064e3b;
-    /* dark green for success */
+    --success-bg: rgba(6,78,59,0.3);
     --success-text: #6ee7b7;
-    /* light green text */
-    --danger-bg: #7f1d1d;
-    /* dark red for danger */
+    --danger-bg: rgba(127,29,29,0.3);
     --danger-text: #fca5a5;
-    /* light red text */
+    --accent-violet: #a78bfa;
+    --accent-pink: #f472b6;
+    --grad-start: #60a5fa;
+    --grad-end: #a78bfa;
+    --hero-image-shadow: rgba(96,165,250,0.2);
+    --hero-badge-bg: rgba(96,165,250,0.1);
+    --hero-badge-bg-end: rgba(167,139,250,0.1);
+    --hero-badge-border: rgba(96,165,250,0.25);
+    --hero-badge-color: #93c5fd;
 }
 
 body {
     background: var(--bg);
     color: var(--text);
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.35s var(--ease), color 0.35s var(--ease);
+    line-height: 1.65;
+    letter-spacing: -0.01em;
+}
+
+/* Subtle noise grain on bg for depth */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Ambient floating orb mesh — futuristic depth layer */
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 60% 45% at 15% 20%,  rgba(37,99,235,0.07)  0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 80% 10%,  rgba(124,58,237,0.06) 0%, transparent 65%),
+        radial-gradient(ellipse 45% 35% at 90% 80%,  rgba(219,39,119,0.05) 0%, transparent 65%),
+        radial-gradient(ellipse 55% 40% at 10% 85%,  rgba(37,99,235,0.05)  0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    animation: ambientOrbs 18s ease-in-out infinite alternate;
+}
+
+@keyframes ambientOrbs {
+    from { opacity: 1; transform: scale(1); }
+    to   { opacity: 0.7; transform: scale(1.03) translateY(-8px); }
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* Contain stacking contexts from elements with filter/transform inside main
+   so that navbar dropdowns (z-index: 1000 in root context) always paint above
+   page content regardless of CSS effects applied to hero images or cards. */
+main {
+    isolation: isolate;
 }
 
 /* Dark theme adjustments for Bootstrap components */
@@ -210,32 +257,26 @@ body {
     .navbar-nav .nav-link,
     .navbar-nav .dropdown-toggle {
         font-size: 16px;
-        /* Increased from 14px for better readability */
         padding: 0.75rem 1rem;
-        /* Increased touch target size */
         min-height: 44px;
-        /* Apple's recommended minimum touch target */
     }
 
     .navbar-brand {
         font-size: 20px;
-        /* Increased from 18px */
     }
 
     .container {
-        padding-left: 15px;
-        padding-right: 15px;
+        padding-left: 12px;
+        padding-right: 12px;
     }
 
     h1.h3 {
         font-size: 1.75rem;
-        /* Increased from 1.5rem */
         line-height: 1.3;
     }
 
     .lead {
         font-size: 1.125rem;
-        /* Increased from 1rem */
         line-height: 1.6;
     }
 
@@ -245,6 +286,18 @@ body {
         padding: 0.625rem 1.25rem;
         font-size: 16px;
     }
+
+    /* Full-width buttons on very small screens */
+    .tool-action-row .btn {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    /* Tables — horizontal scroll */
+    .table-responsive,
+    table {
+        font-size: 0.82rem;
+    }
 }
 
 @media (max-width: 768px) {
@@ -252,20 +305,16 @@ body {
     .navbar-nav .nav-link,
     .navbar-nav .dropdown-toggle {
         font-size: 16px;
-        /* Increased for better readability */
         padding: 0.75rem 1rem;
-        /* Better touch targets */
         min-height: 44px;
     }
 
     .navbar-brand {
         font-size: 20px;
-        /* Increased from 18px */
     }
 
     .navbar-toggler {
         padding: 0.5rem 0.75rem;
-        /* Larger touch target */
         font-size: 1.25rem;
         min-height: 44px;
         min-width: 44px;
@@ -280,21 +329,34 @@ body {
         padding: 0.75rem 1.25rem;
         min-height: 44px;
     }
-}
 
+    /* Footer centering */
+    footer .col-md-6 {
+        text-align: center !important;
+    }
+
+    footer .col-md-6:last-child {
+        margin-top: 0.25rem;
+    }
+
+    footer .text-md-end {
+        text-align: center !important;
+    }
+}
 /* Improved navigation styles */
 .navbar {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .navbar-brand {
-    font-weight: 600;
+    font-weight: 700;
     color: var(--primary) !important;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
 .navbar-brand:hover {
-    transform: scale(1.05);
+    transform: scale(1.03);
+    opacity: 0.85;
 }
 
 .nav-link {

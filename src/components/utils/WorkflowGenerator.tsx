@@ -145,11 +145,12 @@ export const WorkflowGenerator: React.FC = () => {
     <Container className="py-4">
         <Row className="justify-content-center">
           <Col xs={12} lg={10}>
-            <div className="text-center mb-4">
-              <h1 className="h2">🚀 CI/CD Workflow Generator</h1>
-              <p className="text-muted">
-                Generate CI/CD workflow files for your project using Flowmatic CI/CD
-              </p>
+            <div className="tool-header">
+              <div className="tool-header-icon">🚀</div>
+              <div className="tool-header-content">
+                <h1 className="tool-header-title">CI/CD Workflow Generator</h1>
+                <p className="tool-header-desc">Generate CI/CD workflow files for your project using Flowmatic CI/CD</p>
+              </div>
             </div>
 
             {error && (

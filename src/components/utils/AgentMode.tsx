@@ -119,10 +119,13 @@ export function AgentMode() {
   // -------------------------------------------------------------------------
   return (
     <Container className="py-4 agent-page">
-      <h2 className="mb-1">🤖 Agent Mode</h2>
-      <p className="text-muted mb-4">
-        Describe a task and the agent will autonomously plan & execute tools to accomplish it.
-      </p>
+      <div className="tool-header">
+        <div className="tool-header-icon">🤖</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">Agent Mode</h1>
+          <p className="tool-header-desc">Describe a task and the agent will autonomously plan & execute tools to accomplish it.</p>
+        </div>
+      </div>
 
       {/* AI config warning */}
       {!isConfigured && (

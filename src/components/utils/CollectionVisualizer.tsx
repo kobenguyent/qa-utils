@@ -4,13 +4,9 @@
 import React, { useState, useRef, useCallback } from 'react';
 import {
   Container,
-  Card,
   Button,
   Form,
-  Alert,
   Badge,
-  Row,
-  Col,
   Modal,
 } from 'react-bootstrap';
 import { parseCollectionFromFile, parseCollection } from '../../utils/collectionParser';
@@ -417,109 +413,99 @@ export const CollectionVisualizer: React.FC = () => {
 
   return (
     <Container className="py-4">
-      <h2 className="mb-1">🗺️ Collection Visualizer</h2>
-      <p className="text-muted mb-4">
-        Upload a Postman, Insomnia, or Thunder Client collection and explore the full structure of
-        your API requests and folders interactively.
-      </p>
+      {/* ── Header ── */}
+      <div className="tool-header">
+        <div className="tool-header-icon">🗺️</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">Collection Visualizer</h1>
+          <p className="tool-header-desc">Upload a Postman, Insomnia, or Thunder Client collection and explore its full structure interactively.</p>
+        </div>
+      </div>
 
       {error && (
-        <Alert variant="danger" dismissible onClose={() => setError('')} aria-live="assertive">
-          {error}
-        </Alert>
+        <div style={{
+          background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.25)',
+          borderRadius: 'var(--radius-md)', padding: '0.65rem 1rem', marginBottom: '1rem',
+          color: '#f87171', fontSize: '0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        }}>
+          <span>⚠️ {error}</span>
+          <button onClick={() => setError('')} style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '1rem' }}>×</button>
+        </div>
       )}
 
       {!collection && (
-        <Row className="g-3">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
           {/* File upload */}
-          <Col xs={12} md={6}>
-            <Card className="h-100">
-              <Card.Header>📁 Upload Collection File</Card.Header>
-              <Card.Body className="d-flex flex-column justify-content-center align-items-center gap-3 py-4">
-                <p className="text-muted text-center mb-0">
-                  Supports Postman v2.1, Insomnia, and Thunder Client JSON exports.
-                </p>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".json"
-                  className="d-none"
-                  onChange={handleFileUpload}
-                  aria-label="Upload collection file"
-                />
-                <Button
-                  variant="primary"
-                  onClick={() => fileInputRef.current?.click()}
-                  aria-label="Choose collection file to upload"
-                >
-                  📂 Choose File
-                </Button>
-              </Card.Body>
-            </Card>
-          </Col>
+          <div className="tool-card">
+            <div className="tool-card-header">📁 Upload Collection File</div>
+            <div className="tool-card-body" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '1rem', padding: '2rem 1.5rem' }}>
+              <p style={{ color: 'var(--muted)', textAlign: 'center', margin: 0, fontSize: '0.85rem' }}>
+                Supports Postman v2.1, Insomnia, and Thunder Client JSON exports.
+              </p>
+              <input ref={fileInputRef} type="file" accept=".json" className="d-none" onChange={handleFileUpload} aria-label="Upload collection file" />
+              <Button size="sm" onClick={() => fileInputRef.current?.click()}
+                style={{ background: 'var(--primary)', border: 'none', fontWeight: 600, padding: '0.45rem 1.4rem', borderRadius: 'var(--radius-md)' }}>
+                📂 Choose File
+              </Button>
+            </div>
+          </div>
 
           {/* JSON paste */}
-          <Col xs={12} md={6}>
-            <Card className="h-100">
-              <Card.Header>📋 Paste JSON</Card.Header>
-              <Card.Body className="d-flex flex-column gap-2">
-                <Form.Control
-                  as="textarea"
-                  rows={6}
-                  placeholder="Paste your collection JSON here..."
-                  value={jsonInput}
-                  onChange={(e) => setJsonInput(e.target.value)}
-                  aria-label="Collection JSON input"
-                  style={{ fontFamily: 'monospace', fontSize: '0.85rem', resize: 'vertical' }}
-                />
-                <Button
-                  variant="success"
-                  onClick={handleParseJson}
-                  disabled={!jsonInput.trim()}
-                  aria-label="Visualize pasted JSON"
-                >
-                  🔍 Visualize
-                </Button>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
+          <div className="tool-card">
+            <div className="tool-card-header">📋 Paste JSON</div>
+            <div className="tool-card-body" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              <textarea
+                className="tool-textarea"
+                rows={6}
+                placeholder="Paste your collection JSON here..."
+                value={jsonInput}
+                onChange={(e) => setJsonInput(e.target.value)}
+                aria-label="Collection JSON input"
+                style={{ fontFamily: 'var(--font-mono)', fontSize: '0.82rem' }}
+              />
+              <Button size="sm" onClick={handleParseJson} disabled={!jsonInput.trim()}
+                aria-label="Visualize pasted JSON"
+                style={{ background: '#34d399', border: 'none', fontWeight: 600, padding: '0.45rem 1.4rem', borderRadius: 'var(--radius-md)', color: '#000' }}>
+                🔍 Visualize
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
 
       {collection && (
-        <Card>
-          <Card.Header className="d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <div>
-              <span className="fw-bold fs-5 me-2">{collection.name}</span>
-              <Badge bg="light" text="dark" className="me-1">
-                {collection.sourceFormat}
-              </Badge>
+        <div className="tool-card">
+          <div className="tool-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontWeight: 700, fontSize: '1.05rem' }}>{collection.name}</span>
+              <span style={{
+                padding: '0.15rem 0.5rem', borderRadius: '999px', fontSize: '0.68rem', fontWeight: 600,
+                background: 'rgba(148,163,184,0.12)', color: 'var(--muted)',
+              }}>{collection.sourceFormat}</span>
               {collection.version && collection.version !== '0.0.0' && (
-                <Badge bg="light" text="dark">
-                  v{collection.version}
-                </Badge>
+                <span style={{
+                  padding: '0.15rem 0.5rem', borderRadius: '999px', fontSize: '0.68rem', fontWeight: 600,
+                  background: 'rgba(148,163,184,0.12)', color: 'var(--muted)',
+                }}>v{collection.version}</span>
               )}
             </div>
-            <Button
-              variant="outline-secondary"
-              size="sm"
-              onClick={handleClear}
+            <button onClick={handleClear}
               aria-label="Load a different collection"
-            >
+              style={{ background: 'none', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '0.25rem 0.7rem', fontSize: '0.75rem', color: 'var(--muted)', cursor: 'pointer', fontWeight: 600 }}>
               🔄 Load Another
-            </Button>
-          </Card.Header>
+            </button>
+          </div>
 
           {collection.description && (
-            <Card.Body className="py-2 border-bottom">
-              <p className="text-muted small mb-0">{collection.description}</p>
-            </Card.Body>
+            <div style={{ padding: '0.5rem 1.25rem', borderBottom: '1px solid var(--border-color)', fontSize: '0.82rem', color: 'var(--muted)' }}>
+              {collection.description}
+            </div>
           )}
 
-          <Card.Body>
+          <div className="tool-card-body">
             <CollectionTree collection={collection} onSelect={setSelectedRequest} />
-          </Card.Body>
-        </Card>
+          </div>
+        </div>
       )}
 
       <RequestDetailModal

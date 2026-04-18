@@ -183,8 +183,13 @@ export const Ctfl = () => {
 
   return (
     <Container>
+      <div className="tool-header">
+        <div className="tool-header-icon">📝</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">CTFL v4 Practice Exam - { selectedQuestionBank }</h1>
+        </div>
+      </div>
       <div className="text-center">
-        <h1>CTFL v4 Practice Exam - { selectedQuestionBank }</h1>
         <div>Time Remaining: {formatTime(timer)}</div>
         <div className="d-flex align-items-center justify-content-center gap-2 mt-2 flex-wrap">
           <Dropdown onSelect={(e: any) => setSelectedQuestionBank(e)}>

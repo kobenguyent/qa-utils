@@ -309,9 +309,12 @@ export const KanbanBoard: React.FC = () => {
     return (
         <Container fluid className="py-4 px-4">
             <div className="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
-                <div>
-                    <h1 className="h3 mb-2">📋 Kanban Board</h1>
-                    <p className="text-muted mb-0">Organize your tasks with drag-and-drop simplicity</p>
+                <div className="tool-header">
+                    <div className="tool-header-icon">📋</div>
+                    <div className="tool-header-content">
+                        <h1 className="tool-header-title">Kanban Board</h1>
+                        <p className="tool-header-desc">Organize your tasks with drag-and-drop simplicity</p>
+                    </div>
                 </div>
                 <ButtonGroup>
                     <Button variant="outline-primary" size="sm" onClick={openAddColumnModal}>
