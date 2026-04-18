@@ -1,169 +1,176 @@
 # GitHub Copilot Instructions for QA Utils
 
 ## Project Overview
-QA Utils is a comprehensive collection of quality assurance tools and utilities built with React, TypeScript, and Bootstrap. The project emphasizes code quality, testing, and accessibility.
+QA Utils is a comprehensive collection of 45+ quality assurance tools and utilities built as a monorepo with multiple packages:
+- **Web App** (root): React 18 + TypeScript + Bootstrap 5 + Vite — the main SPA
+- **API** (`api/`): Express REST API server with OpenAPI spec
+- **CLI** (`cli/`): Command-line interface for QA tools
+- **MCP Server** (`mcp-server/`): Model Context Protocol server for AI integrations
+- **Electron** (`electron/`): Desktop app wrapper
+- **Docs** (`docs/`): VitePress documentation site
+
+The project emphasizes code quality, testing, accessibility, and a polished UX with light/dark theme support.
+
+## Architecture
+
+### Web App Structure
+```
+src/
+├── components/
+│   ├── utils/          # 45+ tool components (one per tool)
+│   ├── __tests__/      # Component tests
+│   ├── hints/          # AI hint components
+│   ├── istqb/          # ISTQB learning tools
+│   └── terms/          # Glossary/terms tools
+├── config/
+│   └── navigationConfig.ts   # Single source of truth for all routes/nav
+├── contexts/           # React contexts (Theme, etc.)
+├── styles/             # Global styles, CSS variables, glassmorphism
+├── utils/              # 53+ utility modules (business logic)
+└── test/               # Test setup
+```
+
+### Key Architectural Patterns
+- **Navigation config as single source of truth**: `src/config/navigationConfig.ts` drives routes, search index, and header nav. To add a new tool, add ONE entry here.
+- **Tool component pattern**: Each tool has a component in `src/components/utils/` and business logic in `src/utils/`. Components use a consistent `tool-header`, `tool-card`, `tool-card-header`, `tool-card-body` CSS class structure.
+- **Lazy loading**: All tool components are lazy-loaded via `React.lazy` in `App.tsx`.
+- **Theme system**: CSS variables in `src/index.css` with `[data-theme="dark"]` selector. Uses `ThemeContext` for runtime switching.
 
 ## Development Workflow
 
 ### 1. Code Quality Standards
 
 #### Linting Requirements
-- **ALWAYS** run linting before committing any changes
-- **ALWAYS** fix all linting issues - the project enforces a maximum of 55 warnings
-- Use `npm run lint` or `bun run lint` to check for issues
-- The project uses ESLint with TypeScript support
-- Configuration: `.eslintrc.cjs`
-- Linting must pass in CI/CD pipeline
+- **ALWAYS** run `npm run lint` before committing — it MUST pass (0 errors, max 221 warnings)
+- ESLint with TypeScript support (config: `.eslintrc.cjs`)
+- Linting runs in CI — PRs will fail if lint doesn't pass
 
 #### Testing Requirements
-- **ALWAYS** add tests for new features and components
-- **ALWAYS** update existing tests when modifying functionality
-- Run tests with `npm test` or `bun test` before committing
-- Maintain high test coverage (currently 319+ tests)
-- Test files location: `src/test/` and `src/components/__tests__/`
-- Use Vitest + React Testing Library for component tests
-- Use `vitest --ui` for interactive test debugging
+- **ALWAYS** add tests for new features and update tests when modifying existing ones
+- Run `npm test` before committing — currently 928+ tests across 71 test files
+- Test files: co-located in `__tests__/` directories next to source
+- Stack: Vitest + React Testing Library + jsdom
+- Config: `vitest.config.ts` (main), `vitest.react.config.ts`, `vitest.simple.config.ts`
 
 #### Build Requirements
-- Verify builds succeed with `npm run build` or `bun run build`
-- Build must complete without errors
-- Check for large bundle warnings and optimize if needed
+- `npm run build` must succeed (runs `tsc && vite build`)
+- TypeScript strict mode — no type errors allowed
+- Watch for unused variables/imports — `tsc` treats these as errors
 
 ### 2. Code Style Guidelines
 
 #### TypeScript
-- Use strict TypeScript mode
-- Avoid `any` types - use proper type definitions
+- Strict mode enabled — no implicit `any`
+- Avoid explicit `any` — use proper type definitions or `unknown`
 - Define interfaces for component props and data structures
 - Use type inference where appropriate
 
 #### React Components
-- Use functional components with hooks
-- Follow React best practices for performance (memo, useCallback, useMemo)
-- Ensure proper cleanup in useEffect hooks
-- Use proper dependency arrays in hooks
-- Add proper ARIA labels for accessibility
+- Functional components with hooks only
+- Performance: use `React.memo`, `useCallback`, `useMemo` where beneficial
+- Proper cleanup in `useEffect` hooks with correct dependency arrays
+- ARIA labels required on all interactive elements
+- Follow the existing tool-header/tool-card pattern for new tools
 
-#### File Organization
-- Components: `src/components/`
-- Utilities: `src/utils/`
-- Tests: Co-located in `__tests__/` directories
-- Styles: `src/styles/` and component-specific CSS
+#### CSS / Styling
+- Use CSS variables from `src/index.css` (e.g., `var(--text)`, `var(--primary)`, `var(--border-color)`)
+- Support both light and dark themes — never hardcode colors
+- Mobile-first responsive design using Bootstrap breakpoints
+- Glassmorphism effects via `src/styles/glassmorphism.css`
+- Tool components use `tool-header`, `tool-header-icon`, `tool-header-title`, `tool-card` classes
 
 ### 3. Accessibility Standards
-- Ensure keyboard navigation works for all interactive elements
-- Add proper ARIA labels and roles
-- Maintain minimum touch target sizes (44px on mobile)
-- Support screen readers
-- Ensure sufficient color contrast in both light and dark themes
+- Keyboard navigation for all interactive elements
+- ARIA labels and roles on buttons, inputs, modals
+- Minimum 44px touch targets on mobile
+- Screen reader support
+- Sufficient color contrast in both themes
 
-### 4. Mobile-First Design
-- Always consider mobile view when making UI changes
-- Use responsive breakpoints from Bootstrap
-- Test on mobile viewport sizes (375px width minimum)
-- Ensure touch targets are appropriately sized
+### 4. Adding a New Tool
 
-### 5. Performance Considerations
-- Use code splitting with React.lazy for route components
-- Optimize bundle size
-- Avoid unnecessary re-renders
-- Use proper memoization techniques
+1. Create utility module: `src/utils/myNewTool.ts`
+2. Create component: `src/components/utils/MyNewTool.tsx`
+3. Add navigation entry in `src/config/navigationConfig.ts` — search and nav update automatically
+4. Add lazy import in `src/App.tsx`
+5. Add route in `src/App.tsx`
+6. Add tests in `src/components/utils/__tests__/MyNewTool.test.tsx`
+7. Run lint, test, build
 
-### 6. Change Process Checklist
-
-When making ANY code changes:
-
-1. **Before coding:**
-   - Understand the existing code structure
-   - Check for related tests
-   - Review current linting rules
-
-2. **During development:**
-   - Write code following TypeScript strict mode
-   - Add/update tests for new/modified functionality
-   - Ensure accessibility standards are met
-   - Consider mobile responsiveness
-
-3. **Before committing:**
-   - [ ] Run `npm run lint` - Fix ALL issues (max 55 warnings)
-   - [ ] Run `npm test` - Ensure all tests pass
-   - [ ] Run `npm run build` - Verify build succeeds
-   - [ ] Test manually in browser (both desktop and mobile)
-   - [ ] Review changed files for unintended modifications
-
-4. **Testing requirements for new features:**
-   - Add unit tests for utility functions
-   - Add component tests for React components
-   - Test edge cases and error conditions
-   - Maintain or improve test coverage
-
-### 7. Common Commands
+### 5. Common Commands
 
 ```bash
 # Development
-npm run dev          # Start dev server
-npm run preview      # Preview production build
+npm run dev              # Start Vite dev server
+npm run preview          # Preview production build
+npm run electron:dev     # Start Electron dev mode
 
 # Testing
-npm test            # Run all tests
-npm run test:ui     # Run tests with UI
-npm run test:coverage # Generate coverage report
+npm test                 # Run all tests
+npm run test:watch       # Watch mode
+npm run test:ui          # Interactive Vitest UI
+npm run test:coverage    # Coverage report
 
 # Code Quality
-npm run lint        # Run ESLint
+npm run lint             # ESLint (must pass: 0 errors, ≤221 warnings)
 
 # Building
-npm run build       # Production build
-npm run build:github # Build for GitHub Pages
+npm run build            # Production build (tsc + vite)
+npm run build:github     # Build for GitHub Pages
+npm run electron:build   # Build Electron app
+
+# Documentation
+npm run docs:dev         # VitePress dev server
+npm run docs:build       # Build docs
+
+# Sub-packages (run from their directories)
+cd api && npm test       # API tests
+cd cli && npm test       # CLI tests
+cd mcp-server && npm test # MCP server tests
 ```
 
-### 8. Git Workflow
-- Branch naming: `copilot/<feature-name>`
-- Commit messages: Use clear, descriptive messages
-- Each commit should be atomic and focused
-- Use `report_progress` tool to commit changes (for Copilot agents)
+### 6. Git Workflow
+- Branch naming: `copilot/<feature-name>` or `feature/<name>`
+- Commit messages: clear, descriptive, atomic
+- CI checks: lint, test, build, coverage, CodeQL security scan, Netlify deploy preview
 
-### 9. Dependencies
-- Package manager: Bun (with npm fallback)
-- Framework: React 18 + TypeScript
+### 7. Dependencies
+- Package manager: Bun (preferred) or npm
+- Framework: React 18 + TypeScript 5
 - UI: Bootstrap 5 + React-Bootstrap
 - Build: Vite
 - Testing: Vitest + React Testing Library
-- Linting: ESLint with TypeScript plugin
+- Linting: ESLint with `@typescript-eslint`
+- Docs: VitePress
 
-### 10. Theme System
-- Support both light and dark themes
-- Use CSS variables for colors (defined in `src/index.css`)
-- Light theme: Default
+### 8. Theme System
+- Light theme: default
 - Dark theme: `[data-theme="dark"]` selector
-- Auto mode: Follows system preference
+- Auto mode: follows system `prefers-color-scheme`
+- CSS variables defined in `src/index.css`
+- Use `ThemeContext` for programmatic access
 
-### 11. Security
-- Never commit secrets or API keys
-- Validate user inputs
-- Use proper sanitization for user-generated content
-- Run CodeQL security scans before finalizing changes
+### 9. Before Committing Checklist
+- [ ] `npm run lint` — 0 errors (max 221 warnings)
+- [ ] `npm test` — all 928+ tests pass
+- [ ] `npm run build` — no TypeScript errors, build succeeds
+- [ ] Accessibility: ARIA labels, keyboard nav, contrast
+- [ ] Mobile: responsive at 375px minimum width
+- [ ] Both themes: verify light and dark modes
 
-### 12. Common Pitfalls to Avoid
-- ❌ Don't skip linting - it MUST pass
-- ❌ Don't skip tests - always add/update them
-- ❌ Don't use `any` type without justification
-- ❌ Don't ignore accessibility
-- ❌ Don't forget mobile responsiveness
-- ❌ Don't introduce breaking changes without tests
-- ❌ Don't commit large files or build artifacts
+### 10. Common Pitfalls
+- ❌ Don't skip lint/test/build — CI will catch it
+- ❌ Don't use `any` without justification
+- ❌ Don't hardcode colors — use CSS variables
+- ❌ Don't forget ARIA labels on new interactive elements
+- ❌ Don't forget to update tests when changing component text/labels
+- ❌ Don't add tools without a `navigationConfig.ts` entry
+- ❌ Don't commit secrets, API keys, or build artifacts
 
-## Priority Order for Changes
-1. Security and accessibility issues (highest priority)
-2. Bugs and functionality issues
-3. Test coverage improvements
-4. Performance optimizations
-5. Code quality improvements
-6. Documentation updates
-7. Nice-to-have features (lowest priority)
-
-## Questions or Issues?
-- Review existing code patterns in similar components
-- Check test files for usage examples
-- Refer to project README.md for setup instructions
-- Ensure changes align with project architecture
+### 11. Priority Order
+1. Security and accessibility (highest)
+2. Bug fixes
+3. Test coverage
+4. Performance
+5. Code quality
+6. Documentation
+7. New features (lowest)

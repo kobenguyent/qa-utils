@@ -78,7 +78,7 @@ export const HashGenerator: React.FC = () => {
     const text = ALGOS
       .map(a => `${a.label}: ${hashes[a.key] ?? ''}`)
       .join('\n');
-    navigator.clipboard.writeText(text).catch(() => {});
+    navigator.clipboard.writeText(text).catch(() => { /* ignore clipboard errors */ });
   };
 
   return (
