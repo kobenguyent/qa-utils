@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { Home } from '../Home';
 import * as randomToolModule from '../../utils/randomTool';
 import * as quotesModule from '../../utils/quotes';
+import { NAV_GROUP_ORDER, NAV_GROUP_META, navigationConfig } from '../../config/navigationConfig';
 
 // Mock the getRandomTool function
 vi.mock('../../utils/randomTool', () => ({
@@ -139,5 +140,52 @@ describe('Home Component', () => {
     expect(screen.getByRole('button', { name: /Visit UUID Generator/ })).toBeDefined();
     expect(screen.getByRole('button', { name: /Get another random tool/ })).toBeDefined();
     expect(screen.getByRole('button', { name: /Get another random quote/ })).toBeDefined();
+  });
+
+  it('should render the hero badge pill', () => {
+    vi.spyOn(randomToolModule, 'getRandomTool').mockReturnValue(mockTool);
+    vi.spyOn(quotesModule, 'getRandomQuote').mockReturnValue(mockQuote);
+
+    render(<Home />);
+
+    expect(screen.getByText(/Open-source QA toolkit/)).toBeDefined();
+  });
+
+  it('should render feature category cards for all nav groups', () => {
+    vi.spyOn(randomToolModule, 'getRandomTool').mockReturnValue(mockTool);
+    vi.spyOn(quotesModule, 'getRandomQuote').mockReturnValue(mockQuote);
+
+    render(<Home />);
+
+    // Each nav group should have a card with its name visible
+    for (const group of NAV_GROUP_ORDER) {
+      expect(screen.getByText(group)).toBeDefined();
+    }
+  });
+
+  it('should render feature category card icons from NAV_GROUP_META', () => {
+    vi.spyOn(randomToolModule, 'getRandomTool').mockReturnValue(mockTool);
+    vi.spyOn(quotesModule, 'getRandomQuote').mockReturnValue(mockQuote);
+
+    render(<Home />);
+
+    for (const group of NAV_GROUP_ORDER) {
+      const meta = NAV_GROUP_META[group];
+      expect(screen.getByText(meta.icon)).toBeDefined();
+    }
+  });
+
+  it('should render tool count badges on feature cards', () => {
+    vi.spyOn(randomToolModule, 'getRandomTool').mockReturnValue(mockTool);
+    vi.spyOn(quotesModule, 'getRandomQuote').mockReturnValue(mockQuote);
+
+    render(<Home />);
+
+    // Each group should have a badge showing its tool count
+    for (const group of NAV_GROUP_ORDER) {
+      const count = navigationConfig.filter(item => item.navGroups.includes(group)).length;
+      const badges = screen.getAllByText(`${count} tools`);
+      expect(badges.length).toBeGreaterThan(0);
+    }
   });
 });
