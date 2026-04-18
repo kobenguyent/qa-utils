@@ -6,7 +6,7 @@ import { DummyDataGenerator } from '../DummyDataGenerator';
 describe('DummyDataGenerator Component', () => {
     it('renders without crashing', () => {
         render(<DummyDataGenerator />);
-        expect(screen.getByText('🎭 Dummy Data Generator')).toBeInTheDocument();
+        expect(screen.getByText('Dummy Data Generator')).toBeInTheDocument();
     });
 
     it('renders all category tabs', () => {

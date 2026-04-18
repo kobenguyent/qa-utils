@@ -6,7 +6,7 @@ import { WebsiteScanner } from '../WebsiteScanner';
 describe('WebsiteScanner Component', () => {
   it('renders without crashing', () => {
     render(<WebsiteScanner />);
-    expect(screen.getByText('🔍 Website Scanner')).toBeInTheDocument();
+    expect(screen.getByText('Website Scanner')).toBeInTheDocument();
   });
 
   it('renders scan configuration form', () => {

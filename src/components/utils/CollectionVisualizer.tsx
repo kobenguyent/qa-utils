@@ -464,6 +464,7 @@ export const CollectionVisualizer: React.FC = () => {
                 style={{ fontFamily: 'var(--font-mono)', fontSize: '0.82rem' }}
               />
               <Button size="sm" onClick={handleParseJson} disabled={!jsonInput.trim()}
+                aria-label="Visualize pasted JSON"
                 style={{ background: '#34d399', border: 'none', fontWeight: 600, padding: '0.45rem 1.4rem', borderRadius: 'var(--radius-md)', color: '#000' }}>
                 🔍 Visualize
               </Button>
@@ -489,6 +490,7 @@ export const CollectionVisualizer: React.FC = () => {
               )}
             </div>
             <button onClick={handleClear}
+              aria-label="Load a different collection"
               style={{ background: 'none', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '0.25rem 0.7rem', fontSize: '0.75rem', color: 'var(--muted)', cursor: 'pointer', fontWeight: 600 }}>
               🔄 Load Another
             </button>

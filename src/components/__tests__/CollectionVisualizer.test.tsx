@@ -70,7 +70,7 @@ describe('CollectionVisualizer Component', () => {
     render(<CollectionVisualizer />);
     expect(screen.getByText(/Upload Collection File/)).toBeInTheDocument();
     expect(screen.getByText(/Paste JSON/)).toBeInTheDocument();
-    expect(screen.getByLabelText('Choose collection file to upload')).toBeInTheDocument();
+    expect(screen.getByLabelText('Upload collection file')).toBeInTheDocument();
     expect(screen.getByLabelText('Collection JSON input')).toBeInTheDocument();
   });
 
