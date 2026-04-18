@@ -38,11 +38,11 @@ describe('Base64 Component', () => {
     render(<Base64 />);
     const textarea = screen.getByPlaceholderText(/Enter text to encode/i);
     fireEvent.change(textarea, { target: { value: 'hello' } });
-    // The action-row Encode button is the second one rendered (after the mode toggle button)
+    // The action-row Encode button is outside the mode-toggle button group
+    const modeToggleGroup = screen.getByRole('group', { name: /select mode/i });
     const allEncodeButtons = screen.getAllByText('⬆️ Encode');
-    // Click the action-row encode button (not the mode toggle one)
     const actionEncode = allEncodeButtons.find(
-      btn => btn.closest('.tool-action-row') !== null
+      btn => !modeToggleGroup.contains(btn)
     );
     expect(actionEncode).toBeDefined();
     if (actionEncode) {
