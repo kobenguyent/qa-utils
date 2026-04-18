@@ -471,9 +471,12 @@ export function KobeanAssistant() {
     return (
         <Container className="kobean-simple py-4" style={{ maxWidth: '900px' }}>
             {/* Header */}
-            <div className="text-center mb-4">
-                <h2 className="kobean-simple-title">🤖 Kobean Assistant</h2>
-                <p className="text-muted small">AI-powered assistant with tool execution and multi-provider support</p>
+            <div className="tool-header">
+                <div className="tool-header-icon">🤖</div>
+                <div className="tool-header-content">
+                    <h1 className="tool-header-title">Kobean Assistant</h1>
+                    <p className="tool-header-desc">AI-powered assistant with tool execution and multi-provider support</p>
+                </div>
             </div>
 
             {/* Configuration Panel */}

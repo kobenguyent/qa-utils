@@ -14,8 +14,13 @@ export const SIP = () => {
 
   return(
     <Container>
+      <div className="tool-header">
+        <div className="tool-header-icon">📡</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">Session Initiation Protocol (SIP)</h1>
+        </div>
+      </div>
       <div className="text-center">
-        <h1>Session Initiation Protocol (SIP)</h1>
         <p>The Session Initiation Protocol (SIP) is a signaling protocol used for initiating, maintaining, and terminating communication sessions that include voice, video and messaging applications. SIP is used in Internet telephony, in private IP telephone systems, as well as mobile phone calling over LTE (VoLTE)</p>
         <img src={sip} width={650} alt="SIP diagram"></img>
       </div>

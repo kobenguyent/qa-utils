@@ -3,7 +3,13 @@ import { Container, Row, Col, Card } from 'react-bootstrap';
 export const AiAgentsInfographic = () => {
   return (
     <Container className="py-4">
-      <h1 className="text-center mb-4">AI Agents & MCP Infographic</h1>
+      <div className="tool-header">
+        <div className="tool-header-icon">🤖</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">AI Agents & MCP Infographic</h1>
+          <p className="tool-header-desc">Understanding AI agents and Model Context Protocol</p>
+        </div>
+      </div>
       
       <Row className="mb-4">
         <Col>

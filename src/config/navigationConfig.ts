@@ -544,6 +544,16 @@ export const navigationConfig: NavItem[] = [
 
   // ── Learn ─────────────────────────────────────────────────────────────────
   {
+    title: 'AI Instructions Guide',
+    description: 'Markdown structure & best practices for Claude, ChatGPT, Gemini, Copilot, Cursor & Windsurf',
+    path: '#/ai-instructions',
+    category: 'Hints',
+    keywords: ['ai', 'instructions', 'claude', 'chatgpt', 'gemini', 'copilot', 'cursor', 'windsurf', 'prompt', 'markdown', 'system prompt', 'rules', 'best practices', 'llm', 'context'],
+    icon: '🤖',
+    navGroups: ['Learn'],
+    navLabel: 'AI Instructions',
+  },
+  {
     title: 'Command Book',
     description: 'Hands-on reference for Git, Docker, Bash, and CodeceptJS commands',
     path: '#/command-book',
@@ -553,11 +563,11 @@ export const navigationConfig: NavItem[] = [
     navGroups: ['Learn'],
   },
   {
-    title: 'CodeceptJS Hints',
-    description: 'Best practices and tips for CodeceptJS testing',
+    title: 'Testing Cheat Sheet',
+    description: 'Quick-reference commands for Playwright, Pytest, CodeceptJS, Cypress, Jest, Vitest & more',
     path: '#/codeceptjs',
     category: 'Hints',
-    keywords: ['codeceptjs', 'hints', 'tips', 'best practices', 'testing'],
+    keywords: ['codeceptjs', 'playwright', 'pytest', 'cypress', 'jest', 'vitest', 'selenium', 'robot', 'k6', 'newman', 'postman', 'testing', 'cheat sheet', 'commands', 'hints'],
     icon: '🔥💡',
     navGroups: ['Learn'],
     navIcon: '🔥',

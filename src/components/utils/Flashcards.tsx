@@ -80,12 +80,12 @@ export const Flashcards: React.FC = () => {
 
   return (
     <Container className="py-4">
-      <div className="text-center mb-4">
-        <h1>🃏 Spaced Repetition Flashcards</h1>
-        <p className="lead text-muted">
-          Review QA concepts anchored to memory-palace stations. Cards surface based on your recall
-          strength using the SM-2 algorithm.
-        </p>
+      <div className="tool-header">
+        <div className="tool-header-icon">🃏</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">Spaced Repetition Flashcards</h1>
+          <p className="tool-header-desc">Review QA concepts anchored to memory-palace stations. Cards surface based on your recall strength using the SM-2 algorithm.</p>
+        </div>
       </div>
 
       {/* Stats bar */}

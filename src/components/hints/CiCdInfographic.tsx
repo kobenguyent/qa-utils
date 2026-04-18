@@ -3,7 +3,13 @@ import { Container, Row, Col, Card } from 'react-bootstrap';
 export const CiCdInfographic = () => {
   return (
     <Container className="py-4">
-      <h1 className="text-center mb-4">CI/CD Pipeline Infographic</h1>
+      <div className="tool-header">
+        <div className="tool-header-icon">🔄</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">CI/CD Pipeline Infographic</h1>
+          <p className="tool-header-desc">Understanding continuous integration and deployment</p>
+        </div>
+      </div>
       
       <Row className="mb-4">
         <Col>

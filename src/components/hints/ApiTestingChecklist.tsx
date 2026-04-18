@@ -8,11 +8,12 @@ export const ApiTestingChecklist = () => {
   return (
     <Container className="py-4">
       <div className="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-4">
-        <div>
-          <h1 className="mb-1">🌐 API Testing Checklist</h1>
-          <p className="lead mb-0">
-            A comprehensive checklist for testing REST APIs, GraphQL, and other web services.
-          </p>
+        <div className="tool-header">
+          <div className="tool-header-icon">🌐</div>
+          <div className="tool-header-content">
+            <h1 className="tool-header-title">API Testing Checklist</h1>
+            <p className="tool-header-desc">Comprehensive checklist for API testing</p>
+          </div>
         </div>
         <Button
           variant={roomMode ? "success" : "outline-secondary"}

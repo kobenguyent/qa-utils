@@ -120,12 +120,14 @@ export const CoveragePalace: React.FC = () => {
 
   return (
     <Container className="py-4">
+      <div className="tool-header">
+        <div className="tool-header-icon">🗺️</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">Coverage Palace</h1>
+          <p className="tool-header-desc">A spatial map of your test coverage across different layers. Glowing rooms are well-covered; dark rooms need attention. Enter your coverage percentages to illuminate the palace.</p>
+        </div>
+      </div>
       <div className="text-center mb-5">
-        <h1>🗺️ Coverage Palace</h1>
-        <p className="lead text-muted">
-          A spatial map of your test coverage across different layers. Glowing rooms are well-covered;
-          dark rooms need attention. Enter your coverage percentages to illuminate the palace.
-        </p>
         <div className="mx-auto" style={{ maxWidth: 400 }}>
           <div className="d-flex justify-content-between mb-1">
             <small className="text-muted">Overall Palace Coverage</small>

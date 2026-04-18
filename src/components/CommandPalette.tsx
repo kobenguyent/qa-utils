@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Modal, Form, ListGroup, Badge } from 'react-bootstrap';
+import { Modal, ListGroup, Badge } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { ToolRegistry, ToolDefinition } from '../utils/toolRegistry';
 import { registerDefaultTools } from '../utils/defaultTools';
@@ -11,6 +11,22 @@ interface CommandPaletteProps {
     onHide: () => void;
 }
 
+const CATEGORY_COLORS: Record<string, { bg: string; color: string }> = {
+  generator:    { bg: 'rgba(251,146,60,0.15)',  color: '#fb923c' },
+  encoding:     { bg: 'rgba(96,165,250,0.15)',  color: '#60a5fa' },
+  converter:    { bg: 'rgba(52,211,153,0.15)',  color: '#34d399' },
+  security:     { bg: 'rgba(167,139,250,0.15)', color: '#a78bfa' },
+  'api-testing':{ bg: 'rgba(232,121,249,0.15)', color: '#e879f9' },
+  ai:           { bg: 'rgba(250,204,21,0.15)',  color: '#facc15' },
+  productivity: { bg: 'rgba(244,114,182,0.15)', color: '#f472b6' },
+  development:  { bg: 'rgba(56,189,248,0.15)',  color: '#38bdf8' },
+};
+
+const CATEGORY_ICONS: Record<string, string> = {
+  generator: '🎲', encoding: '🔄', converter: '⚡', security: '🔐',
+  'api-testing': '🌐', ai: '🤖', productivity: '📋', development: '💻',
+};
+
 export function CommandPalette({ show, onHide }: CommandPaletteProps) {
     const navigate = useNavigate();
     const [query, setQuery] = useState('');
@@ -19,7 +35,6 @@ export function CommandPalette({ show, onHide }: CommandPaletteProps) {
     const [toolsReady, setToolsReady] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // Initialize tools immediately
     useEffect(() => {
         if (!ToolRegistry.isInitialized()) {
             registerDefaultTools();
@@ -27,12 +42,10 @@ export function CommandPalette({ show, onHide }: CommandPaletteProps) {
         setToolsReady(true);
     }, []);
 
-    // Get filtered tools
     const tools = useMemo(() => {
         if (!toolsReady) return [];
         const allTools = ToolRegistry.getAll();
         if (!query.trim()) return allTools.slice(0, 10);
-
         const q = query.toLowerCase();
         return allTools
             .filter((tool: ToolDefinition) =>
@@ -43,8 +56,6 @@ export function CommandPalette({ show, onHide }: CommandPaletteProps) {
             .slice(0, 10);
     }, [query, toolsReady]);
 
-
-    // Reset on show
     useEffect(() => {
         if (show) {
             setQuery('');
@@ -54,12 +65,33 @@ export function CommandPalette({ show, onHide }: CommandPaletteProps) {
         }
     }, [show]);
 
-    // Reset selected index when tools change
-    useEffect(() => {
-        setSelectedIndex(0);
-    }, [tools]);
+    useEffect(() => { setSelectedIndex(0); }, [tools]);
 
-    // Handle keyboard navigation
+    const executeTool = useCallback(async (tool: ToolDefinition) => {
+        if (tool.route) {
+            onHide();
+            navigate(tool.route);
+            return;
+        }
+        if (tool.execute) {
+            try {
+                const res = await ToolRegistry.execute(tool.id, {});
+                if (res.success && res.copyable) {
+                    await navigator.clipboard.writeText(res.copyable);
+                    setResult(`✓ ${res.message || res.copyable} (copied!)`);
+                    setTimeout(() => { setResult(null); onHide(); }, 1500);
+                } else if (res.success) {
+                    setResult(`✓ ${res.message}`);
+                    setTimeout(() => { setResult(null); onHide(); }, 1500);
+                } else {
+                    setResult(`✗ ${res.error}`);
+                }
+            } catch (err) {
+                setResult(`✗ Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
+            }
+        }
+    }, [onHide, navigate]);
+
     const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
         switch (e.key) {
             case 'ArrowDown':
@@ -72,64 +104,13 @@ export function CommandPalette({ show, onHide }: CommandPaletteProps) {
                 break;
             case 'Enter':
                 e.preventDefault();
-                if (tools[selectedIndex]) {
-                    executeTool(tools[selectedIndex]);
-                }
+                if (tools[selectedIndex]) executeTool(tools[selectedIndex]);
                 break;
             case 'Escape':
                 onHide();
                 break;
         }
-    }, [tools, selectedIndex, onHide]);
-
-    // Execute tool
-    const executeTool = async (tool: ToolDefinition) => {
-        // If tool has a route, navigate to it
-        if (tool.route) {
-            onHide();
-            navigate(tool.route);
-            return;
-        }
-
-        // If tool has execute function, run it
-        if (tool.execute) {
-            try {
-                const res = await ToolRegistry.execute(tool.id, {});
-                if (res.success && res.copyable) {
-                    await navigator.clipboard.writeText(res.copyable);
-                    setResult(`✓ ${res.message || res.copyable} (copied!)`);
-                    setTimeout(() => {
-                        setResult(null);
-                        onHide();
-                    }, 1500);
-                } else if (res.success) {
-                    setResult(`✓ ${res.message}`);
-                    setTimeout(() => {
-                        setResult(null);
-                        onHide();
-                    }, 1500);
-                } else {
-                    setResult(`✗ ${res.error}`);
-                }
-            } catch (err) {
-                setResult(`✗ Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
-            }
-        }
-    };
-
-    const getIcon = (category: string) => {
-        const icons: Record<string, string> = {
-            'generator': '🎲',
-            'encoding': '🔄',
-            'converter': '⚡',
-            'security': '🔐',
-            'api-testing': '🌐',
-            'ai': '🤖',
-            'productivity': '📋',
-            'development': '💻',
-        };
-        return icons[category] || '🔧';
-    };
+    }, [tools, selectedIndex, onHide, executeTool]);
 
     return (
         <Modal
@@ -140,48 +121,65 @@ export function CommandPalette({ show, onHide }: CommandPaletteProps) {
             size="lg"
         >
             <div className="command-palette">
-                <Form.Control
-                    ref={inputRef}
-                    type="text"
-                    placeholder="Search tools... (↑↓ to navigate, Enter to select)"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    className="command-input"
-                    autoFocus
-                />
+                {/* Search bar */}
+                <div className="command-search-wrapper">
+                    <span className="command-search-icon">🔍</span>
+                    <input
+                        ref={inputRef}
+                        type="text"
+                        placeholder="Search tools… type anything"
+                        value={query}
+                        onChange={e => setQuery(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        className="command-input"
+                        autoFocus
+                    />
+                    {tools.length > 0 && (
+                        <span className="command-result-count">{tools.length} result{tools.length !== 1 ? 's' : ''}</span>
+                    )}
+                </div>
 
                 {result ? (
-                    <div className="command-result">
-                        {result}
-                    </div>
+                    <div className="command-result">{result}</div>
                 ) : (
                     <ListGroup className="command-list">
-                        {tools.map((tool, index) => (
-                            <ListGroup.Item
-                                key={tool.id}
-                                action
-                                active={index === selectedIndex}
-                                onClick={() => executeTool(tool)}
-                                className="command-item"
-                            >
-                                <span className="command-icon">{getIcon(tool.category)}</span>
-                                <div className="command-info">
-                                    <span className="command-name">{tool.name}</span>
-                                    <span className="command-desc">{tool.description}</span>
-                                </div>
-                                {tool.execute && <Badge bg="success" className="command-badge">⚡</Badge>}
-                            </ListGroup.Item>
-                        ))}
+                        {tools.map((tool, index) => {
+                            const cat = CATEGORY_COLORS[tool.category] ?? { bg: 'rgba(148,163,184,0.12)', color: '#94a3b8' };
+                            const icon = CATEGORY_ICONS[tool.category] ?? '🔧';
+                            return (
+                                <ListGroup.Item
+                                    key={tool.id}
+                                    action
+                                    active={index === selectedIndex}
+                                    onClick={() => executeTool(tool)}
+                                    className="command-item"
+                                >
+                                    <span className="command-icon-bubble" style={{ background: cat.bg, borderColor: `${cat.color}30` }}>
+                                        {icon}
+                                    </span>
+                                    <div className="command-info">
+                                        <span className="command-name">{tool.name}</span>
+                                        <span className="command-desc">{tool.description}</span>
+                                    </div>
+                                    <span className="command-category" style={{ background: cat.bg, color: cat.color, border: `1px solid ${cat.color}30` }}>
+                                        {tool.category.replace('-', ' ')}
+                                    </span>
+                                    {tool.execute && <Badge bg="success" className="command-badge">⚡</Badge>}
+                                </ListGroup.Item>
+                            );
+                        })}
                         {tools.length === 0 && (
-                            <div className="command-empty">No tools found</div>
+                            <div className="command-empty">
+                                <span className="command-empty-icon">🔍</span>
+                                No tools found for <strong>&ldquo;{query}&rdquo;</strong>
+                            </div>
                         )}
                     </ListGroup>
                 )}
 
                 <div className="command-footer">
                     <span><kbd>↑↓</kbd> navigate</span>
-                    <span><kbd>Enter</kbd> select</span>
+                    <span><kbd>↵</kbd> select</span>
                     <span><kbd>Esc</kbd> close</span>
                 </div>
             </div>

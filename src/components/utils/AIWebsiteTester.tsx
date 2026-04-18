@@ -196,11 +196,12 @@ export const AIWebsiteTester: React.FC = () => {
 
   return (
     <Container className="py-4">
-      <div className="text-center mb-4">
-        <h1>🤖 AI Website Tester</h1>
-        <p className="text-muted">
-          AI-powered comprehensive website testing with guided execution and detailed reporting
-        </p>
+      <div className="tool-header">
+        <div className="tool-header-icon">🤖</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">AI Website Tester</h1>
+          <p className="tool-header-desc">AI-powered comprehensive website testing with guided execution and detailed reporting</p>
+        </div>
       </div>
 
       <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k || 'config')} className="mb-4">

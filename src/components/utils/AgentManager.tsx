@@ -1194,13 +1194,12 @@ export function AgentManager() {
 
   return (
     <Container className="py-4">
-      <div className="mb-4">
-        <h2 className="mb-1">🎭 Agent Orchestration</h2>
-        <p className="text-muted mb-0">
-          Coordinate multiple specialized AI agents to tackle complex multi-step tasks.
-          Use <strong>Quick Orchestrate</strong> to get started instantly, or configure
-          custom agents and pipelines in the <strong>Advanced</strong> tabs.
-        </p>
+      <div className="tool-header">
+        <div className="tool-header-icon">🎭</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">Agent Orchestration</h1>
+          <p className="tool-header-desc">Coordinate multiple specialized AI agents to tackle complex multi-step tasks. Use Quick Orchestrate to get started instantly, or configure custom agents and pipelines in the Advanced tabs.</p>
+        </div>
       </div>
 
       <Tab.Container defaultActiveKey="quick">

@@ -60,12 +60,14 @@ export const QAPalace: React.FC = () => {
 
   return (
     <Container className="py-4">
+      <div className="tool-header">
+        <div className="tool-header-icon">🏛️</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">The QA Palace</h1>
+          <p className="tool-header-desc">Walk through the QA Palace — each room holds a set of tools, spatially grouped so your memory can navigate by place. Click any tool to enter its room.</p>
+        </div>
+      </div>
       <div className="text-center mb-5">
-        <h1 className="display-5">🏛️ The QA Palace</h1>
-        <p className="lead text-muted">
-          Walk through the QA Palace — each room holds a set of tools, spatially grouped so your
-          memory can navigate by place. Click any tool to enter its room.
-        </p>
         <div className="d-flex gap-2 justify-content-center flex-wrap">
           <Button variant="outline-primary" href="#/my-palace" size="sm">🏠 My Palace</Button>
           <Button variant="outline-success" href="#/flashcards" size="sm">🃏 Flashcards</Button>

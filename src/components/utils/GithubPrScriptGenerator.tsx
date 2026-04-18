@@ -53,14 +53,13 @@ export const GithubPrScriptGenerator: React.FC = () => {
 
   return (
     <Container className="py-4">
-      <Row>
-        <Col>
-          <h1 className="mb-4">🚀 GitHub PR Script Generator</h1>
-          <p className="text-muted mb-4">
-            Generate customizable bash scripts for creating GitHub pull requests with full git workflow support.
-          </p>
-        </Col>
-      </Row>
+      <div className="tool-header">
+        <div className="tool-header-icon">🚀</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">GitHub PR Script Generator</h1>
+          <p className="tool-header-desc">Generate customizable bash scripts for creating GitHub pull requests with full git workflow support.</p>
+        </div>
+      </div>
 
       <Row>
         <Col lg={6}>

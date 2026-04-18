@@ -138,13 +138,13 @@ export const SequenceDiagramGenerator: React.FC = () => {
 
   return (
     <Container className="py-4">
-      <h2 className="mb-3">
-        📊 Sequence Diagram Generator
-      </h2>
-      <p className="text-muted mb-4">
-        Generate sequence diagrams from CodeceptJS, Playwright, or Pytest test code. Paste your test code below
-        and visualize the test flow as a Mermaid sequence diagram.
-      </p>
+      <div className="tool-header">
+        <div className="tool-header-icon">📊</div>
+        <div className="tool-header-content">
+          <h1 className="tool-header-title">Sequence Diagram Generator</h1>
+          <p className="tool-header-desc">Generate sequence diagrams from CodeceptJS, Playwright, or Pytest test code. Paste your test code below and visualize the test flow as a Mermaid sequence diagram.</p>
+        </div>
+      </div>
 
       <Row className="mb-3">
         <Col md={6}>

@@ -465,8 +465,13 @@ export const QRCodeGenerator: React.FC = () => {
 
     return (
         <Container className="py-4">
-            <h1 className="h3 mb-2">📱 QR Code Generator</h1>
-            <p className="text-muted mb-4">Generate static and dynamic QR codes for URLs, WiFi, contacts, and more</p>
+            <div className="tool-header">
+                <div className="tool-header-icon">📱</div>
+                <div className="tool-header-content">
+                    <h1 className="tool-header-title">QR Code Generator</h1>
+                    <p className="tool-header-desc">Generate static and dynamic QR codes for URLs, WiFi, contacts, and more</p>
+                </div>
+            </div>
 
             <Tabs
                 activeKey={mode}
