@@ -1,0 +1,39 @@
+# Cursor Rules for QA Utils
+
+You are working on QA Utils — a monorepo with 45+ QA tools built with React 18, TypeScript, Bootstrap 5, and Vite.
+
+## Commands to Run Before Committing
+- `npm run lint` — 0 errors, max 221 warnings
+- `npm test` — 928+ tests must pass
+- `npm run build` — TypeScript + Vite build must succeed
+
+## Project Structure
+- `src/config/navigationConfig.ts` — Single source of truth for routes/nav/search
+- `src/components/utils/` — Tool components (one per tool)
+- `src/utils/` — Business logic modules
+- `src/index.css` — CSS variables for light/dark theming
+- `src/App.tsx` — Routes and lazy imports
+- Tests: co-located in `__tests__/` directories
+
+## Code Style
+- TypeScript strict mode, no `any` without justification
+- Functional React components with hooks
+- ARIA labels on all interactive elements
+- CSS variables for colors: `var(--text)`, `var(--primary)`, `var(--bg)`, `var(--border-color)`
+- Tool components use `tool-header`, `tool-card`, `tool-card-header`, `tool-card-body` CSS classes
+- Mobile-first responsive design (min 375px width)
+- Support light and dark themes — never hardcode colors
+
+## Adding a New Tool
+1. Create `src/utils/myTool.ts` and `src/components/utils/MyTool.tsx`
+2. Add entry to `src/config/navigationConfig.ts`
+3. Add lazy import + route in `src/App.tsx`
+4. Add tests in `__tests__/`
+5. Run lint + test + build
+
+## Common Pitfalls
+- Unused variables/imports cause TypeScript build errors
+- Empty arrow functions `() => {}` cause lint errors — add a comment inside
+- Changing component text/labels without updating tests breaks CI
+- Hardcoded colors break dark theme
+- Missing ARIA labels fail accessibility standards
