@@ -4,7 +4,6 @@ import CopyWithToast from '../CopyWithToast';
 import {
   WebSocketClient,
   WebSocketConfig,
-  WebSocketMessage,
   WebSocketResponse,
   isValidWebSocketUrl,
   formatWebSocketMessage,

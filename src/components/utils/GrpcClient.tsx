@@ -493,7 +493,6 @@ export const GrpcClientComponent: React.FC = () => {
           <div className="tool-card-body" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
             {history.map((entry) => {
               const ok = !entry.error;
-              const sc = ok ? getStatusColor(entry.response?.status ?? 0) : '#f87171';
               return (
                 <div key={entry.id} style={{
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
