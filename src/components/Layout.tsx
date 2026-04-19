@@ -50,7 +50,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     <ErrorBoundary>
       {/* CSS-Tricks: scroll-driven progress bar */}
       <div className="scroll-progress" aria-hidden="true" />
-      <Container fluid className="d-flex flex-column min-vh-100">
+      <Container fluid className="d-flex flex-column min-vh-100 px-0">
         <Header />
         <main className="flex-grow-1">
           {children}
