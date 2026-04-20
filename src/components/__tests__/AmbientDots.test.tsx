@@ -100,12 +100,14 @@ describe('AmbientDots', () => {
     setTheme('dark');
     const { getByTestId } = render(<AmbientDots />);
     const canvas = getByTestId('ambient-dots-canvas');
+    // React attaches synthetic event listeners; verify the element exists and
+    // responds to mouse events without throwing.
     expect(canvas).toBeDefined();
-    // Canvas should have onMouseMove and onMouseLeave handlers (rendered in DOM as event listeners)
-    expect(typeof canvas.onmouseleave !== 'undefined' || canvas.getAttribute('onMouseLeave') !== undefined || true).toBe(true);
+    expect(() => canvas.dispatchEvent(new MouseEvent('mousemove', { bubbles: true }))).not.toThrow();
+    expect(() => canvas.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }))).not.toThrow();
   });
 
-  it('QA_TOOLS list is non-empty (matrix rain uses tool names)', async () => {
+  it('QA_TOOLS list is non-empty (matrix rain uses tool names)', () => {
     // Import the module to check exports indirectly via render
     setTheme('light');
     const { getByTestId } = render(<AmbientDots />);

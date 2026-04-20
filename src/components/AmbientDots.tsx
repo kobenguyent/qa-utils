@@ -52,6 +52,16 @@ const STAR_COLORS = [
   [220, 255, 210],   // soft green
 ];
 
+// ─── Star rendering constants ─────────────────────────────────────────────────
+const TWO_PI = Math.PI * 2;
+const MAX_STARS = 200;
+const STAR_DENSITY_DIVISOR = 5000;
+const OUTER_HALO_MULTIPLIER = 4.5;
+const INNER_GLOW_MULTIPLIER = 2;
+const SPECULAR_OFFSET = 0.25;
+const SPECULAR_RADIUS = 0.35;
+const MAX_PARALLAX = 24;
+
 export const AmbientDots: React.FC = () => {
   const cvs = useRef<HTMLCanvasElement>(null);
 
@@ -73,7 +83,7 @@ export const AmbientDots: React.FC = () => {
 
   // ── Dark mode initialiser ──────────────────────────────────────────────────
   const initStars = useCallback((w: number, h: number) => {
-    const count = Math.min(Math.floor((w * h) / 5000), 200);
+    const count = Math.min(Math.floor((w * h) / STAR_DENSITY_DIVISOR), MAX_STARS);
     const arr: Star[] = [];
     for (let i = 0; i < count; i++) {
       const x = Math.random() * w;
@@ -82,9 +92,9 @@ export const AmbientDots: React.FC = () => {
       arr.push({
         x, y, ox: x, oy: y,
         r: depth * 2.2 + 0.8,
-        twinklePhase: Math.random() * Math.PI * 2,
+        twinklePhase: Math.random() * TWO_PI,
         twinkleSpeed: Math.random() * 0.02 + 0.005,
-        driftPhase: Math.random() * Math.PI * 2,
+        driftPhase: Math.random() * TWO_PI,
         driftSpeed: Math.random() * 0.002 + 0.0005,
         baseAlpha: depth * 0.5 + 0.25,
         depth,
@@ -136,7 +146,6 @@ export const AmbientDots: React.FC = () => {
     resize();
     window.addEventListener('resize', resize);
 
-    const MAX_PARALLAX = 24;
     const FONT_SIZE = 13;
 
     const frame = () => {
@@ -173,37 +182,37 @@ export const AmbientDots: React.FC = () => {
 
           // Outer halo
           if (r > 1) {
-            const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, r * 4.5);
+            const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, r * OUTER_HALO_MULTIPLIER);
             grad.addColorStop(0, `rgba(${cr},${cg},${cb},${alpha * 0.45})`);
             grad.addColorStop(0.5, `rgba(${cr},${cg},${cb},${alpha * 0.12})`);
             grad.addColorStop(1, 'rgba(0,0,0,0)');
             ctx.beginPath();
-            ctx.arc(s.x, s.y, r * 4.5, 0, 6.283);
+            ctx.arc(s.x, s.y, r * OUTER_HALO_MULTIPLIER, 0, TWO_PI);
             ctx.fillStyle = grad;
             ctx.fill();
           }
 
           // Inner glow ring
           if (r > 1.2) {
-            const grad2 = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, r * 2);
+            const grad2 = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, r * INNER_GLOW_MULTIPLIER);
             grad2.addColorStop(0, `rgba(${cr},${cg},${cb},${alpha * 0.7})`);
             grad2.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
             ctx.beginPath();
-            ctx.arc(s.x, s.y, r * 2, 0, 6.283);
+            ctx.arc(s.x, s.y, r * INNER_GLOW_MULTIPLIER, 0, TWO_PI);
             ctx.fillStyle = grad2;
             ctx.fill();
           }
 
           // Bright core
           ctx.beginPath();
-          ctx.arc(s.x, s.y, r, 0, 6.283);
+          ctx.arc(s.x, s.y, r, 0, TWO_PI);
           ctx.fillStyle = `rgba(${cr},${cg},${cb},${Math.min(alpha * 1.3, 1)})`;
           ctx.fill();
 
           // Specular highlight on larger stars
           if (r > 1.8) {
             ctx.beginPath();
-            ctx.arc(s.x - r * 0.25, s.y - r * 0.25, r * 0.35, 0, 6.283);
+            ctx.arc(s.x - r * SPECULAR_OFFSET, s.y - r * SPECULAR_OFFSET, r * SPECULAR_RADIUS, 0, TWO_PI);
             ctx.fillStyle = `rgba(255,255,255,${alpha * 0.6})`;
             ctx.fill();
           }
