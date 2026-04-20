@@ -14,6 +14,11 @@ vi.mock('../../utils/quotes', () => ({
   getRandomQuote: vi.fn()
 }));
 
+// Mock ThemeContext so AmbientDots can render without a ThemeProvider
+vi.mock('../../contexts/ThemeContext', () => ({
+  useTheme: vi.fn(() => ({ theme: 'light', setTheme: vi.fn() })),
+}));
+
 describe('Home Component', () => {
   const mockTool = {
     title: 'UUID Generator',
