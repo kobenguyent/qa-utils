@@ -9,8 +9,8 @@
 **QA Utils** is an all-in-one quality assurance toolkit — 45+ tools for developers and testers, available as a **web app**, **desktop app** (macOS/Windows/Linux), **CLI**, **REST API**, and **MCP server** for AI agent integration.
 
 🌐 **[Try it now →](https://kobenguyent.github.io/qa-utils/#/)**
+<img width="987" height="623" alt="Screenshot" src="https://github.com/user-attachments/assets/532e2302-7e1e-475e-bb6e-7c094783133a" />
 
-<img width="1310" height="780" alt="QA Utils screenshot" src="https://github.com/user-attachments/assets/667bf71d-84cc-4d30-bb1c-7b95fe37ceab" />
 
 > **Disclaimer**: All referenced trademarks, frameworks, and services belong to their respective owners. This project is not affiliated with, endorsed by, or sponsored by any of them.
 
