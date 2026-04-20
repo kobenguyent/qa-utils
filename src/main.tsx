@@ -37,6 +37,7 @@ const ApiTestingChecklist = lazy(() => import('./components/hints/ApiTestingChec
 const MobileTestingChecklist = lazy(() => import('./components/hints/MobileTestingChecklist.tsx').then(module => ({ default: module.MobileTestingChecklist })));
 const CiCdInfographic = lazy(() => import('./components/hints/CiCdInfographic.tsx').then(module => ({ default: module.CiCdInfographic })));
 const AiAgentsInfographic = lazy(() => import('./components/hints/AiAgentsInfographic.tsx').then(module => ({ default: module.AiAgentsInfographic })));
+const LocalLlmMacTips = lazy(() => import('./components/hints/LocalLlmMacTips.tsx').then(module => ({ default: module.LocalLlmMacTips })));
 const TestFrameworksComparison = lazy(() => import('./components/hints/TestFrameworksComparison.tsx').then(module => ({ default: module.TestFrameworksComparison })));
 const SqlGenerator = lazy(() => import('./components/utils/SqlGenerator.tsx').then(module => ({ default: module.SqlGenerator })));
 const HtmlRenderer = lazy(() => import('./components/utils/HtmlRenderer.tsx').then(module => ({ default: module.HtmlRenderer })));
@@ -202,6 +203,10 @@ const router = createHashRouter([
   {
     path: 'ai-agents-infographic',
     element: <RouteWrapper><AiAgentsInfographic /></RouteWrapper>
+  },
+  {
+    path: 'local-llm-mac-tips',
+    element: <RouteWrapper><LocalLlmMacTips /></RouteWrapper>
   },
   {
     path: 'test-frameworks-comparison',
