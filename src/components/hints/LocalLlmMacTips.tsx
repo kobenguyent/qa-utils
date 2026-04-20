@@ -274,7 +274,7 @@ llama-cli \\
               <ol>
                 <li>Quit unused browser tabs (each Chrome tab = ~100–400 MB).</li>
                 <li>Quit Slack, Teams, Electron-based apps.</li>
-                <li>Purge the macOS disk cache: <code>sudo purge</code></li>
+                <li>Purge the macOS disk cache: <code>sudo purge</code> (forces macOS to release inactive memory back to the RAM pool — safe to run, no data is lost)</li>
                 <li>Check memory pressure in Activity Monitor — aim for <strong>green</strong> before loading a large model.</li>
                 <li>Disable iCloud Drive sync during inference sessions.</li>
               </ol>
@@ -404,11 +404,11 @@ curl http://localhost:11434/v1/chat/completions \\
             </Card.Header>
             <Card.Body>
               <ul className="mb-0">
-                <li><strong>Ollama docs:</strong> <code>ollama.com/docs</code></li>
-                <li><strong>llama.cpp:</strong> <code>github.com/ggerganov/llama.cpp</code></li>
-                <li><strong>GGUF model hub:</strong> <code>huggingface.co/bartowski</code> (pre-quantized GGUF releases)</li>
-                <li><strong>Apple MLX framework:</strong> <code>github.com/ml-explore/mlx</code> — Apple&apos;s own ML framework, often faster than llama.cpp on Apple Silicon</li>
-                <li><strong>LM Studio:</strong> <code>lmstudio.ai</code> — GUI for managing and running local models</li>
+                <li><strong>Ollama docs:</strong> <a href="https://ollama.com/docs" target="_blank" rel="noopener noreferrer">ollama.com/docs</a></li>
+                <li><strong>llama.cpp:</strong> <a href="https://github.com/ggerganov/llama.cpp" target="_blank" rel="noopener noreferrer">github.com/ggerganov/llama.cpp</a></li>
+                <li><strong>GGUF model hub:</strong> <a href="https://huggingface.co/bartowski" target="_blank" rel="noopener noreferrer">huggingface.co/bartowski</a> (pre-quantized GGUF releases)</li>
+                <li><strong>Apple MLX framework:</strong> <a href="https://github.com/ml-explore/mlx" target="_blank" rel="noopener noreferrer">github.com/ml-explore/mlx</a> — Apple&apos;s own ML framework, often faster than llama.cpp on Apple Silicon</li>
+                <li><strong>LM Studio:</strong> <a href="https://lmstudio.ai" target="_blank" rel="noopener noreferrer">lmstudio.ai</a> — GUI for managing and running local models</li>
               </ul>
             </Card.Body>
           </Card>
