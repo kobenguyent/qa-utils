@@ -594,6 +594,16 @@ export const navigationConfig: NavItem[] = [
     navLabel: 'AI Agents & MCP',
   },
   {
+    title: 'Local LLM on Mac (16 GB RAM)',
+    description: 'Tips to run local LLMs efficiently on Apple Silicon Mac with 16 GB RAM — model selection, quantization, Ollama config, swap tuning',
+    path: '#/local-llm-mac-tips',
+    category: 'Hints',
+    keywords: ['local', 'llm', 'mac', 'apple silicon', 'ollama', 'gemma', 'llama', 'quantization', 'gguf', 'inference', 'ram', '16gb', 'mac mini', 'local ai'],
+    icon: '🍎',
+    navGroups: ['Learn'],
+    navLabel: 'Local LLM on Mac',
+  },
+  {
     title: 'Test Frameworks Comparison',
     description: 'Compare test automation frameworks and choose the right one',
     path: '#/test-frameworks-comparison',
