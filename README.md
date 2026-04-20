@@ -1,399 +1,152 @@
 # QA Utils 🚀
 
-[![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://paypal.me/peternguyentr?country.x=DE&locale.x=en_US)
-[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/peternguyew)
-
-A comprehensive collection of quality assurance tools and utilities designed to enhance your testing workflow. Built with modern React, TypeScript, and optimized for performance with comprehensive test coverage. **Now available as a desktop app for macOS, Windows, and Linux!** Includes an **MCP server** for AI agent integration and a built-in **Agent Mode** for autonomous multi-step task execution.
-
-> **Disclaimer**: This project references various third-party tools, frameworks, and services for compatibility and integration purposes. All trademarks, service marks, and trade names referenced in this project are the property of their respective owners. This project is not affiliated with, endorsed by, or sponsored by any of the referenced vendors or organizations.
-
-🌐 **[Live Demo](https://kobenguyent.github.io/qa-utils/#/)** | 💻 **Desktop App Available** | 📊 **760+ Tests** | 🎯 **Mobile-First Design** | 🤖 **AI-Powered** | 🔌 **MCP Server**
-
-<img width="1310" height="780" alt="Screenshot 1" src="https://github.com/user-attachments/assets/667bf71d-84cc-4d30-bb1c-7b95fe37ceab" />
-
-## ✨ Features
-
-### 🛠️ Utility Tools
-
-#### 🌐 JWT Debugger
-Decode and analyze JSON Web Tokens with enhanced features:
-- **Multi-line textarea** for handling long JWT tokens
-- **📋 Paste from Clipboard** button for easy token input
-- **🗑️ Clear functionality** to reset input quickly
-- **Real-time validation** with expiration status
-- **Syntax-highlighted decoded payload** display
-- **Copy to clipboard** functionality for decoded data
-
-![JWT Debugger](https://github.com/user-attachments/assets/5346ad83-e80a-414c-a563-cd33e9645c70)
-
-#### 🚀 CI/CD Workflow Generator
-Professional workflow generator supporting multiple platforms:
-- **5 CI/CD Platforms**: Supports popular CI/CD services (GitHub Actions, GitLab CI, Azure DevOps, Jenkins, Bitbucket Pipelines)
-- **API & E2E Testing**: Configurable test types with multiple runners
-- **Test Runner Support**: Supports popular test automation frameworks (Playwright, Puppeteer, WebDriverIO, Cypress)
-- **Node.js Versions**: 16, 18, 20, 21 support
-- **NPM Publishing**: Automated package publishing workflows
-- **Real-time Preview**: Live preview with syntax highlighting
-- **One-click Download**: Generate and download workflow files instantly
-- **Comprehensive Instructions**: Detailed setup guidance for each platform
-
-![CI/CD Workflow Generator](https://github.com/user-attachments/assets/84580edc-ab15-432c-a016-a26ea00f13d8)
-
-#### 🌐 REST Client
-Advanced REST API testing and development tool:
-- **HTTP Methods**: Support for GET, POST, PUT, DELETE, HEAD requests
-- **Curl Import**: Parse and import curl commands automatically
-- **Request Builder**: Visual interface for building requests
-- **Response Viewer**: Formatted JSON display with syntax highlighting
-- **Request History**: Track and reload previous requests
-- **Header Management**: Easy header editing and management
-- **Copy Functionality**: Copy responses and export as curl commands
-
-![REST Client](https://github.com/user-attachments/assets/rest-client-placeholder)
-
-#### 🔌 WebSocket Client
-Real-time WebSocket testing and debugging tool:
-- **Real-time Connection**: Live WebSocket connection management
-- **Auto-reconnect**: Configurable automatic reconnection with retry limits
-- **Protocol Support**: Custom WebSocket protocols and subprotocols
-- **Message History**: Complete conversation tracking with timestamps
-- **Connection Status**: Visual indicators for connection state
-- **Message Formatting**: JSON formatting and syntax highlighting
-- **Copy Functionality**: Copy individual messages or entire conversations
-
-#### ⚡ gRPC Client
-Test gRPC services with browser-compatible gRPC-Web support:
-- **gRPC-Web Protocol**: Browser-compatible gRPC communication
-- **Unary Calls**: Standard request-response gRPC calls
-- **Streaming Support**: Server streaming call handling
-- **Protobuf Integration**: Parse .proto files for service discovery
-- **Metadata Management**: Custom headers and gRPC metadata
-- **Request History**: Track and reload previous gRPC calls
-- **JSON Interface**: User-friendly JSON input for protobuf messages
-- **Response Analysis**: Detailed response inspection with status codes
-
-#### 📦 Collection Manager
-Unified API collection management tool supporting multiple formats:
-- **Format Compatibility**: Supports Postman-compatible, Insomnia-compatible, and Thunder Client-compatible collection formats, plus .env, CSV, and generic JSON files
-- **Multi-Collection Support**: Import and manage multiple collections and environments simultaneously
-- **Auto-Detection**: Automatically detect collection format and type (collection vs environment)
-- **Persistent Storage**: Auto-saves to IndexedDB - resume work after page refresh
-- **Inline Editor**: Edit requests directly - method, URL, headers, body, scripts with real-time updates
-- **Rename Items**: Double-click to rename collections, environments, folders, and requests
-- **Script Support**: Full support for pre-request and test scripts
-- **Script Preservation**: Scripts are preserved when converting between formats
-- **Script Translation**: Automatically translates script syntax between formats
-- **Folder Scripts**: Pre-request and test scripts at folder and collection level
-- **Variable Rendering**: Visual badges show variable references with values on hover
-- **Autocomplete**: Type `{{` in URL/headers to see variable suggestions
-- **Syntax Highlighting**: JavaScript syntax highlighting for scripts with edit/preview toggle
-- **Bulk Operations**: Find & replace across entire collection (variables, URLs, headers, body)
-- **Variable Management**: Add/edit/delete variables with types, descriptions, enabled/disabled state
-- **Format Conversion**: Convert between any supported format with live preview
-- **Import/Export**: Bulk import/export variables as JSON or CSV
-- **Hierarchical View**: Collapsible tree view for folders and requests
-- **Drag & Drop Reordering**: Reorder requests and folders by dragging
-- **Search & Filter**: Real-time search across all collection elements
-- **Request Search**: Filter requests/folders by name, URL, method, headers, or body content
-- **Collection Switching**: Easy switching between loaded collections and environments with tabs
-
-*Note: This tool supports conversion between various REST API collection formats. The tool is not affiliated with or endorsed by any API testing tool vendors.*
-
-#### 🛸 Base64 Encode/Decode
-Simple and efficient Base64 operations:
-- **Bidirectional conversion** (encode/decode)
-- **Clean interface** with instant results
-- **Error handling** for invalid inputs
-- **Copy functionality** for results
-
-![Base64 Tool](https://github.com/user-attachments/assets/04c7fedc-0a31-4dd1-9acd-3d2751255ba0)
-
-#### ﹛ JSON Formatter ﹜
-Advanced JSON processing capabilities:
-- **Pretty-print JSON** with syntax highlighting
-- **Collapsible tree view** for large objects
-- **Error detection** and validation
-- **Copy to clipboard** functionality
-- **Real-time formatting** as you type
-
-#### ⏰ Unix Timestamp Converter
-Convert between Unix timestamps and human-readable dates:
-- **Bidirectional conversion** (timestamp ↔ date)
-- **Multiple format support** (seconds/milliseconds)
-- **Timezone handling** with local time display
-- **Real-time conversion** with validation
-
-#### 🤖 AI Chat (Enhanced)
-Advanced AI chat interface with cutting-edge features:
-- **Multi-Provider Support**: 
-  - **OpenAI** - GPT-3.5, GPT-4, and more
-  - **Anthropic Claude** - Claude 3 Opus, Sonnet, and Haiku
-  - **Google Gemini** - Gemini Pro and Gemini 1.5 Pro
-  - **Azure OpenAI** - Enterprise-grade OpenAI deployments
-  - **Ollama** - Local LLMs (Llama 2, Mistral, CodeLlama, etc.)
-- **Token Optimization**: 
-  - Automatic token counting and display
-  - Smart token compression to reduce API costs
-  - Real-time token usage monitoring
-- **Smart Prompt Engineering**:
-  - Three system prompt types: Default, Technical, and Creative
-  - Automatic context injection for enhanced responses
-  - Optimized for better AI responses
-- **Conversation Management**:
-  - Multiple chat contexts with easy switching
-  - Save and load conversation history
-  - Export conversations (JSON/Markdown format)
-  - Delete or rename conversations
-- **MCP Tool Management**: Comprehensive tool enable/disable/load/unload system
-  - 11 pre-configured default tools (file system, web, computation, data, utility)
-  - Enable/disable individual tools or entire categories
-  - Load custom tools from MCP servers
-  - Import/export tool configurations
-  - Real-time statistics (total, enabled, default, custom tools)
-  - Complete usage guide with code examples
-  - Custom MCP server support with auto-discovery
-- **Knowledge Base & CAG**:
-  - File upload support (.txt, .md, .json, .csv, .pdf)
-  - Cache-Augmented Generation (CAG) for fast retrieval
-  - Keyword-based search and metadata filtering
-  - Large context window support (up to 1M tokens for Gemini 1.5)
-- **Model Management**: Fetch and select from available models for each provider
-- **Real-time Statistics**: Monitor cache usage, document count, and token usage
-
-#### 🤖 Agent Mode
-Autonomous AI agent that plans and executes multi-step tasks using QA tools:
-- **Autonomous Execution**: Describe a task and the agent plans & executes tools automatically
-- **Observe-Think-Act Loop**: Iterative reasoning with tool calls until the task is complete
-- **Step-by-Step Timeline**: Visual timeline showing thinking, tool calls, results, and final answer
-- **Preset Task Examples**: Quick-start examples like "Generate a UUID and base64 encode it"
-- **Multi-Provider Support**: Reuses AI provider config from Kobean Assistant (OpenAI, Claude, Gemini, Azure, Ollama)
-- **Configurable Iterations**: Set max iterations (1–25) for complex multi-step tasks
-- **Error Handling**: Graceful recovery when tools fail, with alternative approach suggestions
-
-#### 🔌 MCP Server
-[Model Context Protocol](https://modelcontextprotocol.io/) server exposing QA tools to AI agents like Claude:
-- **15 Tools Available**: UUID generation, Base64 encoding/decoding, password generation, timestamp conversion, hashing, lorem ipsum, character counting, email validation, JSON formatting, JWT decoding, SQL generation, color conversion, random strings, and HTML sanitization
-- **Stdio Transport**: Standard MCP transport for local integration with Claude Desktop and other MCP clients
-- **Shared Tool Logic**: Platform-agnostic implementations shared between MCP server and UI to avoid duplication
-- **Easy Setup**: Simple configuration for Claude Desktop, Cursor, or any MCP-compatible client
-
-See [MCP Server README](mcp-server/README.md) for detailed setup instructions.
-
-#### 🌠 Additional Tools
-- **UUID Generator**: Generate UUIDs v1, v4 with copy functionality
-- **JIRA Comment Generator**: Format comments for JIRA with markdown support
-- **🌠 OTP Generator**: Generate time-based and counter-based OTP codes
-- **🔐 Encryption/Decryption**: Multiple encryption algorithms support
-- **🤖 Test Code Converter**: Convert between test automation framework formats with dual conversion methods:
-  - **Default Mode**: Fast regex-based conversion for common patterns
-  - **AI-Powered Mode**: Context-aware conversion using AI providers
-  - **Features**: API key persistence, connection testing, automatic fallback on errors
-  - **Smart Conversion**: AI mode provides better handling of complex test scenarios
-
-### 📚 Educational Resources
-
-#### 💡 Hints
-- **🔥💡 CodeceptJS Hints**: Best practices and tips for CodeceptJS testing
-
-#### 📚 Technical Terms
-- **Interactive Voice Response (IVR)**: Comprehensive guide
-- **Busy Lamp Field (BLF)**: Technical specifications
-- **Session Initiation Protocol (SIP)**: Protocol documentation
-
-#### 📚 ISTQB Certification
-- **CTFL v4 Practice Exams**: Interactive practice tests for certification preparation
-
-## 🏗️ Technical Architecture
-
-### 🎯 Performance Optimizations
-- **Code splitting** with React.lazy for reduced bundle size
-- **Lazy loading** of route components for faster initial load
-- **Bundle optimization** with separate chunks
-- **Performance monitoring** with Web Vitals
-- **Mobile-first responsive design** with Bootstrap
-
-### 🧪 Comprehensive Testing
-- **760+ test cases** across multiple test files
-- **Component testing** with React Testing Library
-- **Utility function testing** with comprehensive coverage
-- **Shared tools testing** for platform-agnostic implementations
-- **Agent executor testing** for autonomous task execution
-- **AI/ML features testing** with MCP, conversation management, and knowledge base tests
-- **Multi-provider AI testing** for OpenAI, Anthropic, Google, Azure, and Ollama
-- **Token optimization testing** for cost-effective AI usage
-- **WebSocket & gRPC client testing** with mocked services
-- **MCP server testing** with 48 dedicated tests
-- **Integration tests** demonstrating real-world usage patterns
-- **CI/CD integration** with automated testing on PRs
-- **Coverage reporting** with detailed metrics
-
-### 🔒 Security Features
-- **XSS protection** with input sanitization
-- **Content Security Policy** headers
-- **Input validation** across all forms
-- **Secure clipboard operations** with fallback support
-
-### 📱 Mobile Experience
-- **Mobile-first design** with responsive layouts
-- **Touch-friendly interfaces** with proper target sizes
-- **Progressive enhancement** for all devices
-- **Accessibility compliance** with ARIA attributes
-
-## 🤖 AI Provider Setup
-
-The AI Chat feature supports multiple providers. Here's how to get started with each:
-
-### OpenAI
-1. Sign up at [OpenAI Platform](https://platform.openai.com/)
-2. Generate an API key from the [API Keys page](https://platform.openai.com/api-keys)
-3. Select "OpenAI" provider and enter your API key
-4. Available models: GPT-3.5 Turbo, GPT-4, GPT-4 Turbo
-
-### Anthropic Claude
-1. Sign up at [Anthropic Console](https://console.anthropic.com/)
-2. Generate an API key from your account settings
-3. Select "Anthropic Claude" provider and enter your API key
-4. Available models: Claude 3 Opus, Sonnet, Haiku (200K context window)
-
-### Google Gemini
-1. Sign up at [Google AI Studio](https://makersuite.google.com/)
-2. Generate an API key from the [API Keys page](https://makersuite.google.com/app/apikey)
-3. Select "Google Gemini" provider and enter your API key
-4. Available models: Gemini 1.5 Flash, Gemini 1.5 Pro, Gemini 2.0 Flash (up to 2M tokens)
-
-### Azure OpenAI
-1. Create an Azure OpenAI resource in Azure Portal
-2. Deploy a model (e.g., gpt-35-turbo)
-3. Get your API key and endpoint from the resource
-4. Select "Azure OpenAI" provider and enter your credentials
-
-### Ollama (Local)
-1. Install Ollama from [ollama.ai](https://ollama.ai)
-2. Pull a model: `ollama pull llama2` (or mistral, codellama, etc.)
-3. Set CORS environment variable:
-   ```bash
-   # macOS/Linux
-   export OLLAMA_ORIGINS="https://kobenguyent.github.io"
-   ollama serve
-   
-   # Windows PowerShell
-   $env:OLLAMA_ORIGINS="https://kobenguyent.github.io"
-   ollama serve
-   ```
-4. Select "Ollama (Local)" provider and use default endpoint
-
-### 💡 Tips for Best Results
-- **Token Optimization**: Enable to reduce costs by removing redundant whitespace
-- **System Prompts**: Choose "Technical" for code/technical tasks, "Creative" for brainstorming
-- **Conversation Management**: Save important chats for future reference
-- **Knowledge Base**: Upload relevant documents to provide context to the AI
-- **MCP Tools**: Connect MCP servers to give AI access to external tools and data
-
-## 🔧 MCP Tool Management
-
-The AI Chat includes a comprehensive MCP (Model Context Protocol) tool management system:
-
-### Default Tools (11 Pre-configured)
-
-**Filesystem Tools:**
-- `read_file` - Read file contents
-- `list_directory` - List directory contents
-- `write_file` - Write to files
-
-**Web Tools:**
-- `fetch_url` - Fetch content from URLs
-- `web_search` - Search the web
-
-**Computation Tools:**
-- `calculate` - Perform calculations
-- `execute_code` - Execute code in sandbox
-
-**Data Tools:**
-- `parse_json` - Parse JSON data
-- `query_database` - Query databases
-
-**Utility Tools:**
-- `generate_uuid` - Generate UUIDs
-- `get_timestamp` - Get timestamps
-
-### Tool Management Features
-
-**Quick Actions:**
-- 📥 Load Default Tools - Initialize 11 pre-configured tools
-- ✅ Enable All Default - Enable all default tools at once
-- ❌ Disable All - Disable all tools
-- 💾 Export Config - Save tool configuration as JSON
-- 📁 Import Config - Load tool configuration from file
-
-**Per-Tool Control:**
-- Enable/disable individual tools via checkboxes
-- View tool descriptions and categories
-- Track tool source (default vs custom)
-- Real-time statistics (total, enabled, disabled)
-
-**Custom MCP Servers:**
-- Connect to external MCP servers
-- Auto-discover and load server tools
-- Disconnect to unload server tools
-- Tools loaded from servers marked as "custom"
-
-### Usage Example
-
-```typescript
-import { MCPToolManager } from './utils/mcpToolManager';
-
-// Create manager
-const manager = new MCPToolManager();
-
-// Load default tools
-manager.initializeDefaultTools();
-
-// Enable specific tools
-manager.enableTool('read_file');
-manager.enableTool('web_search');
-
-// Or enable all at once
-manager.enableAllDefaultTools();
-
-// Connect to custom server
-const client = new MCPClient({ 
-  name: 'my-server', 
-  url: 'http://localhost:8080' 
-});
-await manager.loadToolsFromServer(client);
-
-// Export configuration
-const config = manager.exportConfig();
-// Save to file...
-
-// Import configuration
-manager.importConfig(configJson);
-
-// Get statistics
-const stats = manager.getStats();
-// { total: 15, enabled: 8, defaultTools: 11, customTools: 4 }
-```
-
-For the complete MCP Tool Management Guide, click "📖 View Complete MCP Tools Guide" in the AI Chat interface.
-
-## 🔌 MCP Server Setup
-
-QA Utils includes a standalone MCP server that exposes 15 QA tools to AI assistants like Claude Desktop, Cursor, and any MCP-compatible client.
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Visit-brightgreen?style=flat-square)](https://kobenguyent.github.io/qa-utils/#/)
+[![npm version](https://img.shields.io/npm/v/qautils-cli?label=CLI&style=flat-square)](https://www.npmjs.com/package/qautils-cli)
+[![Tests](https://img.shields.io/badge/Tests-928%2B-blue?style=flat-square)](https://github.com/kobenguyent/qa-utils/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
+[![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-blue?style=flat-square)](https://paypal.me/peternguyentr?country.x=DE&locale.x=en_US)
+
+**QA Utils** is an all-in-one quality assurance toolkit — 45+ tools for developers and testers, available as a **web app**, **desktop app** (macOS/Windows/Linux), **CLI**, **REST API**, and **MCP server** for AI agent integration.
+
+🌐 **[Try it now →](https://kobenguyent.github.io/qa-utils/#/)**
+
+<img width="1310" height="780" alt="QA Utils screenshot" src="https://github.com/user-attachments/assets/667bf71d-84cc-4d30-bb1c-7b95fe37ceab" />
+
+> **Disclaimer**: All referenced trademarks, frameworks, and services belong to their respective owners. This project is not affiliated with, endorsed by, or sponsored by any of them.
+
+---
+
+## 🗺️ What's Inside
+
+### 🔄 Converters & Formatters
+
+| Tool | What it does |
+|------|-------------|
+| 🔑 [JWT Debugger](https://kobenguyent.github.io/qa-utils/#/jwtDebugger) | Decode & validate JSON Web Tokens with syntax-highlighted output |
+| 🛸 [Base64](https://kobenguyent.github.io/qa-utils/#/base64) | Bidirectional Base64 encode / decode |
+| ⏰ [Timestamp Converter](https://kobenguyent.github.io/qa-utils/#/timestamp) | Unix epoch ↔ human-readable date with timezone support |
+| ﹛﹜ [JSON Formatter](https://kobenguyent.github.io/qa-utils/#/jsonFormatter) | Pretty-print, validate, and explore JSON with a collapsible tree view |
+| 🎨 [Color Converter](https://kobenguyent.github.io/qa-utils/#/color-converter) | HEX ↔ RGB ↔ HSL ↔ CMYK ↔ LAB with palette generation & WCAG contrast check |
+| 🗄️ [SQL Generator](https://kobenguyent.github.io/qa-utils/#/sql-generator) | Visual SQL query builder (SELECT, INSERT, UPDATE, DELETE, CREATE TABLE) |
+| 🌐 [HTML Renderer](https://kobenguyent.github.io/qa-utils/#/html-renderer) | Live preview and render HTML in real-time |
+| 🔄 [Media Converter](https://kobenguyent.github.io/qa-utils/#/media-converter) | Image ↔ PDF, PNG ↔ JPEG, background removal |
+
+### 🎲 Generators
+
+| Tool | What it does |
+|------|-------------|
+| 🆔 [UUID Generator](https://kobenguyent.github.io/qa-utils/#/uuid) | Generate UUIDs v1 and v4 |
+| 🔐 [OTP Generator](https://kobenguyent.github.io/qa-utils/#/otp) | Time-based (TOTP) and counter-based (HOTP) one-time passwords |
+| 🔑 [Password Generator](https://kobenguyent.github.io/qa-utils/#/password) | Cryptographically secure passwords with configurable rules |
+| 🔐 [Hash Generator](https://kobenguyent.github.io/qa-utils/#/hash) | SHA-1/256/512 and MD5 checksums |
+| 🔒 [HTPasswd Generator](https://kobenguyent.github.io/qa-utils/#/htpasswd) | Apache/Nginx HTTP basic-auth entries |
+| 📝 [Lorem Ipsum](https://kobenguyent.github.io/qa-utils/#/lorem-ipsum) | Placeholder text by words, sentences, or paragraphs |
+| 📋 [JIRA Comment Generator](https://kobenguyent.github.io/qa-utils/#/jiraComment) | Format Markdown-styled JIRA comments |
+| 🔢 [Character Counter](https://kobenguyent.github.io/qa-utils/#/character-counter) | Count characters, words, sentences, and lines |
+| 📁 [Test File Generator](https://kobenguyent.github.io/qa-utils/#/test-file-generator) | Generate PNG, PDF, WAV, and other file types for upload testing |
+| 🚀 [GitHub PR Script Generator](https://kobenguyent.github.io/qa-utils/#/github-pr-generator) | Generate bash scripts for full GitHub PR workflows |
+| 📱 [QR Code Generator](https://kobenguyent.github.io/qa-utils/#/qr-code) | Static and dynamic QR codes for URLs, Wi-Fi, vCards, SMS, and more |
+| 🎭 [Dummy Data Generator](https://kobenguyent.github.io/qa-utils/#/dummy-data) | Fake names, emails, addresses, phone numbers for test data |
+
+### 🌐 API Testing
+
+| Tool | What it does |
+|------|-------------|
+| 🌐 [REST Client](https://kobenguyent.github.io/qa-utils/#/rest-client) | HTTP requests (GET/POST/PUT/DELETE), curl import, response viewer |
+| 🔌 [WebSocket Client](https://kobenguyent.github.io/qa-utils/#/websocket-client) | Real-time WebSocket testing with auto-reconnect and message history |
+| ⚡ [gRPC Client](https://kobenguyent.github.io/qa-utils/#/grpc-client) | gRPC-Web unary and server-streaming calls with .proto support |
+| 📦 [Collection Manager](https://kobenguyent.github.io/qa-utils/#/collection-manager) | Import, edit, convert, and export Postman / Insomnia / Thunder Client collections |
+| 🗺️ [Collection Visualizer](https://kobenguyent.github.io/qa-utils/#/collection-visualizer) | Interactive tree view of all requests, folders, and HTTP methods in a collection |
+
+### 🔧 Developer Tools
+
+| Tool | What it does |
+|------|-------------|
+| 🎨 [Image Editor](https://kobenguyent.github.io/qa-utils/#/image-editor) | Filters, rotation, brightness/contrast, compression |
+| 🔒 [Encryption / Decryption](https://kobenguyent.github.io/qa-utils/#/encryption) | AES and other cipher algorithms |
+| 🎭 [Test Code Converter](https://kobenguyent.github.io/qa-utils/#/playwright2codecept) | Convert Playwright tests to CodeceptJS (regex mode or AI-powered) |
+| 📊 [Sequence Diagram Generator](https://kobenguyent.github.io/qa-utils/#/sequence-diagram) | Generate Mermaid sequence diagrams from test code |
+| 🚀 [CI/CD Workflow Generator](https://kobenguyent.github.io/qa-utils/#/workflow-generator) | GitHub Actions, GitLab CI, Azure DevOps, Jenkins, Bitbucket workflows |
+| 📋 [Kanban Board](https://kobenguyent.github.io/qa-utils/#/kanban) | Drag-and-drop task management |
+| 📁 [File Processor](https://kobenguyent.github.io/qa-utils/#/file-processor) | Batch resize, compress, and convert images and documents |
+| 🔍 [Website Scanner](https://kobenguyent.github.io/qa-utils/#/website-scanner) | Audit broken links, accessibility, SEO, and security issues |
+
+### 🤖 AI Features
+
+| Feature | What it does |
+|---------|-------------|
+| 🤖 [Kobean Assistant](https://kobenguyent.github.io/qa-utils/#/kobean) | AI chat with multi-provider support, knowledge base, and MCP tool integration |
+| ✨ [Prompt Enhancer](https://kobenguyent.github.io/qa-utils/#/prompt-enhancer) | Transform basic prompts into detailed, structured versions |
+| 🤖 [Agent Mode](https://kobenguyent.github.io/qa-utils/#/agent) | Autonomous observe-think-act agent — describe a task and it runs the tools |
+| 🗂️ [Agent Manager](https://kobenguyent.github.io/qa-utils/#/agent-manager) | Create reusable named agent profiles and review run history |
+| 🤖 [AI Website Tester](https://kobenguyent.github.io/qa-utils/#/ai-website-tester) | AI-powered functional, UI/UX, performance, and security checks |
+
+**AI providers supported:** OpenAI · Anthropic Claude · Google Gemini · Azure OpenAI · Ollama (local)
+
+### 📚 Learn & Reference
+
+| Resource | What it covers |
+|----------|---------------|
+| 🔥💡 [Testing Cheat Sheet](https://kobenguyent.github.io/qa-utils/#/codeceptjs) | Quick-reference for Playwright, Pytest, Cypress, Jest, Vitest, CodeceptJS & more |
+| 📖 [Command Book](https://kobenguyent.github.io/qa-utils/#/command-book) | Git, Docker, Bash, and CodeceptJS command reference |
+| 🤖 [AI Instructions Guide](https://kobenguyent.github.io/qa-utils/#/ai-instructions) | Best practices for Claude, ChatGPT, Gemini, Copilot & Cursor system prompts |
+| ⚖️ [Test Frameworks Comparison](https://kobenguyent.github.io/qa-utils/#/test-frameworks-comparison) | Side-by-side comparison to pick the right framework |
+| ✅ [Testing Checklists](https://kobenguyent.github.io/qa-utils/#/web-testing-checklist) | Web, API, and mobile testing checklists |
+| 🎓 [ISTQB CTFL v4 Practice Exams](https://kobenguyent.github.io/qa-utils/#/ctfl) | Interactive practice tests for certification prep |
+| 🃏 [Flashcards](https://kobenguyent.github.io/qa-utils/#/flashcards) | Spaced-repetition (SM-2) flashcards for QA concepts |
+
+### 🏛️ Palace (Visual Navigation)
+
+| Feature | What it does |
+|---------|-------------|
+| 🗺️ [QA Palace](https://kobenguyent.github.io/qa-utils/#/palace) | Spatial map — browse all tools organised into themed rooms |
+| 🏠 [My Palace](https://kobenguyent.github.io/qa-utils/#/my-palace) | Personal pinboard of favourite tools |
+| 🗺️ [Coverage Palace](https://kobenguyent.github.io/qa-utils/#/coverage-palace) | Visual heatmap of your test coverage across unit, integration, E2E, security, and more |
+
+---
+
+## 🤖 AI Features In Depth
+
+### Kobean Assistant
+
+Multi-provider AI chat (OpenAI, Anthropic, Google, Azure, Ollama) with:
+
+- **Knowledge Base / CAG** — upload `.txt`, `.md`, `.json`, `.csv`, `.pdf` files; Cache-Augmented Generation for fast retrieval
+- **MCP Tool Integration** — enable/disable 11 built-in tools or connect custom MCP servers
+- **Token Optimization** — automatic counting, smart compression, real-time monitoring
+- **Conversation Management** — save, export (JSON/Markdown), and switch between chat contexts
+
+### Agent Mode
+
+Describe a task in plain English and the agent plans and executes QA tools autonomously:
+
+1. **Describe** — e.g., *"Generate a UUID and base64 encode it"*
+2. **Plan** — AI selects which tools to call
+3. **Execute** — tools run and results feed back to the AI
+4. **Repeat** — loop continues (up to 25 iterations) until the task is done
+5. **Answer** — final result presented in a step-by-step timeline
+
+### Agent Manager
+
+Save named agent profiles so you don't reconfigure your AI provider every time. Profiles can be invoked from the web UI, REST API (`POST /api/agents/run`), or CLI (`qautils agent run "<task>"`).
+
+---
+
+## 🔌 MCP Server
+
+QA Utils ships a standalone [Model Context Protocol](https://modelcontextprotocol.io/) server that exposes 15 QA tools to AI assistants like **Claude Desktop**, **Cursor**, and any MCP-compatible client.
 
 ### Quick Setup
 
 ```bash
 cd mcp-server
-npm install
-npm run build
+npm install && npm run build
 ```
-
-### Usage with Claude Desktop
 
 Add to your Claude Desktop config:
 
-**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+**macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`  
+**Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
 
 ```json
 {
@@ -406,328 +159,93 @@ Add to your Claude Desktop config:
 }
 ```
 
-### Available MCP Tools
+### Available MCP Tools (15)
 
 | Tool | Description |
 |------|-------------|
-| `generate_uuid` | Generate random UUIDs (v4) |
-| `base64_encode` / `base64_decode` | Base64 encoding and decoding |
-| `generate_password` | Secure random password generation |
-| `convert_timestamp` | Unix timestamp conversion |
-| `generate_hash` | Cryptographic hashes (MD5, SHA-1, SHA-256, SHA-384, SHA-512) |
-| `generate_lorem_ipsum` | Placeholder text generation |
-| `count_characters` | Text analysis (characters, words, sentences, lines, paragraphs) |
+| `generate_uuid` | Random UUID v4 |
+| `base64_encode` / `base64_decode` | Base64 encoding / decoding |
+| `generate_password` | Secure random password |
+| `convert_timestamp` | Unix ↔ human-readable date |
+| `generate_hash` | MD5, SHA-1/256/384/512 |
+| `generate_lorem_ipsum` | Placeholder text |
+| `count_characters` | Characters, words, sentences, lines |
 | `validate_email` | Email format validation |
-| `format_json` | JSON formatting and validation |
-| `decode_jwt` | JWT token decoding (does not verify signatures) |
-| `generate_sql` | SQL command generation (SELECT, INSERT, UPDATE, DELETE, CREATE TABLE) |
-| `convert_color` | Color conversion between hex, RGB, and HSL |
-| `generate_random_string` | Random alphanumeric string generation |
-| `sanitize_html` | HTML sanitization (script/event handler removal) |
+| `format_json` | JSON formatting & validation |
+| `decode_jwt` | JWT decoding (no signature verification) |
+| `generate_sql` | SQL command generation |
+| `convert_color` | HEX ↔ RGB ↔ HSL |
+| `generate_random_string` | Random alphanumeric string |
+| `sanitize_html` | Remove scripts / event handlers |
 
-For more details, see the [MCP Server README](mcp-server/README.md).
-
-## 🤖 Agent Mode & Agent Manager
-
-Agent Mode (`/agent` route) turns QA Utils into an autonomous AI agent. Describe a task in natural language and the agent will plan and execute the necessary tools to accomplish it.
-
-The **Agent Manager** (`/agent-manager`) lets you create reusable named agent profiles so you don't have to reconfigure your AI provider each time. Profiles can be run from the web UI, the REST API, or the CLI.
-
-### How It Works
-
-1. **Describe your task** — e.g., "Generate a UUID and base64 encode it"
-2. **Agent plans** — The AI provider decides which tools to call
-3. **Tools execute** — The agent calls tools from the registry and collects results
-4. **Loop continues** — Results feed back to the AI until the task is complete
-5. **Final answer** — The agent presents the completed result
-
-### Features
-
-- **Observe-Think-Act loop** with configurable max iterations (1–25)
-- **Step-by-step timeline** showing thinking, tool calls, results, and final answer
-- **Agent Manager** — save named profiles with custom AI configs and review run history
-- **REST API** — run agent tasks programmatically via `POST /api/agents/run`
-- **CLI** — run agent tasks from the terminal with `qautils agent run "<task>"`
-- **Preset examples** to get started quickly
-- **All providers supported** — OpenAI, Claude, Gemini, Azure OpenAI, Ollama
-
-### Getting Started with Agent Mode
-
-1. Configure an AI provider in [Kobean Assistant](#-ai-provider-setup) (`/kobean`)
-2. Navigate to Agent Mode (`/agent`) or Agent Manager (`/agent-manager`)
-3. Enter a task description or pick a preset example
-4. Click **▶ Run Agent** and watch the step-by-step execution
-
-### CLI Agent
-
-```bash
-qautils agent run "Generate a UUID and base64-encode it"
-qautils agent run "Hash 'hello' with SHA-256" --verbose
-qautils agent list   # show available tools
-```
-
-### API Agent
-
-```bash
-curl -X POST http://localhost:3333/api/agents/run \
-  -H 'Content-Type: application/json' \
-  -d '{"task": "Generate a UUID", "provider": "ollama", "endpoint": "http://localhost:11434"}'
-```
-
-## 🖥️ CLI — Kobean Chat & qautils-cli
-
-QA Utils ships a full-featured **command-line interface** (`qautils-cli`) that includes all utility tools **plus an AI-powered Kobean chat assistant** right in your terminal.
-
-### Installation
-
-```bash
-npm install -g qautils-cli
-```
-
-### Kobean Chat
-
-Configure your AI provider once, then start chatting:
-
-```bash
-# Interactive configuration wizard
-qautils chat config
-
-# Quick setup (non-interactive)
-qautils chat config --provider openai --api-key sk-xxxxxx
-qautils chat config --provider ollama --endpoint http://localhost:11434
-
-# List available models for the configured provider
-qautils chat models
-
-# Start a chat session
-qautils chat
-```
-
-**Supported AI providers:** OpenAI · Anthropic Claude · Google Gemini · Azure OpenAI · Ollama (local)
-
-Config is persisted to `~/.config/qautils-cli/config.json` (Linux/macOS) or `%APPDATA%\qautils-cli\config.json` (Windows).
-
-See the [CLI README](./cli/README.md) for full documentation.
+See [mcp-server/README.md](mcp-server/README.md) for full documentation.
 
 ---
 
-## 🚀 Getting Started
+## 🖥️ CLI (`qautils-cli`)
 
-### Prerequisites
-- **Node.js 16+**
-- Modern web browser with ES6+ support
-
-### Installation & Development
+All tools are available in your terminal, plus an AI-powered Kobean chat assistant.
 
 ```bash
-npm install && npm run dev
+npm install -g qautils-cli
+
+# AI chat
+qautils chat config --provider openai --api-key sk-xxxxxx
+qautils chat
+
+# Agent tasks
+qautils agent run "Generate a UUID and base64-encode it"
+qautils agent run "Hash 'hello' with SHA-256" --verbose
+
+# Orchestrate multi-agent pipelines
+qautils orchestrate "Write and review a test plan for a login page"
 ```
 
-The application will be available at: **http://localhost:5173/**
+See the [CLI README](./cli/README.md) for the full command reference.
 
-### Available Scripts
+---
+
+## 💻 Desktop App (Electron)
+
+Download a pre-built app for **macOS, Windows, or Linux** from the [GitHub Actions artifacts](https://github.com/kobenguyent/qa-utils/actions/workflows/build-electron.yml), or build locally:
 
 ```bash
-# Development server
-npm run dev          # Start development server with hot reload
-
-# Building
-npm run build        # Build for production
-npm run build:github # Build for GitHub Pages deployment
-
-# Testing
-npm test            # Run all tests
-npm run test:ui     # Run tests with UI
-npm run test:coverage # Generate coverage report
-
-# Code Quality
-npm run lint        # Run ESLint with TypeScript support
-npm run preview     # Preview production build
+npm run electron:dev      # dev mode with hot reload
+npm run electron:build    # production build for your platform
 ```
 
-## 💻 Desktop Application (Electron)
+**Key benefit**: No CORS restrictions — make API calls to any server, including localhost.
 
-QA Utils is now available as a **cross-platform desktop application** for macOS, Windows, and Linux! The desktop app solves CORS issues that may occur when using the web version, providing a more seamless experience for tools like REST Client, WebSocket Client, and gRPC Client.
+---
 
-### Why Use the Desktop App?
-
-- **🔓 No CORS Restrictions**: Make API calls to any server without browser security limitations
-- **⚡ Native Performance**: Faster startup and better resource management
-- **📴 Offline Capable**: Use most features without an internet connection
-- **🎯 Focused Environment**: Dedicated window without browser distractions
-- **🔒 Enhanced Security**: Isolated from web browser cookies and session data
-
-### Running the Desktop App (Development)
-
-To run the Electron app in development mode with hot reload:
+## 🚀 Getting Started (Web / Dev)
 
 ```bash
-npm install
-npm run electron:dev
+# Prerequisites: Node.js 16+
+npm install && npm run dev   # → http://localhost:5173/
 ```
 
-This will:
-1. Start the Vite development server
-2. Wait for the server to be ready
-3. Launch the Electron app pointing to localhost:5173
-
-### Downloading Pre-built Apps
-
-Pre-built desktop applications are automatically generated via GitHub Actions and available for download:
-
-1. Go to the [Actions tab](https://github.com/kobenguyent/qa-utils/actions/workflows/build-electron.yml)
-2. Click on the latest successful workflow run
-3. Scroll down to the "Artifacts" section
-4. Download the appropriate package for your platform:
-   - **Linux**: `linux-appimage`, `linux-deb`, or `linux-rpm`
-   - **Windows**: `windows-installer`
-   - **macOS**: `macos-dmg` or `macos-zip`
-
-The workflow is automatically triggered when:
-- Changes are pushed to `main` branch that affect Electron files
-- A release tag (e.g., `v1.0.0`) is created
-- Manually triggered from the Actions tab
-
-### Building the Desktop App Locally
-
-#### Build for Current Platform
-```bash
-npm run electron:build
-```
-
-This builds the app for your current operating system and creates distributable packages in the `release/` directory.
-
-#### Build for Specific Platforms
-
-```bash
-# macOS (.dmg and .zip)
-npm run electron:build:mac
-
-# Windows (.exe installer and portable)
-npm run electron:build:win
-
-# Linux (AppImage, .deb, and .rpm)
-npm run electron:build:linux
-```
-
-#### Build for All Platforms
-```bash
-npm run electron:build:all
-```
-
-**Note**: Building for all platforms from a single OS may have limitations. For best results:
-- Build macOS apps from macOS
-- Build Windows apps from Windows or Linux with Wine
-- Build Linux apps from any platform
-
-### Distribution Packages
-
-After building, you'll find the following in the `release/` directory:
-
-#### macOS
-- `QA Utils-1.0.0.dmg` - Installer disk image
-- `QA Utils-1.0.0-mac.zip` - Zipped application bundle
-
-#### Windows
-- `QA Utils Setup 1.0.0.exe` - NSIS installer
-- `QA Utils 1.0.0.exe` - Portable executable (no installation required)
-
-#### Linux
-- `QA Utils-1.0.0.AppImage` - Universal Linux package
-- `qa-utils_1.0.0_amd64.deb` - Debian/Ubuntu package
-- `qa-utils-1.0.0.x86_64.rpm` - Red Hat/Fedora package
-
-### Installation Instructions
-
-#### macOS
-1. Download the `.dmg` file
-2. Double-click to open
-3. Drag "QA Utils" to the Applications folder
-4. Launch from Applications or Spotlight
-
-#### Windows
-1. Download the `.exe` installer
-2. Run the installer and follow the prompts
-3. Launch from Start Menu or Desktop shortcut
-
-Or use the portable version:
-1. Download the portable `.exe`
-2. Run directly - no installation needed!
-
-#### Linux
-
-**AppImage (Recommended - Works on all distributions)**
-```bash
-chmod +x "QA Utils-1.0.0.AppImage"
-./"QA Utils-1.0.0.AppImage"
-```
-
-**Debian/Ubuntu**
-```bash
-sudo dpkg -i qa-utils_1.0.0_amd64.deb
-```
-
-**Red Hat/Fedora**
-```bash
-sudo rpm -i qa-utils-1.0.0.x86_64.rpm
-```
-
-### Desktop App Features
-
-All web features are available in the desktop app, with enhanced capabilities:
-
-- **REST Client**: No CORS limitations when making API requests
-- **WebSocket Client**: Connect to any WebSocket server without restrictions
-- **gRPC Client**: Direct gRPC-Web calls without proxy requirements
-- **File Processing**: Better file system access for import/export operations
-- **Local Storage**: Persistent data storage across app restarts
-
-### Keyboard Shortcuts
-
-- `Ctrl/Cmd + R` - Reload the app
-- `Ctrl/Cmd + Q` - Quit the app
-- `F11` - Toggle fullscreen
-- `Ctrl/Cmd + Plus` - Zoom in
-- `Ctrl/Cmd + Minus` - Zoom out
-- `Ctrl/Cmd + 0` - Reset zoom
-- `F12` or `Ctrl/Cmd + Shift + I` - Toggle DevTools
-
-### Troubleshooting
-
-**App won't start on macOS**
-- Right-click the app and select "Open" the first time (to bypass Gatekeeper)
-- Or run: `xattr -cr /Applications/QA\ Utils.app`
-
-**App won't start on Windows**
-- Windows Defender may flag the app initially - click "More info" → "Run anyway"
-- Ensure you have the latest Visual C++ redistributables installed
-
-**App won't start on Linux**
-- For AppImage: Ensure the file is executable (`chmod +x`)
-- Install required dependencies: `sudo apt install libgtk-3-0 libnotify4 libnss3 libxss1`
-
-### Building Custom Icons
-
-To customize the app icon, place icon files in the `build/` directory:
-
-- `build/icon.icns` - macOS icon (512x512 or larger)
-- `build/icon.ico` - Windows icon (256x256 or larger)
-- `build/icons/*.png` - Linux icons (16x16 to 512x512)
-
-See `build/README.md` for detailed instructions on creating icons.
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Development server with hot reload |
+| `npm run build` | Production build |
+| `npm test` | Run all 928+ tests |
+| `npm run test:coverage` | Coverage report |
+| `npm run lint` | ESLint (TypeScript strict) |
 
 ## 🏗️ Technology Stack
 
-- **Frontend**: React 18, TypeScript, Bootstrap 5
-- **Build System**: Vite with SWC for fast builds
-- **Desktop App**: Electron for cross-platform desktop distribution
-- **MCP Server**: `@modelcontextprotocol/sdk` with stdio transport for AI agent integration
-- **AI Agent**: Built-in autonomous agent with observe-think-act execution loop
-- **Testing**: Vitest + React Testing Library (760+ tests)
-- **Package Manager**: npm (with Bun support)
-- **Code Quality**: ESLint, TypeScript strict mode
-- **CI/CD**: GitHub Actions with automated testing
-- **Deployment**: GitHub Pages with automated workflows + Electron builds
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 18, TypeScript 5, Bootstrap 5 |
+| Build | Vite + SWC |
+| Testing | Vitest + React Testing Library (928+ tests) |
+| Desktop | Electron |
+| CLI | Node.js, Commander |
+| MCP Server | `@modelcontextprotocol/sdk` (stdio transport) |
+| AI Agents | Observe-think-act loop, multi-provider |
+| CI/CD | GitHub Actions → GitHub Pages + Electron builds |
+| Code Quality | ESLint, TypeScript strict mode |
 
 ## 🤝 Contributing
 
