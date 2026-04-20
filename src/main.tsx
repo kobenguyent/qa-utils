@@ -63,6 +63,7 @@ const QAPalace = lazy(() => import('./components/utils/QAPalace.tsx').then(modul
 const Flashcards = lazy(() => import('./components/utils/Flashcards.tsx').then(module => ({ default: module.Flashcards })));
 const CoveragePalace = lazy(() => import('./components/utils/CoveragePalace.tsx').then(module => ({ default: module.CoveragePalace })));
 const MyPalace = lazy(() => import('./components/utils/MyPalace.tsx').then(module => ({ default: module.MyPalace })));
+const ExploreTools = lazy(() => import('./components/ExploreTools.tsx'));
 
 // Component wrapper with suspense for lazy loaded routes
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -77,6 +78,10 @@ const router = createHashRouter([
   {
     path: "/",
     element: <App />,
+  },
+  {
+    path: 'explore',
+    element: <RouteWrapper><ExploreTools /></RouteWrapper>
   },
   {
     path: 'codeceptjs',

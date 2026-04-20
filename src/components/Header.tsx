@@ -64,8 +64,8 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <Navbar expand="lg" className="glass-navbar" style={{ backgroundColor: 'var(--navbar-bg)' }}>
-      <Container>
+    <Navbar expand="lg" className="glass-navbar" style={{ backgroundColor: 'var(--navbar-bg)', paddingTop: '0.85rem' }}>
+      <Container fluid className="px-3 px-lg-4">
         <Navbar.Brand href='#' data-testid="logo" className="navbar-brand-gradient">
           ⚙️ QA Utils
         </Navbar.Brand>
@@ -267,7 +267,7 @@ export const Header: React.FC = () => {
           </Nav>
           </div>
           {/* Search + Theme row */}
-          <div className="d-flex align-items-center gap-2 mt-lg-0 mt-2 pb-lg-0 pb-2" style={{ width: '100%', maxWidth: '380px' }}>
+          <div className="d-flex align-items-center gap-2 mt-lg-0 mt-2 pb-lg-0 pb-2 ms-auto" style={{ maxWidth: '380px' }}>
           <div className="position-relative flex-grow-1" ref={searchRef}>
             <div style={{ position: 'relative' }}>
               <span style={{

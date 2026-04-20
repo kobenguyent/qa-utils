@@ -8,52 +8,57 @@ export const Footer: React.FC = () => {
 
   return (
     <>
-      <footer className="glass-footer border-top mt-auto py-3">
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-md-6">
-              <small className="text-muted">
-                © {currentYear} QA Utils - Built with ❤️ for the testing community
-              </small>
+      <footer className="glass-footer border-top mt-auto">
+        <div className="container-fluid px-3 px-lg-4">
+          <div className="footer-inner">
+            <div className="footer-row">
+              <span className="footer-text">
+                © {currentYear} QA Utils
+              </span>
+              <span className="footer-sep" aria-hidden="true">·</span>
+              <span className="footer-text">
+                Built by KobeT
+              </span>
+              <span className="footer-sep" aria-hidden="true">·</span>
+              <span className="footer-text footer-mono">
+                {commitHash}
+              </span>
+              <span className="footer-sep" aria-hidden="true">·</span>
+              <button
+                className="footer-link"
+                onClick={() => setShowPrivacy(true)}
+                aria-label="View privacy policy"
+              >
+                Privacy
+              </button>
             </div>
-            <div className="col-md-6 text-md-end">
-              <small className="text-muted">
-                Built by 🏀 KobeT 🏀 | Commit: {commitHash}
-                {' | '}
-                <button 
-                  className="btn btn-link btn-sm text-muted p-0"
-                  onClick={() => setShowPrivacy(true)}
-                  style={{ textDecoration: 'none', fontSize: 'inherit', minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}
-                >
-                  🔒 Privacy
-                </button>
-              </small>
-            </div>
-          </div>
-          <div className="row mt-2 align-items-center">
-            <div className="col-12 text-center">
-              <small className="text-muted">
-                Support this project:{' '}
-                <a 
-                  href="https://github.com/sponsors/kobenguyent" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="btn btn-link btn-sm p-0 text-decoration-none"
-                  style={{ fontSize: 'inherit', minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}
-                >
-                  💖 GitHub Sponsors
-                </a>
-                {' | '}
-                <a 
-                  href="https://www.buymeacoffee.com/peternguyew" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="btn btn-link btn-sm p-0 text-decoration-none"
-                  style={{ fontSize: 'inherit', minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}
-                >
-                  ☕ Buy Me a Coffee
-                </a>
-              </small>
+            <div className="footer-row">
+              <a
+                href="https://github.com/sponsors/kobenguyent"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-link"
+              >
+                💖 Sponsor
+              </a>
+              <span className="footer-sep" aria-hidden="true">·</span>
+              <a
+                href="https://www.buymeacoffee.com/peternguyew"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-link"
+              >
+                ☕ Buy Me a Coffee
+              </a>
+              <span className="footer-sep" aria-hidden="true">·</span>
+              <a
+                href="https://github.com/kobenguyent/qa-utils"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-link"
+              >
+                GitHub
+              </a>
             </div>
           </div>
         </div>
