@@ -17,7 +17,7 @@ export const Footer: React.FC = () => {
               </span>
               <span className="footer-sep" aria-hidden="true">·</span>
               <span className="footer-text">
-                Built by KobeT
+                Built by KobeT - JosephThien
               </span>
               <span className="footer-sep" aria-hidden="true">·</span>
               <span className="footer-text footer-mono">
