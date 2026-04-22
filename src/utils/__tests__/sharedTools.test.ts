@@ -9,6 +9,7 @@ import {
   convertSimpleColor,
   sanitizeHtml,
   decodeJwt,
+  convertMarkdownToConfluence,
 } from '../sharedTools';
 
 describe('sharedTools', () => {
@@ -177,6 +178,99 @@ describe('sharedTools', () => {
     it('should report error for invalid JWT', () => {
       const result = decodeJwt('not-a-jwt', () => '');
       expect(result.error).toBeTruthy();
+    });
+  });
+
+  describe('convertMarkdownToConfluence', () => {
+    it('converts ATX headings', () => {
+      expect(convertMarkdownToConfluence('# Heading 1')).toBe('h1. Heading 1');
+      expect(convertMarkdownToConfluence('## Heading 2')).toBe('h2. Heading 2');
+      expect(convertMarkdownToConfluence('### Heading 3')).toBe('h3. Heading 3');
+    });
+
+    it('converts bold text', () => {
+      expect(convertMarkdownToConfluence('**bold**')).toBe('*bold*');
+      expect(convertMarkdownToConfluence('__bold__')).toBe('*bold*');
+    });
+
+    it('converts italic text', () => {
+      expect(convertMarkdownToConfluence('_italic_')).toBe('_italic_');
+    });
+
+    it('converts strikethrough', () => {
+      expect(convertMarkdownToConfluence('~~strike~~')).toBe('-strike-');
+    });
+
+    it('converts inline code', () => {
+      expect(convertMarkdownToConfluence('`code`')).toBe('{{code}}');
+    });
+
+    it('converts fenced code blocks with language', () => {
+      const md = '```js\nconsole.log("hi");\n```';
+      const result = convertMarkdownToConfluence(md);
+      expect(result).toBe('{code:language=js}\nconsole.log("hi");\n{code}');
+    });
+
+    it('converts fenced code blocks without language', () => {
+      const md = '```\nplain text\n```';
+      const result = convertMarkdownToConfluence(md);
+      expect(result).toBe('{code}\nplain text\n{code}');
+    });
+
+    it('converts unordered lists', () => {
+      expect(convertMarkdownToConfluence('- item')).toBe('* item');
+      expect(convertMarkdownToConfluence('* item')).toBe('* item');
+    });
+
+    it('converts nested unordered lists', () => {
+      const md = '- parent\n  - child';
+      const result = convertMarkdownToConfluence(md);
+      expect(result).toBe('* parent\n** child');
+    });
+
+    it('converts ordered lists', () => {
+      expect(convertMarkdownToConfluence('1. item')).toBe('# item');
+    });
+
+    it('converts nested ordered lists', () => {
+      const md = '1. parent\n  1. child';
+      const result = convertMarkdownToConfluence(md);
+      expect(result).toBe('# parent\n## child');
+    });
+
+    it('converts links', () => {
+      expect(convertMarkdownToConfluence('[text](https://example.com)')).toBe('[text|https://example.com]');
+    });
+
+    it('converts images', () => {
+      expect(convertMarkdownToConfluence('![alt text](image.png)')).toBe('!image.png|alt=alt text!');
+      expect(convertMarkdownToConfluence('![](image.png)')).toBe('!image.png!');
+    });
+
+    it('converts blockquotes', () => {
+      const md = '> quoted line';
+      const result = convertMarkdownToConfluence(md);
+      expect(result).toBe('{quote}\nquoted line\n{quote}');
+    });
+
+    it('converts horizontal rules', () => {
+      expect(convertMarkdownToConfluence('---')).toBe('----');
+      expect(convertMarkdownToConfluence('***')).toBe('----');
+    });
+
+    it('converts GFM tables', () => {
+      const md = '| Col A | Col B |\n|-------|-------|\n| val1  | val2  |';
+      const result = convertMarkdownToConfluence(md);
+      expect(result).toContain('|| Col A || Col B ||');
+      expect(result).toContain('| val1 | val2 |');
+    });
+
+    it('handles empty string', () => {
+      expect(convertMarkdownToConfluence('')).toBe('');
+    });
+
+    it('preserves plain text lines unchanged', () => {
+      expect(convertMarkdownToConfluence('Just a plain sentence.')).toBe('Just a plain sentence.');
     });
   });
 });

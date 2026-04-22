@@ -42,6 +42,7 @@ import { registerNanoidCommand }    from './commands/nanoid.js';
 import { registerChatCommand }        from './commands/chat.js';
 import { registerAgentCommand }       from './commands/agent.js';
 import { registerOrchestrateCommand } from './commands/orchestrate.js';
+import { registerMarkdownCommand }    from './commands/markdown.js';
 
 // ── Program ──────────────────────────────────────────────────────────────────
 
@@ -99,6 +100,7 @@ ${chalk.bold('Data Toolkit')}:
   ${chalk.cyan('qautils json format data.json')}          Pretty-print JSON file
   ${chalk.cyan('qautils sql SELECT --table users')}       Generate SELECT SQL
   ${chalk.cyan('qautils html sanitize "<p>…</p>"')}      Sanitize HTML
+  ${chalk.cyan('qautils md-confluence "# Hello\\n**bold**"')} Convert Markdown to Confluence Wiki
 
 ${chalk.bold('AI Chat (Kobean)')}:
   ${chalk.cyan('qautils chat')}                           Start interactive AI chat session
@@ -148,6 +150,8 @@ registerNanoidCommand(program);
 registerChatCommand(program);
 registerAgentCommand(program);
 registerOrchestrateCommand(program);
+// Converters
+registerMarkdownCommand(program);
 
 // ── Launch mode ───────────────────────────────────────────────────────────────
 

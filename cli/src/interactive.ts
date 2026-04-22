@@ -16,6 +16,7 @@ import {
   validateEmail, formatJson, convertTimestamp, generateSql, convertColor,
   sanitizeHtml, urlEncode, urlDecode, parseUrl, testRegex, convertBase,
   convertCase, generateNanoId, HASH_ALGORITHMS, CASE_TYPES,
+  convertMarkdownToConfluence,
   type HashAlgorithm, type SqlOperation, type CaseType,
 } from './lib/tools.js';
 import {
@@ -705,35 +706,57 @@ async function runOrchestrate(): Promise<null> {
   return null;
 }
 
+// ── Markdown → Confluence Wiki ─────────────────────────────────────────────────
+async function runMarkdownToConfluence(): Promise<string | null> {
+  const markdown = await input({ message: 'Paste Markdown text (enter on blank line to finish):' });
+  if (!markdown.trim()) {
+    console.log(T.dim('\n  No input provided.\n'));
+    return null;
+  }
+  const sp = spin('Converting…').start();
+  const result = convertMarkdownToConfluence(markdown);
+  sp.stop();
+  console.log();
+  console.log(T.border('╭─ Confluence Wiki ─────────────────────────────────────────────────╮'));
+  result.split('\n').forEach((line) =>
+    console.log(`${T.border('│')}  ${chalk.white(line)}`)
+  );
+  console.log(T.border('╰───────────────────────────────────────────────────────────────────╯'));
+  console.log();
+  cliTip(`md-confluence "# Heading\\n\\n**bold**"`);
+  return result;
+}
+
 // ── Tool registry ─────────────────────────────────────────────────────────────
 type ToolKey =
   | 'uuid' | 'base64' | 'jwt' | 'hash' | 'password' | 'timestamp'
   | 'json' | 'lorem' | 'text' | 'email' | 'sql' | 'color' | 'html'
   | 'random' | 'url' | 'regex' | 'base' | 'case' | 'nanoid' | 'chat'
-  | 'orchestrate';
+  | 'orchestrate' | 'mdconfluence';
 
 const TOOLS: Record<ToolKey, { label: string; run: () => Promise<string | null> }> = {
-  uuid:        { label: 'UUID Generator',        run: runUuid        },
-  nanoid:      { label: 'NanoID Generator',       run: runNanoId      },
-  base64:      { label: 'Base64 Encode/Decode',   run: runBase64      },
-  random:      { label: 'Random String',          run: runRandom      },
-  password:    { label: 'Password Generator',     run: runPassword    },
-  lorem:       { label: 'Lorem Ipsum',            run: runLorem       },
-  jwt:         { label: 'JWT Decoder',            run: runJwt         },
-  hash:        { label: 'Hash Generator',         run: runHash        },
-  text:        { label: 'Text Analyser',          run: runText        },
-  email:       { label: 'Email Validator',        run: runEmail       },
-  regex:       { label: 'Regex Tester',           run: runRegex       },
-  timestamp:   { label: 'Timestamp Converter',    run: runTimestamp   },
-  color:       { label: 'Color Converter',        run: runColor       },
-  url:         { label: 'URL Toolkit',            run: runUrl         },
-  base:        { label: 'Base Converter',         run: runBase        },
-  case:        { label: 'Case Converter',         run: runCase        },
-  json:        { label: 'JSON Toolkit',           run: runJson        },
-  sql:         { label: 'SQL Generator',          run: runSql         },
-  html:        { label: 'HTML Sanitizer',         run: runHtml        },
-  chat:        { label: 'Kobean AI Chat',         run: runChat        },
-  orchestrate: { label: 'AI Orchestrator',        run: runOrchestrate },
+  uuid:          { label: 'UUID Generator',             run: runUuid                },
+  nanoid:        { label: 'NanoID Generator',            run: runNanoId              },
+  base64:        { label: 'Base64 Encode/Decode',        run: runBase64              },
+  random:        { label: 'Random String',               run: runRandom              },
+  password:    { label: 'Password Generator',               run: runPassword           },
+  lorem:       { label: 'Lorem Ipsum',                      run: runLorem              },
+  jwt:         { label: 'JWT Decoder',                      run: runJwt                },
+  hash:        { label: 'Hash Generator',                   run: runHash               },
+  text:        { label: 'Text Analyser',                    run: runText               },
+  email:       { label: 'Email Validator',                  run: runEmail              },
+  regex:       { label: 'Regex Tester',                     run: runRegex              },
+  timestamp:   { label: 'Timestamp Converter',              run: runTimestamp          },
+  color:       { label: 'Color Converter',                  run: runColor              },
+  url:         { label: 'URL Toolkit',                      run: runUrl                },
+  base:        { label: 'Base Converter',                   run: runBase               },
+  case:        { label: 'Case Converter',                   run: runCase               },
+  json:        { label: 'JSON Toolkit',                     run: runJson               },
+  sql:         { label: 'SQL Generator',                    run: runSql                },
+  html:        { label: 'HTML Sanitizer',                   run: runHtml               },
+  mdconfluence:{ label: 'Markdown → Confluence Wiki',       run: runMarkdownToConfluence },
+  chat:        { label: 'Kobean AI Chat',                   run: runChat               },
+  orchestrate: { label: 'AI Orchestrator',                  run: runOrchestrate        },
 };
 
 const TOOL_COUNT = Object.keys(TOOLS).length;
@@ -779,9 +802,10 @@ async function showMainMenu(): Promise<ToolKey | 'exit'> {
   choices.push(item('🔢', 'Base Converter',       'base',      'Binary · Octal · Decimal · Hex · custom base'));
   choices.push(item('🔡', 'Case Converter',       'case',      'camelCase · snake_case · PascalCase · and more'));
   choices.push(new Separator(T.dim('  ── Data Toolkit ────────────────────────────────── ')));
-  choices.push(item('📋', 'JSON Toolkit',         'json',      'Format · validate · minify JSON'));
-  choices.push(item('🗄️', 'SQL Generator',        'sql',       'SELECT · INSERT · UPDATE · DELETE · CREATE TABLE'));
-  choices.push(item('🌐', 'HTML Sanitizer',       'html',      'Strip <script> tags and inline event handlers'));
+  choices.push(item('📋', 'JSON Toolkit',              'json',         'Format · validate · minify JSON'));
+  choices.push(item('🗄️', 'SQL Generator',             'sql',          'SELECT · INSERT · UPDATE · DELETE · CREATE TABLE'));
+  choices.push(item('🌐', 'HTML Sanitizer',            'html',         'Strip <script> tags and inline event handlers'));
+  choices.push(item('📝', 'MD → Confluence Wiki',      'mdconfluence', 'Convert Markdown to Confluence Wiki markup'));
   choices.push(new Separator(T.dim('  ── AI ─────────────────────────────────────────── ')));
   choices.push(item('🤖', 'Kobean AI Chat',       'chat',        'Interactive AI chat (OpenAI, Anthropic, Gemini, Ollama…)'));
   choices.push(item('🧩', 'AI Orchestrator',      'orchestrate', 'Multi-agent pipeline — describe a task and let the AI team handle it'));
