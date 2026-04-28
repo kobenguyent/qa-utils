@@ -4,21 +4,21 @@ import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import CopyWithToast from "../CopyWithToast";
 
-type SecretEntry = { name: string; key: string; timestamp: string };
-
 const ALGOS = [
-    { key: 'sha1', label: 'SHA-1', badge: 'Widely Supported', note: 'Supported by Apache & Nginx. Weak by modern crypto standards but widely compatible.' },
-    { key: 'sha256',  label: 'SHA-256', badge: 'SHA-256 fallback', note: 'True APR1-MD5 requires server-side tools. This uses SHA-256 as a browser-safe substitute.' },
-    { key: 'sha512',  label: 'SHA-512', badge: 'SHA-512 fallback', note: 'True APR1-MD5 requires server-side tools. This uses SHA-512 as a browser-safe substitute.' },
+    { key: 'sha1', label: 'SHA-1', badge: 'Standard', note: 'Default algorithm per RFC 6238. Compatible with most authenticator apps (Google Authenticator, Authy, etc.).' },
+    { key: 'sha256', label: 'SHA-256', badge: 'Extended', note: 'Stronger hashing algorithm. Requires authenticator app support (e.g. FreeOTP).' },
+    { key: 'sha512', label: 'SHA-512', badge: 'Strongest', note: 'Maximum strength hashing. Requires authenticator app support.' },
 ] as const;
 type AlgoKey = typeof ALGOS[number]['key'];
 
 const OTP_DIGITS = [
-    { key: '6', label: '6', badge: '6 digit OTP', note: '6 digit OTP' },
-    { key: '7',  label: '7', badge: '7 digit OTP', note: '7 digit OTP' },
-    { key: '8',  label: '8', badge: '8 digit OTP', note: '8 digit OTP' },
+    { key: '6', label: '6', note: 'Standard 6-digit OTP. Compatible with most authenticator apps.' },
+    { key: '7', label: '7', note: '7-digit OTP. Requires app support.' },
+    { key: '8', label: '8', note: '8-digit OTP for higher security. Requires app support.' },
 ] as const;
 type OtpDigitsKey = typeof OTP_DIGITS[number]['key'];
+
+type SecretEntry = { name: string; key: string; timestamp: string; digits?: OtpDigitsKey; algorithm?: AlgoKey };
 
 export const OtpGenerator = () => {
   const [otp, setOtp] = useState("");
@@ -28,8 +28,8 @@ export const OtpGenerator = () => {
   const [showSecret, setShowSecret] = useState(false);
   const [showTableSecrets, setShowTableSecrets] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(30);
-  const [digits, setDigits] = useState<OtpDigitsKey>('8');
-  const [algorithm, setAlgorithm] = useState<AlgoKey>("sha512");
+  const [digits, setDigits] = useState<OtpDigitsKey>('6');
+  const [algorithm, setAlgorithm] = useState<AlgoKey>("sha1");
   const [secretKeys, setSecretKeys] = useState<SecretEntry[]>(() => {
     try { return JSON.parse(localStorage.getItem("secretKeys") ?? "[]"); } catch { return []; }
   });
@@ -39,22 +39,27 @@ export const OtpGenerator = () => {
     return clean.length === 16 || clean.length === 32;
   };
 
-  const generateOtp = (otpOption?: any) => {
-      console.log(secret);
-    const keyToUse = (otpOption?.key || secret).replace(/\s/g, "");
+  const generateOtp = (keyOverride?: string, digitsOverride?: OtpDigitsKey, algoOverride?: AlgoKey) => {
+    const keyToUse = (keyOverride || secret).replace(/\s/g, "");
     if (!keyToUse) return;
+    const d = parseInt(digitsOverride ?? digits, 10);
+    const a = algoOverride ?? algorithm;
     // @ts-ignore
-    window.otplib.generate({secret: keyToUse, digits: otpOption?.digits || digits, algorithm: otpOption?.algorithm || algorithm}).then((otp) => {
-        console.log(otp, otpOption);
-        setOtp(otp);
-        setIsSecretValid(true);
-        const exists = secretKeys.some(k => k.key === keyToUse);
-        if (!exists) {
-            const updated = [...secretKeys, { name: name.trim() || "Unnamed", key: keyToUse, timestamp: new Date().toLocaleString(), digits, algorithm }];
-            setSecretKeys(updated);
-            localStorage.setItem("secretKeys", JSON.stringify(updated));
-        }
-    });
+    const newOtp = window.otplib.totp.generate(keyToUse, { digits: d, algorithm: a });
+    setOtp(newOtp);
+    setIsSecretValid(true);
+    const exists = secretKeys.some(k => k.key === keyToUse);
+    if (!exists) {
+      const updated = [...secretKeys, {
+        name: name.trim() || "Unnamed",
+        key: keyToUse,
+        timestamp: new Date().toLocaleString(),
+        digits: digitsOverride ?? digits,
+        algorithm: algoOverride ?? algorithm,
+      }];
+      setSecretKeys(updated);
+      localStorage.setItem("secretKeys", JSON.stringify(updated));
+    }
   };
 
   const handleSecretChange = (val: string) => {
@@ -75,16 +80,20 @@ export const OtpGenerator = () => {
       });
     }, 1000);
     return () => clearInterval(id);
-  }, [secret, isSecretValid]);
+  }, [secret, isSecretValid, digits, algorithm]);
 
-  const handleSetCurrentSecret = (secretKeyOption?: any) => {
-      console.log(secretKeyOption);
-    setSecret(secretKeyOption.key);
-    setName(secretKeyOption.keyName);
-    setOtp(""); setTimeRemaining(30);
-    if (validateSecretKey(secretKeyOption.key)) {
-        setIsSecretValid(true);
-        generateOtp(secretKeyOption);
+  const handleSetCurrentSecret = (entry: SecretEntry) => {
+    const effectiveDigits = entry.digits ?? digits;
+    const effectiveAlgorithm = entry.algorithm ?? algorithm;
+    setSecret(entry.key);
+    setName(entry.name);
+    setDigits(effectiveDigits);
+    setAlgorithm(effectiveAlgorithm);
+    setOtp("");
+    setTimeRemaining(30);
+    if (validateSecretKey(entry.key)) {
+      setIsSecretValid(true);
+      generateOtp(entry.key, effectiveDigits, effectiveAlgorithm);
     }
   };
 
@@ -96,6 +105,7 @@ export const OtpGenerator = () => {
   const timerColor = timeRemaining > 15 ? "#34d399" : timeRemaining > 8 ? "#f59e0b" : "#f87171";
   const algoMeta = ALGOS.find(a => a.key === algorithm)!;
   const digitMeta = OTP_DIGITS.find(a => a.key === digits)!;
+  const otpHalf = Math.floor(otp.length / 2);
 
   return (
     <Container className="py-4">
@@ -234,7 +244,7 @@ export const OtpGenerator = () => {
             </div>
 
             <div style={{ display: "flex", gap: "0.5rem" }}>
-              <Button variant="primary" onClick={() => generateOtp({secret, digits, algorithm})} disabled={!isSecretValid} style={{ flex: 1 }}>
+              <Button variant="primary" onClick={() => generateOtp()} disabled={!isSecretValid} style={{ flex: 1 }}>
                 ⟳ Generate OTP
               </Button>
               <button
@@ -276,7 +286,7 @@ export const OtpGenerator = () => {
                   padding: "0.75rem 1.5rem",
                   userSelect: "all",
                 }}>
-                  {otp.slice(0, 3)} {otp.slice(3)}
+                  {otp.slice(0, otpHalf)} {otp.slice(otpHalf)}
                 </div>
 
                 {/* Timer */}
@@ -377,6 +387,20 @@ export const OtpGenerator = () => {
                       <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--muted)" }}>
                         {showTableSecrets ? entry.key : "••••••••••••••••"}
                       </div>
+                      {(entry.algorithm || entry.digits) && (
+                        <div style={{ display: "flex", gap: "0.3rem", marginTop: "0.2rem" }}>
+                          {entry.algorithm && (
+                            <span style={{ fontSize: "0.65rem", background: "var(--bg)", border: "1px solid var(--border-color)", borderRadius: "var(--radius-sm)", padding: "0.05rem 0.35rem", color: "var(--muted)" }}>
+                              {entry.algorithm.toUpperCase()}
+                            </span>
+                          )}
+                          {entry.digits && (
+                            <span style={{ fontSize: "0.65rem", background: "var(--bg)", border: "1px solid var(--border-color)", borderRadius: "var(--radius-sm)", padding: "0.05rem 0.35rem", color: "var(--muted)" }}>
+                              {entry.digits} digits
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <div style={{ fontSize: "0.68rem", color: "var(--muted)", flexShrink: 0, textAlign: "right" }}>
                       {entry.timestamp}
