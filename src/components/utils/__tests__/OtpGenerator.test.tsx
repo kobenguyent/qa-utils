@@ -31,7 +31,6 @@ const VALID_SECRET = 'JBSWY3DPEHPK3PXP'; // 16-char base32 key
 describe('OtpGenerator Component', () => {
   beforeEach(() => {
     localStorage.clear();
-    mockGenerate.mockReturnValue('123456');
     vi.clearAllMocks();
     mockGenerate.mockReturnValue('123456');
   });

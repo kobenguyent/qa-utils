@@ -44,8 +44,7 @@ export const OtpGenerator = () => {
     if (!keyToUse) return;
     const d = parseInt(digitsOverride ?? digits, 10);
     const a = algoOverride ?? algorithm;
-    // @ts-ignore
-    const newOtp = window.otplib.totp.generate(keyToUse, { digits: d, algorithm: a });
+    const newOtp = (window as Window & { otplib: { totp: { generate: (secret: string, options: { digits: number; algorithm: string }) => string } } }).otplib.totp.generate(keyToUse, { digits: d, algorithm: a });
     setOtp(newOtp);
     setIsSecretValid(true);
     const exists = secretKeys.some(k => k.key === keyToUse);
