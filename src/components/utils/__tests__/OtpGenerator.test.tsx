@@ -14,12 +14,13 @@ vi.mock('react-circular-progressbar', () => ({
   buildStyles: () => ({}),
 }));
 
-// Mock window.otplib
+// Mock window.otplib — mirroring @otplib/preset-browser API: totp.clone({...}).generate(secret)
 const mockGenerate = vi.fn().mockReturnValue('123456');
+const mockClone = vi.fn().mockReturnValue({ generate: mockGenerate });
 Object.defineProperty(window, 'otplib', {
   value: {
     totp: {
-      generate: mockGenerate,
+      clone: mockClone,
     },
   },
   writable: true,
@@ -33,6 +34,7 @@ describe('OtpGenerator Component', () => {
     localStorage.clear();
     vi.clearAllMocks();
     mockGenerate.mockReturnValue('123456');
+    mockClone.mockReturnValue({ generate: mockGenerate });
   });
 
   afterEach(() => {
@@ -111,16 +113,17 @@ describe('OtpGenerator Component', () => {
     expect(generateBtn).not.toBeDisabled();
   });
 
-  it('calls otplib.totp.generate with correct default options on generate', () => {
+  it('calls otplib.totp.clone with correct default options on generate', () => {
     render(<OtpGenerator />);
     const secretInput = screen.getByPlaceholderText('16 or 32 character key');
     fireEvent.change(secretInput, { target: { value: VALID_SECRET } });
     const generateBtn = screen.getByRole('button', { name: /Generate OTP/i });
     fireEvent.click(generateBtn);
-    expect(mockGenerate).toHaveBeenCalledWith(VALID_SECRET, { digits: 6, algorithm: 'sha1' });
+    expect(mockClone).toHaveBeenCalledWith({ digits: 6, algorithm: 'sha1' });
+    expect(mockGenerate).toHaveBeenCalledWith(VALID_SECRET);
   });
 
-  it('calls otplib.totp.generate with selected digits and algorithm', () => {
+  it('calls otplib.totp.clone with selected digits and algorithm', () => {
     render(<OtpGenerator />);
     // Select SHA-512
     fireEvent.click(screen.getByText('SHA-512'));
@@ -133,7 +136,8 @@ describe('OtpGenerator Component', () => {
     // Generate
     const generateBtn = screen.getByRole('button', { name: /Generate OTP/i });
     fireEvent.click(generateBtn);
-    expect(mockGenerate).toHaveBeenCalledWith(VALID_SECRET, { digits: 8, algorithm: 'sha512' });
+    expect(mockClone).toHaveBeenCalledWith({ digits: 8, algorithm: 'sha512' });
+    expect(mockGenerate).toHaveBeenCalledWith(VALID_SECRET);
   });
 
   it('saves entry to localStorage with digits and algorithm on generate', () => {
@@ -185,7 +189,8 @@ describe('OtpGenerator Component', () => {
     render(<OtpGenerator />);
     const useBtn = screen.getByRole('button', { name: 'Use' });
     fireEvent.click(useBtn);
-    expect(mockGenerate).toHaveBeenCalledWith(VALID_SECRET, { digits: 8, algorithm: 'sha512' });
+    expect(mockClone).toHaveBeenCalledWith({ digits: 8, algorithm: 'sha512' });
+    expect(mockGenerate).toHaveBeenCalledWith(VALID_SECRET);
   });
 
   it('shows algorithm and digits badges for saved entries', () => {
