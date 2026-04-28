@@ -6,6 +6,20 @@ import CopyWithToast from "../CopyWithToast";
 
 type SecretEntry = { name: string; key: string; timestamp: string };
 
+const ALGOS = [
+    { key: 'sha1', label: 'SHA-1', badge: 'Widely Supported', note: 'Supported by Apache & Nginx. Weak by modern crypto standards but widely compatible.' },
+    { key: 'sha256',  label: 'SHA-256', badge: 'SHA-256 fallback', note: 'True APR1-MD5 requires server-side tools. This uses SHA-256 as a browser-safe substitute.' },
+    { key: 'sha512',  label: 'SHA-512', badge: 'SHA-512 fallback', note: 'True APR1-MD5 requires server-side tools. This uses SHA-512 as a browser-safe substitute.' },
+] as const;
+type AlgoKey = typeof ALGOS[number]['key'];
+
+const OTP_DIGITS = [
+    { key: '6', label: '6', badge: '6 digit OTP', note: '6 digit OTP' },
+    { key: '7',  label: '7', badge: '7 digit OTP', note: '7 digit OTP' },
+    { key: '8',  label: '8', badge: '8 digit OTP', note: '8 digit OTP' },
+] as const;
+type OtpDigitsKey = typeof OTP_DIGITS[number]['key'];
+
 export const OtpGenerator = () => {
   const [otp, setOtp] = useState("");
   const [secret, setSecret] = useState("");
@@ -14,6 +28,8 @@ export const OtpGenerator = () => {
   const [showSecret, setShowSecret] = useState(false);
   const [showTableSecrets, setShowTableSecrets] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(30);
+  const [digits, setDigits] = useState<OtpDigitsKey>('8');
+  const [algorithm, setAlgorithm] = useState<AlgoKey>("sha512");
   const [secretKeys, setSecretKeys] = useState<SecretEntry[]>(() => {
     try { return JSON.parse(localStorage.getItem("secretKeys") ?? "[]"); } catch { return []; }
   });
@@ -23,19 +39,22 @@ export const OtpGenerator = () => {
     return clean.length === 16 || clean.length === 32;
   };
 
-  const generateOtp = (secretKey?: string) => {
-    const keyToUse = (secretKey || secret).replace(/\s/g, "");
+  const generateOtp = (otpOption?: any) => {
+      console.log(secret);
+    const keyToUse = (otpOption?.key || secret).replace(/\s/g, "");
     if (!keyToUse) return;
     // @ts-ignore
-    const newOtp = window.otplib.authenticator.generate(keyToUse);
-    setOtp(newOtp);
-    setIsSecretValid(true);
-    const exists = secretKeys.some(k => k.key === keyToUse);
-    if (!exists) {
-      const updated = [...secretKeys, { name: name.trim() || "Unnamed", key: keyToUse, timestamp: new Date().toLocaleString() }];
-      setSecretKeys(updated);
-      localStorage.setItem("secretKeys", JSON.stringify(updated));
-    }
+    window.otplib.generate({secret: keyToUse, digits: otpOption?.digits || digits, algorithm: otpOption?.algorithm || algorithm}).then((otp) => {
+        console.log(otp, otpOption);
+        setOtp(otp);
+        setIsSecretValid(true);
+        const exists = secretKeys.some(k => k.key === keyToUse);
+        if (!exists) {
+            const updated = [...secretKeys, { name: name.trim() || "Unnamed", key: keyToUse, timestamp: new Date().toLocaleString(), digits, algorithm }];
+            setSecretKeys(updated);
+            localStorage.setItem("secretKeys", JSON.stringify(updated));
+        }
+    });
   };
 
   const handleSecretChange = (val: string) => {
@@ -58,9 +77,15 @@ export const OtpGenerator = () => {
     return () => clearInterval(id);
   }, [secret, isSecretValid]);
 
-  const handleSetCurrentSecret = (key: string, keyName: string) => {
-    setSecret(key); setName(keyName); setOtp(""); setTimeRemaining(30);
-    if (validateSecretKey(key)) { setIsSecretValid(true); generateOtp(key); }
+  const handleSetCurrentSecret = (secretKeyOption?: any) => {
+      console.log(secretKeyOption);
+    setSecret(secretKeyOption.key);
+    setName(secretKeyOption.keyName);
+    setOtp(""); setTimeRemaining(30);
+    if (validateSecretKey(secretKeyOption.key)) {
+        setIsSecretValid(true);
+        generateOtp(secretKeyOption);
+    }
   };
 
   const handleClearAll = () => {
@@ -69,6 +94,8 @@ export const OtpGenerator = () => {
 
   const timerPct = (timeRemaining / 30) * 100;
   const timerColor = timeRemaining > 15 ? "#34d399" : timeRemaining > 8 ? "#f59e0b" : "#f87171";
+  const algoMeta = ALGOS.find(a => a.key === algorithm)!;
+  const digitMeta = OTP_DIGITS.find(a => a.key === digits)!;
 
   return (
     <Container className="py-4">
@@ -104,6 +131,68 @@ export const OtpGenerator = () => {
                 onChange={e => setName(e.target.value)}
               />
             </div>
+
+              {/* Algorithms */}
+              <div>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.5rem' }}>
+                      Algorithm
+                  </label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                      {ALGOS.map(a => {
+                          const active = algorithm === a.key;
+                          return (
+                              <button
+                                  key={a.key}
+                                  onClick={() => setAlgorithm(a.key)}
+                                  style={{
+                                      padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', textAlign: 'left',
+                                      border: `1px solid ${active ? 'var(--primary)' : 'var(--border-color)'}`,
+                                      background: active ? 'var(--primary-light)' : 'transparent',
+                                      color: active ? 'var(--primary)' : 'var(--text)',
+                                      fontWeight: 600, fontSize: '0.83rem', cursor: 'pointer',
+                                      transition: 'all var(--duration) var(--ease)',
+                                  }}
+                              >
+                                  {a.label}
+                              </button>
+                          );
+                      })}
+                  </div>
+                  <div style={{ fontSize: '0.71rem', color: 'var(--muted)', marginTop: '0.4rem', lineHeight: 1.5 }}>
+                      {algoMeta.note}
+                  </div>
+              </div>
+
+              {/* Digits */}
+              <div>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.5rem' }}>
+                      Digits
+                  </label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                      {OTP_DIGITS.map(a => {
+                          const active = digits === a.key;
+                          return (
+                              <button
+                                  key={a.key}
+                                  onClick={() => setDigits(a.key)}
+                                  style={{
+                                      padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', textAlign: 'left',
+                                      border: `1px solid ${active ? 'var(--primary)' : 'var(--border-color)'}`,
+                                      background: active ? 'var(--primary-light)' : 'transparent',
+                                      color: active ? 'var(--primary)' : 'var(--text)',
+                                      fontWeight: 600, fontSize: '0.83rem', cursor: 'pointer',
+                                      transition: 'all var(--duration) var(--ease)',
+                                  }}
+                              >
+                                  {a.label}
+                              </button>
+                          );
+                      })}
+                  </div>
+                  <div style={{ fontSize: '0.71rem', color: 'var(--muted)', marginTop: '0.4rem', lineHeight: 1.5 }}>
+                      {digitMeta.note}
+                  </div>
+              </div>
 
             {/* Secret key */}
             <div>
@@ -145,7 +234,7 @@ export const OtpGenerator = () => {
             </div>
 
             <div style={{ display: "flex", gap: "0.5rem" }}>
-              <Button variant="primary" onClick={() => generateOtp()} disabled={!isSecretValid} style={{ flex: 1 }}>
+              <Button variant="primary" onClick={() => generateOtp({secret, digits, algorithm})} disabled={!isSecretValid} style={{ flex: 1 }}>
                 ⟳ Generate OTP
               </Button>
               <button
@@ -294,7 +383,7 @@ export const OtpGenerator = () => {
                     </div>
                     {!isCurrent && (
                       <button
-                        onClick={() => handleSetCurrentSecret(entry.key, entry.name)}
+                        onClick={() => handleSetCurrentSecret(entry)}
                         style={{
                           padding: "0.3rem 0.7rem",
                           borderRadius: "var(--radius-sm)",
