@@ -164,7 +164,7 @@ export function registerPromptCommand(program: Command): void {
             if (allVars.size > 0) {
                 console.log();
                 console.log(chalk.bold.yellow('  Template variables detected:'));
-                allVars.forEach((v) => console.log(`    ${chalk.cyan(`{{${v}}}}`)}`));
+                allVars.forEach((v) => console.log(`    ${chalk.cyan(`{{${v}}}`)}`))
             }
             console.log();
         });

@@ -483,7 +483,7 @@ export const navigationConfig: NavItem[] = [
     ],
     icon: '🧩',
     navGroups: ['Tools'],
-    navLabel: 'JSON Prompt',
+    navLabel: 'JSON Prompt Builder',
   },
   {
     title: 'Website Scanner',
