@@ -44,8 +44,8 @@ export const OtpGenerator = () => {
     if (!keyToUse) return;
     const d = parseInt(digitsOverride ?? digits, 10);
     const a = algoOverride ?? algorithm;
-    type OtplibGlobal = { generateSync: (opts: { secret: string; digits: number; algorithm: string }) => string };
-    const newOtp = (window as Window & { otplib: OtplibGlobal }).otplib.generateSync({ secret: keyToUse, digits: d, algorithm: a });
+    // @ts-ignore
+      const newOtp = window.otplib.generateSync({ secret: keyToUse, digits: d, algorithm: a });
     setOtp(newOtp);
     setIsSecretValid(true);
     const exists = secretKeys.some(k => k.key === keyToUse);
