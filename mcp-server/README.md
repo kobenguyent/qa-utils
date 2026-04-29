@@ -21,6 +21,7 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that e
 | `convert_color` | Convert colors between hex, RGB, and HSL formats |
 | `generate_random_string` | Generate random alphanumeric strings |
 | `sanitize_html` | Remove script tags and event handlers from HTML |
+| `convert_markdown_to_confluence` | Convert Markdown text to Confluence Wiki markup |
 
 ## Setup
 

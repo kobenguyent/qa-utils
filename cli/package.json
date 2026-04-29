@@ -1,6 +1,6 @@
 {
   "name": "qautils-cli",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "Command-line interface for QA Utils — utility tools for testing and automation workflows",
   "type": "module",
   "bin": {

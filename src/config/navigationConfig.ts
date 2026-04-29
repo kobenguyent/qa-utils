@@ -220,6 +220,19 @@ export const navigationConfig: NavItem[] = [
     icon: '🔄',
     navGroups: ['Converters'],
   },
+  {
+    title: 'Markdown to Confluence Wiki',
+    description: 'Convert Markdown text or files to Confluence Wiki markup',
+    path: '#/markdown-to-confluence',
+    category: 'Converters & Formatters',
+    keywords: [
+      'markdown', 'confluence', 'wiki', 'atlassian', 'converter', 'markup',
+      'md', 'convert', 'jira', 'document', 'headings', 'table',
+    ],
+    icon: '📝',
+    navGroups: ['Converters'],
+    navLabel: 'MD → Confluence',
+  },
 
   // ── Generators ────────────────────────────────────────────────────────────
   {

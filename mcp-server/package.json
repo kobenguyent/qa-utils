@@ -1,6 +1,6 @@
 {
   "name": "qa-utils-mcp-server",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "MCP server for qa-utils - enables AI agents to interact with QA utility tools",
   "type": "module",
   "main": "dist/mcp-server/src/index.js",

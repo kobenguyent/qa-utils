@@ -25,6 +25,7 @@ export {
   SQL_OPERATIONS,
   HASH_ALGORITHMS,
   NANO_ALPHABET,
+  convertMarkdownToConfluence,
   // Node.js-specific
   generateUuids,
   base64Encode,
