@@ -17,7 +17,9 @@ import {
   sanitizeHtml, urlEncode, urlDecode, parseUrl, testRegex, convertBase,
   convertCase, generateNanoId, HASH_ALGORITHMS, CASE_TYPES,
   convertMarkdownToConfluence,
+  buildJsonPrompt, parseJsonPrompt, extractTemplateVariables,
   type HashAlgorithm, type SqlOperation, type CaseType,
+  type PromptProviderFormat, type JsonPromptTemplate,
 } from './lib/tools.js';
 import {
   readConfig,
@@ -706,6 +708,90 @@ async function runOrchestrate(): Promise<null> {
   return null;
 }
 
+// ── JSON Prompt Builder ───────────────────────────────────────────────────────
+async function runJsonPromptBuilder(): Promise<string | null> {
+  const FORMATS: Array<{ name: string; value: PromptProviderFormat }> = [
+    { name: '  🟢  OpenAI    — ChatCompletion format',  value: 'openai'    },
+    { name: '  🟣  Anthropic — Messages API format',    value: 'anthropic' },
+    { name: '  🔵  Gemini    — GenerateContent format', value: 'gemini'    },
+    { name: '  ⚙️   Generic   — plain JSON format',      value: 'generic'   },
+  ];
+
+  const format = await select<PromptProviderFormat>({ message: 'Provider format:', choices: FORMATS });
+
+  const defaultModels: Record<PromptProviderFormat, string> = {
+    openai:    'gpt-4o',
+    anthropic: 'claude-3-5-sonnet-20241022',
+    gemini:    'gemini-1.5-flash',
+    generic:   'my-model',
+  };
+
+  const model = await input({ message: 'Model name:', default: defaultModels[format] });
+  const tempStr = await input({ message: 'Temperature (0–2):', default: '0.7' });
+  const tokStr  = await input({ message: 'Max tokens:', default: '1024' });
+
+  const temperature = parseFloat(tempStr) || 0.7;
+  const maxTokens   = parseInt(tokStr, 10)   || 1024;
+
+  const messages: JsonPromptTemplate['messages'] = [];
+
+  const sysContent = await input({ message: 'System message (blank to skip):', default: '' });
+  if (sysContent.trim()) messages.push({ role: 'system', content: sysContent.trim() });
+
+  let addMore = true;
+  while (addMore) {
+    const role = await select<'user' | 'assistant' | 'done'>({
+      message: 'Add a message (role):',
+      choices: [
+        { name: '  👤  user',       value: 'user'      },
+        { name: '  🤖  assistant',  value: 'assistant' },
+        { name: '  ✅  Done',       value: 'done'      },
+      ],
+    });
+    if (role === 'done') { addMore = false; break; }
+    const content = await input({ message: `${role} message content (use {{var}} for variables):` });
+    messages.push({ role, content });
+  }
+
+  if (messages.length === 0) {
+    console.log(T.dim('\n  No messages added.\n'));
+    return null;
+  }
+
+  const template: JsonPromptTemplate = { model, temperature, maxTokens, messages };
+
+  // Collect variable values
+  const allVars = new Set<string>();
+  messages.forEach((m) => extractTemplateVariables(m.content).forEach((v) => allVars.add(v)));
+  const variables: Record<string, string> = {};
+  if (allVars.size > 0) {
+    console.log(T.dim(`\n  Detected ${allVars.size} template variable(s). Enter values (blank to leave as-is):`));
+    for (const varName of allVars) {
+      const val = await input({ message: `  {{${varName}}}:`, default: '' });
+      variables[varName] = val;
+    }
+  }
+
+  const sp = spin('Building JSON prompt…').start();
+  const result = buildJsonPrompt(template, variables, format);
+  sp.stop();
+
+  if (!result.valid) {
+    console.log(`\n  ${T.error('✗')}  ${chalk.red(result.error)}\n`);
+    return null;
+  }
+
+  console.log();
+  console.log(T.border('╭─ JSON Prompt ─────────────────────────────────────────────────────╮'));
+  result.json.split('\n').forEach((line) =>
+    console.log(`${T.border('│')}  ${chalk.white(line)}`)
+  );
+  console.log(T.border('╰───────────────────────────────────────────────────────────────────╯'));
+  console.log();
+  cliTip(`prompt build --format ${format} --system "…" --user "…"`);
+  return result.json;
+}
+
 // ── Markdown → Confluence Wiki ─────────────────────────────────────────────────
 async function runMarkdownToConfluence(): Promise<string | null> {
   const markdown = await input({ message: 'Paste Markdown text (enter on blank line to finish):' });
@@ -732,7 +818,7 @@ type ToolKey =
   | 'uuid' | 'base64' | 'jwt' | 'hash' | 'password' | 'timestamp'
   | 'json' | 'lorem' | 'text' | 'email' | 'sql' | 'color' | 'html'
   | 'random' | 'url' | 'regex' | 'base' | 'case' | 'nanoid' | 'chat'
-  | 'orchestrate' | 'mdconfluence';
+  | 'orchestrate' | 'mdconfluence' | 'jsonprompt';
 
 const TOOLS: Record<ToolKey, { label: string; run: () => Promise<string | null> }> = {
   uuid:         { label: 'UUID Generator',            run: runUuid                },
@@ -755,6 +841,7 @@ const TOOLS: Record<ToolKey, { label: string; run: () => Promise<string | null> 
   sql:          { label: 'SQL Generator',              run: runSql                 },
   html:         { label: 'HTML Sanitizer',             run: runHtml                },
   mdconfluence: { label: 'Markdown → Confluence Wiki', run: runMarkdownToConfluence },
+  jsonprompt:   { label: 'JSON Prompt Builder',         run: runJsonPromptBuilder   },
   chat:         { label: 'Kobean AI Chat',             run: runChat                },
   orchestrate:  { label: 'AI Orchestrator',            run: runOrchestrate         },
 };
@@ -806,6 +893,7 @@ async function showMainMenu(): Promise<ToolKey | 'exit'> {
   choices.push(item('🗄️', 'SQL Generator',             'sql',          'SELECT · INSERT · UPDATE · DELETE · CREATE TABLE'));
   choices.push(item('🌐', 'HTML Sanitizer',            'html',         'Strip <script> tags and inline event handlers'));
   choices.push(item('📝', 'MD → Confluence Wiki',      'mdconfluence', 'Convert Markdown to Confluence Wiki markup'));
+  choices.push(item('🧩', 'JSON Prompt Builder',       'jsonprompt',   'Build structured AI prompts (OpenAI, Anthropic, Gemini, generic)'));
   choices.push(new Separator(T.dim('  ── AI ─────────────────────────────────────────── ')));
   choices.push(item('🤖', 'Kobean AI Chat',       'chat',        'Interactive AI chat (OpenAI, Anthropic, Gemini, Ollama…)'));
   choices.push(item('🧩', 'AI Orchestrator',      'orchestrate', 'Multi-agent pipeline — describe a task and let the AI team handle it'));

@@ -62,6 +62,46 @@ Improve AI prompts using intelligent rewriting techniques.
 
 ---
 
+## 🧩 JSON Prompt Builder
+
+Build, validate, and export structured AI prompts in JSON format — designed for prompt engineers working with AI/LLM APIs.
+
+### Features
+
+- **Visual message editor** — Add system, user, and assistant turns in order
+- **Template variables** — Use `{{variableName}}` placeholders; fill in values before export
+- **Multi-provider export** — One-click export to OpenAI, Anthropic, Gemini, or generic JSON
+- **Import & edit** — Paste existing JSON prompts (any format) to edit them visually
+- **Validation** — Structural validation with clear error messages
+- **Copy to clipboard** — One-click copy of the generated JSON
+
+### Supported Provider Formats
+
+| Provider | Format details |
+|----------|---------------|
+| **OpenAI** | `{"model":"…","messages":[…],"temperature":…,"max_tokens":…}` |
+| **Anthropic** | `{"system":"…","messages":[…],"max_tokens":…}` |
+| **Gemini** | `{"systemInstruction":{"parts":[…]},"contents":[…],"generationConfig":{…}}` |
+| **Generic** | Flat messages array with model params |
+
+### Template Variables
+
+Use `{{variableName}}` syntax in any message content to create reusable prompt templates.
+The builder auto-detects variables and shows fill-in fields so you can preview the rendered output before exporting.
+
+**Example:**
+
+```
+System: You are an expert {{role}}.
+User:   Explain {{topic}} in simple terms.
+```
+
+Fill in `role=QA engineer` and `topic=test automation` to preview the final prompt.
+
+**Route:** `/json-prompt-builder`
+
+---
+
 ## 🤖 AI Website Tester
 
 AI-powered website testing and analysis.

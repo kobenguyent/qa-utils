@@ -472,6 +472,20 @@ export const navigationConfig: NavItem[] = [
     navGroups: ['Tools'],
   },
   {
+    title: 'JSON Prompt Builder',
+    description: 'Build structured AI prompts in JSON format with variables, multi-turn messages, and provider-specific export (OpenAI, Anthropic, Gemini)',
+    path: '#/json-prompt-builder',
+    category: 'AI Tools',
+    keywords: [
+      'json', 'prompt', 'builder', 'ai', 'openai', 'anthropic', 'gemini', 'llm',
+      'chat', 'messages', 'system', 'user', 'assistant', 'template', 'variables',
+      'prompt engineering', 'structured prompt',
+    ],
+    icon: '🧩',
+    navGroups: ['Tools'],
+    navLabel: 'JSON Prompt',
+  },
+  {
     title: 'Website Scanner',
     description:
       'Comprehensive website analysis for broken links, accessibility, performance, SEO, and security issues',
