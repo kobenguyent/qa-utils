@@ -15,6 +15,7 @@ import {
   convertColor,
   generateRandomString,
   sanitizeHtml,
+  convertMarkdownToConfluence,
 } from '../tools.js';
 
 describe('generateUuids', () => {
@@ -354,5 +355,56 @@ describe('sanitizeHtml', () => {
   it('should leave safe HTML intact', () => {
     const html = '<p>Hello <strong>World</strong></p>';
     expect(sanitizeHtml(html)).toBe(html);
+  });
+});
+
+describe('convertMarkdownToConfluence', () => {
+  it('should convert ATX headings', () => {
+    expect(convertMarkdownToConfluence('# Title')).toBe('h1. Title');
+    expect(convertMarkdownToConfluence('## Section')).toBe('h2. Section');
+  });
+
+  it('should convert bold text', () => {
+    expect(convertMarkdownToConfluence('**bold**')).toBe('*bold*');
+  });
+
+  it('should convert italic text', () => {
+    expect(convertMarkdownToConfluence('_italic_')).toBe('_italic_');
+  });
+
+  it('should convert inline code', () => {
+    expect(convertMarkdownToConfluence('`snippet`')).toBe('{{snippet}}');
+  });
+
+  it('should convert fenced code blocks', () => {
+    const md = '```python\nprint("hello")\n```';
+    expect(convertMarkdownToConfluence(md)).toBe('{code:language=python}\nprint("hello")\n{code}');
+  });
+
+  it('should convert unordered lists', () => {
+    expect(convertMarkdownToConfluence('- item')).toBe('* item');
+  });
+
+  it('should convert ordered lists', () => {
+    expect(convertMarkdownToConfluence('1. item')).toBe('# item');
+  });
+
+  it('should convert links', () => {
+    expect(convertMarkdownToConfluence('[Click](https://example.com)')).toBe('[Click|https://example.com]');
+  });
+
+  it('should convert horizontal rules', () => {
+    expect(convertMarkdownToConfluence('---')).toBe('----');
+  });
+
+  it('should convert GFM tables', () => {
+    const md = '| H1 | H2 |\n|----|----|\n| r1 | r2 |';
+    const result = convertMarkdownToConfluence(md);
+    expect(result).toContain('|| H1 || H2 ||');
+    expect(result).toContain('| r1 | r2 |');
+  });
+
+  it('should handle empty string', () => {
+    expect(convertMarkdownToConfluence('')).toBe('');
   });
 });

@@ -65,6 +65,7 @@ const Flashcards = lazy(() => import('./components/utils/Flashcards.tsx').then(m
 const CoveragePalace = lazy(() => import('./components/utils/CoveragePalace.tsx').then(module => ({ default: module.CoveragePalace })));
 const MyPalace = lazy(() => import('./components/utils/MyPalace.tsx').then(module => ({ default: module.MyPalace })));
 const ExploreTools = lazy(() => import('./components/ExploreTools.tsx'));
+const MarkdownToConfluence = lazy(() => import('./components/utils/MarkdownToConfluence.tsx').then(module => ({ default: module.MarkdownToConfluence })));
 
 // Component wrapper with suspense for lazy loaded routes
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -251,6 +252,10 @@ const router = createHashRouter([
   {
     path: 'media-converter',
     element: <RouteWrapper><MediaConverter /></RouteWrapper>
+  },
+  {
+    path: 'markdown-to-confluence',
+    element: <RouteWrapper><MarkdownToConfluence /></RouteWrapper>
   },
   {
     path: 'qr-code',

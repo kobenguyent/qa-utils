@@ -62,6 +62,7 @@ export {
   convertBase,
   NANO_ALPHABET,
   HASH_ALGORITHMS,
+  convertMarkdownToConfluence,
 } from './sharedTools.js';
 
 // ---------------------------------------------------------------------------

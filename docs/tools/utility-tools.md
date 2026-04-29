@@ -199,3 +199,21 @@ Generate test data in various formats.
 - Bulk generation
 
 **Route:** `/dummy-data`
+
+
+---
+
+## 📝 Markdown to Confluence Wiki Converter
+
+Convert Markdown text or `.md` files to Confluence Wiki markup.
+
+- Headings (`# H1` → `h1. H1`)
+- Bold, italic, strikethrough, inline code
+- Fenced code blocks with language syntax highlighting
+- Ordered and unordered lists (with nesting)
+- Links and images
+- Blockquotes and horizontal rules
+- GFM tables
+- Upload one or multiple `.md` files
+
+**Route:** `/markdown-to-confluence` &nbsp;|&nbsp; **MCP:** `convert_markdown_to_confluence` &nbsp;|&nbsp; **CLI:** `md-confluence`

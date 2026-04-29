@@ -697,3 +697,161 @@ export function convertCase(text: string, to: CaseType): string {
       return text;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Markdown → Confluence Wiki markup converter
+// ---------------------------------------------------------------------------
+
+/**
+ * Convert Markdown text to Confluence Wiki markup.
+ *
+ * Supported conversions:
+ * - ATX headings (#, ##, … → h1., h2., …)
+ * - Bold (**text** / __text__ → *text*)
+ * - Italic (*text* / _text_ → _text_)
+ * - Strikethrough (~~text~~ → -text-)
+ * - Inline code (`code` → {{code}})
+ * - Fenced code blocks (```lang … ``` → {code:language=lang} … {code})
+ * - Unordered lists (- / * with nesting → *, **, ***)
+ * - Ordered lists (1. with nesting → #, ##, ###)
+ * - Links ([text](url) → [text|url])
+ * - Images (![alt](url) → !url|alt=alt!)
+ * - Blockquotes (> … → {quote} … {quote})
+ * - Horizontal rules (--- → ----)
+ * - GFM tables (→ Confluence table with || header row)
+ */
+export function convertMarkdownToConfluence(markdown: string): string {
+  const lines = markdown.split('\n');
+  const output: string[] = [];
+
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // ── Fenced code block ──────────────────────────────────────────────────
+    const fenceMatch = line.match(/^(`{3,}|~{3,})\s*(\S*)$/);
+    if (fenceMatch) {
+      const lang = fenceMatch[2] || '';
+      const langAttr = lang ? `:language=${lang}` : '';
+      output.push(`{code${langAttr}}`);
+      i++;
+      const fence = fenceMatch[1];
+      while (i < lines.length && !lines[i].startsWith(fence)) {
+        output.push(lines[i]);
+        i++;
+      }
+      output.push('{code}');
+      i++; // skip closing fence
+      continue;
+    }
+
+    // ── Blockquote block ───────────────────────────────────────────────────
+    if (/^>/.test(line)) {
+      const quoteLines: string[] = [];
+      while (i < lines.length && /^>/.test(lines[i])) {
+        quoteLines.push(lines[i].replace(/^>\s?/, ''));
+        i++;
+      }
+      output.push('{quote}');
+      quoteLines.forEach((ql) => output.push(applyInline(ql)));
+      output.push('{quote}');
+      continue;
+    }
+
+    // ── GFM table ─────────────────────────────────────────────────────────
+    // A table starts with a line containing | and is followed by a separator row
+    if (/^\|/.test(line) && i + 1 < lines.length && /^\|[-| :]+\|/.test(lines[i + 1])) {
+      // header row
+      const cells = parseTableRow(line);
+      output.push('|| ' + cells.map(applyInline).join(' || ') + ' ||');
+      i += 2; // skip separator row
+      while (i < lines.length && /^\|/.test(lines[i])) {
+        const dataCells = parseTableRow(lines[i]);
+        output.push('| ' + dataCells.map(applyInline).join(' | ') + ' |');
+        i++;
+      }
+      continue;
+    }
+
+    // ── Horizontal rule ────────────────────────────────────────────────────
+    if (/^(-{3,}|\*{3,}|_{3,})\s*$/.test(line.trim())) {
+      output.push('----');
+      i++;
+      continue;
+    }
+
+    // ── ATX Heading ────────────────────────────────────────────────────────
+    const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
+    if (headingMatch) {
+      const level = headingMatch[1].length;
+      const text = applyInline(headingMatch[2].trim());
+      output.push(`h${level}. ${text}`);
+      i++;
+      continue;
+    }
+
+    // ── Unordered list ────────────────────────────────────────────────────
+    const ulMatch = line.match(/^(\s*)[-*+]\s+(.+)$/);
+    if (ulMatch) {
+      const depth = Math.floor(ulMatch[1].length / 2) + 1;
+      output.push('*'.repeat(depth) + ' ' + applyInline(ulMatch[2]));
+      i++;
+      continue;
+    }
+
+    // ── Ordered list ──────────────────────────────────────────────────────
+    const olMatch = line.match(/^(\s*)\d+\.\s+(.+)$/);
+    if (olMatch) {
+      const depth = Math.floor(olMatch[1].length / 2) + 1;
+      output.push('#'.repeat(depth) + ' ' + applyInline(olMatch[2]));
+      i++;
+      continue;
+    }
+
+    // ── Regular line (apply inline transformations) ────────────────────────
+    output.push(applyInline(line));
+    i++;
+  }
+
+  return output.join('\n');
+}
+
+/** Apply inline Markdown → Confluence conversions to a single line. */
+function applyInline(text: string): string {
+  // Images before links (more specific)
+  text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, url) =>
+    alt ? `!${url}|alt=${alt}!` : `!${url}!`
+  );
+
+  // Links
+  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '[$1|$2]');
+
+  // Inline code (must come before bold/italic to avoid interference)
+  text = text.replace(/`([^`]+)`/g, '{{$1}}');
+
+  // Bold (**text** or __text__) — use a placeholder so the italic pass below
+  // does not accidentally re-interpret the resulting single-star syntax.
+  const BOLD_PLACEHOLDER = '\x00BOLD\x00';
+  text = text.replace(/\*\*([^*]+)\*\*/g, `${BOLD_PLACEHOLDER}$1${BOLD_PLACEHOLDER}`);
+  text = text.replace(/__([^_]+)__/g, `${BOLD_PLACEHOLDER}$1${BOLD_PLACEHOLDER}`);
+
+  // Italic (*text* — single asterisk; _text_)
+  text = text.replace(/(?<!\*)\*(?!\*)([^*]+?)(?<!\*)\*(?!\*)/g, '_$1_');
+  text = text.replace(/(?<!_)_(?!_)([^_]+?)(?<!_)_(?!_)/g, '_$1_');
+
+  // Restore bold placeholders to Confluence bold (*text*)
+  text = text.replace(new RegExp(`${BOLD_PLACEHOLDER}([^${BOLD_PLACEHOLDER}]+)${BOLD_PLACEHOLDER}`, 'g'), '*$1*');
+
+  // Strikethrough
+  text = text.replace(/~~([^~]+)~~/g, '-$1-');
+
+  return text;
+}
+
+/** Parse cells from a GFM table row, trimming leading/trailing pipes and whitespace. */
+function parseTableRow(row: string): string[] {
+  return row
+    .replace(/^\||\|$/g, '')
+    .split('|')
+    .map((c) => c.trim());
+}

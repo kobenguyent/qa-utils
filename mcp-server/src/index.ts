@@ -20,6 +20,7 @@ import {
   convertColor,
   generateRandomString,
   sanitizeHtml,
+  convertMarkdownToConfluence,
 } from './tools.js';
 
 const server = new McpServer(
@@ -223,6 +224,17 @@ server.registerTool('sanitize_html', {
   annotations: { readOnlyHint: true, openWorldHint: false },
 }, async ({ html }) => ({
   content: [{ type: 'text', text: sanitizeHtml(html) }],
+}));
+
+server.registerTool('convert_markdown_to_confluence', {
+  title: 'Markdown to Confluence Wiki Converter',
+  description: 'Convert Markdown text to Confluence Wiki markup. Supports headings, bold, italic, strikethrough, inline code, fenced code blocks, tables, ordered and unordered lists, links, images, blockquotes, and horizontal rules.',
+  inputSchema: {
+    markdown: z.string().describe('The Markdown text to convert to Confluence Wiki markup'),
+  },
+  annotations: { readOnlyHint: true, openWorldHint: false },
+}, async ({ markdown }) => ({
+  content: [{ type: 'text', text: convertMarkdownToConfluence(markdown) }],
 }));
 
 // --- Start Server ---

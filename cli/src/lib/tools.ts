@@ -53,6 +53,8 @@ export {
   // Case converter
   convertCase,
   CASE_TYPES,
+  // Markdown to Confluence Wiki
+  convertMarkdownToConfluence,
 } from '../../../src/utils/sharedToolsNode.js';
 
 export type {
