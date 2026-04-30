@@ -43,6 +43,7 @@ import { registerChatCommand }        from './commands/chat.js';
 import { registerAgentCommand }       from './commands/agent.js';
 import { registerOrchestrateCommand } from './commands/orchestrate.js';
 import { registerMarkdownCommand }    from './commands/markdown.js';
+import { registerPromptCommand }      from './commands/prompt.js';
 
 // ── Program ──────────────────────────────────────────────────────────────────
 
@@ -102,6 +103,13 @@ ${chalk.bold('Data Toolkit')}:
   ${chalk.cyan('qautils html sanitize "<p>…</p>"')}      Sanitize HTML
   ${chalk.cyan('qautils md-confluence "# Hello\\n**bold**"')} Convert Markdown to Confluence Wiki
 
+${chalk.bold('JSON Prompt Builder')}:
+  ${chalk.cyan('qautils prompt build --system "You are helpful." --user "{{q}}" --var q="Hello"')}  Build OpenAI JSON prompt
+  ${chalk.cyan('qautils prompt build --format anthropic --system "Be concise." --user "Summarize"')} Anthropic format
+  ${chalk.cyan('qautils prompt parse prompt.json')}          Parse and display a JSON prompt
+  ${chalk.cyan('qautils prompt render prompt.json --var name=Alice')}  Render template variables
+  ${chalk.cyan('qautils prompt validate prompt.json')}       Validate prompt structure
+
 ${chalk.bold('AI Chat (Kobean)')}:
   ${chalk.cyan('qautils chat')}                           Start interactive AI chat session
   ${chalk.cyan('qautils chat config')}                    Configure AI provider (wizard)
@@ -152,6 +160,8 @@ registerAgentCommand(program);
 registerOrchestrateCommand(program);
 // Converters
 registerMarkdownCommand(program);
+// Prompt builder
+registerPromptCommand(program);
 
 // ── Launch mode ───────────────────────────────────────────────────────────────
 

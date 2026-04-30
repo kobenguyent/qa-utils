@@ -55,6 +55,12 @@ export {
   CASE_TYPES,
   // Markdown to Confluence Wiki
   convertMarkdownToConfluence,
+  // JSON Prompt Builder
+  extractTemplateVariables,
+  renderPromptTemplate,
+  validatePromptTemplate,
+  buildJsonPrompt,
+  parseJsonPrompt,
 } from '../../../src/utils/sharedToolsNode.js';
 
 export type {
@@ -75,4 +81,12 @@ export type {
   RegexTestResult,
   BaseConversionResult,
   CaseType,
+  // JSON Prompt Builder
+  MessageRole,
+  PromptProviderFormat,
+  PromptMessage,
+  JsonPromptTemplate,
+  BuildJsonPromptResult,
+  ParseJsonPromptResult,
+  ValidatePromptResult,
 } from '../../../src/utils/sharedToolsNode.js';

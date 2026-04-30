@@ -855,3 +855,265 @@ function parseTableRow(row: string): string[] {
     .split('|')
     .map((c) => c.trim());
 }
+
+// ---------------------------------------------------------------------------
+// JSON Prompt Builder
+// ---------------------------------------------------------------------------
+
+/** Role of a message in the prompt conversation. */
+export type MessageRole = 'system' | 'user' | 'assistant';
+
+/** Output format targeted at a specific AI provider. */
+export type PromptProviderFormat = 'openai' | 'anthropic' | 'gemini' | 'generic';
+
+/** A single turn in the conversation. */
+export interface PromptMessage {
+  role: MessageRole;
+  content: string;
+}
+
+/** Full prompt template including model parameters. */
+export interface JsonPromptTemplate {
+  model: string;
+  temperature: number;
+  maxTokens: number;
+  messages: PromptMessage[];
+}
+
+/** Result of building a JSON prompt. */
+export interface BuildJsonPromptResult {
+  json: string;
+  variablesUsed: string[];
+  valid: boolean;
+  error?: string;
+}
+
+/** Result of parsing a raw JSON string into a template. */
+export interface ParseJsonPromptResult {
+  template: JsonPromptTemplate | null;
+  error?: string;
+}
+
+/** Result of validating a prompt template. */
+export interface ValidatePromptResult {
+  valid: boolean;
+  errors: string[];
+}
+
+/** Variable placeholder pattern: {{variableName}} */
+const VARIABLE_PATTERN = /\{\{([a-zA-Z_][a-zA-Z0-9_]*)\}\}/g;
+
+/**
+ * Extract all unique `{{variable}}` placeholder names from a string.
+ */
+export function extractTemplateVariables(content: string): string[] {
+  const found = new Set<string>();
+  const matches = content.matchAll(VARIABLE_PATTERN);
+  for (const m of matches) {
+    found.add(m[1]);
+  }
+  return Array.from(found);
+}
+
+/**
+ * Replace `{{variable}}` placeholders in content with provided values.
+ * Unknown variables are left unchanged.
+ */
+export function renderPromptTemplate(
+  content: string,
+  variables: Record<string, string>,
+): string {
+  return content.replace(VARIABLE_PATTERN, (match, name: string) =>
+    Object.prototype.hasOwnProperty.call(variables, name) ? variables[name] : match,
+  );
+}
+
+/**
+ * Validate a `JsonPromptTemplate` for structural correctness.
+ */
+export function validatePromptTemplate(
+  template: JsonPromptTemplate,
+): ValidatePromptResult {
+  const errors: string[] = [];
+  if (!template.messages || !Array.isArray(template.messages)) {
+    errors.push('messages must be an array');
+  } else if (template.messages.length === 0) {
+    errors.push('messages array must not be empty');
+  } else {
+    const validRoles: MessageRole[] = ['system', 'user', 'assistant'];
+    template.messages.forEach((msg, i) => {
+      if (!validRoles.includes(msg.role)) {
+        errors.push(`messages[${i}].role must be system, user, or assistant`);
+      }
+      if (typeof msg.content !== 'string') {
+        errors.push(`messages[${i}].content must be a string`);
+      }
+    });
+  }
+  if (typeof template.temperature === 'number') {
+    if (template.temperature < 0 || template.temperature > 2) {
+      errors.push('temperature must be between 0 and 2');
+    }
+  }
+  if (typeof template.maxTokens === 'number' && template.maxTokens < 1) {
+    errors.push('maxTokens must be a positive integer');
+  }
+  return { valid: errors.length === 0, errors };
+}
+
+/**
+ * Build a provider-specific JSON prompt string from a template and variable values.
+ */
+export function buildJsonPrompt(
+  template: JsonPromptTemplate,
+  variables: Record<string, string>,
+  format: PromptProviderFormat,
+): BuildJsonPromptResult {
+  const validation = validatePromptTemplate(template);
+  if (!validation.valid) {
+    return { json: '', variablesUsed: [], valid: false, error: validation.errors.join('; ') };
+  }
+
+  const allVarNames = new Set<string>();
+  const renderedMessages = template.messages.map((msg) => {
+    extractTemplateVariables(msg.content).forEach((v) => allVarNames.add(v));
+    return { ...msg, content: renderPromptTemplate(msg.content, variables) };
+  });
+
+  const variablesUsed = Array.from(allVarNames);
+
+  let payload: Record<string, unknown>;
+
+  switch (format) {
+    case 'openai':
+      payload = {
+        model: template.model || 'gpt-4o',
+        messages: renderedMessages,
+        temperature: template.temperature,
+        max_tokens: template.maxTokens,
+      };
+      break;
+
+    case 'anthropic': {
+      const systemMsg = renderedMessages.find((m) => m.role === 'system');
+      const nonSystemMsgs = renderedMessages.filter((m) => m.role !== 'system');
+      payload = {
+        model: template.model || 'claude-3-5-sonnet-20241022',
+        max_tokens: template.maxTokens,
+        ...(systemMsg ? { system: systemMsg.content } : {}),
+        messages: nonSystemMsgs,
+      };
+      break;
+    }
+
+    case 'gemini': {
+      const systemMsg = renderedMessages.find((m) => m.role === 'system');
+      const nonSystemMsgs = renderedMessages.filter((m) => m.role !== 'system');
+      payload = {
+        systemInstruction: systemMsg
+          ? { parts: [{ text: systemMsg.content }] }
+          : undefined,
+        contents: nonSystemMsgs.map((m) => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content }],
+        })),
+        generationConfig: {
+          temperature: template.temperature,
+          maxOutputTokens: template.maxTokens,
+        },
+      };
+      // Remove undefined systemInstruction if no system message
+      if (!systemMsg) delete payload.systemInstruction;
+      break;
+    }
+
+    default: // generic
+      payload = {
+        model: template.model,
+        messages: renderedMessages,
+        temperature: template.temperature,
+        max_tokens: template.maxTokens,
+      };
+  }
+
+  return {
+    json: JSON.stringify(payload, null, 2),
+    variablesUsed,
+    valid: true,
+  };
+}
+
+/**
+ * Parse a raw JSON string into a `JsonPromptTemplate`.
+ * Accepts OpenAI, Anthropic, Gemini, or generic formats.
+ */
+export function parseJsonPrompt(json: string): ParseJsonPromptResult {
+  let raw: Record<string, unknown>;
+  try {
+    raw = JSON.parse(json) as Record<string, unknown>;
+  } catch (e) {
+    return { template: null, error: e instanceof Error ? e.message : 'Invalid JSON' };
+  }
+
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
+    return { template: null, error: 'Prompt must be a JSON object' };
+  }
+
+  const messages: PromptMessage[] = [];
+
+  // OpenAI / generic format
+  if (Array.isArray(raw.messages)) {
+    for (const m of raw.messages as PromptMessage[]) {
+      if (m && typeof m.role === 'string' && typeof m.content === 'string') {
+        messages.push({ role: m.role as MessageRole, content: m.content });
+      }
+    }
+  }
+
+  // Anthropic format: system is top-level, messages array has user/assistant
+  if (messages.length === 0 || !messages.some((m) => m.role === 'system')) {
+    if (typeof raw.system === 'string') {
+      messages.unshift({ role: 'system', content: raw.system as string });
+    }
+  }
+
+  // Gemini format
+  if (messages.length === 0 && Array.isArray(raw.contents)) {
+    const si = raw.systemInstruction as { parts?: Array<{ text?: string }> } | undefined;
+    if (si?.parts?.[0]?.text) {
+      messages.push({ role: 'system', content: si.parts[0].text });
+    }
+    for (const c of raw.contents as Array<{ role?: string; parts?: Array<{ text?: string }> }>) {
+      const text = c.parts?.[0]?.text ?? '';
+      const role: MessageRole = c.role === 'model' ? 'assistant' : 'user';
+      messages.push({ role, content: text });
+    }
+  }
+
+  if (messages.length === 0) {
+    return { template: null, error: 'No messages found in prompt' };
+  }
+
+  const model =
+    typeof raw.model === 'string' ? raw.model : 'gpt-4o';
+
+  const temperature =
+    typeof raw.temperature === 'number'
+      ? raw.temperature
+      : typeof (raw.generationConfig as Record<string, unknown> | undefined)?.temperature === 'number'
+        ? (raw.generationConfig as Record<string, number>).temperature
+        : 0.7;
+
+  const maxTokens =
+    typeof raw.max_tokens === 'number'
+      ? raw.max_tokens
+      : typeof raw.max_output_tokens === 'number'
+        ? (raw.max_output_tokens as number)
+        : typeof (raw.generationConfig as Record<string, unknown> | undefined)?.maxOutputTokens === 'number'
+          ? (raw.generationConfig as Record<string, number>).maxOutputTokens
+          : 1024;
+
+  return {
+    template: { model, temperature, maxTokens, messages },
+  };
+}

@@ -204,7 +204,96 @@ qautils orchestrate session
 
 ---
 
-## All CLI Commands
+## 🧩 JSON Prompt Builder (CLI)
+
+Build, validate, and render structured AI prompts from the command line.
+
+### Build a prompt
+
+```bash
+# OpenAI format (default)
+qautils prompt build \
+  --system "You are a helpful QA engineer." \
+  --user "{{question}}" \
+  --var question="How do I write a test plan?"
+
+# Anthropic format
+qautils prompt build \
+  --format anthropic \
+  --model claude-3-5-sonnet-20241022 \
+  --system "Be concise." \
+  --user "Summarize {{topic}}" \
+  --var topic="test automation"
+
+# Gemini format
+qautils prompt build \
+  --format gemini \
+  --system "You are an expert." \
+  --user "Explain {{concept}}"
+
+# Multi-turn conversation
+qautils prompt build \
+  --system "You are helpful." \
+  --user "What is 2+2?" \
+  --assistant "4" \
+  --user "And 3+3?"
+```
+
+### Parse a prompt file
+
+```bash
+# Display the structure of an existing prompt
+qautils prompt parse my-prompt.json
+
+# Parse from stdin / inline JSON
+qautils prompt parse '{"model":"gpt-4","messages":[{"role":"user","content":"Hi"}]}'
+```
+
+### Render template variables
+
+```bash
+# Replace {{variable}} placeholders and output the final JSON
+qautils prompt render prompt-template.json \
+  --var name=Alice \
+  --var role="QA engineer"
+
+# Output in a different provider format
+qautils prompt render template.json --format anthropic --var topic=testing
+```
+
+### Validate a prompt
+
+```bash
+qautils prompt validate my-prompt.json
+```
+
+### Options
+
+#### `prompt build`
+
+| Option | Description |
+|--------|-------------|
+| `--format <format>` | Provider: `openai` (default), `anthropic`, `gemini`, `generic` |
+| `--model <model>` | Model name (defaults to the provider's flagship model) |
+| `--temperature <n>` | Temperature `0–2` (default: `0.7`) |
+| `--max-tokens <n>` | Max tokens (default: `1024`) |
+| `-s, --system <content>` | System message content |
+| `-u, --user <content>` | User message (repeatable) |
+| `-a, --assistant <content>` | Assistant message (repeatable) |
+| `--var <key=value>` | Template variable (repeatable) |
+
+#### `prompt render`
+
+| Option | Description |
+|--------|-------------|
+| `--var <key=value>` | Variable substitution (repeatable) |
+| `--format <format>` | Output provider format (default: `openai`) |
+
+### Template Variables
+
+Use `{{variableName}}` syntax in message content to create reusable prompt templates. Variables are substituted when you use `prompt build --var` or `prompt render --var`. Unknown variables are left unchanged.
+
+---
 
 Run `qautils --help` to see all commands, or `qautils <command> --help` for details.
 
@@ -229,6 +318,11 @@ Run `qautils --help` to see all commands, or `qautils <command> --help` for deta
 | **Data Toolkit** | `json format/validate/minify` | JSON toolkit |
 | | `sql` | SQL statement generator |
 | | `html sanitize` | HTML sanitizer |
+| | `md-confluence` | Convert Markdown to Confluence Wiki markup |
+| **JSON Prompt Builder** | `prompt build` | Build a JSON prompt (OpenAI, Anthropic, Gemini, generic) |
+| | `prompt parse <input>` | Parse and display a JSON prompt |
+| | `prompt render <input>` | Render a prompt template with variable substitution |
+| | `prompt validate <input>` | Validate a JSON prompt structure |
 | **AI** | `chat` | Kobean AI chat session |
 | | `chat config` | Configure AI provider |
 | | `chat models` | List available models for the provider |

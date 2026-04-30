@@ -41,6 +41,14 @@ export type {
   RegexTestResult,
   BaseConversionResult,
   CaseType,
+  // JSON Prompt Builder
+  MessageRole,
+  PromptProviderFormat,
+  PromptMessage,
+  JsonPromptTemplate,
+  BuildJsonPromptResult,
+  ParseJsonPromptResult,
+  ValidatePromptResult,
 } from './sharedTools.js';
 
 export {
@@ -63,6 +71,12 @@ export {
   NANO_ALPHABET,
   HASH_ALGORITHMS,
   convertMarkdownToConfluence,
+  // JSON Prompt Builder
+  extractTemplateVariables,
+  renderPromptTemplate,
+  validatePromptTemplate,
+  buildJsonPrompt,
+  parseJsonPrompt,
 } from './sharedTools.js';
 
 // ---------------------------------------------------------------------------
