@@ -6,7 +6,7 @@
   "type": "commonjs",
   "main": "dist/api/src/index.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "dev": "tsx watch src/index.ts",
     "start": "node dist/api/src/index.js",
     "build": "tsc",
     "lint": "eslint src --ext ts --report-unused-disable-directives --max-warnings 0",
