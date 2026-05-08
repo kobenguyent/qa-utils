@@ -447,6 +447,15 @@ const navigableTools: ToolDefinition[] = [
         route: '/grpc-client',
     },
     {
+        id: 'graphql-client',
+        name: 'GraphQL Client',
+        description: 'Execute GraphQL queries & mutations with introspection and schema exploration',
+        category: 'api-testing',
+        keywords: ['graphql', 'gql', 'query', 'mutation', 'subscription', 'schema', 'introspection'],
+        examples: ['graphql query', 'graphql mutation', 'graphql schema', 'gql client'],
+        route: '/graphql-client',
+    },
+    {
         id: 'kobean-assistant',
         name: 'Kobean Assistant',
         description: 'AI-powered assistant with tool execution (OpenAI, Claude, Gemini, Ollama)',

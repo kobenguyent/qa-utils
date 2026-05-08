@@ -29,6 +29,8 @@ const WorkflowGenerator = lazy(() => import('./components/utils/WorkflowGenerato
 const RestClient = lazy(() => import('./components/utils/RestClient.tsx').then(module => ({ default: module.RestClient })));
 const WebSocketClient = lazy(() => import('./components/utils/WebSocketClient.tsx').then(module => ({ default: module.WebSocketClientComponent })));
 const GrpcClient = lazy(() => import('./components/utils/GrpcClient.tsx').then(module => ({ default: module.GrpcClientComponent })));
+// eslint-disable-next-line react-refresh/only-export-components
+const GraphQLClient = lazy(() => import('./components/utils/GraphQLClient.tsx').then(module => ({ default: module.GraphQLClient })));
 const Ctfl = lazy(() => import('./components/istqb/ctfl.tsx').then(module => ({ default: module.Ctfl })));
 const CharacterCounter = lazy(() => import('./components/utils/CharacterCounter.tsx').then(module => ({ default: module.CharacterCounter })));
 const TestFileGenerator = lazy(() => import('./components/utils/TestFileGenerator.tsx').then(module => ({ default: module.TestFileGenerator })));
@@ -39,6 +41,8 @@ const CiCdInfographic = lazy(() => import('./components/hints/CiCdInfographic.ts
 const AiAgentsInfographic = lazy(() => import('./components/hints/AiAgentsInfographic.tsx').then(module => ({ default: module.AiAgentsInfographic })));
 const LocalLlmMacTips = lazy(() => import('./components/hints/LocalLlmMacTips.tsx').then(module => ({ default: module.LocalLlmMacTips })));
 const TestFrameworksComparison = lazy(() => import('./components/hints/TestFrameworksComparison.tsx').then(module => ({ default: module.TestFrameworksComparison })));
+// eslint-disable-next-line react-refresh/only-export-components
+const ApiTypesGuide = lazy(() => import('./components/hints/ApiTypesGuide.tsx').then(module => ({ default: module.ApiTypesGuide })));
 const SqlGenerator = lazy(() => import('./components/utils/SqlGenerator.tsx').then(module => ({ default: module.SqlGenerator })));
 const HtmlRenderer = lazy(() => import('./components/utils/HtmlRenderer.tsx').then(module => ({ default: module.HtmlRenderer })));
 const GithubPrScriptGenerator = lazy(() => import('./components/utils/GithubPrScriptGenerator.tsx').then(module => ({ default: module.GithubPrScriptGenerator })));
@@ -172,6 +176,10 @@ const router = createHashRouter([
     element: <RouteWrapper><GrpcClient /></RouteWrapper>
   },
   {
+    path: 'graphql-client',
+    element: <RouteWrapper><GraphQLClient /></RouteWrapper>
+  },
+  {
     path: 'ctfl',
     element: <RouteWrapper><Ctfl /></RouteWrapper>
   },
@@ -214,6 +222,10 @@ const router = createHashRouter([
   {
     path: 'test-frameworks-comparison',
     element: <RouteWrapper><TestFrameworksComparison /></RouteWrapper>
+  },
+  {
+    path: 'api-types-guide',
+    element: <RouteWrapper><ApiTypesGuide /></RouteWrapper>
   },
   {
     path: 'sql-generator',
