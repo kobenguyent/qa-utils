@@ -23,6 +23,11 @@ import {
   convertMarkdownToConfluence,
 } from './tools.js';
 
+import {
+  executeGraphQL,
+  introspectSchema,
+} from '../../src/utils/graphqlClient.js';
+
 const server = new McpServer(
   {
     name: 'qa-utils-mcp-server',
@@ -236,6 +241,96 @@ server.registerTool('convert_markdown_to_confluence', {
 }, async ({ markdown }) => ({
   content: [{ type: 'text', text: convertMarkdownToConfluence(markdown) }],
 }));
+
+server.registerTool('graphql_query', {
+  title: 'GraphQL Query Executor',
+  description: 'Execute a GraphQL query or mutation against any GraphQL endpoint. Returns the response data, errors, HTTP status, and round-trip duration.',
+  inputSchema: {
+    endpoint: z.string().url().describe('The GraphQL endpoint URL'),
+    query: z.string().describe('The GraphQL query or mutation string'),
+    variables: z.record(z.string(), z.unknown()).optional().describe('GraphQL variables as a JSON object'),
+    operationName: z.string().optional().describe('The operation name to execute (for documents with multiple operations)'),
+    headers: z.record(z.string(), z.string()).optional().describe('Additional HTTP headers (e.g. Authorization)'),
+    timeout: z.number().min(1000).max(120000).default(30000).describe('Request timeout in milliseconds (1000–120000)'),
+  },
+  annotations: { readOnlyHint: false, openWorldHint: true },
+}, async ({ endpoint, query, variables, operationName, headers, timeout }) => {
+  try {
+    const response = await executeGraphQL(
+      { endpoint, headers: headers ?? {}, timeout },
+      { query, variables, operationName },
+    );
+    const result = {
+      status: response.status,
+      statusText: response.statusText,
+      duration: `${response.duration}ms`,
+      data: response.data,
+      errors: response.errors ?? null,
+    };
+    return {
+      content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      isError: !!(response.errors?.length),
+    };
+  } catch (err) {
+    return {
+      content: [{ type: 'text', text: `Error: ${err instanceof Error ? err.message : String(err)}` }],
+      isError: true,
+    };
+  }
+});
+
+server.registerTool('graphql_introspect', {
+  title: 'GraphQL Schema Introspector',
+  description: 'Fetch and explore a GraphQL schema via introspection. Returns the query, mutation, and subscription root types, plus all user-defined types with their fields and descriptions.',
+  inputSchema: {
+    endpoint: z.string().url().describe('The GraphQL endpoint URL'),
+    headers: z.record(z.string(), z.string()).optional().describe('Additional HTTP headers (e.g. Authorization)'),
+    timeout: z.number().min(1000).max(120000).default(30000).describe('Request timeout in milliseconds'),
+    typeName: z.string().optional().describe('If provided, return details for only this named type'),
+  },
+  annotations: { readOnlyHint: true, openWorldHint: true },
+}, async ({ endpoint, headers, timeout, typeName }) => {
+  try {
+    const schema = await introspectSchema({ endpoint, headers: headers ?? {}, timeout });
+
+    if (typeName) {
+      const found = schema.types.find(
+        (t) => t.name.toLowerCase() === typeName.toLowerCase(),
+      );
+      if (!found) {
+        return {
+          content: [{ type: 'text', text: `Type "${typeName}" not found in schema.` }],
+          isError: true,
+        };
+      }
+      return {
+        content: [{ type: 'text', text: JSON.stringify(found, null, 2) }],
+      };
+    }
+
+    const summary = {
+      queryType: schema.queryType,
+      mutationType: schema.mutationType,
+      subscriptionType: schema.subscriptionType,
+      typeCount: schema.types.length,
+      types: schema.types.map((t) => ({
+        name: t.name,
+        kind: t.kind,
+        description: t.description ?? null,
+        fieldCount: (t.fields?.length ?? t.inputFields?.length ?? 0),
+      })),
+    };
+
+    return {
+      content: [{ type: 'text', text: JSON.stringify(summary, null, 2) }],
+    };
+  } catch (err) {
+    return {
+      content: [{ type: 'text', text: `Error: ${err instanceof Error ? err.message : String(err)}` }],
+      isError: true,
+    };
+  }
+});
 
 // --- Start Server ---
 

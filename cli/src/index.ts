@@ -43,8 +43,7 @@ import { registerChatCommand }        from './commands/chat.js';
 import { registerAgentCommand }       from './commands/agent.js';
 import { registerOrchestrateCommand } from './commands/orchestrate.js';
 import { registerMarkdownCommand }    from './commands/markdown.js';
-import { registerPromptCommand }      from './commands/prompt.js';
-
+import { registerPromptCommand }      from './commands/prompt.js';import { registerGraphqlCommand }     from './commands/graphql.js';
 // ── Program ──────────────────────────────────────────────────────────────────
 
 const program = new Command();
@@ -53,7 +52,7 @@ program
   .name('qautils')
   .description(
     chalk.bold('QA Utils CLI') +
-      chalk.dim(' — 20 utility tools for testing and automation workflows') +
+      chalk.dim(' — 21 utility tools for testing and automation workflows') +
       '\n' +
       chalk.dim('  https://github.com/kobenguyent/qa-utils'),
   )
@@ -102,6 +101,15 @@ ${chalk.bold('Data Toolkit')}:
   ${chalk.cyan('qautils sql SELECT --table users')}       Generate SELECT SQL
   ${chalk.cyan('qautils html sanitize "<p>…</p>"')}      Sanitize HTML
   ${chalk.cyan('qautils md-confluence "# Hello\\n**bold**"')} Convert Markdown to Confluence Wiki
+
+${chalk.bold('GraphQL')}:
+  ${chalk.cyan('qautils graphql query <endpoint> <query>')}  Execute a GraphQL query
+  ${chalk.cyan('qautils graphql query <url> <query> -v \'{"id":1}\'')}  With variables
+  ${chalk.cyan('qautils graphql query <url> <query> -H "Authorization: Bearer token"')}  With headers
+  ${chalk.cyan('qautils graphql query <url> <query> --curl')}  Print equivalent curl command
+  ${chalk.cyan('qautils graphql introspect <endpoint>')}  Fetch schema via introspection
+  ${chalk.cyan('qautils graphql introspect <endpoint> --types')}  List all schema types
+  ${chalk.cyan('qautils graphql introspect <endpoint> --type Query')}  Inspect a specific type
 
 ${chalk.bold('JSON Prompt Builder')}:
   ${chalk.cyan('qautils prompt build --system "You are helpful." --user "{{q}}" --var q="Hello"')}  Build OpenAI JSON prompt
@@ -162,6 +170,8 @@ registerOrchestrateCommand(program);
 registerMarkdownCommand(program);
 // Prompt builder
 registerPromptCommand(program);
+// GraphQL client
+registerGraphqlCommand(program);
 
 // ── Launch mode ───────────────────────────────────────────────────────────────
 

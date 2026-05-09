@@ -63,6 +63,25 @@ export {
   parseJsonPrompt,
 } from '../../../src/utils/sharedToolsNode.js';
 
+// GraphQL
+export {
+  executeGraphQL,
+  introspectSchema,
+  parseIntrospection,
+  validateQuery,
+  validateVariables,
+  detectOperationType,
+  buildCurlCommand,
+} from '../../../src/utils/graphqlClient.js';
+
+export type {
+  GraphQLConfig,
+  GraphQLRequest,
+  GraphQLResponse,
+  GraphQLError,
+  SchemaInfo,
+} from '../../../src/utils/graphqlClient.js';
+
 export type {
   TextStats,
   EmailValidationResult,
