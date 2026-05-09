@@ -6,9 +6,9 @@ import { useTheme } from '../contexts/ThemeContext';
 import { getEffectiveTheme } from '../utils/themeManager';
 import qaLogoLight from '../assets/logo-icon.png';
 // Dark mode variants — swap the active import to preview each:
-import qaLogoDark from '../assets/logo-icon-dark-liquid.png';  // ✦ Liquid Glass (violet→indigo→teal)
+// import qaLogoDark from '../assets/logo-icon-dark-liquid.png';  // ✦ Liquid Glass (violet→indigo→teal)
 // import qaLogoDark from '../assets/logo-icon-dark-cyan.png';    // A: Cyan + Amber ⚡
-// import qaLogoDark from '../assets/logo-icon-dark-nebula.png'; // B: Nebula Violet + Cyan 🔮
+import qaLogoDark from '../assets/logo-icon-dark-nebula.png'; // B: Nebula Violet + Cyan 🔮
 // import qaLogoDark from '../assets/logo-icon-dark-star.png';   // C: Starlight + Gold ✨
 // import qaLogoDark from '../assets/logo-icon-dark.png';        // Original: Gold
 

@@ -10,7 +10,7 @@ export default defineConfig({
   themeConfig: {
     logo: {
       light: '/logo-icon.png',
-      dark: '/logo-icon-dark.png',
+      dark: '/logo-icon-dark-nebula.png',
       alt: 'QA Utils',
     },
     nav: [
