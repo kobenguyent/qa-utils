@@ -395,6 +395,16 @@ export const navigationConfig: NavItem[] = [
     navLabel: 'gRPC',
   },
   {
+    title: 'GraphQL Client',
+    description: 'Execute GraphQL queries & mutations, explore schemas via introspection, and test GraphQL APIs',
+    path: '#/graphql-client',
+    category: 'API Testing',
+    keywords: ['graphql', 'gql', 'query', 'mutation', 'subscription', 'introspection', 'schema', 'api', 'client'],
+    icon: '⬡',
+    navGroups: ['API'],
+    navLabel: 'GraphQL',
+  },
+  {
     title: 'Collection Manager',
     description:
       'Parse, edit, and convert API collections between Postman, Insomnia, Thunder Client, and more',
@@ -639,6 +649,16 @@ export const navigationConfig: NavItem[] = [
     icon: '⚖️',
     navGroups: ['Learn'],
     navLabel: 'Test Frameworks',
+  },
+  {
+    title: 'API Types Guide',
+    description: 'Comprehensive guide to REST, GraphQL, gRPC, WebSocket, SOAP, SSE, Webhooks and MQTT — definitions, comparisons, security, and when to use each',
+    path: '#/api-types-guide',
+    category: 'Hints',
+    keywords: ['api', 'rest', 'graphql', 'grpc', 'websocket', 'soap', 'sse', 'webhook', 'mqtt', 'comparison', 'guide', 'types', 'protocol', 'architecture'],
+    icon: '🔌',
+    navGroups: ['Learn'],
+    navLabel: 'API Types Guide',
   },
   // -- divider in Learn --
   {

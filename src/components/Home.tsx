@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Button } from "react-bootstrap";
+import qaLogoLight from '../assets/logo.png';
+// Dark mode variants — swap the active import to preview each:
+import qaLogoDark from '../assets/logo-dark-liquid.png';  // ✦ Liquid Glass (violet→indigo→teal)
+// import qaLogoDark from '../assets/logo-dark-cyan.png';    // A: Cyan + Amber ⚡
+// import qaLogoDark from '../assets/logo-dark-nebula.png'; // B: Nebula Violet + Cyan 🔮
+// import qaLogoDark from '../assets/logo-dark-star.png';   // C: Starlight + Gold ✨
+// import qaLogoDark from '../assets/logo-dark.png';        // Original: Gold
+import { useTheme } from '../contexts/ThemeContext';
+import { getEffectiveTheme } from '../utils/themeManager';
 import { getRandomTool } from '../utils/randomTool';
 import { SearchItem } from '../utils/searchData';
 import { getRandomQuote, Quote } from '../utils/quotes';
@@ -9,6 +18,7 @@ import { AmbientDots } from './AmbientDots';
 const totalTools = navigationConfig.length;
 
 export const Home: React.FC = () => {
+  const { theme } = useTheme();
   const [randomTool, setRandomTool] = useState<SearchItem | null>(null);
   const [quote, setQuote] = useState<Quote | null>(null);
 
@@ -27,14 +37,18 @@ export const Home: React.FC = () => {
         <Container>
           <Row className="justify-content-center">
             <Col xs={12} md={10} lg={8} className="text-center">
-              <h1 className="home-title">
-                <span className="gradient-text">QA Utils</span>
-              </h1>
-              <p className="home-subtitle">
-                {totalTools}+ developer tools for testing, converting,
-                <br className="d-none d-sm-block" />
-                generating, and learning — all in one place.
-              </p>
+              <div className="home-logo-hero" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0 }}>
+                <img
+                  src={getEffectiveTheme(theme) === 'dark' ? qaLogoDark : qaLogoLight}
+                  alt="Kobean QA Utils"
+                  style={{ width: '320px', height: 'auto', display: 'block' }}
+                />
+                <p className="home-subtitle" style={{ margin: '0.1rem 0 0', padding: 0 }}>
+                  {totalTools}+ developer tools for testing, converting,
+                  <br className="d-none d-sm-block" />
+                  generating, and learning — all in one place.
+                </p>
+              </div>
               <div className="home-hero-actions">
                 <Button
                   href="#/explore"
