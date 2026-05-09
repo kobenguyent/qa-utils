@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { formatJson, sanitizeHtml, generateSql } from '../tools';
-import { JsonFormatSchema, HtmlSanitizeSchema, SqlGenerateSchema } from '../schemas';
+import { formatJson, sanitizeHtml, generateSql, convertMarkdownToConfluence } from '../tools';
+import { JsonFormatSchema, HtmlSanitizeSchema, SqlGenerateSchema, MarkdownToConfluenceSchema } from '../schemas';
 
 export const formattersRouter = Router();
 
@@ -166,4 +166,49 @@ formattersRouter.post('/sql', (req, res) => {
     operation,
     tableName,
   });
+});
+
+/**
+ * @openapi
+ * /api/formatters/markdown-to-confluence:
+ *   post:
+ *     tags: [Formatters]
+ *     summary: Convert Markdown to Confluence Wiki markup
+ *     description: |
+ *       Converts a Markdown document to Confluence Wiki markup syntax.
+ *       Supports headings, bold, italic, strikethrough, inline code,
+ *       fenced code blocks, tables, ordered and unordered lists,
+ *       links, images, blockquotes, and horizontal rules.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [markdown]
+ *             properties:
+ *               markdown:
+ *                 type: string
+ *                 example: "# Hello\n\nSome **bold** and _italic_ text.\n\n- Item 1\n- Item 2"
+ *     responses:
+ *       200:
+ *         description: Converted Confluence Wiki markup
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 confluence:
+ *                   type: string
+ *                   description: Confluence Wiki markup output
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ */
+formattersRouter.post('/markdown-to-confluence', (req, res) => {
+  const parsed = MarkdownToConfluenceSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'Validation failed', details: parsed.error.flatten() });
+    return;
+  }
+  res.json({ confluence: convertMarkdownToConfluence(parsed.data.markdown) });
 });

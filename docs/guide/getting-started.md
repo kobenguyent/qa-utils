@@ -53,16 +53,17 @@ npm run lint             # Run ESLint
 
 ## What's Included
 
-QA Utils provides **30+ tools** across several categories:
+QA Utils provides **47+ tools** across several categories:
 
 | Category | Examples |
 |----------|----------|
 | **Utility Tools** | JWT Debugger, Base64, JSON Formatter, UUID Generator, Password Generator, Timestamp Converter |
 | **Testing Tools** | CI/CD Workflow Generator, Test Checklists, ISTQB Practice Exams, Test Code Converter |
-| **API Clients** | REST Client, WebSocket Client, gRPC Client, Collection Manager |
+| **API Clients** | REST Client, GraphQL Client, WebSocket Client, gRPC Client, Collection Manager |
 | **AI-Powered** | AI Chat (multi-provider), Agent Mode, Prompt Enhancer, AI Website Tester |
 | **Converters** | Color Converter, SQL Generator, HTML Renderer, Hash Generator |
 | **Generators** | Lorem Ipsum, Dummy Data, QR Code, Sequence Diagrams |
+| **Reference Guides** | API Types Guide, Testing Cheat Sheet, Command Book, AI Instructions Guide |
 
 ## Next Steps
 

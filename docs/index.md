@@ -6,7 +6,7 @@ hero:
   text: "Quality Assurance Tools & Utilities"
   tagline: A comprehensive collection of developer & QA tools — with MCP server integration and autonomous Agent Mode.
   image:
-    src: /logo.svg
+    src: /logo.png
     alt: QA Utils
   actions:
     - theme: brand
@@ -24,8 +24,8 @@ hero:
 
 features:
   - icon: 🛠️
-    title: 30+ Utility Tools
-    details: JWT debugger, Base64, JSON formatter, UUID generator, password generator, timestamp converter, SQL generator, and many more.
+    title: 47+ Utility Tools
+    details: JWT debugger, Base64, JSON formatter, UUID generator, password generator, timestamp converter, SQL generator, GraphQL client, and many more.
   - icon: 🤖
     title: Agent Mode
     details: Autonomous AI agent that plans and executes multi-step tasks using available QA tools in an observe-think-act loop.
@@ -43,10 +43,16 @@ features:
     details: Cross-platform Electron app for macOS, Windows, and Linux — no CORS restrictions, offline capable.
   - icon: 🌐
     title: API Clients
-    details: REST client, WebSocket client, gRPC client, and Collection Manager for API testing and development.
+    details: REST client, GraphQL client, WebSocket client, gRPC client, and Collection Manager for API testing and development.
   - icon: 📊
-    title: 760+ Tests
+    title: 928+ Tests
     details: Comprehensive test coverage with Vitest and React Testing Library, including shared tools, agent executor, and MCP server tests.
+  - icon: ⬡
+    title: GraphQL Client
+    details: Execute GraphQL queries and mutations with built-in schema introspection, variable support, custom headers, and example queries against public APIs.
+  - icon: 📖
+    title: API Types Guide
+    details: Interactive reference comparing REST, GraphQL, gRPC, WebSocket, SOAP, SSE, Webhooks, and MQTT — with decision trees, use-case cards, and a side-by-side comparison table.
 ---
 
 ## Quick Start
