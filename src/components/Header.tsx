@@ -3,6 +3,14 @@ import { Container, Nav, Navbar, Form, Dropdown } from "react-bootstrap";
 import { searchItems, SearchItem } from '../utils/searchData';
 import { navigationConfig, NAV_GROUP_ORDER, NAV_GROUP_META, NavGroup } from '../config/navigationConfig';
 import { useTheme } from '../contexts/ThemeContext';
+import { getEffectiveTheme } from '../utils/themeManager';
+import qaLogoLight from '../assets/logo-icon.png';
+// Dark mode variants — swap the active import to preview each:
+import qaLogoDark from '../assets/logo-icon-dark-liquid.png';  // ✦ Liquid Glass (violet→indigo→teal)
+// import qaLogoDark from '../assets/logo-icon-dark-cyan.png';    // A: Cyan + Amber ⚡
+// import qaLogoDark from '../assets/logo-icon-dark-nebula.png'; // B: Nebula Violet + Cyan 🔮
+// import qaLogoDark from '../assets/logo-icon-dark-star.png';   // C: Starlight + Gold ✨
+// import qaLogoDark from '../assets/logo-icon-dark.png';        // Original: Gold
 
 // Pre-group nav items by NavGroup for efficient rendering.
 const navItemsByGroup = NAV_GROUP_ORDER.reduce<Record<NavGroup, typeof navigationConfig>>((acc, group) => {
@@ -66,8 +74,8 @@ export const Header: React.FC = () => {
   return (
     <Navbar expand="lg" className="glass-navbar" style={{ backgroundColor: 'var(--navbar-bg)', paddingTop: '0.85rem' }}>
       <Container fluid className="px-3 px-lg-4">
-        <Navbar.Brand href='#' data-testid="logo" className="navbar-brand-gradient">
-          ⚙️ QA Utils
+        <Navbar.Brand href='#' data-testid="logo" className="navbar-brand-gradient" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <img src={getEffectiveTheme(theme) === 'dark' ? qaLogoDark : qaLogoLight} alt="Kobean QA Utils" style={{ height: '40px', width: 'auto' }} />
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" aria-label="Toggle navigation" />
         <Navbar.Collapse id="basic-navbar-nav">
