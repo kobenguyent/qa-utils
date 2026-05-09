@@ -40,7 +40,7 @@ describe('Home Component', () => {
     
     render(<Home />);
     
-    expect(screen.getByRole('heading', { name: /QA Utils/i })).toBeDefined();
+    expect(screen.getByAltText(/Kobean QA Utils/i)).toBeDefined();
     expect(screen.getByText(/developer tools for testing, converting/)).toBeDefined();
   });
 
