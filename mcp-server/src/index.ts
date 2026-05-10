@@ -21,6 +21,13 @@ import {
   generateRandomString,
   sanitizeHtml,
   convertMarkdownToConfluence,
+  generateNanoId,
+  urlEncode,
+  urlDecode,
+  parseUrl,
+  testRegex,
+  convertBase,
+  convertCase,
 } from './tools.js';
 
 import {
@@ -240,6 +247,97 @@ server.registerTool('convert_markdown_to_confluence', {
   annotations: { readOnlyHint: true, openWorldHint: false },
 }, async ({ markdown }) => ({
   content: [{ type: 'text', text: convertMarkdownToConfluence(markdown) }],
+}));
+
+server.registerTool('generate_nanoid', {
+  title: 'NanoID Generator',
+  description: 'Generate one or more cryptographically secure NanoID identifiers',
+  inputSchema: {
+    size: z.number().min(1).max(128).default(21).describe('Character length of each NanoID (1-128)'),
+    count: z.number().min(1).max(100).default(1).describe('Number of NanoIDs to generate (1-100)'),
+  },
+  annotations: { readOnlyHint: true, openWorldHint: false },
+}, async ({ size, count }) => ({
+  content: [{ type: 'text', text: JSON.stringify(Array.from({ length: count }, () => generateNanoId(size)), null, 2) }],
+}));
+
+server.registerTool('url_encode', {
+  title: 'URL Encoder',
+  description: 'Percent-encode a string for safe use in a URL',
+  inputSchema: {
+    text: z.string().describe('The text to URL-encode'),
+  },
+  annotations: { readOnlyHint: true, openWorldHint: false },
+}, async ({ text }) => ({
+  content: [{ type: 'text', text: urlEncode(text) }],
+}));
+
+server.registerTool('url_decode', {
+  title: 'URL Decoder',
+  description: 'Decode a percent-encoded URL string',
+  inputSchema: {
+    text: z.string().describe('The URL-encoded string to decode'),
+  },
+  annotations: { readOnlyHint: true, openWorldHint: false },
+}, async ({ text }) => ({
+  content: [{ type: 'text', text: urlDecode(text) }],
+}));
+
+server.registerTool('url_parse', {
+  title: 'URL Parser',
+  description: 'Parse a URL into its components: protocol, host, pathname, query parameters, hash, etc.',
+  inputSchema: {
+    url: z.string().describe('The URL to parse'),
+  },
+  annotations: { readOnlyHint: true, openWorldHint: false },
+}, async ({ url }) => ({
+  content: [{ type: 'text', text: JSON.stringify(parseUrl(url), null, 2) }],
+}));
+
+server.registerTool('test_regex', {
+  title: 'Regex Tester',
+  description: 'Test a regular expression against text and return all matches with their indices and capture groups',
+  inputSchema: {
+    pattern: z.string().describe('The regular expression pattern'),
+    text: z.string().describe('The text to test against'),
+    flags: z.string().default('gi').describe('Regex flags (e.g. gi, m, s)'),
+  },
+  annotations: { readOnlyHint: true, openWorldHint: false },
+}, async ({ pattern, text, flags }) => {
+  const result = testRegex(pattern, text, flags);
+  return {
+    content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+    isError: !!result.error,
+  };
+});
+
+server.registerTool('convert_base', {
+  title: 'Number Base Converter',
+  description: 'Convert a number between bases (binary, octal, decimal, hexadecimal, or any base 2-36)',
+  inputSchema: {
+    value: z.string().describe('The number value to convert'),
+    from: z.number().min(2).max(36).default(10).describe('Source base (2-36)'),
+    to: z.number().min(2).max(36).default(16).describe('Target base (2-36)'),
+  },
+  annotations: { readOnlyHint: true, openWorldHint: false },
+}, async ({ value, from, to }) => {
+  const result = convertBase(value, from, to);
+  return {
+    content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+    isError: !!result.error,
+  };
+});
+
+server.registerTool('convert_case', {
+  title: 'Case Style Converter',
+  description: 'Convert text between case styles: camelCase, PascalCase, snake_case, kebab-case, SCREAMING_SNAKE_CASE, Title Case, lower, UPPER',
+  inputSchema: {
+    text: z.string().describe('The text to convert'),
+    to: z.enum(['upper', 'lower', 'title', 'camel', 'pascal', 'snake', 'kebab', 'constant']).describe('Target case style'),
+  },
+  annotations: { readOnlyHint: true, openWorldHint: false },
+}, async ({ text, to }) => ({
+  content: [{ type: 'text', text: convertCase(text, to) }],
 }));
 
 server.registerTool('graphql_query', {

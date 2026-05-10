@@ -11,6 +11,7 @@ import { convertersRouter } from './routes/converters';
 import { analysersRouter } from './routes/analysers';
 import { formattersRouter } from './routes/formatters';
 import { agentsRouter } from './routes/agents';
+import { graphqlRouter } from './routes/graphql';
 
 // ── Swagger / OpenAPI spec ────────────────────────────────────────────────────
 
@@ -42,6 +43,7 @@ const swaggerOptions: swaggerJsdoc.Options = {
       { name: 'Analysers', description: 'Text stats, email validation, JWT decoding, regex testing' },
       { name: 'Formatters', description: 'JSON formatting, HTML sanitization, SQL generation' },
       { name: 'Agents', description: 'Autonomous AI agent — run multi-step tasks with built-in tools' },
+      { name: 'GraphQL', description: 'Proxy GraphQL queries, mutations and introspection to any endpoint' },
       { name: 'Health', description: 'Service health check' },
     ],
     components: {
@@ -196,6 +198,7 @@ export function createApp() {
   app.use('/api/analysers', analysersRouter);
   app.use('/api/formatters', formattersRouter);
   app.use('/api/agents', agentsRouter);
+  app.use('/api/graphql', graphqlRouter);
 
   // ── 404 handler ─────────────────────────────────────────────────────────────
   app.use((_req, res) => {

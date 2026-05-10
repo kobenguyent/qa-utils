@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 [![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-blue?style=flat-square)](https://paypal.me/peternguyentr?country.x=DE&locale.x=en_US)
 
-**QA Utils** is an all-in-one quality assurance toolkit — 45+ tools for developers and testers, available as a **web app**, **desktop app** (macOS/Windows/Linux), **CLI**, **REST API**, and **MCP server** for AI agent integration.
+**QA Utils** is an all-in-one quality assurance toolkit — 47+ tools for developers and testers, available as a **web app**, **desktop app** (macOS/Windows/Linux), **CLI**, **REST API**, and **MCP server** for AI agent integration.
 
 🌐 **[Try it now →](https://kobenguyent.github.io/qa-utils/#/)**
 <img width="987" height="623" alt="Screenshot" src="https://github.com/user-attachments/assets/532e2302-7e1e-475e-bb6e-7c094783133a" />
@@ -57,6 +57,7 @@
 | ⚡ [gRPC Client](https://kobenguyent.github.io/qa-utils/#/grpc-client) | gRPC-Web unary and server-streaming calls with .proto support |
 | 📦 [Collection Manager](https://kobenguyent.github.io/qa-utils/#/collection-manager) | Import, edit, convert, and export Postman / Insomnia / Thunder Client collections |
 | 🗺️ [Collection Visualizer](https://kobenguyent.github.io/qa-utils/#/collection-visualizer) | Interactive tree view of all requests, folders, and HTTP methods in a collection |
+| ⬡ [GraphQL Client](https://kobenguyent.github.io/qa-utils/#/graphql-client) | Execute GraphQL queries & mutations with introspection and schema exploration |
 
 ### 🔧 Developer Tools
 
@@ -94,6 +95,7 @@
 | ✅ [Testing Checklists](https://kobenguyent.github.io/qa-utils/#/web-testing-checklist) | Web, API, and mobile testing checklists |
 | 🎓 [ISTQB CTFL v4 Practice Exams](https://kobenguyent.github.io/qa-utils/#/ctfl) | Interactive practice tests for certification prep |
 | 🃏 [Flashcards](https://kobenguyent.github.io/qa-utils/#/flashcards) | Spaced-repetition (SM-2) flashcards for QA concepts |
+| 🌐 [API Types Guide](https://kobenguyent.github.io/qa-utils/#/api-types-guide) | Interactive comparison of REST, GraphQL, gRPC, WebSocket, SOAP, SSE, Webhooks & MQTT |
 
 ### 🏛️ Palace (Visual Navigation)
 

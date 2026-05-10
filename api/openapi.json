@@ -37,6 +37,14 @@
       "description": "JSON formatting, HTML sanitization, SQL generation"
     },
     {
+      "name": "Agents",
+      "description": "Autonomous AI agent — run multi-step tasks and multi-agent orchestration pipelines with built-in tools"
+    },
+    {
+      "name": "GraphQL",
+      "description": "Proxy GraphQL queries, mutations, and introspection to any endpoint"
+    },
+    {
       "name": "Health",
       "description": "Service health check"
     }
@@ -1458,6 +1466,574 @@
           },
           "400": {
             "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/api/formatters/markdown-to-confluence": {
+      "post": {
+        "tags": ["Formatters"],
+        "summary": "Convert Markdown to Confluence Wiki markup",
+        "description": "Converts a Markdown document to Confluence Wiki markup syntax. Supports headings, bold, italic, strikethrough, inline code, fenced code blocks, tables, ordered/unordered lists, links, images, blockquotes, and horizontal rules.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["markdown"],
+                "properties": {
+                  "markdown": {
+                    "type": "string",
+                    "example": "# Hello\n\nSome **bold** and _italic_ text.\n\n- Item 1\n- Item 2"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Confluence Wiki markup output",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "confluence": {
+                      "type": "string",
+                      "description": "The converted Confluence Wiki markup"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" }
+        }
+      }
+    },
+    "/api/graphql/query": {
+      "post": {
+        "tags": ["GraphQL"],
+        "summary": "Execute a GraphQL query or mutation",
+        "description": "Proxies a GraphQL request to any endpoint. Supports queries, mutations, variables, operation names, and custom HTTP headers (e.g. Authorization).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["endpoint", "query"],
+                "properties": {
+                  "endpoint": {
+                    "type": "string",
+                    "format": "uri",
+                    "example": "https://countries.trevorblades.com/graphql",
+                    "description": "GraphQL endpoint URL"
+                  },
+                  "query": {
+                    "type": "string",
+                    "example": "{ countries { code name emoji } }",
+                    "description": "GraphQL query or mutation document"
+                  },
+                  "variables": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "example": {"id": 1},
+                    "description": "GraphQL variables as a JSON object"
+                  },
+                  "operationName": {
+                    "type": "string",
+                    "description": "Operation name for multi-operation documents"
+                  },
+                  "headers": {
+                    "type": "object",
+                    "additionalProperties": { "type": "string" },
+                    "example": {"Authorization": "Bearer <token>"},
+                    "description": "Custom HTTP headers forwarded to the upstream endpoint"
+                  },
+                  "timeout": {
+                    "type": "integer",
+                    "minimum": 100,
+                    "maximum": 60000,
+                    "default": 30000,
+                    "description": "Request timeout in milliseconds"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "GraphQL response (data and/or errors)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "GraphQL response data"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "message": { "type": "string" },
+                          "locations": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "line": { "type": "integer" },
+                                "column": { "type": "integer" }
+                              }
+                            }
+                          },
+                          "path": {
+                            "type": "array",
+                            "items": { "oneOf": [{ "type": "string" }, { "type": "integer" }] }
+                          }
+                        }
+                      }
+                    },
+                    "extensions": { "type": "object", "nullable": true },
+                    "status": {
+                      "type": "integer",
+                      "description": "HTTP status code from the upstream GraphQL server"
+                    },
+                    "duration": {
+                      "type": "integer",
+                      "description": "Round-trip duration in milliseconds"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "502": {
+            "description": "Upstream endpoint unreachable or returned non-JSON",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/graphql/introspect": {
+      "post": {
+        "tags": ["GraphQL"],
+        "summary": "Introspect a GraphQL schema",
+        "description": "Sends the standard GraphQL introspection query to the target endpoint and returns a parsed schema summary — types, fields, arguments, and enum values — with built-in meta-types filtered out.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["endpoint"],
+                "properties": {
+                  "endpoint": {
+                    "type": "string",
+                    "format": "uri",
+                    "example": "https://countries.trevorblades.com/graphql"
+                  },
+                  "headers": {
+                    "type": "object",
+                    "additionalProperties": { "type": "string" }
+                  },
+                  "timeout": {
+                    "type": "integer",
+                    "minimum": 100,
+                    "maximum": 60000,
+                    "default": 30000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Parsed schema info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "queryType": { "type": "string", "nullable": true, "example": "Query" },
+                    "mutationType": { "type": "string", "nullable": true },
+                    "subscriptionType": { "type": "string", "nullable": true },
+                    "typeCount": { "type": "integer" },
+                    "types": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": { "type": "string" },
+                          "kind": { "type": "string", "example": "OBJECT" },
+                          "description": { "type": "string", "nullable": true },
+                          "fields": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": { "type": "string" },
+                                "type": { "type": "string" },
+                                "description": { "type": "string", "nullable": true },
+                                "args": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "name": { "type": "string" },
+                                      "type": { "type": "string" },
+                                      "defaultValue": { "type": "string", "nullable": true }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "enumValues": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": { "type": "string" },
+                                "description": { "type": "string", "nullable": true }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "502": {
+            "description": "Introspection failed or endpoint unreachable",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/graphql/curl": {
+      "post": {
+        "tags": ["GraphQL"],
+        "summary": "Generate a curl command for a GraphQL request",
+        "description": "Returns the equivalent curl command string for the given GraphQL request without sending any actual request. Useful for sharing, debugging, or piping into a terminal.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["endpoint", "query"],
+                "properties": {
+                  "endpoint": {
+                    "type": "string",
+                    "format": "uri",
+                    "example": "https://countries.trevorblades.com/graphql"
+                  },
+                  "query": {
+                    "type": "string",
+                    "example": "{ countries { code name } }"
+                  },
+                  "variables": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "operationName": { "type": "string" },
+                  "headers": {
+                    "type": "object",
+                    "additionalProperties": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Generated curl command",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "curl": {
+                      "type": "string",
+                      "description": "The equivalent curl command",
+                      "example": "curl -X POST 'https://example.com/graphql' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"query\":\"{ countries { code } }\"}'"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" }
+        }
+      }
+    },
+    "/api/agents/tools": {
+      "get": {
+        "tags": ["Agents"],
+        "summary": "List all tools available to the AI agent",
+        "description": "Returns the full set of built-in tools the agent can autonomously call when solving a task.",
+        "responses": {
+          "200": {
+            "description": "List of available agent tools",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tools": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "description": { "type": "string" },
+                          "params": { "type": "string" }
+                        }
+                      }
+                    },
+                    "count": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/agents/run": {
+      "post": {
+        "tags": ["Agents"],
+        "summary": "Run a single autonomous agent task",
+        "description": "Runs the AI agent observe-think-act loop until the task is complete or maxIterations is reached. The agent autonomously selects and calls built-in tools to complete the task.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["task", "provider"],
+                "properties": {
+                  "task": {
+                    "type": "string",
+                    "description": "Natural language task description",
+                    "example": "Generate a UUID and base64-encode it",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "provider": {
+                    "type": "string",
+                    "enum": ["ollama", "openai", "anthropic", "google", "azure-openai"],
+                    "description": "AI provider to use for the agent"
+                  },
+                  "apiKey": {
+                    "type": "string",
+                    "description": "API key (required for cloud providers)"
+                  },
+                  "endpoint": {
+                    "type": "string",
+                    "description": "Custom endpoint URL (e.g. Azure OpenAI or Ollama)"
+                  },
+                  "model": {
+                    "type": "string",
+                    "description": "Model name — uses provider default if omitted"
+                  },
+                  "maxIterations": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 25,
+                    "default": 10,
+                    "description": "Maximum observe-think-act iterations"
+                  },
+                  "temperature": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "default": 0.3,
+                    "description": "Sampling temperature"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Agent run result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "answer": { "type": "string" },
+                    "iterationCount": { "type": "integer" },
+                    "steps": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "type": {
+                            "type": "string",
+                            "enum": ["thinking", "tool_call", "tool_result", "answer", "error"]
+                          },
+                          "content": { "type": "string" },
+                          "toolName": { "type": "string" },
+                          "timestamp": { "type": "integer" }
+                        }
+                      }
+                    },
+                    "error": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "500": {
+            "description": "Agent execution error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/agents/orchestrate": {
+      "post": {
+        "tags": ["Agents"],
+        "summary": "Run a multi-agent orchestration pipeline",
+        "description": "Coordinates multiple specialized agents to solve a complex task.\n\n- **sequential** — each agent's output feeds into the next agent as context (chain).\n- **orchestrated** — a designated orchestrator agent breaks the task into sub-tasks, delegates them to worker agents in parallel, then synthesizes a final answer.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["task", "mode", "agents"],
+                "properties": {
+                  "task": {
+                    "type": "string",
+                    "description": "The complex task to solve",
+                    "example": "Analyse this codebase for security issues and write a remediation plan",
+                    "minLength": 1,
+                    "maxLength": 4000
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": ["sequential", "orchestrated"],
+                    "description": "Pipeline execution mode"
+                  },
+                  "agents": {
+                    "type": "array",
+                    "description": "Worker agent configurations",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "required": ["profileId", "name", "role", "provider"],
+                      "properties": {
+                        "profileId": { "type": "string" },
+                        "name": { "type": "string" },
+                        "role": { "type": "string" },
+                        "specialty": { "type": "string" },
+                        "provider": {
+                          "type": "string",
+                          "enum": ["ollama", "openai", "anthropic", "google", "azure-openai"]
+                        },
+                        "apiKey": { "type": "string" },
+                        "endpoint": { "type": "string" },
+                        "model": { "type": "string" },
+                        "maxIterations": { "type": "integer", "minimum": 1, "maximum": 25 },
+                        "temperature": { "type": "number", "minimum": 0, "maximum": 1 },
+                        "order": {
+                          "type": "integer",
+                          "description": "Execution order for sequential mode (0-based)"
+                        }
+                      }
+                    }
+                  },
+                  "orchestrator": {
+                    "type": "object",
+                    "description": "Orchestrator agent config — required when mode is 'orchestrated'",
+                    "properties": {
+                      "name": { "type": "string" },
+                      "role": { "type": "string", "default": "orchestrator" },
+                      "provider": {
+                        "type": "string",
+                        "enum": ["ollama", "openai", "anthropic", "google", "azure-openai"]
+                      },
+                      "apiKey": { "type": "string" },
+                      "endpoint": { "type": "string" },
+                      "model": { "type": "string" },
+                      "maxIterations": { "type": "integer", "minimum": 1, "maximum": 25 },
+                      "temperature": { "type": "number", "minimum": 0, "maximum": 1 }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pipeline execution result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "summary": { "type": "string", "description": "Final synthesized answer" },
+                    "agentResults": {
+                      "type": "array",
+                      "description": "Per-agent outputs",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "agentId": { "type": "string" },
+                          "agentName": { "type": "string" },
+                          "success": { "type": "boolean" },
+                          "answer": { "type": "string" },
+                          "iterationCount": { "type": "integer" },
+                          "duration": { "type": "integer", "description": "Duration in ms" }
+                        }
+                      }
+                    },
+                    "totalDuration": { "type": "integer", "description": "Total pipeline duration in ms" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "500": {
+            "description": "Pipeline execution error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
           }
         }
       }

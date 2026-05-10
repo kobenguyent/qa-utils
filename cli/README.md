@@ -275,6 +275,62 @@ qautils random -l 64 -c 5             # 5 × 64-char strings
 
 ---
 
+## ⬡ GraphQL Client
+
+Execute GraphQL queries and mutations, and explore schemas via introspection.
+
+```bash
+# Basic query
+qautils graphql query https://countries.trevorblades.com/graphql '{ countries { code name emoji } }'
+
+# With variables
+qautils graphql query https://rickandmortyapi.com/graphql \
+  'query GetCharacter($id: ID!) { character(id: $id) { name status } }' \
+  -v '{"id": 1}'
+
+# With auth header
+qautils graphql query https://api.example.com/graphql '{ me { name } }' \
+  -H "Authorization: Bearer <token>"
+
+# Print equivalent curl command
+qautils graphql query https://api.example.com/graphql '{ users { id } }' --curl
+
+# Raw JSON output (pipe into jq)
+qautils graphql query https://api.example.com/graphql '{ users { id } }' --raw | jq '.data'
+
+# Schema overview via introspection
+qautils graphql introspect https://countries.trevorblades.com/graphql
+
+# List all types
+qautils graphql introspect https://countries.trevorblades.com/graphql --types
+
+# Inspect a specific type
+qautils graphql introspect https://countries.trevorblades.com/graphql --type Country
+```
+
+### `graphql query` options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `-v, --variables <json>` | `{}` | GraphQL variables as a JSON string |
+| `-H, --header <key:value>` | — | HTTP header (repeatable) |
+| `-o, --operation-name <name>` | — | Operation name for multi-operation documents |
+| `-t, --timeout <ms>` | `30000` | Request timeout in milliseconds |
+| `--curl` | — | Print equivalent curl command and exit |
+| `--raw` | — | Output raw JSON response only |
+
+### `graphql introspect` options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `-H, --header <key:value>` | — | HTTP header (repeatable) |
+| `-t, --timeout <ms>` | `30000` | Request timeout in milliseconds |
+| `--types` | — | List all types in the schema |
+| `--type <name>` | — | Show fields and details for a specific type |
+| `--raw` | — | Output raw introspection JSON |
+
+---
+
 ## 🤖 Kobean AI Chat
 
 Kobean is an AI-powered chat assistant built into qautils-cli. It supports multiple providers and provides an interactive REPL-style chat experience right in your terminal.
