@@ -106,6 +106,10 @@ export const HtmlSanitizeSchema = z.object({
   html: z.string().min(1, 'html is required'),
 });
 
+export const MarkdownToConfluenceSchema = z.object({
+  markdown: z.string().min(1, 'markdown is required'),
+});
+
 // ── Data ──────────────────────────────────────────────────────────────────────
 
 export const SqlGenerateSchema = z.object({

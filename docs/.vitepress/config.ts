@@ -5,10 +5,14 @@ export default defineConfig({
   description: 'A comprehensive collection of quality assurance tools and utilities',
   base: '/qa-utils/docs/',
   head: [
-    ['link', { rel: 'icon', href: '/qa-utils/docs/favicon.ico' }],
+    ['link', { rel: 'icon', type: 'image/png', href: '/qa-utils/docs/logo-icon.png' }],
   ],
   themeConfig: {
-    logo: '/logo.svg',
+    logo: {
+      light: '/logo-icon.png',
+      dark: '/logo-icon-dark-nebula.png',
+      alt: 'QA Utils',
+    },
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Guide', link: '/guide/getting-started' },
