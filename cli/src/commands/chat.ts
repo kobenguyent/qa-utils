@@ -109,8 +109,8 @@ async function runConfigWizard(): Promise<void> {
   const requiresApiKey: AIProvider[] = ['openai', 'anthropic', 'google', 'azure-openai', 'cloudflare-ai'];
   let apiKey: string | undefined;
   if (requiresApiKey.includes(provider)) {
-    const keyLabel = provider === 'cloudflare-ai' ? 'Cloudflare API token' : `${provider} API key`;
-    apiKey = await password({ message: `${keyLabel}:`, mask: '*' });
+    const authLabel = provider === 'cloudflare-ai' ? 'Cloudflare API token' : `${provider} API key`;
+    apiKey = await password({ message: `${authLabel}:`, mask: '*' });
     if (!apiKey) {
       console.error(T.error('  ✗  API key is required. Configuration cancelled.'));
       process.exit(1);

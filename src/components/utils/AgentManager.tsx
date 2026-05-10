@@ -560,7 +560,7 @@ function QuickOrchestrate() {
                     type="password"
                     value={apiKey}
                     onChange={e => setApiKey(e.target.value)}
-                    placeholder="API key / token (leave blank for Ollama)"
+                    placeholder={provider === 'cloudflare-ai' ? 'Cloudflare API token' : 'API key (leave blank for Ollama)'}
                     disabled={running}
                   />
                 </Col>

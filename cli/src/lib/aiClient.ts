@@ -46,7 +46,7 @@ function trimMessagesToFitContext(messages: ChatMessage[], maxTokens: number): C
 
   if (budget <= 0) {
     const truncated = systemMessages[systemMessages.length - 1];
-    return [{ ...truncated, content: truncated.content.slice(0, maxTokens * 3) }];
+    return [{ ...truncated, content: truncated.content.slice(0, maxTokens * 4) }];
   }
 
   const kept: ChatMessage[] = [];

@@ -65,7 +65,9 @@ const CONNECTION_TEST_TIMEOUT = 30000; // 30 seconds for connection tests (Ollam
 const DEFAULT_GEMINI_CONTEXT_WINDOW = 32768; // Default context window for Gemini models
 
 // Cloudflare Workers AI free-tier constants
-// Free tier: 10,000 neurons/day — keep max_tokens low to conserve quota
+// Free tier grants 10,000 neurons/day. A "neuron" is Cloudflare's billing unit for inference
+// (roughly equivalent to processing one token). See:
+// https://developers.cloudflare.com/workers-ai/platform/pricing/
 export const CLOUDFLARE_AI_BASE_URL = 'https://api.cloudflare.com/client/v4/accounts';
 export const CLOUDFLARE_AI_FREE_MAX_TOKENS = 512;
 // Context window for free-tier models (conservative estimate to avoid overruns)
@@ -262,9 +264,10 @@ export function trimMessagesToFitContext(
   const budget = maxTokens - systemTokens;
 
   if (budget <= 0) {
-    // System messages alone exceed budget — truncate the last system message
+    // System messages alone exceed budget — truncate the last system message to roughly maxTokens chars
+    // (~4 chars per token is a reasonable estimate for English text)
     const truncated = systemMessages[systemMessages.length - 1];
-    return [{ ...truncated, content: truncated.content.slice(0, maxTokens * 3) }];
+    return [{ ...truncated, content: truncated.content.slice(0, maxTokens * 4) }];
   }
 
   // Walk conversation messages from newest to oldest, accumulating until budget exceeded

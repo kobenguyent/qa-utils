@@ -155,6 +155,11 @@ export function parseActionBlock(text: string): ParsedAction | null {
 
 const TIMEOUT_MS = 60_000;
 
+// Cloudflare Workers AI free-tier limits
+const CF_CONTEXT_WINDOW = 6144;  // total context window for free-tier models
+const CF_MAX_OUTPUT_TOKENS = 512; // conservative output cap for free tier
+const CF_INPUT_BUDGET = CF_CONTEXT_WINDOW - CF_MAX_OUTPUT_TOKENS; // 5632 input tokens
+
 const DEFAULT_MODELS: Record<AIProvider, string> = {
   openai: 'gpt-3.5-turbo',
   anthropic: 'claude-3-sonnet-20240229',
@@ -171,13 +176,12 @@ function estimateCfTokens(text: string): number {
   return Math.ceil((words * 1.3 + chars / 4) / 2);
 }
 
-/** Trim messages to fit Cloudflare Workers AI free-tier context window (~5632 input tokens) */
+/** Trim messages to fit Cloudflare Workers AI free-tier context window (${CF_INPUT_BUDGET} input tokens) */
 function trimForCloudflare(messages: ChatMessage[]): ChatMessage[] {
-  const budget = 5632; // 6144 context - 512 max_tokens
   const system = messages.filter(m => m.role === 'system');
   const conv = messages.filter(m => m.role !== 'system');
   const sysTok = system.reduce((s, m) => s + estimateCfTokens(m.content), 0);
-  const remaining = budget - sysTok;
+  const remaining = CF_INPUT_BUDGET - sysTok;
   const kept: ChatMessage[] = [];
   let used = 0;
   for (let i = conv.length - 1; i >= 0; i--) {
@@ -290,12 +294,12 @@ async function callAI(messages: ChatMessage[], config: AgentConfig): Promise<str
         if (!accountId) throw new Error('Cloudflare Account ID is required');
         const model = config.model || DEFAULT_MODELS['cloudflare-ai'];
         const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${model}`;
-        // Trim messages to fit the free-tier context window (6144 input tokens)
+        // Trim messages to fit the free-tier input budget (CF_INPUT_BUDGET tokens)
         const trimmedMessages = trimForCloudflare(messages);
         const res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.apiKey || ''}` },
-          body: JSON.stringify({ messages: trimmedMessages, max_tokens: 512 }),
+          body: JSON.stringify({ messages: trimmedMessages, max_tokens: CF_MAX_OUTPUT_TOKENS }),
           signal: ctrl.signal,
         });
         if (!res.ok) {
