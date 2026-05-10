@@ -102,15 +102,30 @@ async function runConfigWizard(): Promise<void> {
       { name: 'Google Gemini', value: 'google' },
       { name: 'Azure OpenAI', value: 'azure-openai' },
       { name: 'Ollama (local)', value: 'ollama' },
+      { name: 'Cloudflare Workers AI (free tier)', value: 'cloudflare-ai' },
     ],
   });
 
-  const requiresApiKey: AIProvider[] = ['openai', 'anthropic', 'google', 'azure-openai'];
+  const requiresApiKey: AIProvider[] = ['openai', 'anthropic', 'google', 'azure-openai', 'cloudflare-ai'];
   let apiKey: string | undefined;
   if (requiresApiKey.includes(provider)) {
-    apiKey = await password({ message: `${provider} API key:`, mask: '*' });
+    const keyLabel = provider === 'cloudflare-ai' ? 'Cloudflare API token' : `${provider} API key`;
+    apiKey = await password({ message: `${keyLabel}:`, mask: '*' });
     if (!apiKey) {
       console.error(T.error('  ✗  API key is required. Configuration cancelled.'));
+      process.exit(1);
+    }
+  }
+
+  // Cloudflare Workers AI: prompt for Account ID
+  let cloudflareAccountId: string | undefined;
+  if (provider === 'cloudflare-ai') {
+    const accountIdInput = await input({
+      message: 'Cloudflare Account ID (from dash.cloudflare.com → Overview → Account ID):',
+    });
+    cloudflareAccountId = accountIdInput.trim();
+    if (!cloudflareAccountId) {
+      console.error(T.error('  ✗  Account ID is required for Cloudflare Workers AI. Configuration cancelled.'));
       process.exit(1);
     }
   }
@@ -154,6 +169,7 @@ async function runConfigWizard(): Promise<void> {
     ...(apiKey ? { apiKey } : {}),
     ...(endpoint ? { endpoint } : {}),
     ...(azureApiVersion ? { azureApiVersion } : {}),
+    ...(cloudflareAccountId ? { cloudflareAccountId } : {}),
   };
 
   const validationError = validateAIConfig(config);
@@ -316,6 +332,7 @@ export function registerChatCommand(program: Command): void {
     .option('--model <model>', 'Set model non-interactively')
     .option('--endpoint <url>', 'Set endpoint non-interactively')
     .option('--temperature <value>', 'Set temperature non-interactively (0–1)')
+    .option('--cloudflare-account-id <id>', 'Set Cloudflare Account ID (for cloudflare-ai provider)')
     .action(async (opts: {
       show?: boolean;
       reset?: boolean;
@@ -324,6 +341,7 @@ export function registerChatCommand(program: Command): void {
       model?: string;
       endpoint?: string;
       temperature?: string;
+      cloudflareAccountId?: string;
     }) => {
       // ── --show ──────────────────────────────────────────────────────────
       if (opts.show) {
@@ -357,6 +375,7 @@ export function registerChatCommand(program: Command): void {
           ...(opts.model ? { model: opts.model } : {}),
           ...(opts.endpoint ? { endpoint: opts.endpoint } : {}),
           ...(opts.temperature ? { temperature: parseFloat(opts.temperature) } : {}),
+          ...(opts.cloudflareAccountId ? { cloudflareAccountId: opts.cloudflareAccountId } : {}),
         };
 
         const validationError = validateAIConfig(config);

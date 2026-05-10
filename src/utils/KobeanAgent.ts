@@ -9,10 +9,11 @@ import { registerDefaultTools, getAllTools } from './defaultTools';
 import { sendChatMessage, ChatMessage, ChatConfig } from './aiChatClient';
 
 export interface KobeanConfig {
-    aiProvider?: 'ollama' | 'openai' | 'anthropic' | 'google' | 'azure-openai';
+    aiProvider?: 'ollama' | 'openai' | 'anthropic' | 'google' | 'azure-openai' | 'cloudflare-ai';
     aiEndpoint?: string;
     aiModel?: string;
     aiApiKey?: string;
+    cloudflareAccountId?: string; // For Cloudflare Workers AI
     enableVoice?: boolean;
     systemPrompt?: string;
     obfuscateSensitiveData?: boolean;
@@ -34,6 +35,7 @@ export function getAiChatSessionConfig(): KobeanConfig {
         const endpoint = window.sessionStorage.getItem('aiChat_endpoint');
         const model = window.sessionStorage.getItem('aiChat_model');
         const obfuscate = window.sessionStorage.getItem('aiChat_obfuscateSensitiveData');
+        const cloudflareAccountId = window.sessionStorage.getItem('aiChat_cloudflareAccountId');
 
         const config: KobeanConfig = {};
 
@@ -51,6 +53,9 @@ export function getAiChatSessionConfig(): KobeanConfig {
         }
         if (obfuscate !== null) {
             config.obfuscateSensitiveData = JSON.parse(obfuscate) as boolean;
+        }
+        if (cloudflareAccountId) {
+            config.cloudflareAccountId = JSON.parse(cloudflareAccountId) as string;
         }
 
         return config;
@@ -283,11 +288,14 @@ export class KobeanAgent {
     ): Promise<KobeanResponse> {
         // Check if AI is properly configured
         const isOllamaConfigured = this.config.aiProvider === 'ollama' && this.config.aiEndpoint;
+        const isCloudflareConfigured = this.config.aiProvider === 'cloudflare-ai' &&
+            this.config.aiApiKey && this.config.cloudflareAccountId;
         const isCloudProviderConfigured = this.config.aiProvider && 
             this.config.aiProvider !== 'ollama' && 
+            this.config.aiProvider !== 'cloudflare-ai' &&
             this.config.aiApiKey;
         
-        if (!isOllamaConfigured && !isCloudProviderConfigured) {
+        if (!isOllamaConfigured && !isCloudProviderConfigured && !isCloudflareConfigured) {
             return {
                 text: this.generateFallbackResponse(intent),
                 intent,
@@ -310,6 +318,7 @@ export class KobeanAgent {
                 endpoint: this.config.aiEndpoint,
                 model: this.config.aiModel,
                 apiKey: this.config.aiApiKey,
+                cloudflareAccountId: this.config.cloudflareAccountId,
                 temperature: 0.7,
                 maxTokens: 1000,
                 obfuscateSensitiveData: this.config.obfuscateSensitiveData,

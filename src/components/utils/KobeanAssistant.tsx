@@ -49,6 +49,7 @@ export function KobeanAssistant() {
     const [apiKey, setApiKey] = useSessionStorage<string>('aiChat_apiKey', '');
     const [endpoint, setEndpoint] = useSessionStorage<string>('aiChat_endpoint', 'http://localhost:11434');
     const [azureApiVersion, setAzureApiVersion] = useSessionStorage<string>('aiChat_azureApiVersion', '2024-02-15-preview');
+    const [cloudflareAccountId, setCloudflareAccountId] = useSessionStorage<string>('aiChat_cloudflareAccountId', '');
     const [model, setModel] = useSessionStorage<string>('aiChat_model', '');
     const [temperature, setTemperature] = useSessionStorage<number>('aiChat_temperature', 0.7);
     const [optimizeTokens, setOptimizeTokens] = useSessionStorage<boolean>('aiChat_optimizeTokens', true);
@@ -111,9 +112,14 @@ export function KobeanAssistant() {
             if (!model) {
                 setModel('llama2');
             }
+        } else if (provider === 'cloudflare-ai') {
+            setIsConfigured(!!apiKey && !!cloudflareAccountId);
+            if (!model) {
+                setModel('@cf/meta/llama-3-8b-instruct');
+            }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [provider, apiKey, endpoint, model]);
+    }, [provider, apiKey, endpoint, cloudflareAccountId, model]);
 
     // Update Kobean agent when config changes
     useEffect(() => {
@@ -123,9 +129,10 @@ export function KobeanAssistant() {
             aiEndpoint: endpoint,
             aiModel: model || getDefaultModel(provider).id,
             aiApiKey: apiKey || undefined,
+            cloudflareAccountId: cloudflareAccountId || undefined,
             obfuscateSensitiveData,
         });
-    }, [provider, apiKey, endpoint, model, obfuscateSensitiveData]);
+    }, [provider, apiKey, endpoint, cloudflareAccountId, model, obfuscateSensitiveData]);
 
     // Restore knowledge base documents from session storage on mount
     useEffect(() => {
@@ -196,9 +203,10 @@ export function KobeanAssistant() {
         const defaultModel = getDefaultModel(provider);
         return {
             provider,
-            apiKey: (provider === 'openai' || provider === 'anthropic' || provider === 'google' || provider === 'azure-openai') ? apiKey : undefined,
+            apiKey: (provider === 'openai' || provider === 'anthropic' || provider === 'google' || provider === 'azure-openai' || provider === 'cloudflare-ai') ? apiKey : undefined,
             endpoint: (provider === 'ollama' || provider === 'azure-openai') ? endpoint : undefined,
             azureApiVersion: provider === 'azure-openai' ? azureApiVersion : undefined,
+            cloudflareAccountId: provider === 'cloudflare-ai' ? cloudflareAccountId : undefined,
             model: model || defaultModel.id,
             temperature,
             timeout: 60000,
@@ -521,6 +529,7 @@ export function KobeanAssistant() {
                               <option value="google">Google Gemini</option>
                               <option value="azure-openai">Azure OpenAI</option>
                               <option value="ollama">Ollama (Local)</option>
+                              <option value="cloudflare-ai">Cloudflare Workers AI (Free)</option>
                             </Form.Select>
                           </Form.Group>
                         </Col>
@@ -739,6 +748,64 @@ export function KobeanAssistant() {
                               <a href="https://ollama.ai" target="_blank" rel="noopener noreferrer">
                                 ollama.ai
                               </a>
+                            </Form.Text>
+                          </Form.Group>
+                        </>
+                      )}
+
+                      {provider === 'cloudflare-ai' && (
+                        <>
+                          <Alert variant="info" className="mb-3">
+                            <Alert.Heading className="h6">☁️ Cloudflare Workers AI — Free Tier</Alert.Heading>
+                            <p className="mb-2 small">
+                              Use Cloudflare's free LLM inference. No credit card required —
+                              just a Cloudflare account. Free tier: 10,000 neurons/day.
+                            </p>
+                            <p className="mb-0 small">
+                              Get your API token and Account ID from{' '}
+                              <a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" rel="noopener noreferrer">
+                                dash.cloudflare.com
+                              </a>
+                              . Create a token with <strong>Workers AI</strong> permission.
+                            </p>
+                          </Alert>
+                          <Form.Group className="mb-3">
+                            <Form.Label>API Token</Form.Label>
+                            <Form.Control
+                              type="password"
+                              placeholder="Your Cloudflare API token"
+                              value={apiKey}
+                              onChange={(e) => {
+                                setApiKey(e.target.value);
+                                setConnectionStatus('unknown');
+                              }}
+                              disabled={loading}
+                            />
+                            <Form.Text className="text-muted">
+                              Create an API token with <em>Workers AI: Edit</em> permission at{' '}
+                              <a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" rel="noopener noreferrer">
+                                Cloudflare Dashboard → API Tokens
+                              </a>
+                            </Form.Text>
+                          </Form.Group>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Account ID</Form.Label>
+                            <Form.Control
+                              type="text"
+                              placeholder="e.g. a1b2c3d4e5f6..."
+                              value={cloudflareAccountId}
+                              onChange={(e) => {
+                                setCloudflareAccountId(e.target.value);
+                                setConnectionStatus('unknown');
+                              }}
+                              disabled={loading}
+                            />
+                            <Form.Text className="text-muted">
+                              Found on the right side of{' '}
+                              <a href="https://dash.cloudflare.com/" target="_blank" rel="noopener noreferrer">
+                                dash.cloudflare.com
+                              </a>{' '}
+                              → select your account → Overview.
                             </Form.Text>
                           </Form.Group>
                         </>

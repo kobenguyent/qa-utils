@@ -10,7 +10,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 
-export type AIProvider = 'openai' | 'anthropic' | 'google' | 'azure-openai' | 'ollama';
+export type AIProvider = 'openai' | 'anthropic' | 'google' | 'azure-openai' | 'ollama' | 'cloudflare-ai';
 
 export interface AIProviderConfig {
   provider: AIProvider;
@@ -19,6 +19,7 @@ export interface AIProviderConfig {
   model?: string;
   temperature?: number;
   azureApiVersion?: string;
+  cloudflareAccountId?: string; // For Cloudflare Workers AI
 }
 
 const CONFIG_DIR_NAME = 'qautils-cli';
@@ -75,6 +76,7 @@ export const DEFAULT_MODELS: Record<AIProvider, string> = {
   google: 'gemini-1.5-flash',
   'azure-openai': 'gpt-35-turbo',
   ollama: 'llama2',
+  'cloudflare-ai': '@cf/meta/llama-3-8b-instruct',
 };
 
 /** Default endpoints per provider (where applicable) */
@@ -89,7 +91,7 @@ export const DEFAULT_ENDPOINTS: Partial<Record<AIProvider, string>> = {
 export function validateAIConfig(config: AIProviderConfig): string | null {
   if (!config.provider) return 'Provider is required';
 
-  const requiresApiKey: AIProvider[] = ['openai', 'anthropic', 'google', 'azure-openai'];
+  const requiresApiKey: AIProvider[] = ['openai', 'anthropic', 'google', 'azure-openai', 'cloudflare-ai'];
   if (requiresApiKey.includes(config.provider) && !config.apiKey) {
     return `API key is required for ${config.provider}`;
   }
@@ -100,6 +102,10 @@ export function validateAIConfig(config: AIProviderConfig): string | null {
 
   if (config.provider === 'ollama' && !config.endpoint) {
     return 'Endpoint is required for Ollama (e.g. http://localhost:11434)';
+  }
+
+  if (config.provider === 'cloudflare-ai' && !config.cloudflareAccountId) {
+    return 'Account ID is required for Cloudflare Workers AI';
   }
 
   return null;
@@ -136,6 +142,9 @@ export function formatConfigForDisplay(
   }
   if (config.azureApiVersion) {
     lines.push(`  API Version: ${config.azureApiVersion}`);
+  }
+  if (config.cloudflareAccountId) {
+    lines.push(`  CF Account : ${config.cloudflareAccountId}`);
   }
   return lines.join('\n');
 }

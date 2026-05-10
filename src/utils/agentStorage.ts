@@ -15,7 +15,7 @@ const PIPELINE_RUNS_KEY_PREFIX = 'agentManager_pipelineRuns_';
 const MAX_RUNS_PER_PROFILE = 10;
 const MAX_RUNS_PER_PIPELINE = 10;
 
-export type AIProvider = 'ollama' | 'openai' | 'anthropic' | 'google' | 'azure-openai';
+export type AIProvider = 'ollama' | 'openai' | 'anthropic' | 'google' | 'azure-openai' | 'cloudflare-ai';
 
 /** The functional role an agent plays in a pipeline */
 export type AgentRole =
@@ -62,6 +62,7 @@ export interface AgentProfile {
   endpoint?: string;
   apiKey?: string;
   model?: string;
+  cloudflareAccountId?: string; // For Cloudflare Workers AI
   maxIterations: number;
   temperature: number;
   systemPromptOverride?: string;

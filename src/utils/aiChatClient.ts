@@ -1,12 +1,13 @@
 /**
  * AI Chat Client Utilities
- * Supports multiple AI providers: OpenAI, Anthropic Claude, Google Gemini, Azure OpenAI, and Ollama
+ * Supports multiple AI providers: OpenAI, Anthropic Claude, Google Gemini, Azure OpenAI, Ollama,
+ * and Cloudflare Workers AI (free tier).
  * Enhanced with knowledge management, token optimization, and prompt guidance
  */
 
 import { obfuscateMessages } from './dataObfuscator';
 
-export type AIProvider = 'openai' | 'anthropic' | 'google' | 'azure-openai' | 'ollama';
+export type AIProvider = 'openai' | 'anthropic' | 'google' | 'azure-openai' | 'ollama' | 'cloudflare-ai';
 
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
@@ -23,6 +24,7 @@ export interface ChatConfig {
   timeout?: number;
   contextWindow?: number; // Support for large context windows
   azureApiVersion?: string; // For Azure OpenAI
+  cloudflareAccountId?: string; // For Cloudflare Workers AI
   optimizeTokens?: boolean; // Enable token optimization
   systemPrompt?: string; // Custom system prompt for guidance
   obfuscateSensitiveData?: boolean; // Replace sensitive values with placeholders before sending
@@ -62,6 +64,48 @@ const DEFAULT_TIMEOUT = 30000; // 30 seconds
 const CONNECTION_TEST_TIMEOUT = 30000; // 30 seconds for connection tests (Ollama models may need time to load)
 const DEFAULT_GEMINI_CONTEXT_WINDOW = 32768; // Default context window for Gemini models
 
+// Cloudflare Workers AI free-tier constants
+// Free tier: 10,000 neurons/day — keep max_tokens low to conserve quota
+export const CLOUDFLARE_AI_BASE_URL = 'https://api.cloudflare.com/client/v4/accounts';
+export const CLOUDFLARE_AI_FREE_MAX_TOKENS = 512;
+// Context window for free-tier models (conservative estimate to avoid overruns)
+export const CLOUDFLARE_AI_CONTEXT_WINDOW = 6144;
+
+/** Free-tier models available on Cloudflare Workers AI */
+export const CLOUDFLARE_AI_FREE_MODELS: ModelInfo[] = [
+  {
+    id: '@cf/meta/llama-3-8b-instruct',
+    name: 'Llama 3 8B Instruct (Free)',
+    contextWindow: 8192,
+    provider: 'cloudflare-ai',
+    isDefault: true,
+  },
+  {
+    id: '@cf/mistral/mistral-7b-instruct-v0.1',
+    name: 'Mistral 7B Instruct v0.1 (Free)',
+    contextWindow: 32768,
+    provider: 'cloudflare-ai',
+  },
+  {
+    id: '@cf/meta/llama-2-7b-chat-int8',
+    name: 'Llama 2 7B Chat (Free)',
+    contextWindow: 4096,
+    provider: 'cloudflare-ai',
+  },
+  {
+    id: '@cf/google/gemma-7b-it',
+    name: 'Gemma 7B IT (Free)',
+    contextWindow: 8192,
+    provider: 'cloudflare-ai',
+  },
+  {
+    id: '@cf/tiiuae/falcon-7b-instruct',
+    name: 'Falcon 7B Instruct (Free)',
+    contextWindow: 2048,
+    provider: 'cloudflare-ai',
+  },
+];
+
 // Default models configuration
 const DEFAULT_MODELS: Record<AIProvider, ModelInfo> = {
   openai: {
@@ -99,6 +143,7 @@ const DEFAULT_MODELS: Record<AIProvider, ModelInfo> = {
     provider: 'ollama',
     isDefault: true,
   },
+  'cloudflare-ai': CLOUDFLARE_AI_FREE_MODELS[0],
 };
 
 // System prompts for better AI responses
@@ -132,7 +177,7 @@ const SYSTEM_PROMPTS = {
 };
 
 // Providers that require API keys
-const PROVIDERS_REQUIRING_API_KEY: AIProvider[] = ['openai', 'anthropic', 'google', 'azure-openai'];
+const PROVIDERS_REQUIRING_API_KEY: AIProvider[] = ['openai', 'anthropic', 'google', 'azure-openai', 'cloudflare-ai'];
 
 /**
  * Validates the chat configuration
@@ -152,6 +197,10 @@ export function validateConfig(config: ChatConfig): { valid: boolean; error?: st
 
   if (config.provider === 'ollama' && !config.endpoint) {
     return { valid: false, error: 'Endpoint is required for Ollama' };
+  }
+
+  if (config.provider === 'cloudflare-ai' && !config.cloudflareAccountId) {
+    return { valid: false, error: 'Account ID is required for Cloudflare Workers AI' };
   }
 
   return { valid: true };
@@ -189,8 +238,52 @@ export function optimizeMessages(messages: ChatMessage[]): ChatMessage[] {
 }
 
 /**
- * Get system prompt based on context
+ * Trim a message list to fit within a token budget.
+ *
+ * Strategy (preserves conversation coherence):
+ *   1. Always keep system messages.
+ *   2. Always keep the last user message.
+ *   3. Drop oldest conversation turns first until the total fits.
+ *
+ * This is essential for free-tier providers (e.g. Cloudflare Workers AI) where
+ * context windows are small and overrunning them returns an error.
  */
+export function trimMessagesToFitContext(
+  messages: ChatMessage[],
+  maxTokens: number,
+): ChatMessage[] {
+  const systemMessages = messages.filter(m => m.role === 'system');
+  const conversationMessages = messages.filter(m => m.role !== 'system');
+
+  const systemTokens = systemMessages.reduce(
+    (sum, m) => sum + estimateTokenCount(m.content),
+    0,
+  );
+  const budget = maxTokens - systemTokens;
+
+  if (budget <= 0) {
+    // System messages alone exceed budget — truncate the last system message
+    const truncated = systemMessages[systemMessages.length - 1];
+    return [{ ...truncated, content: truncated.content.slice(0, maxTokens * 3) }];
+  }
+
+  // Walk conversation messages from newest to oldest, accumulating until budget exceeded
+  const kept: ChatMessage[] = [];
+  let used = 0;
+  for (let i = conversationMessages.length - 1; i >= 0; i--) {
+    const tokens = estimateTokenCount(conversationMessages[i].content);
+    if (used + tokens > budget && kept.length > 0) {
+      // Always keep at least the last message, then stop
+      break;
+    }
+    kept.unshift(conversationMessages[i]);
+    used += tokens;
+  }
+
+  return [...systemMessages, ...kept];
+}
+
+
 export function getSystemPrompt(type: 'default' | 'technical' | 'creative' = 'default', custom?: string): string {
   return custom || SYSTEM_PROMPTS[type];
 }
@@ -592,6 +685,98 @@ async function sendToAzureOpenAI(
 }
 
 /**
+ * Send a chat message to Cloudflare Workers AI (free tier).
+ *
+ * API docs: https://developers.cloudflare.com/workers-ai/get-started/rest-api/
+ *
+ * Endpoint: POST https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/run/{model}
+ * Auth:     Bearer <api_token>
+ * Body:     { messages: [...] }   (OpenAI-compatible chat format)
+ * Response: { result: { response: string }, success: boolean }
+ *
+ * Token optimization is applied automatically to stay within free-tier limits:
+ * - Messages are trimmed to fit the model's context window.
+ * - max_tokens is capped at CLOUDFLARE_AI_FREE_MAX_TOKENS (512) by default.
+ */
+async function sendToCloudflareAI(
+  messages: ChatMessage[],
+  config: ChatConfig,
+): Promise<ChatResponse> {
+  const accountId = config.cloudflareAccountId;
+  if (!accountId) throw new Error('Cloudflare Account ID is required');
+
+  const model = config.model || CLOUDFLARE_AI_FREE_MODELS[0].id;
+  const url = `${CLOUDFLARE_AI_BASE_URL}/${accountId}/ai/run/${model}`;
+
+  // Determine context budget: use configured window or conservative default
+  const contextBudget = config.contextWindow ?? CLOUDFLARE_AI_CONTEXT_WINDOW;
+  // Reserve space for the output tokens
+  const maxOutputTokens = Math.min(
+    config.maxTokens ?? CLOUDFLARE_AI_FREE_MAX_TOKENS,
+    CLOUDFLARE_AI_FREE_MAX_TOKENS,
+  );
+  const inputBudget = contextBudget - maxOutputTokens;
+
+  // Trim conversation history to fit within the input token budget
+  const trimmedMessages = trimMessagesToFitContext(messages, inputBudget);
+
+  const requestBody = {
+    messages: trimmedMessages,
+    max_tokens: maxOutputTokens,
+  };
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(
+    () => controller.abort(),
+    config.timeout || DEFAULT_TIMEOUT,
+  );
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${config.apiKey || ''}`,
+      },
+      body: JSON.stringify(requestBody),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const cfErrors = (errorData as { errors?: Array<{ message?: string }> }).errors;
+      const errMsg = cfErrors?.[0]?.message
+        ?? `Cloudflare Workers AI error: ${response.status} ${response.statusText}`;
+      throw new Error(errMsg);
+    }
+
+    const data = (await response.json()) as {
+      result?: { response?: string };
+      success?: boolean;
+      errors?: Array<{ message?: string }>;
+    };
+
+    if (!data.success || !data.result?.response) {
+      const cfErr = data.errors?.[0]?.message ?? 'No response from Cloudflare Workers AI';
+      throw new Error(cfErr);
+    }
+
+    return {
+      message: data.result.response,
+      model,
+    };
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if ((error as Error).name === 'AbortError') {
+      throw new Error('Request timeout');
+    }
+    throw error;
+  }
+}
+
+/**
  * Send a chat message using the specified provider
  */
 export async function sendChatMessage(
@@ -635,6 +820,8 @@ export async function sendChatMessage(
       return sendToAzureOpenAI(processedMessages, config);
     case 'ollama':
       return sendToOllama(processedMessages, config);
+    case 'cloudflare-ai':
+      return sendToCloudflareAI(processedMessages, config);
     default:
       throw new Error(`Unsupported provider: ${config.provider}`);
   }
@@ -734,6 +921,17 @@ export async function testConnection(config: ChatConfig): Promise<boolean> {
         options: { num_predict: 5 },
       });
       break;
+
+    case 'cloudflare-ai': {
+      const cfModel = config.model || CLOUDFLARE_AI_FREE_MODELS[0].id;
+      endpoint = `${CLOUDFLARE_AI_BASE_URL}/${config.cloudflareAccountId}/ai/run/${cfModel}`;
+      headers['Authorization'] = `Bearer ${config.apiKey || ''}`;
+      body = JSON.stringify({
+        messages: [{ role: 'user', content: 'test' }],
+        max_tokens: 5,
+      });
+      break;
+    }
 
     default:
       return false;
@@ -963,6 +1161,9 @@ export async function fetchModels(provider: AIProvider, config: { apiKey?: strin
       return [DEFAULT_MODELS['azure-openai']];
     case 'ollama':
       return config.endpoint ? fetchOllamaModels(config.endpoint) : [DEFAULT_MODELS.ollama];
+    case 'cloudflare-ai':
+      // Return the static list of free-tier models (no API endpoint to list them)
+      return CLOUDFLARE_AI_FREE_MODELS;
     default:
       return [getDefaultModel(provider)];
   }

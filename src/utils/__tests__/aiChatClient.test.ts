@@ -576,12 +576,13 @@ describe('aiChatClient', () => {
 
     it('should get all default models', () => {
       const models = getAllDefaultModels();
-      expect(models.length).toBe(5);
+      expect(models.length).toBe(6);
       expect(models.some(m => m.provider === 'openai')).toBe(true);
       expect(models.some(m => m.provider === 'anthropic')).toBe(true);
       expect(models.some(m => m.provider === 'google')).toBe(true);
       expect(models.some(m => m.provider === 'azure-openai')).toBe(true);
       expect(models.some(m => m.provider === 'ollama')).toBe(true);
+      expect(models.some(m => m.provider === 'cloudflare-ai')).toBe(true);
     });
 
     it('should fetch OpenAI models', async () => {

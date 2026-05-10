@@ -9,7 +9,7 @@ import { randomUUID, createHash } from 'crypto';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type AIProvider = 'ollama' | 'openai' | 'anthropic' | 'google' | 'azure-openai';
+export type AIProvider = 'ollama' | 'openai' | 'anthropic' | 'google' | 'azure-openai' | 'cloudflare-ai';
 
 export interface AgentConfig {
   provider: AIProvider;
@@ -18,6 +18,7 @@ export interface AgentConfig {
   model?: string;
   maxIterations?: number;
   temperature?: number;
+  cloudflareAccountId?: string; // For Cloudflare Workers AI
 }
 
 export interface AgentStep {
@@ -160,7 +161,33 @@ const DEFAULT_MODELS: Record<AIProvider, string> = {
   google: 'gemini-1.5-flash',
   'azure-openai': 'gpt-35-turbo',
   ollama: 'llama2',
+  'cloudflare-ai': '@cf/meta/llama-3-8b-instruct',
 };
+
+/** Rough token estimator for Cloudflare free-tier budget enforcement */
+function estimateCfTokens(text: string): number {
+  const words = text.split(/\s+/).length;
+  const chars = text.length;
+  return Math.ceil((words * 1.3 + chars / 4) / 2);
+}
+
+/** Trim messages to fit Cloudflare Workers AI free-tier context window (~5632 input tokens) */
+function trimForCloudflare(messages: ChatMessage[]): ChatMessage[] {
+  const budget = 5632; // 6144 context - 512 max_tokens
+  const system = messages.filter(m => m.role === 'system');
+  const conv = messages.filter(m => m.role !== 'system');
+  const sysTok = system.reduce((s, m) => s + estimateCfTokens(m.content), 0);
+  const remaining = budget - sysTok;
+  const kept: ChatMessage[] = [];
+  let used = 0;
+  for (let i = conv.length - 1; i >= 0; i--) {
+    const t = estimateCfTokens(conv[i].content);
+    if (used + t > remaining && kept.length > 0) break;
+    kept.unshift(conv[i]);
+    used += t;
+  }
+  return [...system, ...kept];
+}
 
 async function callAI(messages: ChatMessage[], config: AgentConfig): Promise<string> {
   const ctrl = new AbortController();
@@ -256,6 +283,30 @@ async function callAI(messages: ChatMessage[], config: AgentConfig): Promise<str
         }
         const data = await res.json() as { message: { content: string } };
         return data.message.content;
+      }
+
+      case 'cloudflare-ai': {
+        const accountId = config.cloudflareAccountId;
+        if (!accountId) throw new Error('Cloudflare Account ID is required');
+        const model = config.model || DEFAULT_MODELS['cloudflare-ai'];
+        const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${model}`;
+        // Trim messages to fit the free-tier context window (6144 input tokens)
+        const trimmedMessages = trimForCloudflare(messages);
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.apiKey || ''}` },
+          body: JSON.stringify({ messages: trimmedMessages, max_tokens: 512 }),
+          signal: ctrl.signal,
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({})) as { errors?: Array<{ message?: string }> };
+          throw new Error(err.errors?.[0]?.message ?? `Cloudflare Workers AI error ${res.status}`);
+        }
+        const data = await res.json() as { result?: { response?: string }; success?: boolean; errors?: Array<{ message?: string }> };
+        if (!data.success || !data.result?.response) {
+          throw new Error(data.errors?.[0]?.message ?? 'No response from Cloudflare Workers AI');
+        }
+        return data.result.response;
       }
 
       default:

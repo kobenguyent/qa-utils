@@ -49,7 +49,7 @@ import {
   AutoOrchestrateEvent,
 } from '../../utils/orchestrator';
 
-const PROVIDERS: AIProvider[] = ['ollama', 'openai', 'anthropic', 'google', 'azure-openai'];
+const PROVIDERS: AIProvider[] = ['ollama', 'openai', 'anthropic', 'google', 'azure-openai', 'cloudflare-ai'];
 const ROLES: AgentRole[] = ['orchestrator', 'planner', 'researcher', 'coder', 'reviewer', 'tester', 'synthesizer', 'custom'];
 const PIPELINE_MODES: PipelineMode[] = ['sequential', 'orchestrated'];
 
@@ -81,6 +81,7 @@ const EMPTY_PROFILE_FORM: Omit<AgentProfile, 'id' | 'createdAt' | 'updatedAt'> =
   endpoint: 'http://localhost:11434',
   apiKey: '',
   model: '',
+  cloudflareAccountId: '',
   maxIterations: 10,
   temperature: 0.3,
   systemPromptOverride: '',
@@ -115,6 +116,7 @@ function ProfileRunner({ profile, onRunSaved }: RunnerProps) {
       endpoint: profile.endpoint,
       model: profile.model,
       apiKey: profile.apiKey,
+      cloudflareAccountId: profile.cloudflareAccountId,
       maxIterations: profile.maxIterations,
       temperature: profile.temperature,
     };
@@ -393,7 +395,7 @@ function PipelineRunner({ pipeline, profiles, onRunSaved }: PipelineRunnerProps)
 
 // ── Quick Orchestrate ─────────────────────────────────────────────────────────
 
-const QUICK_PROVIDERS: AIProvider[] = ['ollama', 'openai', 'anthropic', 'google', 'azure-openai'];
+const QUICK_PROVIDERS: AIProvider[] = ['ollama', 'openai', 'anthropic', 'google', 'azure-openai', 'cloudflare-ai'];
 
 const PROVIDER_DEFAULTS: Record<AIProvider, { endpoint: string; modelPlaceholder: string }> = {
   ollama:       { endpoint: 'http://localhost:11434', modelPlaceholder: 'e.g. llama3' },
@@ -401,6 +403,7 @@ const PROVIDER_DEFAULTS: Record<AIProvider, { endpoint: string; modelPlaceholder
   anthropic:    { endpoint: '',                       modelPlaceholder: 'e.g. claude-3-haiku-20240307' },
   google:       { endpoint: '',                       modelPlaceholder: 'e.g. gemini-1.5-flash' },
   'azure-openai': { endpoint: '',                     modelPlaceholder: 'e.g. gpt-4o' },
+  'cloudflare-ai': { endpoint: '',                    modelPlaceholder: 'e.g. @cf/meta/llama-3-8b-instruct' },
 };
 
 function QuickOrchestrate() {
@@ -409,6 +412,7 @@ function QuickOrchestrate() {
   const [model, setModel] = useState('');
   const [endpoint, setEndpoint] = useState('http://localhost:11434');
   const [apiKey, setApiKey] = useState('');
+  const [cloudflareAccountId, setCloudflareAccountId] = useState('');
   const [showAdvancedConfig, setShowAdvancedConfig] = useState(false);
 
   const [running, setRunning] = useState(false);
@@ -439,6 +443,7 @@ function QuickOrchestrate() {
       model: model.trim() || undefined,
       endpoint: endpoint.trim() || undefined,
       apiKey: apiKey.trim() || undefined,
+      cloudflareAccountId: provider === 'cloudflare-ai' ? cloudflareAccountId.trim() || undefined : undefined,
       maxIterations: 10,
       temperature: 0.3,
     };
@@ -475,7 +480,7 @@ function QuickOrchestrate() {
     } finally {
       setRunning(false);
     }
-  }, [task, running, provider, model, endpoint, apiKey]);
+  }, [task, running, provider, model, endpoint, apiKey, cloudflareAccountId]);
 
   const canRun = task.trim().length > 0 && !running;
 
@@ -555,10 +560,21 @@ function QuickOrchestrate() {
                     type="password"
                     value={apiKey}
                     onChange={e => setApiKey(e.target.value)}
-                    placeholder="API key (leave blank for Ollama)"
+                    placeholder="API key / token (leave blank for Ollama)"
                     disabled={running}
                   />
                 </Col>
+                {provider === 'cloudflare-ai' && (
+                  <Col xs={12}>
+                    <Form.Control
+                      size="sm"
+                      value={cloudflareAccountId}
+                      onChange={e => setCloudflareAccountId(e.target.value)}
+                      placeholder="Cloudflare Account ID (required for Cloudflare Workers AI)"
+                      disabled={running}
+                    />
+                  </Col>
+                )}
               </Row>
             </div>
           </Collapse>
@@ -668,6 +684,7 @@ function AgentsTab({ profiles, onRefresh }: AgentsTabProps) {
     setEditingProfile(p);
     setForm({ name: p.name, description: p.description, role: p.role, specialty: p.specialty ?? '',
       provider: p.provider, endpoint: p.endpoint ?? '', apiKey: p.apiKey ?? '', model: p.model ?? '',
+      cloudflareAccountId: p.cloudflareAccountId ?? '',
       maxIterations: p.maxIterations, temperature: p.temperature, systemPromptOverride: p.systemPromptOverride ?? '' });
     setShowModal(true);
   };
@@ -835,6 +852,13 @@ function AgentsTab({ profiles, onRefresh }: AgentsTabProps) {
               <Form.Control type="password" value={form.apiKey} onChange={e => setForm(f => ({ ...f, apiKey: e.target.value }))}
                 placeholder="Leave blank for Ollama" />
             </Form.Group>
+            {form.provider === 'cloudflare-ai' && (
+              <Form.Group className="mb-3">
+                <Form.Label>Cloudflare Account ID</Form.Label>
+                <Form.Control value={form.cloudflareAccountId ?? ''} onChange={e => setForm(f => ({ ...f, cloudflareAccountId: e.target.value }))}
+                  placeholder="Your Cloudflare Account ID (from dash.cloudflare.com)" />
+              </Form.Group>
+            )}
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">

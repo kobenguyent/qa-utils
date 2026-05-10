@@ -2,7 +2,8 @@
  * qautils-cli — AI Chat Client
  *
  * Sends chat messages to AI providers using Node.js native fetch (Node 18+).
- * Supports: OpenAI, Anthropic Claude, Google Gemini, Azure OpenAI, Ollama.
+ * Supports: OpenAI, Anthropic Claude, Google Gemini, Azure OpenAI, Ollama,
+ * and Cloudflare Workers AI (free tier).
  */
 
 import type { AIProviderConfig } from './aiConfig.js';
@@ -19,6 +20,46 @@ export interface ChatResponse {
 }
 
 const DEFAULT_TIMEOUT_MS = 60_000;
+
+// Cloudflare Workers AI free-tier constants
+const CLOUDFLARE_AI_BASE_URL = 'https://api.cloudflare.com/client/v4/accounts';
+const CLOUDFLARE_AI_FREE_MAX_TOKENS = 512;
+const CLOUDFLARE_AI_CONTEXT_WINDOW = 6144;
+
+/** Rough token estimator: hybrid word + character count */
+function estimateTokens(text: string): number {
+  const words = text.split(/\s+/).length;
+  const chars = text.length;
+  return Math.ceil((words * 1.3 + chars / 4) / 2);
+}
+
+/**
+ * Trim messages to fit within a token budget.
+ * Keeps system messages and the newest conversation turns.
+ */
+function trimMessagesToFitContext(messages: ChatMessage[], maxTokens: number): ChatMessage[] {
+  const systemMessages = messages.filter(m => m.role === 'system');
+  const conversationMessages = messages.filter(m => m.role !== 'system');
+
+  const systemTokens = systemMessages.reduce((sum, m) => sum + estimateTokens(m.content), 0);
+  const budget = maxTokens - systemTokens;
+
+  if (budget <= 0) {
+    const truncated = systemMessages[systemMessages.length - 1];
+    return [{ ...truncated, content: truncated.content.slice(0, maxTokens * 3) }];
+  }
+
+  const kept: ChatMessage[] = [];
+  let used = 0;
+  for (let i = conversationMessages.length - 1; i >= 0; i--) {
+    const tokens = estimateTokens(conversationMessages[i].content);
+    if (used + tokens > budget && kept.length > 0) break;
+    kept.unshift(conversationMessages[i]);
+    used += tokens;
+  }
+
+  return [...systemMessages, ...kept];
+}
 
 // ── Provider implementations ──────────────────────────────────────────────────
 
@@ -263,6 +304,62 @@ async function sendToOllama(
   }
 }
 
+async function sendToCloudflareAI(
+  messages: ChatMessage[],
+  config: AIProviderConfig,
+): Promise<ChatResponse> {
+  const accountId = config.cloudflareAccountId;
+  if (!accountId) throw new Error('Cloudflare Account ID is required');
+
+  const model = config.model || DEFAULT_MODELS['cloudflare-ai'];
+  const url = `${CLOUDFLARE_AI_BASE_URL}/${accountId}/ai/run/${model}`;
+
+  // Trim conversation to fit within the free-tier context window
+  const inputBudget = CLOUDFLARE_AI_CONTEXT_WINDOW - CLOUDFLARE_AI_FREE_MAX_TOKENS;
+  const trimmedMessages = trimMessagesToFitContext(messages, inputBudget);
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${config.apiKey || ''}`,
+      },
+      body: JSON.stringify({
+        messages: trimmedMessages,
+        max_tokens: CLOUDFLARE_AI_FREE_MAX_TOKENS,
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timer);
+
+    if (!res.ok) {
+      const err = (await res.json().catch(() => ({}))) as { errors?: Array<{ message?: string }> };
+      throw new Error(err.errors?.[0]?.message ?? `Cloudflare Workers AI error ${res.status}`);
+    }
+
+    const data = (await res.json()) as {
+      result?: { response?: string };
+      success?: boolean;
+      errors?: Array<{ message?: string }>;
+    };
+
+    if (!data.success || !data.result?.response) {
+      throw new Error(data.errors?.[0]?.message ?? 'No response from Cloudflare Workers AI');
+    }
+
+    return { message: data.result.response, model };
+  } catch (err) {
+    clearTimeout(timer);
+    if ((err as Error).name === 'AbortError') throw new Error('Request timed out');
+    throw err;
+  }
+}
+
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /**
@@ -350,6 +447,19 @@ export async function fetchModels(config: AIProviderConfig): Promise<string[]> {
         return (data.models || []).map((m) => m.name).sort();
       }
 
+      case 'cloudflare-ai': {
+        // Cloudflare Workers AI does not expose a model-list REST endpoint;
+        // return the curated list of free-tier text-generation models.
+        clearTimeout(timer);
+        return [
+          '@cf/meta/llama-3-8b-instruct',
+          '@cf/mistral/mistral-7b-instruct-v0.1',
+          '@cf/meta/llama-2-7b-chat-int8',
+          '@cf/google/gemma-7b-it',
+          '@cf/tiiuae/falcon-7b-instruct',
+        ];
+      }
+
       default:
         throw new Error(`Unsupported provider: ${(config as AIProviderConfig).provider}`);
     }
@@ -380,6 +490,8 @@ export async function sendChat(
       return sendToAzureOpenAI(messages, config);
     case 'ollama':
       return sendToOllama(messages, config);
+    case 'cloudflare-ai':
+      return sendToCloudflareAI(messages, config);
     default:
       throw new Error(`Unsupported provider: ${(config as AIProviderConfig).provider}`);
   }
