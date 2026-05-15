@@ -106,7 +106,83 @@ Visualize any API collection as an interactive tree diagram.
 
 ## 🧪 Testing Workflow
 
-### 🚀 CI/CD Workflow Generator
+### File Comparator
+
+Compare two files side-by-side — find same, similar, and different content across PDF, CSV, DOCX, XLSX, and text formats.
+
+- **Multi-format support** — PDF, DOCX, XLSX, CSV, JSON, TXT, Markdown, HTML, XML, and 30+ code/text formats
+- **Line-by-line diff** with LCS algorithm — same, added, removed, and modified classification
+- **Similarity scoring** — Levenshtein distance per-line, overall percentage
+- **Side-by-side and unified views** — toggle between diff display modes
+- **Comparison options** — ignore whitespace, case, blank lines; configurable similarity threshold
+- **Export** results as `.diff`, `.html`, or `.json`
+- **Drag & drop** file upload with format auto-detection
+- **Fullscreen modal** with zoom in/out for detailed inspection
+- Fully in-browser — no files leave your machine
+
+**Route:** `/file-comparator` &nbsp;|&nbsp; **CLI:** `qautils compare` &nbsp;|&nbsp; **API:** `POST /api/analysers/compare`
+
+#### CLI Usage
+
+```bash
+# Basic comparison
+qautils compare file1.txt file2.txt
+
+# Ignore whitespace and case differences
+qautils compare a.txt b.txt -w -i
+
+# Show stats summary only (no diff lines)
+qautils compare a.txt b.txt -f stats
+
+# JSON output (pipe-friendly)
+qautils compare a.txt b.txt -f json
+
+# Custom similarity threshold (80%)
+qautils compare a.txt b.txt -t 80
+
+# Ignore blank lines
+qautils compare a.txt b.txt -b
+```
+
+#### API Usage
+
+```bash
+curl -X POST http://localhost:3080/api/analysers/compare \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text1": "line 1\nline 2\nline 3",
+    "text2": "line 1\nline 2 modified\nline 4",
+    "ignoreWhitespace": false,
+    "ignoreCase": false,
+    "similarityThreshold": 0.6
+  }'
+```
+
+Response:
+
+```json
+{
+  "similarity": 33,
+  "stats": {
+    "totalLines": 4,
+    "sameLines": 1,
+    "addedLines": 1,
+    "removedLines": 1,
+    "modifiedLines": 1,
+    "similarityPercentage": 33
+  },
+  "diffLines": [
+    { "type": "same", "lineNumber1": 1, "lineNumber2": 1, "content": "line 1" },
+    { "type": "modified", "lineNumber1": 2, "lineNumber2": 2, "content": "line 2 modified", "oldContent": "line 2", "similarity": 80 },
+    { "type": "removed", "lineNumber1": 3, "content": "line 3" },
+    { "type": "added", "lineNumber2": 3, "content": "line 4" }
+  ]
+}
+```
+
+---
+
+### CI/CD Workflow Generator
 
 Generate production-ready CI/CD pipeline files for multiple platforms. *(Also listed under Developer Tools.)*
 

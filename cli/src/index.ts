@@ -16,7 +16,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 
 import { version as CLI_VERSION } from './version.js';
-import { runInteractive, printBanner } from './interactive.js';
+import { runInteractive, printBanner, TOOL_COUNT } from './interactive.js';
 
 import { registerUuidCommand }      from './commands/uuid.js';
 import { registerBase64Command }    from './commands/base64.js';
@@ -43,7 +43,9 @@ import { registerChatCommand }        from './commands/chat.js';
 import { registerAgentCommand }       from './commands/agent.js';
 import { registerOrchestrateCommand } from './commands/orchestrate.js';
 import { registerMarkdownCommand }    from './commands/markdown.js';
-import { registerPromptCommand }      from './commands/prompt.js';import { registerGraphqlCommand }     from './commands/graphql.js';
+import { registerPromptCommand }      from './commands/prompt.js';
+import { registerGraphqlCommand }     from './commands/graphql.js';
+import { registerCompareCommand }     from './commands/compare.js';
 // ── Program ──────────────────────────────────────────────────────────────────
 
 const program = new Command();
@@ -52,7 +54,7 @@ program
   .name('qautils')
   .description(
     chalk.bold('QA Utils CLI') +
-      chalk.dim(' — 21 utility tools for testing and automation workflows') +
+      chalk.dim(' — 24 utility tools for testing and automation workflows') +
       '\n' +
       chalk.dim('  https://github.com/kobenguyent/qa-utils'),
   )
@@ -101,6 +103,13 @@ ${chalk.bold('Data Toolkit')}:
   ${chalk.cyan('qautils sql SELECT --table users')}       Generate SELECT SQL
   ${chalk.cyan('qautils html sanitize "<p>…</p>"')}      Sanitize HTML
   ${chalk.cyan('qautils md-confluence "# Hello\\n**bold**"')} Convert Markdown to Confluence Wiki
+
+${chalk.bold('File Comparison')}:
+  ${chalk.cyan('qautils compare file1.txt file2.txt')}     Compare two text files
+  ${chalk.cyan('qautils compare a.txt b.txt -w -i')}       Ignore whitespace and case
+  ${chalk.cyan('qautils compare a.txt b.txt -f stats')}    Summary stats only
+  ${chalk.cyan('qautils compare a.txt b.txt -f json')}     JSON output
+  ${chalk.cyan('qautils compare a.txt b.txt -t 80')}       Custom similarity threshold
 
 ${chalk.bold('GraphQL')}:
   ${chalk.cyan('qautils graphql query <endpoint> <query>')}  Execute a GraphQL query
@@ -172,6 +181,8 @@ registerMarkdownCommand(program);
 registerPromptCommand(program);
 // GraphQL client
 registerGraphqlCommand(program);
+// File comparison
+registerCompareCommand(program);
 
 // ── Launch mode ───────────────────────────────────────────────────────────────
 
@@ -190,6 +201,6 @@ if (isInteractive) {
   });
 } else {
   // Direct CLI mode: parse and dispatch
-  printBanner();
+  printBanner(TOOL_COUNT);
   program.parse(process.argv);
 }

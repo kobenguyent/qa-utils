@@ -72,6 +72,7 @@ const ExploreTools = lazy(() => import('./components/ExploreTools.tsx'));
 const MarkdownToConfluence = lazy(() => import('./components/utils/MarkdownToConfluence.tsx').then(module => ({ default: module.MarkdownToConfluence })));
 // eslint-disable-next-line react-refresh/only-export-components
 const JsonPromptBuilder = lazy(() => import('./components/utils/JsonPromptBuilder.tsx').then(module => ({ default: module.JsonPromptBuilder })));
+const FileComparator = lazy(() => import('./components/utils/FileComparator.tsx').then(module => ({ default: module.FileComparator })));
 
 // Component wrapper with suspense for lazy loaded routes
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -338,6 +339,10 @@ const router = createHashRouter([
   {
     path: 'json-prompt-builder',
     element: <RouteWrapper><JsonPromptBuilder /></RouteWrapper>
+  },
+  {
+    path: 'file-comparator',
+    element: <RouteWrapper><FileComparator /></RouteWrapper>
   },
 ]);
 

@@ -40,7 +40,7 @@ const swaggerOptions: swaggerJsdoc.Options = {
     tags: [
       { name: 'Generators', description: 'Generate UUIDs, passwords, NanoIDs, lorem ipsum, random strings' },
       { name: 'Converters', description: 'Base64, URL, hash, color, timestamp, base and case converters' },
-      { name: 'Analysers', description: 'Text stats, email validation, JWT decoding, regex testing' },
+      { name: 'Analysers', description: 'Text stats, email validation, JWT decoding, regex testing, text comparison' },
       { name: 'Formatters', description: 'JSON formatting, HTML sanitization, SQL generation' },
       { name: 'Agents', description: 'Autonomous AI agent — run multi-step tasks with built-in tools' },
       { name: 'GraphQL', description: 'Proxy GraphQL queries, mutations and introspection to any endpoint' },

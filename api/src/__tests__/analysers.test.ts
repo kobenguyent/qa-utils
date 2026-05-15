@@ -105,3 +105,50 @@ describe('POST /api/analysers/regex', () => {
     expect(res.status).toBe(400);
   });
 });
+
+// ── compare ──────────────────────────────────────────────────────────────────
+
+describe('POST /api/analysers/compare', () => {
+  it('returns 100% similarity for identical texts', async () => {
+    const res = await post('/api/analysers/compare', {
+      text1: 'line 1\nline 2',
+      text2: 'line 1\nline 2',
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.similarity).toBe(100);
+    expect(res.body.stats.sameLines).toBe(2);
+    expect(res.body.stats.addedLines).toBe(0);
+    expect(res.body.stats.removedLines).toBe(0);
+  });
+
+  it('detects differences between texts', async () => {
+    const res = await post('/api/analysers/compare', {
+      text1: 'hello\nworld',
+      text2: 'hello\nearth',
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.stats.sameLines).toBe(1);
+    expect(res.body.diffLines).toBeInstanceOf(Array);
+    expect(res.body.diffLines.length).toBeGreaterThan(0);
+  });
+
+  it('respects ignoreCase option', async () => {
+    const res = await post('/api/analysers/compare', {
+      text1: 'Hello',
+      text2: 'hello',
+      ignoreCase: true,
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.similarity).toBe(100);
+  });
+
+  it('respects ignoreWhitespace option', async () => {
+    const res = await post('/api/analysers/compare', {
+      text1: 'hello   world',
+      text2: 'hello world',
+      ignoreWhitespace: true,
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.similarity).toBe(100);
+  });
+});

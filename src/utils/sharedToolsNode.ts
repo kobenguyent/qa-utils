@@ -49,6 +49,11 @@ export type {
   BuildJsonPromptResult,
   ParseJsonPromptResult,
   ValidatePromptResult,
+  // Text Comparison
+  TextComparisonOptions,
+  TextDiffLine,
+  TextComparisonStats,
+  TextComparisonResult,
 } from './sharedTools.js';
 
 export {
@@ -77,6 +82,8 @@ export {
   validatePromptTemplate,
   buildJsonPrompt,
   parseJsonPrompt,
+  // Text Comparison
+  compareTexts,
 } from './sharedTools.js';
 
 // ---------------------------------------------------------------------------

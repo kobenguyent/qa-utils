@@ -530,6 +530,21 @@ export const navigationConfig: NavItem[] = [
     navGroups: ['Tools'],
   },
   {
+    title: 'File Comparator',
+    description:
+      'Compare two files side-by-side — find same, similar, and different content across PDF, CSV, DOCX, XLSX, and more',
+    path: '#/file-comparator',
+    category: 'Testing Tools',
+    keywords: [
+      'file', 'compare', 'comparator', 'diff', 'difference', 'similar',
+      'same', 'pdf', 'csv', 'docx', 'xlsx', 'text', 'side-by-side',
+      'merge', 'changes', 'version', 'delta',
+    ],
+    icon: '🔍',
+    navGroups: ['Tools'],
+    navLabel: 'File Comparator',
+  },
+  {
     title: 'Encryption/Decryption',
     description: 'Encrypt and decrypt text with various algorithms',
     path: '#/encryption',

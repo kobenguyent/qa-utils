@@ -18,6 +18,7 @@ import {
   convertCase, generateNanoId, HASH_ALGORITHMS, CASE_TYPES,
   convertMarkdownToConfluence,
   buildJsonPrompt, parseJsonPrompt, extractTemplateVariables,
+  compareTexts,
   type HashAlgorithm, type SqlOperation, type CaseType,
   type PromptProviderFormat, type JsonPromptTemplate,
 } from './lib/tools.js';
@@ -813,12 +814,65 @@ async function runMarkdownToConfluence(): Promise<string | null> {
   return result;
 }
 
+// ── File Comparator ───────────────────────────────────────────────────────────
+async function runCompare(): Promise<string | null> {
+  const text1 = await input({ message: 'Paste text 1 (first file content):' });
+  if (!text1.trim()) { console.log(T.dim('\n  No input provided.\n')); return null; }
+  const text2 = await input({ message: 'Paste text 2 (second file content):' });
+  if (!text2.trim()) { console.log(T.dim('\n  No input provided.\n')); return null; }
+
+  const ignoreWs = await select<boolean>({
+    message: 'Ignore whitespace?',
+    choices: [{ name: 'No', value: false }, { name: 'Yes', value: true }],
+  });
+  const ignoreCase = await select<boolean>({
+    message: 'Ignore case?',
+    choices: [{ name: 'No', value: false }, { name: 'Yes', value: true }],
+  });
+
+  const sp = spin('Comparing…').start();
+  const result = compareTexts(text1, text2, {
+    ignoreWhitespace: ignoreWs,
+    ignoreCase,
+    similarityThreshold: 0.6,
+  });
+  sp.stop();
+
+  const simColor = result.similarity >= 80 ? T.success : result.similarity >= 50 ? T.warn : T.error;
+  resultBox('File Comparison', [
+    `${T.label('Similarity'.padEnd(14))} ${simColor(`${result.similarity}%`)}`,
+    `${T.label('Same'.padEnd(14))} ${T.value(String(result.stats.sameLines))}`,
+    `${T.label('Added'.padEnd(14))} ${chalk.green(String(result.stats.addedLines))}`,
+    `${T.label('Removed'.padEnd(14))} ${chalk.red(String(result.stats.removedLines))}`,
+    `${T.label('Modified'.padEnd(14))} ${chalk.yellow(String(result.stats.modifiedLines))}`,
+    `${T.label('Total'.padEnd(14))} ${T.value(String(result.stats.totalLines))}`,
+  ]);
+
+  // Show first 30 diff lines
+  const preview = result.diffLines.slice(0, 30);
+  for (const line of preview) {
+    if (line.type === 'same')    console.log(chalk.gray(`    ${line.content}`));
+    if (line.type === 'added')   console.log(chalk.green(`  + ${line.content}`));
+    if (line.type === 'removed') console.log(chalk.red(`  - ${line.content}`));
+    if (line.type === 'modified') {
+      console.log(chalk.red(`  - ${line.oldContent}`));
+      console.log(chalk.green(`  + ${line.content}`));
+    }
+  }
+  if (result.diffLines.length > 30) {
+    console.log(T.dim(`\n  … and ${result.diffLines.length - 30} more lines`));
+  }
+  console.log();
+  cliTip('compare file1.txt file2.txt');
+  return JSON.stringify(result.stats);
+}
+
 // ── Tool registry ─────────────────────────────────────────────────────────────
 type ToolKey =
   | 'uuid' | 'base64' | 'jwt' | 'hash' | 'password' | 'timestamp'
   | 'json' | 'lorem' | 'text' | 'email' | 'sql' | 'color' | 'html'
   | 'random' | 'url' | 'regex' | 'base' | 'case' | 'nanoid' | 'chat'
-  | 'orchestrate' | 'mdconfluence' | 'jsonprompt';
+  | 'orchestrate' | 'mdconfluence' | 'jsonprompt' | 'compare';
 
 const TOOLS: Record<ToolKey, { label: string; run: () => Promise<string | null> }> = {
   uuid:         { label: 'UUID Generator',            run: runUuid                },
@@ -844,9 +898,10 @@ const TOOLS: Record<ToolKey, { label: string; run: () => Promise<string | null> 
   jsonprompt:   { label: 'JSON Prompt Builder',         run: runJsonPromptBuilder   },
   chat:         { label: 'Kobean AI Chat',             run: runChat                },
   orchestrate:  { label: 'AI Orchestrator',            run: runOrchestrate         },
+  compare:      { label: 'File Comparator',             run: runCompare             },
 };
 
-const TOOL_COUNT = Object.keys(TOOLS).length;
+export const TOOL_COUNT = Object.keys(TOOLS).length;
 
 // ── Session history ───────────────────────────────────────────────────────────
 const sessionHistory: ToolKey[] = [];
@@ -894,6 +949,8 @@ async function showMainMenu(): Promise<ToolKey | 'exit'> {
   choices.push(item('🌐', 'HTML Sanitizer',            'html',         'Strip <script> tags and inline event handlers'));
   choices.push(item('📝', 'MD → Confluence Wiki',      'mdconfluence', 'Convert Markdown to Confluence Wiki markup'));
   choices.push(item('🧩', 'JSON Prompt Builder',       'jsonprompt',   'Build structured AI prompts (OpenAI, Anthropic, Gemini, generic)'));
+  choices.push(new Separator(T.dim('  ── Analysers ───────────────────────────────────── ')));
+  choices.push(item('🔍', 'File Comparator',            'compare',      'Compare two texts — same, similar, different lines'));
   choices.push(new Separator(T.dim('  ── AI ─────────────────────────────────────────── ')));
   choices.push(item('🤖', 'Kobean AI Chat',       'chat',        'Interactive AI chat (OpenAI, Anthropic, Gemini, Ollama…)'));
   choices.push(item('🧩', 'AI Orchestrator',      'orchestrate', 'Multi-agent pipeline — describe a task and let the AI team handle it'));

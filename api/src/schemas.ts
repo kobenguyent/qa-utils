@@ -110,6 +110,17 @@ export const MarkdownToConfluenceSchema = z.object({
   markdown: z.string().min(1, 'markdown is required'),
 });
 
+// ── Text Comparison ──────────────────────────────────────────────────────
+
+export const TextCompareSchema = z.object({
+  text1: z.string().min(0, 'text1 is required'),
+  text2: z.string().min(0, 'text2 is required'),
+  ignoreWhitespace: z.coerce.boolean().default(false),
+  ignoreCase: z.coerce.boolean().default(false),
+  ignoreBlankLines: z.coerce.boolean().default(false),
+  similarityThreshold: z.coerce.number().min(0).max(1).default(0.6),
+});
+
 // ── Data ──────────────────────────────────────────────────────────────────────
 
 export const SqlGenerateSchema = z.object({
