@@ -73,6 +73,8 @@ const MarkdownToConfluence = lazy(() => import('./components/utils/MarkdownToCon
 // eslint-disable-next-line react-refresh/only-export-components
 const JsonPromptBuilder = lazy(() => import('./components/utils/JsonPromptBuilder.tsx').then(module => ({ default: module.JsonPromptBuilder })));
 const FileComparator = lazy(() => import('./components/utils/FileComparator.tsx').then(module => ({ default: module.FileComparator })));
+// eslint-disable-next-line react-refresh/only-export-components
+const LogCollector = lazy(() => import('./components/utils/LogCollector.tsx').then(module => ({ default: module.LogCollector })));
 
 // Component wrapper with suspense for lazy loaded routes
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -343,6 +345,10 @@ const router = createHashRouter([
   {
     path: 'file-comparator',
     element: <RouteWrapper><FileComparator /></RouteWrapper>
+  },
+  {
+    path: 'log-collector',
+    element: <RouteWrapper><LogCollector /></RouteWrapper>
   },
 ]);
 
