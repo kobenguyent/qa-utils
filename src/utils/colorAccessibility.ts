@@ -8,8 +8,9 @@ const maxCacheSize = 1000;
 export const getCachedConversion = (input: ColorInput): ColorFormats => {
   const key = JSON.stringify(input);
   
-  if (conversionCache.has(key)) {
-    return conversionCache.get(key)!;
+  const cached = conversionCache.get(key);
+  if (cached) {
+    return cached;
   }
   
   const result = convertColor(input);

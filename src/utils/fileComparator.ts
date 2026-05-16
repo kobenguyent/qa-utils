@@ -224,6 +224,10 @@ function parseCSVRows(text: string): string[][] {
   return rows;
 }
 
+function isPdfTextItem(item: unknown): item is { str: string } {
+  return typeof item === 'object' && item !== null && 'str' in item && typeof item.str === 'string';
+}
+
 export async function extractTextFromPDF(file: File): Promise<string[]> {
   try {
     const pdfjsLib = await import('pdfjs-dist');
@@ -239,9 +243,8 @@ export async function extractTextFromPDF(file: File): Promise<string[]> {
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const textContent = await page.getTextContent();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const pageText = textContent.items
-        .map((item: any) => (item && typeof item.str === 'string' ? item.str : ''))
+        .map((item: unknown) => (isPdfTextItem(item) ? item.str : ''))
         .join('');
       const pageLines = pageText.split('\n').filter((l: string) => l.trim() !== '');
       if (pageLines.length > 0) {
