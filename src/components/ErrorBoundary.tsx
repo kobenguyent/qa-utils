@@ -1,5 +1,6 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { Alert, Container, Button } from 'react-bootstrap';
+import { recordLog } from '../utils/logCollector';
 
 interface Props {
   children: ReactNode;
@@ -21,6 +22,12 @@ export class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+    recordLog({
+      level: 'error',
+      message: `${error.name}: ${error.message}`,
+      source: 'ErrorBoundary',
+      stack: error.stack,
+    });
   }
 
   private handleReset = () => {
