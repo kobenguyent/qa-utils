@@ -106,21 +106,21 @@ export const LogCollector: React.FC = () => {
     setLogs([]);
   }, []);
 
+  const makeExportTimestamp = () => new Date().toISOString().replace(/[:.]/g, '-');
+
   const handleExportText = useCallback(() => {
-    const ts = new Date().toISOString().replace(/[:.]/g, '-');
-    downloadFile(exportLogsAsText(filtered), `qa-utils-logs-${ts}.txt`, 'text/plain');
+    downloadFile(exportLogsAsText(filtered), `qa-utils-logs-${makeExportTimestamp()}.txt`, 'text/plain');
   }, [filtered]);
 
   const handleExportJson = useCallback(() => {
-    const ts = new Date().toISOString().replace(/[:.]/g, '-');
-    downloadFile(exportLogsAsJson(filtered), `qa-utils-logs-${ts}.json`, 'application/json');
+    downloadFile(exportLogsAsJson(filtered), `qa-utils-logs-${makeExportTimestamp()}.json`, 'application/json');
   }, [filtered]);
 
   return (
     <Container className="tool-page">
       {/* ── Header ── */}
       <div className="tool-header animate-fade-in-up">
-        <div className="tool-header-icon">📋</div>
+        <div className="tool-header-icon">📝</div>
         <div className="tool-header-content">
           <h1 className="tool-header-title mb-0">Log Collector</h1>
           <p className="tool-header-desc mt-1">

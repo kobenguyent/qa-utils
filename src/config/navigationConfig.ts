@@ -584,7 +584,7 @@ export const navigationConfig: NavItem[] = [
     path: '#/log-collector',
     category: 'Developer Tools',
     keywords: ['log', 'collector', 'logs', 'error', 'debug', 'console', 'export', 'report', 'bug', 'issue', 'github', 'diagnostics'],
-    icon: '📋',
+    icon: '📝',
     navGroups: ['Tools'],
     navLabel: 'Log Collector',
   },

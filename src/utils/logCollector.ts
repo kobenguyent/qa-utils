@@ -38,7 +38,7 @@ function _notify(): void {
 }
 
 function _makeId(): string {
-  return `log-${Date.now()}-${++_idCounter}`;
+  return `log-${++_idCounter}`;
 }
 
 function _addEntry(entry: Omit<LogEntry, 'id' | 'timestamp'>): void {
