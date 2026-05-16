@@ -1,5 +1,24 @@
 // ─── Interfaces ──────────────────────────────────────────────────────────────
 
+type PromiseResolver<T> = (value: T | PromiseLike<T>) => void;
+type PromiseRejecter = (reason?: unknown) => void;
+
+interface PdfPromiseWithResolvers<T> {
+  promise: Promise<T>;
+  resolve: PromiseResolver<T>;
+  reject: PromiseRejecter;
+}
+
+declare global {
+  interface PromiseConstructor {
+    withResolvers?<T>(): PdfPromiseWithResolvers<T>;
+  }
+
+  interface Response {
+    bytes?(): Promise<Uint8Array>;
+  }
+}
+
 export interface ComparisonOptions {
   ignoreWhitespace: boolean;
   ignoreCase: boolean;
@@ -228,8 +247,48 @@ function isPdfTextItem(item: unknown): item is { str: string } {
   return typeof item === 'object' && item !== null && 'str' in item && typeof item.str === 'string';
 }
 
+export function ensurePdfJsRuntimeCompatibility(): void {
+  if (typeof Promise.withResolvers !== 'function') {
+    Object.defineProperty(Promise, 'withResolvers', {
+      configurable: true,
+      writable: true,
+      value: <T>(): PdfPromiseWithResolvers<T> => {
+        let resolvePromise: PromiseResolver<T> | undefined;
+        let rejectPromise: PromiseRejecter | undefined;
+
+        const promise = new Promise<T>((resolve, reject) => {
+          resolvePromise = resolve;
+          rejectPromise = reject;
+        });
+
+        if (!resolvePromise || !rejectPromise) {
+          throw new Error('Unable to create Promise capability');
+        }
+
+        return {
+          promise,
+          resolve: resolvePromise,
+          reject: rejectPromise,
+        };
+      },
+    });
+  }
+
+  if (typeof Response !== 'undefined' && typeof Response.prototype.bytes !== 'function') {
+    Object.defineProperty(Response.prototype, 'bytes', {
+      configurable: true,
+      writable: true,
+      value: async function bytes(this: Response): Promise<Uint8Array> {
+        return new Uint8Array(await this.arrayBuffer());
+      },
+    });
+  }
+}
+
 export async function extractTextFromPDF(file: File): Promise<string[]> {
   try {
+    ensurePdfJsRuntimeCompatibility();
+
     const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
     pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
       'pdfjs-dist/legacy/build/pdf.worker.min.mjs',
@@ -238,7 +297,8 @@ export async function extractTextFromPDF(file: File): Promise<string[]> {
 
     const arrayBuffer = await readFileAsArrayBuffer(file);
     const pdfData = new Uint8Array(arrayBuffer);
-    const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+    const documentParams = { data: pdfData, disableWorker: true };
+    const pdf = await pdfjsLib.getDocument(documentParams).promise;
     const lines: string[] = [];
 
     for (let i = 1; i <= pdf.numPages; i++) {

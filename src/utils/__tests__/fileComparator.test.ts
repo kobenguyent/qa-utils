@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   detectFormat,
   getSupportedExtensions,
@@ -6,6 +6,7 @@ import {
   extractTextFromJSON,
   extractTextFromCSV,
   extractTextFromPDF,
+  ensurePdfJsRuntimeCompatibility,
   computeLCS,
   levenshteinDistance,
   computeLineSimilarity,
@@ -176,6 +177,23 @@ describe('extractTextFromCSV', () => {
 });
 
 describe('extractTextFromPDF', () => {
+  const promiseWithResolversDescriptor = Object.getOwnPropertyDescriptor(Promise, 'withResolvers');
+  const responseBytesDescriptor = Object.getOwnPropertyDescriptor(Response.prototype, 'bytes');
+
+  afterEach(() => {
+    if (promiseWithResolversDescriptor) {
+      Object.defineProperty(Promise, 'withResolvers', promiseWithResolversDescriptor);
+    } else {
+      delete (Promise as PromiseConstructor & { withResolvers?: unknown }).withResolvers;
+    }
+
+    if (responseBytesDescriptor) {
+      Object.defineProperty(Response.prototype, 'bytes', responseBytesDescriptor);
+    } else {
+      delete (Response.prototype as Response & { bytes?: unknown }).bytes;
+    }
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     pdfMocks.getTextContent.mockResolvedValue({ items: [{ str: 'hello pdf' }] });
@@ -185,14 +203,60 @@ describe('extractTextFromPDF', () => {
     });
   });
 
-  it('should pass Uint8Array data to PDF.js getDocument', async () => {
+  it('should install Promise.withResolvers when missing', async () => {
+    delete (Promise as PromiseConstructor & { withResolvers?: unknown }).withResolvers;
+
+    ensurePdfJsRuntimeCompatibility();
+
+    const capability = Promise.withResolvers<string>();
+    capability.resolve('ready');
+    await expect(capability.promise).resolves.toBe('ready');
+  });
+
+  it('should install Response.bytes when missing', async () => {
+    delete (Response.prototype as Response & { bytes?: unknown }).bytes;
+
+    ensurePdfJsRuntimeCompatibility();
+
+    const bytes = await new Response('pdf').bytes();
+    expect(bytes).toBeInstanceOf(Uint8Array);
+    expect(Array.from(bytes)).toEqual([112, 100, 102]);
+  });
+
+  it('should not overwrite native compatibility APIs', () => {
+    const existingWithResolvers = vi.fn(() => ({
+      promise: Promise.resolve('native'),
+      resolve: vi.fn(),
+      reject: vi.fn(),
+    }));
+    const existingBytes = vi.fn(async () => new Uint8Array([1, 2, 3]));
+
+    Object.defineProperty(Promise, 'withResolvers', {
+      configurable: true,
+      writable: true,
+      value: existingWithResolvers,
+    });
+    Object.defineProperty(Response.prototype, 'bytes', {
+      configurable: true,
+      writable: true,
+      value: existingBytes,
+    });
+
+    ensurePdfJsRuntimeCompatibility();
+
+    expect(Promise.withResolvers).toBe(existingWithResolvers);
+    expect(Response.prototype.bytes).toBe(existingBytes);
+  });
+
+  it('should pass Uint8Array data and disable workers for PDF.js getDocument', async () => {
     const file = createFile('%PDF-1.4', 'test.pdf', 'application/pdf');
     const lines = await extractTextFromPDF(file);
 
     expect(lines).toEqual(['hello pdf']);
     expect(pdfMocks.getDocument).toHaveBeenCalledTimes(1);
-    const firstArg = pdfMocks.getDocument.mock.calls[0][0] as { data?: unknown };
+    const firstArg = pdfMocks.getDocument.mock.calls[0][0] as { data?: unknown; disableWorker?: unknown };
     expect(firstArg.data).toBeInstanceOf(Uint8Array);
+    expect(firstArg.disableWorker).toBe(true);
   });
 });
 
