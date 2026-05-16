@@ -23,6 +23,7 @@ const pdfMocks = vi.hoisted(() => ({
   getDocument: vi.fn(),
   getPage: vi.fn(),
   getTextContent: vi.fn(),
+  streamTextContent: vi.fn(),
 }));
 
 vi.mock('pdfjs-dist/legacy/build/pdf.mjs', () => ({
@@ -223,8 +224,21 @@ describe('extractTextFromPDF', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    pdfMocks.getTextContent.mockResolvedValue({ items: [{ str: 'hello pdf' }] });
-    pdfMocks.getPage.mockResolvedValue({ getTextContent: pdfMocks.getTextContent });
+    pdfMocks.streamTextContent.mockReturnValue(new ReadableStream({
+      start(controller) {
+        controller.enqueue({
+          items: [{ str: 'hello pdf' }],
+          styles: {},
+          lang: null,
+        });
+        controller.close();
+      },
+    }));
+    pdfMocks.getTextContent.mockRejectedValue(new TypeError("undefined is not a function (near '...value of readableStream...')"));
+    pdfMocks.getPage.mockResolvedValue({
+      getTextContent: pdfMocks.getTextContent,
+      streamTextContent: pdfMocks.streamTextContent,
+    });
     pdfMocks.GlobalWorkerOptions.workerSrc = '';
     pdfMocks.getDocument.mockReturnValue({
       promise: Promise.resolve({ numPages: 1, getPage: pdfMocks.getPage }),
@@ -307,6 +321,15 @@ describe('extractTextFromPDF', () => {
     const firstArg = pdfMocks.getDocument.mock.calls[0][0] as { data?: unknown };
     expect(firstArg.data).toBeInstanceOf(Uint8Array);
     expect(pdfMocks.GlobalWorkerOptions.workerSrc).toContain('pdfjs-dist/legacy/build/pdf.worker.min.mjs');
+  });
+
+  it('should read PDF text via stream reader instead of ReadableStream async iteration', async () => {
+    const file = createFile('%PDF-1.4', 'test.pdf', 'application/pdf');
+
+    await expect(extractTextFromPDF(file)).resolves.toEqual(['hello pdf']);
+
+    expect(pdfMocks.streamTextContent).toHaveBeenCalledTimes(1);
+    expect(pdfMocks.getTextContent).not.toHaveBeenCalled();
   });
 });
 

@@ -251,6 +251,40 @@ function isPdfTextItem(item: unknown): item is { str: string } {
   return typeof item === 'object' && item !== null && 'str' in item && typeof item.str === 'string';
 }
 
+interface PdfTextContentChunk {
+  items?: unknown[];
+}
+
+interface PdfPageProxyLike {
+  streamTextContent?: (params?: { includeMarkedContent?: boolean; disableNormalization?: boolean }) => ReadableStream<PdfTextContentChunk>;
+  getTextContent?: () => Promise<{ items?: unknown[] }>;
+}
+
+async function readPdfTextItems(page: PdfPageProxyLike): Promise<unknown[]> {
+  if (typeof page.streamTextContent === 'function') {
+    const reader = page.streamTextContent().getReader();
+    const items: unknown[] = [];
+
+    try {
+      let chunk = await reader.read();
+      while (!chunk.done) {
+        const { value } = chunk;
+        if (value?.items) {
+          items.push(...value.items);
+        }
+        chunk = await reader.read();
+      }
+    } finally {
+      reader.releaseLock();
+    }
+
+    return items;
+  }
+
+  const textContent = await page.getTextContent?.();
+  return textContent?.items ?? [];
+}
+
 export function ensurePdfJsRuntimeCompatibility(): void {
   if (typeof Promise.withResolvers !== 'function') {
     Object.defineProperty(Promise, 'withResolvers', {
@@ -350,8 +384,8 @@ export async function extractTextFromPDF(file: File): Promise<string[]> {
 
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
-      const textContent = await page.getTextContent();
-      const pageText = textContent.items
+      const textItems = await readPdfTextItems(page);
+      const pageText = textItems
         .map((item: unknown) => (isPdfTextItem(item) ? item.str : ''))
         .join('');
       const pageLines = pageText.split('\n').filter((l: string) => l.trim() !== '');
