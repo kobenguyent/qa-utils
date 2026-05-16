@@ -578,6 +578,16 @@ export const navigationConfig: NavItem[] = [
     icon: '📋',
     navGroups: ['Tools'],
   },
+  {
+    title: 'Log Collector',
+    description: 'View, filter, and export captured application logs to diagnose errors and create GitHub bug reports',
+    path: '#/log-collector',
+    category: 'Developer Tools',
+    keywords: ['log', 'collector', 'logs', 'error', 'debug', 'console', 'export', 'report', 'bug', 'issue', 'github', 'diagnostics'],
+    icon: '📝',
+    navGroups: [],
+    navLabel: 'Log Collector',
+  },
 
   // ── Learn ─────────────────────────────────────────────────────────────────
   {
