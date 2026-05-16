@@ -230,9 +230,9 @@ function isPdfTextItem(item: unknown): item is { str: string } {
 
 export async function extractTextFromPDF(file: File): Promise<string[]> {
   try {
-    const pdfjsLib = await import('pdfjs-dist');
+    const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
     pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-      'pdfjs-dist/build/pdf.worker.min.mjs',
+      'pdfjs-dist/legacy/build/pdf.worker.min.mjs',
       import.meta.url
     ).href;
 

@@ -23,7 +23,7 @@ const pdfMocks = vi.hoisted(() => ({
   getTextContent: vi.fn(),
 }));
 
-vi.mock('pdfjs-dist', () => ({
+vi.mock('pdfjs-dist/legacy/build/pdf.mjs', () => ({
   GlobalWorkerOptions: { workerSrc: '' },
   getDocument: pdfMocks.getDocument,
 }));
