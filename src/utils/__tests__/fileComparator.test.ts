@@ -1,10 +1,11 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   detectFormat,
   getSupportedExtensions,
   extractTextFromPlain,
   extractTextFromJSON,
   extractTextFromCSV,
+  extractTextFromPDF,
   computeLCS,
   levenshteinDistance,
   computeLineSimilarity,
@@ -15,6 +16,17 @@ import {
   DEFAULT_COMPARISON_OPTIONS,
   ComparisonOptions,
 } from '../fileComparator';
+
+const pdfMocks = vi.hoisted(() => ({
+  getDocument: vi.fn(),
+  getPage: vi.fn(),
+  getTextContent: vi.fn(),
+}));
+
+vi.mock('pdfjs-dist', () => ({
+  GlobalWorkerOptions: { workerSrc: '' },
+  getDocument: pdfMocks.getDocument,
+}));
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -160,6 +172,27 @@ describe('extractTextFromCSV', () => {
     const file = createFile('', 'empty.csv');
     const lines = await extractTextFromCSV(file);
     expect(lines).toHaveLength(0);
+  });
+});
+
+describe('extractTextFromPDF', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    pdfMocks.getTextContent.mockResolvedValue({ items: [{ str: 'hello pdf' }] });
+    pdfMocks.getPage.mockResolvedValue({ getTextContent: pdfMocks.getTextContent });
+    pdfMocks.getDocument.mockReturnValue({
+      promise: Promise.resolve({ numPages: 1, getPage: pdfMocks.getPage }),
+    });
+  });
+
+  it('should pass Uint8Array data to PDF.js getDocument', async () => {
+    const file = createFile('%PDF-1.4', 'test.pdf', 'application/pdf');
+    const lines = await extractTextFromPDF(file);
+
+    expect(lines).toEqual(['hello pdf']);
+    expect(pdfMocks.getDocument).toHaveBeenCalledTimes(1);
+    const firstArg = pdfMocks.getDocument.mock.calls[0][0] as { data?: unknown };
+    expect(firstArg.data).toBeInstanceOf(Uint8Array);
   });
 });
 

@@ -237,7 +237,8 @@ export async function extractTextFromPDF(file: File): Promise<string[]> {
     ).href;
 
     const arrayBuffer = await readFileAsArrayBuffer(file);
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const pdfData = new Uint8Array(arrayBuffer);
+    const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
     const lines: string[] = [];
 
     for (let i = 1; i <= pdf.numPages; i++) {

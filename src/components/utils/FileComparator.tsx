@@ -184,6 +184,7 @@ export const FileComparator: React.FC = () => {
                   <input
                     ref={file1Ref}
                     type="file"
+                    accept={supportedExts}
                     style={{ display: 'none' }}
                     onChange={(e) => {
                       if (e.target.files?.[0]) {
@@ -232,6 +233,7 @@ export const FileComparator: React.FC = () => {
                   <input
                     ref={file2Ref}
                     type="file"
+                    accept={supportedExts}
                     style={{ display: 'none' }}
                     onChange={(e) => {
                       if (e.target.files?.[0]) {
