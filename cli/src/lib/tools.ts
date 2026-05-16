@@ -61,6 +61,8 @@ export {
   validatePromptTemplate,
   buildJsonPrompt,
   parseJsonPrompt,
+  // Text Comparison
+  compareTexts,
 } from '../../../src/utils/sharedToolsNode.js';
 
 // GraphQL
@@ -108,4 +110,9 @@ export type {
   BuildJsonPromptResult,
   ParseJsonPromptResult,
   ValidatePromptResult,
+  // Text Comparison
+  TextComparisonOptions,
+  TextDiffLine,
+  TextComparisonStats,
+  TextComparisonResult,
 } from '../../../src/utils/sharedToolsNode.js';

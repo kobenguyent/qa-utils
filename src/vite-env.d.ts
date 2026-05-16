@@ -1,6 +1,10 @@
 /// <reference types="vite/client" />
 declare const __COMMIT_HASH__: string;
 
+declare module 'pdfjs-dist/legacy/build/pdf.worker.mjs' {
+  export const WorkerMessageHandler: unknown;
+}
+
 // Web Speech API types (not present in all TypeScript DOM lib versions)
 interface SpeechRecognitionResult {
   readonly isFinal: boolean;
