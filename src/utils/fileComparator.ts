@@ -297,8 +297,7 @@ export async function extractTextFromPDF(file: File): Promise<string[]> {
 
     const arrayBuffer = await readFileAsArrayBuffer(file);
     const pdfData = new Uint8Array(arrayBuffer);
-    const documentParams = { data: pdfData, disableWorker: true };
-    const pdf = await pdfjsLib.getDocument(documentParams).promise;
+    const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
     const lines: string[] = [];
 
     for (let i = 1; i <= pdf.numPages; i++) {

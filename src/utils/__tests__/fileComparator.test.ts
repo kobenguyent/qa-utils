@@ -19,13 +19,14 @@ import {
 } from '../fileComparator';
 
 const pdfMocks = vi.hoisted(() => ({
+  GlobalWorkerOptions: { workerSrc: '' },
   getDocument: vi.fn(),
   getPage: vi.fn(),
   getTextContent: vi.fn(),
 }));
 
 vi.mock('pdfjs-dist/legacy/build/pdf.mjs', () => ({
-  GlobalWorkerOptions: { workerSrc: '' },
+  GlobalWorkerOptions: pdfMocks.GlobalWorkerOptions,
   getDocument: pdfMocks.getDocument,
 }));
 
@@ -198,6 +199,7 @@ describe('extractTextFromPDF', () => {
     vi.clearAllMocks();
     pdfMocks.getTextContent.mockResolvedValue({ items: [{ str: 'hello pdf' }] });
     pdfMocks.getPage.mockResolvedValue({ getTextContent: pdfMocks.getTextContent });
+    pdfMocks.GlobalWorkerOptions.workerSrc = '';
     pdfMocks.getDocument.mockReturnValue({
       promise: Promise.resolve({ numPages: 1, getPage: pdfMocks.getPage }),
     });
@@ -248,15 +250,15 @@ describe('extractTextFromPDF', () => {
     expect(Response.prototype.bytes).toBe(existingBytes);
   });
 
-  it('should pass Uint8Array data and disable workers for PDF.js getDocument', async () => {
+  it('should pass Uint8Array data and configure the matching legacy worker', async () => {
     const file = createFile('%PDF-1.4', 'test.pdf', 'application/pdf');
     const lines = await extractTextFromPDF(file);
 
     expect(lines).toEqual(['hello pdf']);
     expect(pdfMocks.getDocument).toHaveBeenCalledTimes(1);
-    const firstArg = pdfMocks.getDocument.mock.calls[0][0] as { data?: unknown; disableWorker?: unknown };
+    const firstArg = pdfMocks.getDocument.mock.calls[0][0] as { data?: unknown };
     expect(firstArg.data).toBeInstanceOf(Uint8Array);
-    expect(firstArg.disableWorker).toBe(true);
+    expect(pdfMocks.GlobalWorkerOptions.workerSrc).toContain('pdfjs-dist/legacy/build/pdf.worker.min.mjs');
   });
 });
 
