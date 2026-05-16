@@ -30,6 +30,10 @@ vi.mock('pdfjs-dist/legacy/build/pdf.mjs', () => ({
   getDocument: pdfMocks.getDocument,
 }));
 
+vi.mock('pdfjs-dist/legacy/build/pdf.worker.mjs', () => ({
+  WorkerMessageHandler: {},
+}));
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function createFile(content: string, name: string, type = 'text/plain'): File {
@@ -179,6 +183,10 @@ describe('extractTextFromCSV', () => {
 
 describe('extractTextFromPDF', () => {
   const promiseWithResolversDescriptor = Object.getOwnPropertyDescriptor(Promise, 'withResolvers');
+  const promiseTryDescriptor = Object.getOwnPropertyDescriptor(Promise, 'try');
+  const arrayAtDescriptor = Object.getOwnPropertyDescriptor(Array.prototype, 'at');
+  const typedArrayPrototype = Object.getPrototypeOf(Uint8Array.prototype) as { at?: unknown };
+  const typedArrayAtDescriptor = Object.getOwnPropertyDescriptor(typedArrayPrototype, 'at');
   const responseBytesDescriptor = Object.getOwnPropertyDescriptor(Response.prototype, 'bytes');
 
   afterEach(() => {
@@ -186,6 +194,24 @@ describe('extractTextFromPDF', () => {
       Object.defineProperty(Promise, 'withResolvers', promiseWithResolversDescriptor);
     } else {
       delete (Promise as PromiseConstructor & { withResolvers?: unknown }).withResolvers;
+    }
+
+    if (promiseTryDescriptor) {
+      Object.defineProperty(Promise, 'try', promiseTryDescriptor);
+    } else {
+      delete (Promise as PromiseConstructor & { try?: unknown }).try;
+    }
+
+    if (arrayAtDescriptor) {
+      Object.defineProperty(Array.prototype, 'at', arrayAtDescriptor);
+    } else {
+      delete (Array.prototype as unknown as { at?: unknown }).at;
+    }
+
+    if (typedArrayAtDescriptor) {
+      Object.defineProperty(typedArrayPrototype, 'at', typedArrayAtDescriptor);
+    } else {
+      delete typedArrayPrototype.at;
     }
 
     if (responseBytesDescriptor) {
@@ -213,6 +239,28 @@ describe('extractTextFromPDF', () => {
     const capability = Promise.withResolvers<string>();
     capability.resolve('ready');
     await expect(capability.promise).resolves.toBe('ready');
+  });
+
+  it('should install Promise.try when missing', async () => {
+    delete (Promise as PromiseConstructor & { try?: unknown }).try;
+
+    ensurePdfJsRuntimeCompatibility();
+
+    await expect(Promise.try(() => 'ready')).resolves.toBe('ready');
+    await expect(Promise.try((value: string) => value, 'arg')).resolves.toBe('arg');
+    await expect(Promise.try(() => {
+      throw new Error('boom');
+    })).rejects.toThrow('boom');
+  });
+
+  it('should install Array.at and typed-array at when missing', () => {
+    delete (Array.prototype as unknown as { at?: unknown }).at;
+    delete typedArrayPrototype.at;
+
+    ensurePdfJsRuntimeCompatibility();
+
+    expect(['a', 'b', 'c'].at(-1)).toBe('c');
+    expect(new Uint8Array([1, 2, 3]).at(-2)).toBe(2);
   });
 
   it('should install Response.bytes when missing', async () => {

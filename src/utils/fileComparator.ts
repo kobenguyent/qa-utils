@@ -12,6 +12,10 @@ interface PdfPromiseWithResolvers<T> {
 declare global {
   interface PromiseConstructor {
     withResolvers?<T>(): PdfPromiseWithResolvers<T>;
+    try?<T, Args extends unknown[]>(
+      callback: (...args: Args) => T | PromiseLike<T>,
+      ...args: Args
+    ): Promise<T>;
   }
 
   interface Response {
@@ -274,6 +278,48 @@ export function ensurePdfJsRuntimeCompatibility(): void {
     });
   }
 
+  if (typeof Promise.try !== 'function') {
+    Object.defineProperty(Promise, 'try', {
+      configurable: true,
+      writable: true,
+      value: <T, Args extends unknown[]>(
+        callback: (...args: Args) => T | PromiseLike<T>,
+        ...args: Args
+      ): Promise<T> => new Promise<T>((resolve) => {
+        resolve(callback(...args));
+      }),
+    });
+  }
+
+  if (typeof Array.prototype.at !== 'function') {
+    Object.defineProperty(Array.prototype, 'at', {
+      configurable: true,
+      writable: true,
+      value: function at<T>(this: ArrayLike<T>, index: number): T | undefined {
+        const length = this.length >>> 0;
+        const relativeIndex = Math.trunc(index) || 0;
+        const actualIndex = relativeIndex >= 0 ? relativeIndex : length + relativeIndex;
+        return actualIndex >= 0 && actualIndex < length ? this[actualIndex] : undefined;
+      },
+    });
+  }
+
+  const typedArrayPrototype = Object.getPrototypeOf(Uint8Array.prototype) as {
+    at?: (index: number) => unknown;
+  };
+  if (typedArrayPrototype && typeof typedArrayPrototype.at !== 'function') {
+    Object.defineProperty(typedArrayPrototype, 'at', {
+      configurable: true,
+      writable: true,
+      value: function at(this: ArrayLike<unknown>, index: number): unknown {
+        const length = this.length >>> 0;
+        const relativeIndex = Math.trunc(index) || 0;
+        const actualIndex = relativeIndex >= 0 ? relativeIndex : length + relativeIndex;
+        return actualIndex >= 0 && actualIndex < length ? this[actualIndex] : undefined;
+      },
+    });
+  }
+
   if (typeof Response !== 'undefined' && typeof Response.prototype.bytes !== 'function') {
     Object.defineProperty(Response.prototype, 'bytes', {
       configurable: true,
@@ -294,6 +340,8 @@ export async function extractTextFromPDF(file: File): Promise<string[]> {
       'pdfjs-dist/legacy/build/pdf.worker.min.mjs',
       import.meta.url
     ).href;
+
+    await import('pdfjs-dist/legacy/build/pdf.worker.mjs');
 
     const arrayBuffer = await readFileAsArrayBuffer(file);
     const pdfData = new Uint8Array(arrayBuffer);
