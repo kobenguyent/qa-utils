@@ -50,6 +50,7 @@ export function AgentMode() {
   const [endpoint] = useSessionStorage<string>('aiChat_endpoint', 'http://localhost:11434');
   const [model] = useSessionStorage<string>('aiChat_model', '');
   const [cloudflareAccountId] = useSessionStorage<string>('aiChat_cloudflareAccountId', '');
+  const [cloudflareGatewayId] = useSessionStorage<string>('aiChat_cloudflareGatewayId', '');
   const [obfuscateSensitiveData, setObfuscateSensitiveData] = useSessionStorage<boolean>('aiChat_obfuscateSensitiveData', false);
 
   // Advanced settings
@@ -82,6 +83,7 @@ export function AgentMode() {
       temperature: 0.3,
       obfuscateSensitiveData,
       cloudflareAccountId: provider === 'cloudflare-ai' ? cloudflareAccountId : undefined,
+      cloudflareGatewayId: provider === 'cloudflare-ai' && cloudflareGatewayId ? cloudflareGatewayId : undefined,
     };
 
     try {
@@ -100,7 +102,7 @@ export function AgentMode() {
     } finally {
       setRunning(false);
     }
-  }, [task, running, provider, endpoint, model, apiKey, cloudflareAccountId, maxIterations, obfuscateSensitiveData, scrollToBottom]);
+  }, [task, running, provider, endpoint, model, apiKey, cloudflareAccountId, cloudflareGatewayId, maxIterations, obfuscateSensitiveData, scrollToBottom]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
