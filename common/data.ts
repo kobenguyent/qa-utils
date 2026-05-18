@@ -10,5 +10,3 @@ export const corsHeaders = {
     "Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
     "Access-Control-Max-Age": "86400",
 };
-
-AI_BASE_URL.ANTHROPIC_AI_BASE_URL
