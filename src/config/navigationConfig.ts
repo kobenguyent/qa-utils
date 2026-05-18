@@ -530,6 +530,21 @@ export const navigationConfig: NavItem[] = [
     navGroups: ['Tools'],
   },
   {
+    title: 'File Comparator',
+    description:
+      'Compare two files side-by-side — find same, similar, and different content across PDF, CSV, DOCX, XLSX, and more',
+    path: '#/file-comparator',
+    category: 'Testing Tools',
+    keywords: [
+      'file', 'compare', 'comparator', 'diff', 'difference', 'similar',
+      'same', 'pdf', 'csv', 'docx', 'xlsx', 'text', 'side-by-side',
+      'merge', 'changes', 'version', 'delta',
+    ],
+    icon: '🔍',
+    navGroups: ['Tools'],
+    navLabel: 'File Comparator',
+  },
+  {
     title: 'Encryption/Decryption',
     description: 'Encrypt and decrypt text with various algorithms',
     path: '#/encryption',
@@ -577,6 +592,16 @@ export const navigationConfig: NavItem[] = [
     keywords: ['kanban', 'board', 'task', 'project', 'management', 'todo', 'agile', 'scrum', 'drag', 'drop', 'cards', 'columns'],
     icon: '📋',
     navGroups: ['Tools'],
+  },
+  {
+    title: 'Log Collector',
+    description: 'View, filter, and export captured application logs to diagnose errors and create GitHub bug reports',
+    path: '#/log-collector',
+    category: 'Developer Tools',
+    keywords: ['log', 'collector', 'logs', 'error', 'debug', 'console', 'export', 'report', 'bug', 'issue', 'github', 'diagnostics'],
+    icon: '📝',
+    navGroups: [],
+    navLabel: 'Log Collector',
   },
 
   // ── Learn ─────────────────────────────────────────────────────────────────

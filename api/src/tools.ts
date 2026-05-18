@@ -55,6 +55,8 @@ export {
   CASE_TYPES,
   // Markdown
   convertMarkdownToConfluence,
+  // Text Comparison
+  compareTexts,
 } from '../../src/utils/sharedToolsNode';
 
 export type {
@@ -75,4 +77,7 @@ export type {
   RegexTestResult,
   BaseConversionResult,
   CaseType,
+  // Text Comparison
+  TextComparisonOptions,
+  TextComparisonResult,
 } from '../../src/utils/sharedToolsNode';

@@ -26,8 +26,12 @@ export const ExploreTools: React.FC = () => {
     const map = new Map<string, typeof tools>();
     for (const tool of tools) {
       const cat = tool.category;
-      if (!map.has(cat)) map.set(cat, []);
-      map.get(cat)!.push(tool);
+      const existing = map.get(cat);
+      if (existing) {
+        existing.push(tool);
+      } else {
+        map.set(cat, [tool]);
+      }
     }
     return map;
   }, [tools]);

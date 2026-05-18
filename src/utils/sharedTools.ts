@@ -1117,3 +1117,182 @@ export function parseJsonPrompt(json: string): ParseJsonPromptResult {
     template: { model, temperature, maxTokens, messages },
   };
 }
+
+// ---------------------------------------------------------------------------
+// Text Comparison (platform-agnostic — no browser / Node-specific APIs)
+// ---------------------------------------------------------------------------
+
+export interface TextComparisonOptions {
+  ignoreWhitespace?: boolean;
+  ignoreCase?: boolean;
+  ignoreBlankLines?: boolean;
+  similarityThreshold?: number;
+}
+
+export interface TextDiffLine {
+  type: 'same' | 'added' | 'removed' | 'modified';
+  lineNumber1?: number;
+  lineNumber2?: number;
+  content: string;
+  oldContent?: string;
+  similarity?: number;
+}
+
+export interface TextComparisonStats {
+  totalLines: number;
+  sameLines: number;
+  addedLines: number;
+  removedLines: number;
+  modifiedLines: number;
+  similarityPercentage: number;
+}
+
+export interface TextComparisonResult {
+  diffLines: TextDiffLine[];
+  stats: TextComparisonStats;
+  similarity: number;
+}
+
+/**
+ * Compute the Levenshtein edit distance between two strings.
+ */
+function levenshtein(a: string, b: string): number {
+  const m = a.length;
+  const n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  let prev = Array.from({ length: n + 1 }, (_, i) => i);
+  let curr = new Array<number>(n + 1);
+  for (let i = 1; i <= m; i++) {
+    curr[0] = i;
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      curr[j] = Math.min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost);
+    }
+    [prev, curr] = [curr, prev];
+  }
+  return prev[n];
+}
+
+function lineSimilarity(a: string, b: string): number {
+  if (a === b) return 1;
+  const maxLen = Math.max(a.length, b.length);
+  if (maxLen === 0) return 1;
+  return 1 - levenshtein(a, b) / maxLen;
+}
+
+/**
+ * Compare two text strings line-by-line and return a structured diff.
+ *
+ * This is the platform-agnostic core used by the CLI `compare` command,
+ * the REST API `/api/analysers/compare` endpoint, and the MCP server.
+ */
+export function compareTexts(
+  text1: string,
+  text2: string,
+  options: TextComparisonOptions = {},
+): TextComparisonResult {
+  const {
+    ignoreWhitespace = false,
+    ignoreCase = false,
+    ignoreBlankLines = false,
+    similarityThreshold = 0.6,
+  } = options;
+
+  const normalize = (s: string): string => {
+    let r = s;
+    if (ignoreWhitespace) r = r.replace(/\s+/g, ' ').trim();
+    if (ignoreCase) r = r.toLowerCase();
+    return r;
+  };
+
+  let linesA = text1.split('\n');
+  let linesB = text2.split('\n');
+
+  if (ignoreBlankLines) {
+    linesA = linesA.filter(l => l.trim() !== '');
+    linesB = linesB.filter(l => l.trim() !== '');
+  }
+
+  const m = linesA.length;
+  const n = linesB.length;
+
+  // LCS table
+  const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (normalize(linesA[i - 1]) === normalize(linesB[j - 1])) {
+        dp[i][j] = dp[i - 1][j - 1] + 1;
+      } else {
+        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+  }
+
+  // Backtrack
+  const rawDiff: Array<{ type: 'same' | 'removed' | 'added'; iA: number; iB: number }> = [];
+  let i = m, j = n;
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && normalize(linesA[i - 1]) === normalize(linesB[j - 1])) {
+      rawDiff.unshift({ type: 'same', iA: i - 1, iB: j - 1 });
+      i--; j--;
+    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+      rawDiff.unshift({ type: 'added', iA: -1, iB: j - 1 });
+      j--;
+    } else {
+      rawDiff.unshift({ type: 'removed', iA: i - 1, iB: -1 });
+      i--;
+    }
+  }
+
+  // Post-process: merge adjacent removed+added into 'modified' when similar
+  const diffLines: TextDiffLine[] = [];
+  let idx = 0;
+  while (idx < rawDiff.length) {
+    const e = rawDiff[idx];
+    if (e.type === 'removed' && idx + 1 < rawDiff.length && rawDiff[idx + 1].type === 'added') {
+      const oldLine = linesA[e.iA];
+      const newLine = linesB[rawDiff[idx + 1].iB];
+      const sim = lineSimilarity(normalize(oldLine), normalize(newLine));
+      if (sim >= similarityThreshold) {
+        diffLines.push({
+          type: 'modified',
+          lineNumber1: e.iA + 1,
+          lineNumber2: rawDiff[idx + 1].iB + 1,
+          content: newLine,
+          oldContent: oldLine,
+          similarity: Math.round(sim * 100),
+        });
+        idx += 2;
+        continue;
+      }
+    }
+    if (e.type === 'same') {
+      diffLines.push({ type: 'same', lineNumber1: e.iA + 1, lineNumber2: e.iB + 1, content: linesA[e.iA] });
+    } else if (e.type === 'removed') {
+      diffLines.push({ type: 'removed', lineNumber1: e.iA + 1, content: linesA[e.iA] });
+    } else {
+      diffLines.push({ type: 'added', lineNumber2: e.iB + 1, content: linesB[e.iB] });
+    }
+    idx++;
+  }
+
+  // Stats
+  const sameLines = diffLines.filter(d => d.type === 'same').length;
+  const addedLines = diffLines.filter(d => d.type === 'added').length;
+  const removedLines = diffLines.filter(d => d.type === 'removed').length;
+  const modifiedEntries = diffLines.filter(d => d.type === 'modified');
+  const modifiedLines = modifiedEntries.length;
+  const totalLines = diffLines.length;
+  const modSimSum = modifiedEntries.reduce((s, d) => s + (d.similarity || 0) / 100, 0);
+  const effectiveSame = sameLines + modSimSum;
+  const similarityPercentage = totalLines > 0
+    ? Math.min(100, Math.max(0, Math.round((effectiveSame / totalLines) * 100)))
+    : (text1 === text2 ? 100 : 0);
+
+  return {
+    diffLines,
+    stats: { totalLines, sameLines, addedLines, removedLines, modifiedLines, similarityPercentage },
+    similarity: similarityPercentage,
+  };
+}

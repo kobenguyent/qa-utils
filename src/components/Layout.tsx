@@ -6,6 +6,7 @@ import { trackPageView } from '../utils/umami.ts';
 import { ErrorBoundary } from './ErrorBoundary.tsx';
 import { CommandPalette } from './CommandPalette.tsx';
 import { KobeanWidget } from './KobeanWidget.tsx';
+import { LogCollectorWidget } from './LogCollectorWidget.tsx';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -62,6 +63,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         onHide={() => setShowCommandPalette(false)}
       />
       <KobeanWidget />
+      <LogCollectorWidget />
     </ErrorBoundary>
   );
 };
