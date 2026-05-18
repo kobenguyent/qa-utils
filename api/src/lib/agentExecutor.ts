@@ -290,6 +290,11 @@ async function callAI(messages: ChatMessage[], config: AgentConfig): Promise<str
       }
 
       case 'cloudflare-ai': {
+        const corsHeaders = {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
+          "Access-Control-Max-Age": "86400",
+        };
         const accountId = config.cloudflareAccountId;
         if (!accountId) throw new Error('Cloudflare Account ID is required');
         const model = config.model || DEFAULT_MODELS['cloudflare-ai'];
@@ -298,7 +303,7 @@ async function callAI(messages: ChatMessage[], config: AgentConfig): Promise<str
         const trimmedMessages = trimForCloudflare(messages);
         const res = await fetch(url, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.apiKey || ''}` },
+          headers: { ...corsHeaders, 'Content-Type': 'application/json', Authorization: `Bearer ${config.apiKey || ''}` },
           body: JSON.stringify({ messages: trimmedMessages, max_tokens: CF_MAX_OUTPUT_TOKENS }),
           signal: ctrl.signal,
         });
