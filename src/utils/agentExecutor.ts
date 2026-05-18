@@ -29,13 +29,14 @@ export interface AgentStep {
 }
 
 export interface AgentConfig {
-  provider: 'ollama' | 'openai' | 'anthropic' | 'google' | 'azure-openai';
+  provider: 'ollama' | 'openai' | 'anthropic' | 'google' | 'azure-openai' | 'cloudflare-ai';
   endpoint?: string;
   model?: string;
   apiKey?: string;
   maxIterations?: number;
   temperature?: number;
   obfuscateSensitiveData?: boolean;
+  cloudflareAccountId?: string; // For Cloudflare Workers AI
 }
 
 export interface AgentRunResult {
@@ -163,6 +164,7 @@ export async function runAgent(
     temperature: config.temperature ?? 0.3,
     maxTokens: 2048,
     obfuscateSensitiveData: config.obfuscateSensitiveData,
+    cloudflareAccountId: config.cloudflareAccountId,
   };
 
   for (let i = 0; i < maxIter; i++) {
