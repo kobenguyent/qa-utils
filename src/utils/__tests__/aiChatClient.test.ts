@@ -14,6 +14,7 @@ import {
   optimizeMessages,
   getSystemPrompt,
   enhanceMessagesWithSystemPrompt,
+  buildCloudflareUrl,
   ChatConfig,
   ChatMessage,
 } from '../aiChatClient';
@@ -944,6 +945,37 @@ describe('aiChatClient', () => {
       const enhanced = enhanceMessagesWithSystemPrompt(messages);
       expect(enhanced.length).toBe(1);
       expect(enhanced[0].role).toBe('user');
+    });
+  });
+
+  describe('buildCloudflareUrl', () => {
+    const accountId = 'acct123';
+    const model = '@cf/meta/llama-3-8b-instruct';
+
+    it('should build a direct URL when no gatewayId is provided', () => {
+      const url = buildCloudflareUrl(accountId, model);
+      expect(url).toBe(
+        `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${model}`,
+      );
+    });
+
+    it('should build an AI Gateway URL when gatewayId is provided', () => {
+      const url = buildCloudflareUrl(accountId, model, 'my-gateway');
+      expect(url).toBe(
+        `https://gateway.ai.cloudflare.com/v1/${accountId}/my-gateway/workers-ai/${model}`,
+      );
+    });
+
+    it('should use direct URL when gatewayId is undefined', () => {
+      const url = buildCloudflareUrl(accountId, model, undefined);
+      expect(url).toContain('api.cloudflare.com');
+      expect(url).not.toContain('gateway.ai.cloudflare.com');
+    });
+
+    it('should use AI Gateway URL when gatewayId is provided for a different model', () => {
+      const url = buildCloudflareUrl(accountId, '@cf/mistral/mistral-7b-instruct-v0.1', 'gw-id');
+      expect(url).toContain('gateway.ai.cloudflare.com');
+      expect(url).toContain('@cf/mistral/mistral-7b-instruct-v0.1');
     });
   });
 });
