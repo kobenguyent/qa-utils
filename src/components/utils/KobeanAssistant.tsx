@@ -823,7 +823,7 @@ export function KobeanAssistant() {
                               disabled={loading}
                             />
                             <Form.Text className="text-muted">
-                              Cloudflare&apos;s REST API blocks browser requests with a{' '}
+                              Cloudflare's REST API blocks browser requests with a{' '}
                               <strong>405 on OPTIONS (CORS preflight)</strong>. Use an{' '}
                               <a href="https://developers.cloudflare.com/ai-gateway/get-started/" target="_blank" rel="noopener noreferrer">
                                 AI Gateway
