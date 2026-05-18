@@ -6,6 +6,7 @@
  */
 
 import { obfuscateMessages } from './dataObfuscator';
+import {AI_BASE_URL, corsHeaders} from "../../common/data.ts";
 
 export type AIProvider = 'openai' | 'anthropic' | 'google' | 'azure-openai' | 'ollama' | 'cloudflare-ai';
 
@@ -68,7 +69,6 @@ const DEFAULT_GEMINI_CONTEXT_WINDOW = 32768; // Default context window for Gemin
 // Free tier grants 10,000 neurons/day. A "neuron" is Cloudflare's billing unit for inference
 // (roughly equivalent to processing one token). See:
 // https://developers.cloudflare.com/workers-ai/platform/pricing/
-export const CLOUDFLARE_AI_BASE_URL = 'https://api.cloudflare.com/client/v4/accounts';
 export const CLOUDFLARE_AI_FREE_MAX_TOKENS = 512;
 // Context window for free-tier models (conservative estimate to avoid overruns)
 export const CLOUDFLARE_AI_CONTEXT_WINDOW = 6144;
@@ -448,7 +448,7 @@ async function sendToAnthropic(
 ): Promise<ChatResponse> {
   const apiKey = config.apiKey;
   const model = config.model || 'claude-3-sonnet-20240229';
-  const endpoint = config.endpoint || 'https://api.anthropic.com/v1/messages';
+  const endpoint = config.endpoint || `${AI_BASE_URL.ANTHROPIC_AI_BASE_URL}/messages`;
 
   // Anthropic requires separating system messages
   const systemMessages = messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
@@ -709,7 +709,7 @@ async function sendToCloudflareAI(
   if (!accountId) throw new Error('Cloudflare Account ID is required');
 
   const model = config.model || CLOUDFLARE_AI_FREE_MODELS[0].id;
-  const url = `${CLOUDFLARE_AI_BASE_URL}/${accountId}/ai/run/${model}`;
+  const url = `${AI_BASE_URL.CLOUDFLARE_AI_BASE_URL}/${accountId}/ai/run/${model}`;
 
   // Determine context budget: use configured window or conservative default
   const contextBudget = config.contextWindow ?? CLOUDFLARE_AI_CONTEXT_WINDOW;
@@ -848,7 +848,7 @@ export async function testConnection(config: ChatConfig): Promise<boolean> {
   // Make a direct HTTP request to check connectivity
   // We only care about HTTP status (2xx = success), not response format
   let endpoint = '';
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const headers: Record<string, string> = { ...corsHeaders, 'Content-Type': 'application/json' };
   let body = '';
 
   switch (config.provider) {
@@ -863,7 +863,7 @@ export async function testConnection(config: ChatConfig): Promise<boolean> {
       break;
 
     case 'anthropic':
-      endpoint = config.endpoint || 'https://api.anthropic.com/v1/messages';
+      endpoint = config.endpoint || `${AI_BASE_URL.ANTHROPIC_AI_BASE_URL}/messages`;
       headers['x-api-key'] = config.apiKey || '';
       headers['anthropic-version'] = '2023-06-01';
       body = JSON.stringify({
@@ -927,7 +927,7 @@ export async function testConnection(config: ChatConfig): Promise<boolean> {
 
     case 'cloudflare-ai': {
       const cfModel = config.model || CLOUDFLARE_AI_FREE_MODELS[0].id;
-      endpoint = `${CLOUDFLARE_AI_BASE_URL}/${config.cloudflareAccountId}/ai/run/${cfModel}`;
+      endpoint = `${AI_BASE_URL.CLOUDFLARE_AI_BASE_URL}/${config.cloudflareAccountId}/ai/run/${cfModel}`;
       headers['Authorization'] = `Bearer ${config.apiKey || ''}`;
       body = JSON.stringify({
         messages: [{ role: 'user', content: 'test' }],

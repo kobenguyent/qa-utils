@@ -6,6 +6,7 @@
  */
 
 import { randomUUID, createHash } from 'crypto';
+import {AI_BASE_URL} from "../../../common/data";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -220,7 +221,7 @@ async function callAI(messages: ChatMessage[], config: AgentConfig): Promise<str
         const model = config.model || DEFAULT_MODELS.anthropic;
         const systemMsg = messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
         const convMsgs = messages.filter(m => m.role !== 'system');
-        const res = await fetch(config.endpoint || 'https://api.anthropic.com/v1/messages', {
+        const res = await fetch(config.endpoint || `${AI_BASE_URL.ANTHROPIC_AI_BASE_URL}/messages`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-api-key': config.apiKey || '', 'anthropic-version': '2023-06-01' },
           body: JSON.stringify({ model, messages: convMsgs, max_tokens: 4096, temperature: config.temperature ?? 0.3, ...(systemMsg ? { system: systemMsg } : {}) }),
@@ -298,7 +299,7 @@ async function callAI(messages: ChatMessage[], config: AgentConfig): Promise<str
         const accountId = config.cloudflareAccountId;
         if (!accountId) throw new Error('Cloudflare Account ID is required');
         const model = config.model || DEFAULT_MODELS['cloudflare-ai'];
-        const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${model}`;
+        const url = `${AI_BASE_URL.CLOUDFLARE_AI_BASE_URL}/client/v4/accounts/${accountId}/ai/run/${model}`;
         // Trim messages to fit the free-tier input budget (CF_INPUT_BUDGET tokens)
         const trimmedMessages = trimForCloudflare(messages);
         const res = await fetch(url, {

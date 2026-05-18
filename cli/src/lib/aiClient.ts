@@ -8,6 +8,7 @@
 
 import type { AIProviderConfig } from './aiConfig.js';
 import { DEFAULT_MODELS } from './aiConfig.js';
+import {AI_BASE_URL} from "../../../common/data.js";
 
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
@@ -22,7 +23,6 @@ export interface ChatResponse {
 const DEFAULT_TIMEOUT_MS = 60_000;
 
 // Cloudflare Workers AI free-tier constants
-const CLOUDFLARE_AI_BASE_URL = 'https://api.cloudflare.com/client/v4/accounts';
 const CLOUDFLARE_AI_FREE_MAX_TOKENS = 512;
 const CLOUDFLARE_AI_CONTEXT_WINDOW = 6144;
 
@@ -114,7 +114,7 @@ async function sendToAnthropic(
   config: AIProviderConfig,
 ): Promise<ChatResponse> {
   const model = config.model || DEFAULT_MODELS['anthropic'];
-  const endpoint = config.endpoint || 'https://api.anthropic.com/v1/messages';
+  const endpoint = config.endpoint || `${AI_BASE_URL.ANTHROPIC_AI_BASE_URL}/messages`;
 
   const systemMessages = messages.filter((m) => m.role === 'system').map((m) => m.content).join('\n');
   const conversationMessages = messages.filter((m) => m.role !== 'system');
@@ -312,7 +312,7 @@ async function sendToCloudflareAI(
   if (!accountId) throw new Error('Cloudflare Account ID is required');
 
   const model = config.model || DEFAULT_MODELS['cloudflare-ai'];
-  const url = `${CLOUDFLARE_AI_BASE_URL}/${accountId}/ai/run/${model}`;
+  const url = `${AI_BASE_URL.CLOUDFLARE_AI_BASE_URL}/${accountId}/ai/run/${model}`;
 
   // Trim conversation to fit within the free-tier context window
   const inputBudget = CLOUDFLARE_AI_CONTEXT_WINDOW - CLOUDFLARE_AI_FREE_MAX_TOKENS;

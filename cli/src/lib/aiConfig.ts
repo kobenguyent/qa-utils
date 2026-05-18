@@ -9,6 +9,7 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import {AI_BASE_URL} from "../../../common/data.js";
 
 export type AIProvider = 'openai' | 'anthropic' | 'google' | 'azure-openai' | 'ollama' | 'cloudflare-ai';
 
@@ -82,7 +83,7 @@ export const DEFAULT_MODELS: Record<AIProvider, string> = {
 /** Default endpoints per provider (where applicable) */
 export const DEFAULT_ENDPOINTS: Partial<Record<AIProvider, string>> = {
   openai: 'https://api.openai.com/v1/chat/completions',
-  anthropic: 'https://api.anthropic.com/v1/messages',
+  anthropic: `${AI_BASE_URL.ANTHROPIC_AI_BASE_URL}/messages`,
   google: 'https://generativelanguage.googleapis.com/v1beta',
   ollama: 'http://localhost:11434',
 };
