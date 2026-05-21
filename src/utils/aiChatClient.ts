@@ -6,7 +6,7 @@
  */
 
 import { obfuscateMessages } from './dataObfuscator';
-import {AI_BASE_URL, corsHeaders} from "../../common/data.ts";
+import {AI_BASE_URL} from "../../common/data.ts";
 
 export type AIProvider = 'openai' | 'anthropic' | 'google' | 'azure-openai' | 'ollama' | 'cloudflare-ai';
 
@@ -26,6 +26,7 @@ export interface ChatConfig {
   contextWindow?: number; // Support for large context windows
   azureApiVersion?: string; // For Azure OpenAI
   cloudflareAccountId?: string; // For Cloudflare Workers AI
+  cloudflareGatewayId?: string; // For Cloudflare AI Gateway (CORS-friendly, recommended for browser use)
   optimizeTokens?: boolean; // Enable token optimization
   systemPrompt?: string; // Custom system prompt for guidance
   obfuscateSensitiveData?: boolean; // Replace sensitive values with placeholders before sending
@@ -688,11 +689,31 @@ async function sendToAzureOpenAI(
 }
 
 /**
+ * Build the Cloudflare AI endpoint URL.
+ *
+ * When a Gateway ID is provided the request is routed through Cloudflare AI Gateway,
+ * which supports CORS and is therefore the recommended path for browser-based access.
+ * Without a Gateway ID the request goes directly to api.cloudflare.com, which is
+ * fine from server-side runtimes (Node.js, Electron, CLI) but will be blocked by
+ * browser CORS preflight because that endpoint does not respond to OPTIONS requests.
+ *
+ * Direct:  POST https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/run/{model}
+ * Gateway: POST https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/workers-ai/{model}
+ */
+export function buildCloudflareUrl(accountId: string, model: string, gatewayId?: string): string {
+  if (gatewayId) {
+    return `${AI_BASE_URL.CLOUDFLARE_AI_GATEWAY_BASE_URL}/${accountId}/${gatewayId}/workers-ai/${model}`;
+  }
+  return `${AI_BASE_URL.CLOUDFLARE_AI_BASE_URL}/${accountId}/ai/run/${model}`;
+}
+
+/**
  * Send a chat message to Cloudflare Workers AI (free tier).
  *
  * API docs: https://developers.cloudflare.com/workers-ai/get-started/rest-api/
  *
- * Endpoint: POST https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/run/{model}
+ * Direct endpoint:   POST https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/run/{model}
+ * Gateway endpoint:  POST https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/workers-ai/{model}
  * Auth:     Bearer <api_token>
  * Body:     { messages: [...] }   (OpenAI-compatible chat format)
  * Response: { result: { response: string }, success: boolean }
@@ -700,6 +721,10 @@ async function sendToAzureOpenAI(
  * Token optimization is applied automatically to stay within free-tier limits:
  * - Messages are trimmed to fit the model's context window.
  * - max_tokens is capped at CLOUDFLARE_AI_FREE_MAX_TOKENS (512) by default.
+ *
+ * Note: Browsers must use Cloudflare AI Gateway (cloudflareGatewayId in config) to avoid
+ * CORS preflight failures. The direct api.cloudflare.com endpoint returns 405 for OPTIONS
+ * requests, which blocks browser fetch calls.
  */
 async function sendToCloudflareAI(
   messages: ChatMessage[],
@@ -709,7 +734,7 @@ async function sendToCloudflareAI(
   if (!accountId) throw new Error('Cloudflare Account ID is required');
 
   const model = config.model || CLOUDFLARE_AI_FREE_MODELS[0].id;
-  const url = `${AI_BASE_URL.CLOUDFLARE_AI_BASE_URL}/${accountId}/ai/run/${model}`;
+  const url = buildCloudflareUrl(accountId, model, config.cloudflareGatewayId);
 
   // Determine context budget: use configured window or conservative default
   const contextBudget = config.contextWindow ?? CLOUDFLARE_AI_CONTEXT_WINDOW;
@@ -774,6 +799,17 @@ async function sendToCloudflareAI(
     clearTimeout(timeoutId);
     if ((error as Error).name === 'AbortError') {
       throw new Error('Request timeout');
+    }
+    // A TypeError typically means the request was blocked before reaching the server.
+    // In browsers this most commonly happens due to a CORS preflight (OPTIONS) rejection:
+    // api.cloudflare.com returns 405 for OPTIONS requests, blocking browser fetch calls.
+    // Configure a Cloudflare AI Gateway (set Gateway ID in provider settings) to fix this.
+    if (error instanceof TypeError) {
+      throw new Error(
+        'Request failed — this is likely a CORS error. ' +
+        'The Cloudflare REST API does not support browser-based cross-origin requests. ' +
+        'To fix this, create a Cloudflare AI Gateway and enter your Gateway ID in the provider settings.'
+      );
     }
     throw error;
   }
@@ -848,7 +884,7 @@ export async function testConnection(config: ChatConfig): Promise<boolean> {
   // Make a direct HTTP request to check connectivity
   // We only care about HTTP status (2xx = success), not response format
   let endpoint = '';
-  const headers: Record<string, string> = { ...corsHeaders, 'Content-Type': 'application/json' };
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   let body = '';
 
   switch (config.provider) {
@@ -927,7 +963,7 @@ export async function testConnection(config: ChatConfig): Promise<boolean> {
 
     case 'cloudflare-ai': {
       const cfModel = config.model || CLOUDFLARE_AI_FREE_MODELS[0].id;
-      endpoint = `${AI_BASE_URL.CLOUDFLARE_AI_BASE_URL}/${config.cloudflareAccountId}/ai/run/${cfModel}`;
+      endpoint = buildCloudflareUrl(config.cloudflareAccountId!, cfModel, config.cloudflareGatewayId);
       headers['Authorization'] = `Bearer ${config.apiKey || ''}`;
       body = JSON.stringify({
         messages: [{ role: 'user', content: 'test' }],

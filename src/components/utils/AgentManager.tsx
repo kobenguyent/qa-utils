@@ -82,6 +82,7 @@ const EMPTY_PROFILE_FORM: Omit<AgentProfile, 'id' | 'createdAt' | 'updatedAt'> =
   apiKey: '',
   model: '',
   cloudflareAccountId: '',
+  cloudflareGatewayId: '',
   maxIterations: 10,
   temperature: 0.3,
   systemPromptOverride: '',
@@ -117,6 +118,7 @@ function ProfileRunner({ profile, onRunSaved }: RunnerProps) {
       model: profile.model,
       apiKey: profile.apiKey,
       cloudflareAccountId: profile.cloudflareAccountId,
+      cloudflareGatewayId: profile.cloudflareGatewayId,
       maxIterations: profile.maxIterations,
       temperature: profile.temperature,
     };
@@ -413,6 +415,7 @@ function QuickOrchestrate() {
   const [endpoint, setEndpoint] = useState('http://localhost:11434');
   const [apiKey, setApiKey] = useState('');
   const [cloudflareAccountId, setCloudflareAccountId] = useState('');
+  const [cloudflareGatewayId, setCloudflareGatewayId] = useState('');
   const [showAdvancedConfig, setShowAdvancedConfig] = useState(false);
 
   const [running, setRunning] = useState(false);
@@ -444,6 +447,7 @@ function QuickOrchestrate() {
       endpoint: endpoint.trim() || undefined,
       apiKey: apiKey.trim() || undefined,
       cloudflareAccountId: provider === 'cloudflare-ai' ? cloudflareAccountId.trim() || undefined : undefined,
+      cloudflareGatewayId: provider === 'cloudflare-ai' && cloudflareGatewayId.trim() ? cloudflareGatewayId.trim() : undefined,
       maxIterations: 10,
       temperature: 0.3,
     };
@@ -480,7 +484,7 @@ function QuickOrchestrate() {
     } finally {
       setRunning(false);
     }
-  }, [task, running, provider, model, endpoint, apiKey, cloudflareAccountId]);
+  }, [task, running, provider, model, endpoint, apiKey, cloudflareAccountId, cloudflareGatewayId]);
 
   const canRun = task.trim().length > 0 && !running;
 
@@ -571,6 +575,17 @@ function QuickOrchestrate() {
                       value={cloudflareAccountId}
                       onChange={e => setCloudflareAccountId(e.target.value)}
                       placeholder="Cloudflare Account ID (required for Cloudflare Workers AI)"
+                      disabled={running}
+                    />
+                  </Col>
+                )}
+                {provider === 'cloudflare-ai' && (
+                  <Col xs={12}>
+                    <Form.Control
+                      size="sm"
+                      value={cloudflareGatewayId}
+                      onChange={e => setCloudflareGatewayId(e.target.value)}
+                      placeholder="AI Gateway ID (optional, fixes CORS/405 errors in browsers)"
                       disabled={running}
                     />
                   </Col>
@@ -857,6 +872,17 @@ function AgentsTab({ profiles, onRefresh }: AgentsTabProps) {
                 <Form.Label>Cloudflare Account ID</Form.Label>
                 <Form.Control value={form.cloudflareAccountId ?? ''} onChange={e => setForm(f => ({ ...f, cloudflareAccountId: e.target.value }))}
                   placeholder="Your Cloudflare Account ID (from dash.cloudflare.com)" />
+              </Form.Group>
+            )}
+            {form.provider === 'cloudflare-ai' && (
+              <Form.Group className="mb-3">
+                <Form.Label>AI Gateway ID <span className="text-muted fw-normal small">(optional, recommended for browser use)</span></Form.Label>
+                <Form.Control value={form.cloudflareGatewayId ?? ''} onChange={e => setForm(f => ({ ...f, cloudflareGatewayId: e.target.value }))}
+                  placeholder="e.g. my-gateway" />
+                <Form.Text className="text-muted">
+                  Required to avoid CORS errors (405 on OPTIONS) when calling Cloudflare AI from a browser.
+                  Create an AI Gateway at dash.cloudflare.com → AI → AI Gateway.
+                </Form.Text>
               </Form.Group>
             )}
             <Row>

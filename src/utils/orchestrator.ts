@@ -77,6 +77,7 @@ function profileToConfig(profile: AgentProfile): AgentConfig {
     maxIterations: profile.maxIterations,
     temperature: profile.temperature,
     cloudflareAccountId: profile.cloudflareAccountId,
+    cloudflareGatewayId: profile.cloudflareGatewayId,
   };
 }
 

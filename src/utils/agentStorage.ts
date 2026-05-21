@@ -63,6 +63,7 @@ export interface AgentProfile {
   apiKey?: string;
   model?: string;
   cloudflareAccountId?: string; // For Cloudflare Workers AI
+  cloudflareGatewayId?: string; // For Cloudflare AI Gateway (CORS-friendly, recommended for browser use)
   maxIterations: number;
   temperature: number;
   systemPromptOverride?: string;

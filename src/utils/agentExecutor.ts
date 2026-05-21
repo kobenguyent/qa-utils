@@ -37,6 +37,7 @@ export interface AgentConfig {
   temperature?: number;
   obfuscateSensitiveData?: boolean;
   cloudflareAccountId?: string; // For Cloudflare Workers AI
+  cloudflareGatewayId?: string; // For Cloudflare AI Gateway (CORS-friendly, recommended for browser use)
 }
 
 export interface AgentRunResult {
@@ -165,6 +166,7 @@ export async function runAgent(
     maxTokens: 2048,
     obfuscateSensitiveData: config.obfuscateSensitiveData,
     cloudflareAccountId: config.cloudflareAccountId,
+    cloudflareGatewayId: config.cloudflareGatewayId,
   };
 
   for (let i = 0; i < maxIter; i++) {

@@ -50,6 +50,7 @@ export function KobeanAssistant() {
     const [endpoint, setEndpoint] = useSessionStorage<string>('aiChat_endpoint', 'http://localhost:11434');
     const [azureApiVersion, setAzureApiVersion] = useSessionStorage<string>('aiChat_azureApiVersion', '2024-02-15-preview');
     const [cloudflareAccountId, setCloudflareAccountId] = useSessionStorage<string>('aiChat_cloudflareAccountId', '');
+    const [cloudflareGatewayId, setCloudflareGatewayId] = useSessionStorage<string>('aiChat_cloudflareGatewayId', '');
     const [model, setModel] = useSessionStorage<string>('aiChat_model', '');
     const [temperature, setTemperature] = useSessionStorage<number>('aiChat_temperature', 0.7);
     const [optimizeTokens, setOptimizeTokens] = useSessionStorage<boolean>('aiChat_optimizeTokens', true);
@@ -207,6 +208,7 @@ export function KobeanAssistant() {
             endpoint: (provider === 'ollama' || provider === 'azure-openai') ? endpoint : undefined,
             azureApiVersion: provider === 'azure-openai' ? azureApiVersion : undefined,
             cloudflareAccountId: provider === 'cloudflare-ai' ? cloudflareAccountId : undefined,
+            cloudflareGatewayId: provider === 'cloudflare-ai' && cloudflareGatewayId ? cloudflareGatewayId : undefined,
             model: model || defaultModel.id,
             temperature,
             timeout: 60000,
@@ -806,6 +808,32 @@ export function KobeanAssistant() {
                                 dash.cloudflare.com
                               </a>{' '}
                               → select your account → Overview.
+                            </Form.Text>
+                          </Form.Group>
+                          <Form.Group className="mb-3">
+                            <Form.Label>AI Gateway ID <span className="text-muted fw-normal">(optional, recommended for browser use)</span></Form.Label>
+                            <Form.Control
+                              type="text"
+                              placeholder="e.g. my-gateway"
+                              value={cloudflareGatewayId}
+                              onChange={(e) => {
+                                setCloudflareGatewayId(e.target.value);
+                                setConnectionStatus('unknown');
+                              }}
+                              disabled={loading}
+                            />
+                            <Form.Text className="text-muted">
+                              Cloudflare's REST API blocks browser requests with a{' '}
+                              <strong>405 on OPTIONS (CORS preflight)</strong>. Use an{' '}
+                              <a href="https://developers.cloudflare.com/ai-gateway/get-started/" target="_blank" rel="noopener noreferrer">
+                                AI Gateway
+                              </a>{' '}
+                              to fix this — it proxies requests with CORS headers.
+                              Create one in{' '}
+                              <a href="https://dash.cloudflare.com/" target="_blank" rel="noopener noreferrer">
+                                dash.cloudflare.com
+                              </a>{' '}
+                              → AI → AI Gateway, then enter its ID here.
                             </Form.Text>
                           </Form.Group>
                         </>
