@@ -1,5 +1,5 @@
 {
-  "name": "kobean-qa-utils",
+  "name": "qa-utils",
   "version": "1.2.0",
   "description": "KobeanQAUtils — A comprehensive collection of quality assurance tools and utilities to enhance your testing workflow",
   "author": "KobeT <kobenguyent@gmail.com>",
@@ -100,7 +100,7 @@
     "wait-on": "^9.0.3"
   },
   "build": {
-    "appId": "com.kobenguyent.kobean-qa-utils",
+    "appId": "com.kobenguyent.qa-utils",
     "productName": "KobeanQAUtils",
     "copyright": "Copyright © 2024 KobeT",
     "directories": {

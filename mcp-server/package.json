@@ -1,5 +1,5 @@
 {
-  "name": "kobean-qa-utils-mcp-server",
+  "name": "qa-utils-mcp-server",
   "version": "1.1.0",
   "description": "MCP server for KobeanQAUtils - enables AI agents to interact with QA utility tools",
   "type": "module",

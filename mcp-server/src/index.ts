@@ -37,7 +37,7 @@ import {
 
 const server = new McpServer(
   {
-    name: 'kobean-qa-utils-mcp-server',
+    name: 'qa-utils-mcp-server',
     version: '1.0.0',
   },
   {
