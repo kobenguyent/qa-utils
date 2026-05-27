@@ -150,7 +150,7 @@ export function subscribeToLogs(listener: LogListener): () => void {
  */
 export function exportLogsAsText(entries: LogEntry[]): string {
   const header = [
-    '=== QA Utils — Log Export ===',
+    '=== KobeanQAUtils — Log Export ===',
     `Exported: ${new Date().toISOString()}`,
     `Total entries: ${entries.length}`,
     '',

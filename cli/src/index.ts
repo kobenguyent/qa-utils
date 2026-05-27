@@ -53,7 +53,7 @@ const program = new Command();
 program
   .name('qautils')
   .description(
-    chalk.bold('QA Utils CLI') +
+    chalk.bold('KobeanQAUtils CLI') +
       chalk.dim(' — 24 utility tools for testing and automation workflows') +
       '\n' +
       chalk.dim('  https://github.com/kobenguyent/qa-utils'),

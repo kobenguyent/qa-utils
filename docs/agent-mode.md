@@ -1,6 +1,6 @@
 # Agent Mode
 
-Agent Mode turns QA Utils into an **autonomous AI agent** capable of planning and executing multi-step tasks using the available QA tools.
+Agent Mode turns KobeanQAUtils into an **autonomous AI agent** capable of planning and executing multi-step tasks using the available QA tools.
 
 ## How It Works
 
@@ -37,7 +37,7 @@ Agent Mode reuses the AI provider configuration from **Kobean Assistant**. Navig
 
 ### 2. Navigate to Agent Mode
 
-Go to `/agent` in the QA Utils app, or find **Agent Mode** in the tool list.
+Go to `/agent` in the KobeanQAUtils app, or find **Agent Mode** in the tool list.
 
 ### 3. Describe Your Task
 
@@ -114,7 +114,7 @@ The agent system prompt includes:
 
 - **Requires AI Provider** — An AI provider must be configured for the agent to function
 - **Token Usage** — Each iteration consumes AI tokens; complex tasks may use significant tokens
-- **Tool Scope** — The agent can only use tools registered in the QA Utils tool registry
+- **Tool Scope** — The agent can only use tools registered in the KobeanQAUtils tool registry
 - **No Persistence** — Agent state is not saved between sessions
 
 ## See Also

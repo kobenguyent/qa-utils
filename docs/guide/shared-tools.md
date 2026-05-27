@@ -1,6 +1,6 @@
 # Shared Tools Architecture
 
-QA Utils uses a shared tools module to avoid code duplication between the MCP server and the web UI.
+KobeanQAUtils uses a shared tools module to avoid code duplication between the MCP server and the web UI.
 
 ## Overview
 

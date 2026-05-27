@@ -75,7 +75,7 @@ export const Header: React.FC = () => {
     <Navbar expand="lg" className="glass-navbar" style={{ backgroundColor: 'var(--navbar-bg)', paddingTop: '0.85rem' }}>
       <Container fluid className="px-3 px-lg-4">
         <Navbar.Brand href='#' data-testid="logo" className="navbar-brand-gradient" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <img src={getEffectiveTheme(theme) === 'dark' ? qaLogoDark : qaLogoLight} alt="Kobean QA Utils" style={{ height: '40px', width: 'auto' }} />
+          <img src={getEffectiveTheme(theme) === 'dark' ? qaLogoDark : qaLogoLight} alt="KobeanQAUtils" style={{ height: '40px', width: 'auto' }} />
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" aria-label="Toggle navigation" />
         <Navbar.Collapse id="basic-navbar-nav">

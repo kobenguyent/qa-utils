@@ -1,10 +1,10 @@
 # Electron Desktop App Implementation Guide
 
-This document provides detailed information about the Electron desktop app implementation for QA Utils.
+This document provides detailed information about the Electron desktop app implementation for KobeanQAUtils.
 
 ## Overview
 
-QA Utils has been successfully converted into a cross-platform desktop application using Electron. The desktop app runs on macOS, Windows, and Linux, solving CORS issues that occur when using the web version.
+KobeanQAUtils has been successfully converted into a cross-platform desktop application using Electron. The desktop app runs on macOS, Windows, and Linux, solving CORS issues that occur when using the web version.
 
 ## Architecture
 
@@ -86,7 +86,7 @@ Key configuration sections:
   "main": "electron/main.js",
   "build": {
     "appId": "com.kobenguyent.qa-utils",
-    "productName": "QA Utils",
+    "productName": "KobeanQAUtils",
     "directories": {
       "output": "release",
       "buildResources": "build"
@@ -193,8 +193,8 @@ The Electron app implements security best practices:
 ### macOS
 
 **Output Files:**
-- `QA Utils-1.0.0.dmg` - Installer disk image
-- `QA Utils-1.0.0-mac.zip` - Zipped app bundle
+- `KobeanQAUtils-1.0.0.dmg` - Installer disk image
+- `KobeanQAUtils-1.0.0-mac.zip` - Zipped app bundle
 
 **Installation:**
 - Double-click DMG
@@ -208,8 +208,8 @@ The Electron app implements security best practices:
 ### Windows
 
 **Output Files:**
-- `QA Utils Setup 1.0.0.exe` - NSIS installer
-- `QA Utils 1.0.0.exe` - Portable executable
+- `KobeanQAUtils Setup 1.0.0.exe` - NSIS installer
+- `KobeanQAUtils 1.0.0.exe` - Portable executable
 
 **Installation:**
 - Run installer for system-wide installation
@@ -222,7 +222,7 @@ The Electron app implements security best practices:
 ### Linux
 
 **Output Files:**
-- `QA Utils-1.0.0.AppImage` - Universal package
+- `KobeanQAUtils-1.0.0.AppImage` - Universal package
 - `qa-utils_1.0.0_amd64.deb` - Debian/Ubuntu
 - `qa-utils-1.0.0.x86_64.rpm` - Red Hat/Fedora
 

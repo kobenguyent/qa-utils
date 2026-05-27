@@ -1,6 +1,6 @@
 # CLI — qautils-cli
 
-**qautils-cli** is the command-line interface for QA Utils. It exposes all 47+ utility tools as scriptable commands, plus an AI-powered **Kobean chat assistant** and an autonomous **AI Orchestrator** you can run directly in your terminal.
+**qautils-cli** is the command-line interface for KobeanQAUtils. It exposes all 47+ utility tools as scriptable commands, plus an AI-powered **Kobean chat assistant** and an autonomous **AI Orchestrator** you can run directly in your terminal.
 
 ## Installation
 

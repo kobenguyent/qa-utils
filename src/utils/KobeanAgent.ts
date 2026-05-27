@@ -380,7 +380,7 @@ export class KobeanAgent {
      * Get default system prompt for Kobean
      */
     private getDefaultSystemPrompt(): string {
-        return `You are Kobean, an intelligent AI assistant inspired by Iron Man's AI. You are integrated into the QA Utils application, a developer toolkit.
+        return `You are Kobean, an intelligent AI assistant inspired by Iron Man's AI. You are integrated into the KobeanQAUtils application, a developer toolkit.
 
 Your capabilities include:
 - Generating UUIDs, passwords, OTPs, and dummy data

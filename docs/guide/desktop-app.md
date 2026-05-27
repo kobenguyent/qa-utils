@@ -1,6 +1,6 @@
 # Desktop App
 
-QA Utils is available as a cross-platform desktop application built with [Electron](https://www.electronjs.org/), providing a native experience on macOS, Windows, and Linux.
+KobeanQAUtils is available as a cross-platform desktop application built with [Electron](https://www.electronjs.org/), providing a native experience on macOS, Windows, and Linux.
 
 ## Features
 
@@ -31,7 +31,7 @@ Pre-built desktop applications are automatically generated via GitHub Actions:
 ### macOS
 1. Download the `.dmg` file
 2. Open the disk image
-3. Drag **QA Utils** to the Applications folder
+3. Drag **KobeanQAUtils** to the Applications folder
 4. Launch from Applications or Spotlight
 
 ::: tip First Launch
@@ -52,8 +52,8 @@ Or use the **portable version** — download and run directly, no installation n
 
 **AppImage (all distributions)**
 ```bash
-chmod +x "QA Utils-1.0.0.AppImage"
-./"QA Utils-1.0.0.AppImage"
+chmod +x "KobeanQAUtils-1.0.0.AppImage"
+./"KobeanQAUtils-1.0.0.AppImage"
 ```
 
 **Debian/Ubuntu**

@@ -29,7 +29,7 @@ This sets the correct base path for GitHub Pages deployment.
 
 ## Desktop Application
 
-QA Utils is available as a cross-platform desktop app built with Electron.
+KobeanQAUtils is available as a cross-platform desktop app built with Electron.
 
 ### Why Desktop?
 

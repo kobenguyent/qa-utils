@@ -1,6 +1,6 @@
 # MCP Server
 
-The QA Utils MCP Server exposes 15 QA tools to AI agents through the [Model Context Protocol](https://modelcontextprotocol.io/) (MCP). This enables AI assistants like Claude Desktop, Cursor, and other MCP-compatible clients to programmatically use QA utility functions.
+The KobeanQAUtils MCP Server exposes 15 QA tools to AI agents through the [Model Context Protocol](https://modelcontextprotocol.io/) (MCP). This enables AI assistants like Claude Desktop, Cursor, and other MCP-compatible clients to programmatically use QA utility functions.
 
 ## Available Tools
 

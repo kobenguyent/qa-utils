@@ -1,6 +1,6 @@
 # qautils-cli
 
-> **Command-line interface for [QA Utils](https://github.com/kobenguyent/qa-utils)** — utility tools for daily testing and automation workflows, plus an AI-powered Kobean chat assistant and multi-agent orchestration system.
+> **Command-line interface for [KobeanQAUtils](https://github.com/kobenguyent/qa-utils)** — utility tools for daily testing and automation workflows, plus an AI-powered Kobean chat assistant and multi-agent orchestration system.
 
 ---
 
@@ -659,4 +659,4 @@ cli/
 
 ## License
 
-MIT — same as the parent [QA Utils](https://github.com/kobenguyent/qa-utils) project.
+MIT — same as the parent [KobeanQAUtils](https://github.com/kobenguyent/qa-utils) project.

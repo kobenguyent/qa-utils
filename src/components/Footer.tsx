@@ -13,7 +13,7 @@ export const Footer: React.FC = () => {
           <div className="footer-inner">
             <div className="footer-row">
               <span className="footer-text">
-                © {currentYear} QA Utils
+                © {currentYear} KobeanQAUtils
               </span>
               <span className="footer-sep" aria-hidden="true">·</span>
               <span className="footer-text">
@@ -71,7 +71,7 @@ export const Footer: React.FC = () => {
         <Modal.Body>
           <h6 className="text-success mb-3">✅ Your Data Stays Private</h6>
           <p>
-            <strong>QA Utils is designed with privacy in mind:</strong>
+            <strong>KobeanQAUtils is designed with privacy in mind:</strong>
           </p>
           <ul>
             <li>✅ <strong>All tools run locally</strong> in your browser</li>

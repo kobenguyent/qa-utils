@@ -1,7 +1,7 @@
 {
   "name": "qa-utils",
   "version": "1.2.0",
-  "description": "A comprehensive collection of quality assurance tools and utilities to enhance your testing workflow",
+  "description": "KobeanQAUtils — A comprehensive collection of quality assurance tools and utilities to enhance your testing workflow",
   "author": "KobeT <kobenguyent@gmail.com>",
   "license": "MIT",
   "homepage": "https://github.com/kobenguyent/qa-utils",
@@ -101,7 +101,7 @@
   },
   "build": {
     "appId": "com.kobenguyent.qa-utils",
-    "productName": "QA Utils",
+    "productName": "KobeanQAUtils",
     "copyright": "Copyright © 2024 KobeT",
     "directories": {
       "output": "release",

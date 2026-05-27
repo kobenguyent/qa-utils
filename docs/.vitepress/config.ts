@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: 'QA Utils',
+  title: 'KobeanQAUtils',
   description: 'A comprehensive collection of quality assurance tools and utilities',
   base: '/qa-utils/docs/',
   head: [
@@ -11,7 +11,7 @@ export default defineConfig({
     logo: {
       light: '/logo-icon.png',
       dark: '/logo-icon-dark-nebula.png',
-      alt: 'QA Utils',
+      alt: 'KobeanQAUtils',
     },
     nav: [
       { text: 'Home', link: '/' },

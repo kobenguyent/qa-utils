@@ -127,7 +127,7 @@ export const navigationConfig: NavItem[] = [
   // ── Home (search only — displayed as a direct link in the header) ─────────
   {
     title: 'Home',
-    description: 'QA Utils homepage with all tools',
+    description: 'KobeanQAUtils homepage with all tools',
     path: '#/',
     category: 'Navigation',
     keywords: ['home', 'start', 'main', 'index'],
@@ -769,7 +769,7 @@ export const navigationConfig: NavItem[] = [
   // ── Palace (+ shared with Learn) ──────────────────────────────────────────
   {
     title: 'QA Palace',
-    description: 'Spatial tool map — browse all QA Utils tools organised into themed palace rooms.',
+    description: 'Spatial tool map — browse all KobeanQAUtils tools organised into themed palace rooms.',
     path: '#/palace',
     category: 'Navigation',
     keywords: ['palace', 'map', 'tools', 'rooms', 'spatial', 'memory', 'discover'],

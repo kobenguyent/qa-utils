@@ -12,7 +12,7 @@
 
 ### 1.1 Problem Statement
 
-QA engineers and developers frequently need to compare two versions of a file — configuration diffs, exported reports, translated documents, migrated data. Existing tools (e.g., `diff`, Beyond Compare) are external desktop applications that don't integrate with the QA Utils workflow or support structured file formats natively.
+QA engineers and developers frequently need to compare two versions of a file — configuration diffs, exported reports, translated documents, migrated data. Existing tools (e.g., `diff`, Beyond Compare) are external desktop applications that don't integrate with the KobeanQAUtils workflow or support structured file formats natively.
 
 ### 1.2 Solution
 

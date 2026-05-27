@@ -132,7 +132,7 @@ describe('logCollector utility', () => {
     it('returns a string containing the export header', () => {
       const entries = getLogs();
       const text = exportLogsAsText(entries);
-      expect(text).toContain('QA Utils — Log Export');
+      expect(text).toContain('KobeanQAUtils — Log Export');
     });
 
     it('includes message content', () => {

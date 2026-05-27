@@ -2,12 +2,12 @@
 layout: home
 
 hero:
-  name: "QA Utils"
+  name: "KobeanQAUtils"
   text: "Quality Assurance Tools & Utilities"
   tagline: A comprehensive collection of developer & QA tools — with MCP server integration and autonomous Agent Mode.
   image:
     src: /logo.png
-    alt: QA Utils
+    alt: KobeanQAUtils
   actions:
     - theme: brand
       text: Get Started

@@ -1,6 +1,6 @@
 # Feature Implementation Plans
 
-> Production-ready technical specifications for new QA Utils features.
+> Production-ready technical specifications for new KobeanQAUtils features.
 
 Each document in this directory represents a **complete implementation blueprint** for a single tool/feature. Plans are designed to be self-contained — any engineer should be able to pick one up and deliver the feature end-to-end.
 

@@ -1,6 +1,6 @@
 # qautils-cli-rest-api
 
-> A REST API wrapper around [QA Utils](https://github.com/kobenguyent/qa-utils) — exposes all 19 utility tools as HTTP endpoints with a built-in **Swagger UI** and an **OpenAPI 3.0 spec** ready for your automation stack.
+> A REST API wrapper around [KobeanQAUtils](https://github.com/kobenguyent/qa-utils) — exposes all 19 utility tools as HTTP endpoints with a built-in **Swagger UI** and an **OpenAPI 3.0 spec** ready for your automation stack.
 
 Inspired by [signal-cli-rest-api](https://github.com/bbernhard/signal-cli-rest-api).
 

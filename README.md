@@ -1,4 +1,4 @@
-# QA Utils 🚀
+# KobeanQAUtils 🚀
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Visit-brightgreen?style=flat-square)](https://kobenguyent.github.io/qa-utils/#/)
 [![npm version](https://img.shields.io/npm/v/qautils-cli?label=CLI&style=flat-square)](https://www.npmjs.com/package/qautils-cli)
@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 [![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-blue?style=flat-square)](https://paypal.me/peternguyentr?country.x=DE&locale.x=en_US)
 
-**QA Utils** is an all-in-one quality assurance toolkit — 47+ tools for developers and testers, available as a **web app**, **desktop app** (macOS/Windows/Linux), **CLI**, **REST API**, and **MCP server** for AI agent integration.
+**KobeanQAUtils** is an all-in-one quality assurance toolkit — 47+ tools for developers and testers, available as a **web app**, **desktop app** (macOS/Windows/Linux), **CLI**, **REST API**, and **MCP server** for AI agent integration.
 
 🌐 **[Try it now →](https://kobenguyent.github.io/qa-utils/#/)**
 <img alt="Screenshot" src="public/screenshot.png" />
@@ -136,7 +136,7 @@ Save named agent profiles so you don't reconfigure your AI provider every time. 
 
 ## 🔌 MCP Server
 
-QA Utils ships a standalone [Model Context Protocol](https://modelcontextprotocol.io/) server that exposes 15 QA tools to AI assistants like **Claude Desktop**, **Cursor**, and any MCP-compatible client.
+KobeanQAUtils ships a standalone [Model Context Protocol](https://modelcontextprotocol.io/) server that exposes 15 QA tools to AI assistants like **Claude Desktop**, **Cursor**, and any MCP-compatible client.
 
 ### Quick Setup
 

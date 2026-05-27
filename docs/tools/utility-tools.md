@@ -1,6 +1,6 @@
 # Utility Tools
 
-Core developer and QA utility tools available in QA Utils, organized by category.
+Core developer and QA utility tools available in KobeanQAUtils, organized by category.
 
 ---
 

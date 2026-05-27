@@ -1,6 +1,6 @@
 # Tools Overview
 
-QA Utils provides **47+ tools** organized into categories. Each tool is accessible from the web UI, and many are also available through the [MCP Server](/mcp-server) or [CLI](/guide/cli) for scripting and AI agent integration.
+KobeanQAUtils provides **47+ tools** organized into categories. Each tool is accessible from the web UI, and many are also available through the [MCP Server](/mcp-server) or [CLI](/guide/cli) for scripting and AI agent integration.
 
 ## Categories
 

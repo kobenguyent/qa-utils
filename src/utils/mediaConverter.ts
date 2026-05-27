@@ -140,8 +140,8 @@ export class MediaConverter {
 
         // Set document metadata
         pdfDoc.setTitle(title);
-        pdfDoc.setCreator('QA Utils Media Converter');
-        pdfDoc.setProducer('QA Utils');
+        pdfDoc.setCreator('KobeanQAUtils Media Converter');
+        pdfDoc.setProducer('KobeanQAUtils');
         pdfDoc.setCreationDate(new Date());
 
         const pdfBytes = await pdfDoc.save();

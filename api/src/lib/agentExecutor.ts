@@ -334,7 +334,7 @@ function buildSystemPrompt(): string {
     `### ${id}\n${t.description}\nParameters: ${t.params}`
   ).join('\n\n');
 
-  return `You are QA Utils Agent — an autonomous AI agent with access to developer & QA tools.
+  return `You are KobeanQAUtils Agent — an autonomous AI agent with access to developer & QA tools.
 
 Your job is to accomplish the user's task by reasoning step-by-step and calling tools when needed.
 

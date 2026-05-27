@@ -1,6 +1,6 @@
 # Project Structure
 
-An overview of the QA Utils repository layout and architecture.
+An overview of the KobeanQAUtils repository layout and architecture.
 
 ## Repository Layout
 
