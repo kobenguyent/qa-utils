@@ -961,7 +961,7 @@ async function showMainMenu(): Promise<ToolKey | 'exit'> {
 
 // ── Interactive entry point ───────────────────────────────────────────────────
 export async function runInteractive(): Promise<void> {
-  const loader = spin('Initializing QA Utils CLI…').start();
+  const loader = spin('Initializing KobeanQAUtils CLI…').start();
   await new Promise((r) => setTimeout(r, 280));
   loader.stop();
   printBanner(TOOL_COUNT);

@@ -40,7 +40,7 @@ export const Home: React.FC = () => {
               <div className="home-logo-hero" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0 }}>
                 <img
                   src={getEffectiveTheme(theme) === 'dark' ? qaLogoDark : qaLogoLight}
-                  alt="Kobean QA Utils"
+                  alt="KobeanQAUtils"
                   style={{ width: '320px', height: 'auto', display: 'block' }}
                 />
                 <p className="home-subtitle" style={{ margin: '0.1rem 0 0', padding: 0 }}>

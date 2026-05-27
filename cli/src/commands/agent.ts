@@ -75,7 +75,7 @@ export function registerAgentCommand(program: Command): void {
       const maxIterations = Math.max(1, Math.min(parseInt(opts.maxIterations, 10) || 10, 25));
 
       console.log();
-      console.log(T.title('  🤖 QA Utils Agent'));
+      console.log(T.title('  🤖 KobeanQAUtils Agent'));
       console.log(T.dim('  ' + '─'.repeat(50)));
       console.log(T.dim(`  Task: `) + chalk.white(task));
       console.log(T.dim(`  Config: `) + chalk.cyan(formatConfigForDisplay(toDisplayConfig(config)).trim()));

@@ -19,7 +19,7 @@ describe('GET /openapi.json', () => {
     const res = await request(app).get('/openapi.json');
     expect(res.status).toBe(200);
     expect(res.body.openapi).toBe('3.0.3');
-    expect(res.body.info.title).toBe('QA Utils API');
+    expect(res.body.info.title).toBe('KobeanQAUtils API');
     expect(Array.isArray(res.body.tags)).toBe(true);
   });
 });

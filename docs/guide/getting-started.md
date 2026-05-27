@@ -1,12 +1,12 @@
 # Getting Started
 
-QA Utils is a comprehensive collection of quality assurance tools and utilities designed to enhance your testing workflow. It's available as a web app, desktop app, and MCP server.
+KobeanQAUtils is a comprehensive collection of quality assurance tools and utilities designed to enhance your testing workflow. It's available as a web app, desktop app, and MCP server.
 
 ## Try It Online
 
 The fastest way to get started is the live demo — no installation required:
 
-🌐 **[Open QA Utils](https://kobenguyent.github.io/qa-utils/#/)**
+🌐 **[Open KobeanQAUtils](https://kobenguyent.github.io/qa-utils/#/)**
 
 ## Local Development
 
@@ -53,7 +53,7 @@ npm run lint             # Run ESLint
 
 ## What's Included
 
-QA Utils provides **47+ tools** across several categories:
+KobeanQAUtils provides **47+ tools** across several categories:
 
 | Category | Examples |
 |----------|----------|

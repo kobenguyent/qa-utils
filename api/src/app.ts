@@ -19,10 +19,10 @@ const swaggerOptions: swaggerJsdoc.Options = {
   definition: {
     openapi: '3.0.3',
     info: {
-      title: 'QA Utils API',
+      title: 'KobeanQAUtils API',
       version: '1.0.0',
       description:
-        'REST API for QA Utils — exposes all tool functions as HTTP endpoints. ' +
+        'REST API for KobeanQAUtils — exposes all tool functions as HTTP endpoints. ' +
         'Use the Swagger UI below to explore and test every endpoint interactively, ' +
         'or import the OpenAPI spec into your automation framework.',
       contact: {
@@ -134,7 +134,7 @@ export function createApp() {
     '/api-docs',
     swaggerUi.serve,
     swaggerUi.setup(swaggerSpec, {
-      customSiteTitle: 'QA Utils API Docs',
+      customSiteTitle: 'KobeanQAUtils API Docs',
       swaggerOptions: {
         persistAuthorization: true,
         displayRequestDuration: true,

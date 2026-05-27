@@ -95,7 +95,7 @@ export function registerOrchestrateCommand(program: Command): void {
       const maxIterations = Math.max(1, Math.min(parseInt(opts.maxIterations, 10) || 10, 25));
 
       console.log();
-      console.log(T.title('  🤖 QA Utils Orchestrator'));
+      console.log(T.title('  🤖 KobeanQAUtils Orchestrator'));
       console.log(T.dim('  ' + '─'.repeat(54)));
       console.log(T.dim('  Task: ') + chalk.white(task));
       console.log(T.dim('  Config: ') + chalk.cyan(formatConfigForDisplay(toDisplayConfig(config)).trim()));
@@ -246,7 +246,7 @@ export function registerOrchestrateCommand(program: Command): void {
       console.log(T.border('  │') + empty + T.border('│'));
       console.log(
         T.border('  │') +
-        '  ' + T.title('🤖 QA Utils Orchestrator') + chalk.bold.yellow(' Session') +
+        '  ' + T.title('🤖 KobeanQAUtils Orchestrator') + chalk.bold.yellow(' Session') +
         ' '.repeat(BOX_W - 34) +
         T.border('│'),
       );

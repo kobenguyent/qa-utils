@@ -37,7 +37,7 @@ import {
 
 const server = new McpServer(
   {
-    name: 'qa-utils-mcp-server',
+    name: 'kobean-qa-utils-mcp-server',
     version: '1.0.0',
   },
   {
@@ -435,7 +435,7 @@ server.registerTool('graphql_introspect', {
 async function main(): Promise<void> {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error('qa-utils MCP server running on stdio');
+  console.error('KobeanQAUtils MCP server running on stdio');
 }
 
 main().catch((error: unknown) => {

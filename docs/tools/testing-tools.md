@@ -447,7 +447,7 @@ Visual and spatial tools for navigating and tracking QA coverage.
 
 ### 🗺️ QA Palace
 
-A spatial map of all QA Utils tools, organized into themed "rooms" — browse and discover tools visually.
+A spatial map of all KobeanQAUtils tools, organized into themed "rooms" — browse and discover tools visually.
 
 **Route:** `/palace`
 

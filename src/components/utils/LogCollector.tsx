@@ -36,7 +36,7 @@ function downloadFile(content: string, filename: string, mimeType: string): void
 
 function buildGitHubIssueUrl(entries: LogEntry[]): string {
   const base = 'https://github.com/kobenguyent/qa-utils/issues/new';
-  const title = encodeURIComponent('[Bug] Log report from QA Utils');
+  const title = encodeURIComponent('[Bug] Log report from KobeanQAUtils');
   const errors = entries.filter(e => e.level === 'error').slice(0, 5);
   const body = encodeURIComponent(
     [

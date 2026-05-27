@@ -128,7 +128,7 @@ function buildToolDescriptions(): string {
 }
 
 function getSystemPrompt(): string {
-  return `You are QA Utils Agent — an autonomous AI agent with access to developer & QA tools.
+  return `You are KobeanQAUtils Agent — an autonomous AI agent with access to developer & QA tools.
 
 Your job is to accomplish the user's task by reasoning step-by-step and calling tools when needed.
 

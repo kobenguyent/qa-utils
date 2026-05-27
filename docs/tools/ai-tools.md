@@ -98,7 +98,7 @@ Autonomous AI agent that plans and executes multi-step QA tasks using the built-
 
 ### Available Tools for the Agent
 
-The agent has access to all QA Utils built-in tools:
+The agent has access to all KobeanQAUtils built-in tools:
 
 | Category | Tools available |
 |----------|----------------|
@@ -176,29 +176,29 @@ Best practices and templates for writing system prompts and instruction files fo
 ### OpenAI
 1. Sign up at [platform.openai.com](https://platform.openai.com/)
 2. Generate an API key from [API Keys](https://platform.openai.com/api-keys)
-3. In QA Utils: open **Kobean** → **Settings** → select **OpenAI** and enter your key
+3. In KobeanQAUtils: open **Kobean** → **Settings** → select **OpenAI** and enter your key
 
 ### Anthropic Claude
 1. Sign up at [console.anthropic.com](https://console.anthropic.com/)
 2. Generate an API key from Account → API Keys
-3. In QA Utils: select **Anthropic Claude** and enter your key
+3. In KobeanQAUtils: select **Anthropic Claude** and enter your key
 
 ### Google Gemini
 1. Sign up at [Google AI Studio](https://aistudio.google.com/)
 2. Create an API key
-3. In QA Utils: select **Google Gemini** and enter your key
+3. In KobeanQAUtils: select **Google Gemini** and enter your key
 
 ### Azure OpenAI
 1. Create an Azure OpenAI resource in the [Azure Portal](https://portal.azure.com/)
 2. Deploy a model (e.g., `gpt-4o`, `gpt-35-turbo`)
 3. Copy your **API key** and **endpoint URL**
-4. In QA Utils: select **Azure OpenAI**, enter the endpoint and key
+4. In KobeanQAUtils: select **Azure OpenAI**, enter the endpoint and key
 
 ### Ollama (Local — Free, No API Key)
 1. Install from [ollama.ai](https://ollama.ai)
 2. Pull a model: `ollama pull llama3` or `ollama pull mistral`
 3. Start the server: `ollama serve` (runs on `http://localhost:11434` by default)
-4. In QA Utils: select **Ollama**, enter `http://localhost:11434`, and choose your model
+4. In KobeanQAUtils: select **Ollama**, enter `http://localhost:11434`, and choose your model
 
 ::: tip CLI Configuration
 All providers can also be configured via CLI:
