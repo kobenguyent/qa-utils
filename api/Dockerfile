@@ -9,6 +9,7 @@ WORKDIR /app
 
 # Install API deps first (layer cache)
 COPY api/package*.json ./api/
+COPY common/data.ts ./common/
 RUN cd api && npm i --include=dev
 
 # Copy API source and shared utils required for compilation
