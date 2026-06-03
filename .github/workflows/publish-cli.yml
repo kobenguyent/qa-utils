@@ -1,4 +1,4 @@
-name: Publish qautils-cli to npm
+name: Publish kobeanqautils-cli to npm
 
 on:
   push:
@@ -38,7 +38,7 @@ jobs:
         working-directory: cli
         run: |
           LOCAL=$(node -p "require('./package.json').version")
-          PUBLISHED=$(npm view qautils-cli version 2>/dev/null || echo "0.0.0")
+          PUBLISHED=$(npm view kobeanqautils-cli version 2>/dev/null || echo "0.0.0")
           echo "local=$LOCAL" >> "$GITHUB_OUTPUT"
           echo "published=$PUBLISHED" >> "$GITHUB_OUTPUT"
           if [ "$LOCAL" = "$PUBLISHED" ] && [ "${{ github.event_name }}" = "push" ]; then

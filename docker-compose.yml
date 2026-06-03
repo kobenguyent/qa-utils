@@ -1,11 +1,11 @@
 services:
   qautils-cli-rest-api:
-    image: ghcr.io/kobenguyent/qautils-cli-rest-api:latest
+    image: ghcr.io/kobenguyent/kobeanqautils-cli-rest-api:latest
     # Or build locally:
     # build:
     #   context: ./api
     #   dockerfile: Dockerfile
-    container_name: qautils-cli-rest-api
+    container_name: kobeanqautils-cli-rest-api
     restart: unless-stopped
     ports:
       - "${PORT:-3333}:3333"

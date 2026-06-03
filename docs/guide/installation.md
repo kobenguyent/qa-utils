@@ -5,8 +5,8 @@
 ### Quick Start
 
 ```bash
-git clone https://github.com/kobenguyent/qa-utils.git
-cd qa-utils
+git clone https://github.com/kobenguyent/kobeanqautils.git
+cd kobeanqautils
 npm install
 npm run dev
 ```
@@ -40,7 +40,7 @@ KobeanQAUtils is available as a cross-platform desktop app built with Electron.
 
 ### Download Pre-built Apps
 
-Pre-built apps are available from [GitHub Actions](https://github.com/kobenguyent/qa-utils/actions/workflows/build-electron.yml):
+Pre-built apps are available from [GitHub Actions](https://github.com/kobenguyent/kobeanqautils/actions/workflows/build-electron.yml):
 
 | Platform | Formats |
 |----------|---------|

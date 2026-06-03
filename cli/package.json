@@ -1,5 +1,5 @@
 {
-  "name": "qautils-cli",
+  "name": "kobeanqautils-cli",
   "version": "1.4.4",
   "description": "Command-line interface for KobeanQAUtils — utility tools for testing and automation workflows",
   "type": "module",
@@ -12,7 +12,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kobenguyent/qa-utils.git",
+    "url": "git+https://github.com/kobenguyent/kobeanqautils.git",
     "directory": "cli"
   },
   "publishConfig": {

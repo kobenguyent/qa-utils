@@ -4,7 +4,7 @@
 
 export type Theme = 'light' | 'dark' | 'auto';
 
-const THEME_KEY = 'qa-utils-theme';
+const THEME_KEY = 'kobeanqautils-theme';
 
 export const getStoredTheme = (): Theme => {
   const stored = localStorage.getItem(THEME_KEY);

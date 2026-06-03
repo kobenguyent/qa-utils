@@ -1,11 +1,11 @@
-# CLI — qautils-cli
+# CLI — kobeanqautils-cli
 
 **qautils-cli** is the command-line interface for KobeanQAUtils. It exposes all 47+ utility tools as scriptable commands, plus an AI-powered **Kobean chat assistant** and an autonomous **AI Orchestrator** you can run directly in your terminal.
 
 ## Installation
 
 ```bash
-npm install -g qautils-cli
+npm install -g kobeanqautils-cli
 ```
 
 Verify the installation:
@@ -423,13 +423,13 @@ qautils chat config --provider ollama --endpoint http://localhost:11434 --model 
 | `ollama` | Endpoint (local) | llama2 |
 
 Config is stored at:
-- **Linux / macOS**: `~/.config/qautils-cli/config.json`
-- **Windows**: `%APPDATA%\qautils-cli\config.json`
+- **Linux / macOS**: `~/.config/kobeanqautils-cli/config.json`
+- **Windows**: `%APPDATA%\kobeanqautils-cli\config.json`
 
 ::: warning Security
 API keys are stored in plain text. Protect the file:
 ```bash
-chmod 600 ~/.config/qautils-cli/config.json
+chmod 600 ~/.config/kobeanqautils-cli/config.json
 ```
 :::
 

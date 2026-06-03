@@ -1,5 +1,5 @@
 /**
- * qautils-cli — AI Chat Client
+ * kobeanqautils-cli — AI Chat Client
  *
  * Sends chat messages to AI providers using Node.js native fetch (Node 18+).
  * Supports: OpenAI, Anthropic Claude, Google Gemini, Azure OpenAI, Ollama,

@@ -35,7 +35,7 @@ function downloadFile(content: string, filename: string, mimeType: string): void
 }
 
 function buildGitHubIssueUrl(entries: LogEntry[]): string {
-  const base = 'https://github.com/kobenguyent/qa-utils/issues/new';
+  const base = 'https://github.com/kobenguyent/kobeanqautils/issues/new';
   const title = encodeURIComponent('[Bug] Log report from KobeanQAUtils');
   const errors = entries.filter(e => e.level === 'error').slice(0, 5);
   const body = encodeURIComponent(
@@ -109,11 +109,11 @@ export const LogCollector: React.FC = () => {
   const makeExportTimestamp = () => new Date().toISOString().replace(/[:.]/g, '-');
 
   const handleExportText = useCallback(() => {
-    downloadFile(exportLogsAsText(filtered), `qa-utils-logs-${makeExportTimestamp()}.txt`, 'text/plain');
+    downloadFile(exportLogsAsText(filtered), `kobeanqautils-logs-${makeExportTimestamp()}.txt`, 'text/plain');
   }, [filtered]);
 
   const handleExportJson = useCallback(() => {
-    downloadFile(exportLogsAsJson(filtered), `qa-utils-logs-${makeExportTimestamp()}.json`, 'application/json');
+    downloadFile(exportLogsAsJson(filtered), `kobeanqautils-logs-${makeExportTimestamp()}.json`, 'application/json');
   }, [filtered]);
 
   return (

@@ -122,6 +122,6 @@ AI-enhanced tools for intelligent assistance, autonomous agent execution, and pr
 
 ::: tip MCP & CLI columns
 - **MCP** — available via the [MCP Server](/mcp-server) for AI agent integration (Claude Desktop, Cursor, etc.)
-- **CLI** — available via `qautils-cli` for terminal scripting and automation. See the [CLI Guide](/guide/cli).
+- **CLI** — available via `kobeanqautils-cli` for terminal scripting and automation. See the [CLI Guide](/guide/cli).
 :::
 

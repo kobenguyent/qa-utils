@@ -1,5 +1,5 @@
 {
-  "name": "qautils-api",
+  "name": "kobeanqautils-api",
   "version": "1.4.3",
   "description": "REST API for KobeanQAUtils — powers Swagger UI for automation test consumption",
   "license": "MIT",

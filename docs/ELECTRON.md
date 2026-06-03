@@ -11,7 +11,7 @@ KobeanQAUtils has been successfully converted into a cross-platform desktop appl
 ### File Structure
 
 ```
-qa-utils/
+kobeanqautils/
 ├── electron/
 │   ├── main.js          # Main process entry point
 │   └── preload.js       # Preload script for secure IPC
@@ -85,7 +85,7 @@ Key configuration sections:
 {
   "main": "electron/main.js",
   "build": {
-    "appId": "com.kobenguyent.qa-utils",
+    "appId": "com.kobenguyent.kobeanqautils",
     "productName": "KobeanQAUtils",
     "directories": {
       "output": "release",
@@ -118,7 +118,7 @@ The Vite configuration supports both web and Electron builds:
 ```typescript
 let base = '/'
 if (process.env.DEPLOY_ENV === 'github') {
-  base = '/qa-utils/'  // GitHub Pages
+  base = '/kobeanqautils/'  // GitHub Pages
 }
 if (process.env.ELECTRON === 'true') {
   base = './'  // Electron (relative paths)
@@ -223,13 +223,13 @@ The Electron app implements security best practices:
 
 **Output Files:**
 - `KobeanQAUtils-1.0.0.AppImage` - Universal package
-- `qa-utils_1.0.0_amd64.deb` - Debian/Ubuntu
-- `qa-utils-1.0.0.x86_64.rpm` - Red Hat/Fedora
+- `kobeanqautils_1.0.0_amd64.deb` - Debian/Ubuntu
+- `kobeanqautils-1.0.0.x86_64.rpm` - Red Hat/Fedora
 
 **Installation:**
 - AppImage: Just make executable and run
-- DEB: `sudo dpkg -i qa-utils_*.deb`
-- RPM: `sudo rpm -i qa-utils-*.rpm`
+- DEB: `sudo dpkg -i kobeanqautils_*.deb`
+- RPM: `sudo rpm -i kobeanqautils-*.rpm`
 
 ## Benefits of Desktop App
 
@@ -282,7 +282,7 @@ The repository includes a GitHub Actions workflow (`.github/workflows/build-elec
   - Manual trigger via Actions tab
 
 **Accessing Build Artifacts:**
-1. Go to [Actions tab](https://github.com/kobenguyent/qa-utils/actions/workflows/build-electron.yml)
+1. Go to [Actions tab](https://github.com/kobenguyent/kobeanqautils/actions/workflows/build-electron.yml)
 2. Click on a successful workflow run
 3. Download artifacts:
    - `linux-appimage` - AppImage for Linux
@@ -317,7 +317,7 @@ Configuration in `package.json`:
   "publish": {
     "provider": "github",
     "owner": "kobenguyent",
-    "repo": "qa-utils"
+    "repo": "kobeanqautils"
   }
 }
 ```
@@ -382,7 +382,7 @@ Potential improvements:
 2. **Native Notifications**: Alert users of important events
 3. **System Tray**: Minimize to tray instead of closing
 4. **File System Access**: Enhanced file operations
-5. **Custom Protocols**: Handle `qa-utils://` URLs
+5. **Custom Protocols**: Handle `kobeanqautils://` URLs
 6. **Menu Bar Extra**: macOS menu bar app
 7. **Native Dialogs**: File picker, alerts, etc.
 
@@ -445,6 +445,6 @@ This version is used in:
 ## Support
 
 For issues or questions:
-- Open GitHub issue: https://github.com/kobenguyent/qa-utils/issues
+- Open GitHub issue: https://github.com/kobenguyent/kobeanqautils/issues
 - Check troubleshooting section above
 - Review Electron documentation

@@ -751,7 +751,7 @@ export class WebsiteScanner {
           method: 'POST',
           headers: {
             'Content-Type': 'text/html; charset=utf-8',
-            'User-Agent': 'QA-Utils-Website-Scanner/1.0'
+            'User-Agent': 'kobeanqautils-Website-Scanner/1.0'
           },
           body: html
         });

@@ -53,9 +53,9 @@ Add to your Claude Desktop configuration file:
 // ~/Library/Application Support/Claude/claude_desktop_config.json
 {
   "mcpServers": {
-    "qa-utils": {
+    "kobeanqautils": {
       "command": "node",
-      "args": ["/absolute/path/to/qa-utils/mcp-server/dist/mcp-server/src/index.js"]
+      "args": ["/absolute/path/to/kobeanqautils/mcp-server/dist/mcp-server/src/index.js"]
     }
   }
 }
@@ -65,16 +65,16 @@ Add to your Claude Desktop configuration file:
 // %APPDATA%\Claude\claude_desktop_config.json
 {
   "mcpServers": {
-    "qa-utils": {
+    "kobeanqautils": {
       "command": "node",
-      "args": ["C:\\path\\to\\qa-utils\\mcp-server\\dist\\mcp-server\\src\\index.js"]
+      "args": ["C:\\path\\to\\kobeanqautils\\mcp-server\\dist\\mcp-server\\src\\index.js"]
     }
   }
 }
 ```
 :::
 
-After adding the configuration, **restart Claude Desktop**. The qa-utils tools will then be available for Claude to use.
+After adding the configuration, **restart Claude Desktop**. The kobeanqautils tools will then be available for Claude to use.
 
 ### Cursor
 
@@ -83,9 +83,9 @@ Add to your Cursor MCP settings (`.cursor/mcp.json`):
 ```json
 {
   "mcpServers": {
-    "qa-utils": {
+    "kobeanqautils": {
       "command": "node",
-      "args": ["/absolute/path/to/qa-utils/mcp-server/dist/mcp-server/src/index.js"]
+      "args": ["/absolute/path/to/kobeanqautils/mcp-server/dist/mcp-server/src/index.js"]
     }
   }
 }
@@ -96,7 +96,7 @@ Add to your Cursor MCP settings (`.cursor/mcp.json`):
 The server uses **stdio transport**, which is the standard for local MCP servers. Any MCP-compatible client can connect by spawning the process:
 
 ```bash
-node /path/to/qa-utils/mcp-server/dist/mcp-server/src/index.js
+node /path/to/kobeanqautils/mcp-server/dist/mcp-server/src/index.js
 ```
 
 ## Tool Examples

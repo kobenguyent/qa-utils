@@ -6,7 +6,7 @@
     "description": "REST API for KobeanQAUtils — exposes all tool functions as HTTP endpoints. Use the Swagger UI below to explore and test every endpoint interactively, or import the OpenAPI spec into your automation framework.",
     "contact": {
       "name": "KobeT",
-      "url": "https://github.com/kobenguyent/qa-utils"
+      "url": "https://github.com/kobenguyent/kobeanqautils"
     },
     "license": {
       "name": "MIT",

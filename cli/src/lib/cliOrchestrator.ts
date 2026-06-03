@@ -1,5 +1,5 @@
 /**
- * qautils-cli — CLI Agent Orchestrator
+ * kobeanqautils-cli — CLI Agent Orchestrator
  *
  * Node.js port of src/utils/orchestrator.ts. Uses runCliAgent from
  * cliAgentExecutor instead of the browser runAgent.

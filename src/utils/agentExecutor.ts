@@ -1,7 +1,7 @@
 /**
  * Agent Executor — Autonomous AI Agent for QA Utils
  *
- * This module turns qa-utils into an AI agent that can autonomously plan and
+ * This module turns kobeanqautils into an AI agent that can autonomously plan and
  * execute multi-step tasks using available tools. Given a task description,
  * the agent:
  *   1. Sends the task + available tool descriptions to the AI provider

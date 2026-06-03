@@ -1,5 +1,5 @@
 /**
- * qautils-cli — CLI Agent Executor
+ * kobeanqautils-cli — CLI Agent Executor
  *
  * Node.js port of the browser agent executor. Uses native crypto and the
  * existing aiClient for provider calls. Supports the same observe-think-act

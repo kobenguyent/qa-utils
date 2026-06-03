@@ -24,7 +24,7 @@ interface KanbanBoard {
     lastUpdated: string;
 }
 
-const STORAGE_KEY = 'qa-utils-kanban-board';
+const STORAGE_KEY = 'kobeanqautils-kanban-board';
 
 const defaultBoard: KanbanBoard = {
     columns: [

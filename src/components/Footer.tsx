@@ -52,7 +52,7 @@ export const Footer: React.FC = () => {
               </a>
               <span className="footer-sep" aria-hidden="true">·</span>
               <a
-                href="https://github.com/kobenguyent/qa-utils"
+                href="https://github.com/kobenguyent/kobeanqautils"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="footer-link"
@@ -103,7 +103,7 @@ export const Footer: React.FC = () => {
 
           <p className="mt-4 mb-0">
             <strong>Questions?</strong> Visit our{' '}
-            <a href="https://github.com/kobenguyent/qa-utils" target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/kobenguyent/kobeanqautils" target="_blank" rel="noopener noreferrer">
               GitHub repository
             </a>
           </p>

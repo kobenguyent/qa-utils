@@ -3,9 +3,9 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'KobeanQAUtils',
   description: 'A comprehensive collection of quality assurance tools and utilities',
-  base: '/qa-utils/docs/',
+  base: '/kobeanqautils/docs/',
   head: [
-    ['link', { rel: 'icon', type: 'image/png', href: '/qa-utils/docs/logo-icon.png' }],
+    ['link', { rel: 'icon', type: 'image/png', href: '/kobeanqautils/docs/logo-icon.png' }],
   ],
   themeConfig: {
     logo: {
@@ -31,9 +31,9 @@ export default defineConfig({
       {
         text: 'Links',
         items: [
-          { text: 'Live Demo', link: 'https://kobenguyent.github.io/qa-utils/#/' },
-          { text: 'API Docs', link: 'https://kobenguyent.github.io/qa-utils/api-docs/' },
-          { text: 'GitHub', link: 'https://github.com/kobenguyent/qa-utils' },
+          { text: 'Live Demo', link: 'https://kobenguyent.github.io/kobeanqautils/#/' },
+          { text: 'API Docs', link: 'https://kobenguyent.github.io/kobeanqautils/api-docs/' },
+          { text: 'GitHub', link: 'https://github.com/kobenguyent/kobeanqautils' },
         ],
       },
     ],
@@ -46,7 +46,7 @@ export default defineConfig({
             { text: 'Getting Started', link: '/guide/getting-started' },
             { text: 'Installation', link: '/guide/installation' },
             { text: 'Desktop App', link: '/guide/desktop-app' },
-            { text: 'CLI (qautils-cli)', link: '/guide/cli' },
+            { text: 'CLI (kobeanqautils-cli)', link: '/guide/cli' },
           ],
         },
         {
@@ -71,7 +71,7 @@ export default defineConfig({
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/kobenguyent/qa-utils' },
+      { icon: 'github', link: 'https://github.com/kobenguyent/kobeanqautils' },
     ],
 
     footer: {
@@ -84,7 +84,7 @@ export default defineConfig({
     },
 
     editLink: {
-      pattern: 'https://github.com/kobenguyent/qa-utils/edit/main/docs/:path',
+      pattern: 'https://github.com/kobenguyent/kobeanqautils/edit/main/docs/:path',
       text: 'Edit this page on GitHub',
     },
   },

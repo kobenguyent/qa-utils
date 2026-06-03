@@ -3,7 +3,7 @@
  */
 import { UnifiedCollection } from './types/collectionTypes';
 
-const DB_NAME = 'qa-utils-collections';
+const DB_NAME = 'kobeanqautils-collections';
 const DB_VERSION = 1;
 const STORE_NAME = 'collections';
 

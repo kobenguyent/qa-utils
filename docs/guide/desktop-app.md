@@ -14,7 +14,7 @@ KobeanQAUtils is available as a cross-platform desktop application built with [E
 
 Pre-built desktop applications are automatically generated via GitHub Actions:
 
-1. Go to the [Actions tab](https://github.com/kobenguyent/qa-utils/actions/workflows/build-electron.yml)
+1. Go to the [Actions tab](https://github.com/kobenguyent/kobeanqautils/actions/workflows/build-electron.yml)
 2. Click on the latest successful workflow run
 3. Download the package for your platform from the **Artifacts** section
 
@@ -58,12 +58,12 @@ chmod +x "KobeanQAUtils-1.0.0.AppImage"
 
 **Debian/Ubuntu**
 ```bash
-sudo dpkg -i qa-utils_1.0.0_amd64.deb
+sudo dpkg -i kobeanqautils_1.0.0_amd64.deb
 ```
 
 **Fedora/RHEL**
 ```bash
-sudo rpm -i qa-utils-1.0.0.x86_64.rpm
+sudo rpm -i kobeanqautils-1.0.0.x86_64.rpm
 ```
 
 ## Build from Source
@@ -93,7 +93,7 @@ npm run electron:build:linux
 ## Architecture
 
 ```
-qa-utils/
+kobeanqautils/
 ├── electron/
 │   ├── main.js          # Main process entry point
 │   └── preload.js       # Preload script for secure IPC

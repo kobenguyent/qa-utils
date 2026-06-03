@@ -1,6 +1,6 @@
 # qautils-cli
 
-> **Command-line interface for [KobeanQAUtils](https://github.com/kobenguyent/qa-utils)** — utility tools for daily testing and automation workflows, plus an AI-powered Kobean chat assistant and multi-agent orchestration system.
+> **Command-line interface for [KobeanQAUtils](https://github.com/kobenguyent/kobeanqautils)** — utility tools for daily testing and automation workflows, plus an AI-powered Kobean chat assistant and multi-agent orchestration system.
 
 ---
 
@@ -20,7 +20,7 @@
 npm login --registry=https://npm.pkg.github.com --scope=@kobenguyent
 
 # Install globally
-npm install -g @kobenguyent/qautils-cli --registry=https://npm.pkg.github.com
+npm install -g @kobenguyent/kobeanqautils-cli --registry=https://npm.pkg.github.com
 
 qautils --help
 ```
@@ -34,7 +34,7 @@ Alternatively, add a `.npmrc` file to your project:
 Then install:
 
 ```bash
-npm install -g @kobenguyent/qautils-cli
+npm install -g @kobenguyent/kobeanqautils-cli
 ```
 
 ### Local development (inside this repo)
@@ -52,7 +52,7 @@ qautils --help
 
 ### From the project root
 ```bash
-cd /path/to/qa-utils/cli
+cd /path/to/kobeanqautils/cli
 npm install && npm run build && npm link
 ```
 
@@ -333,7 +333,7 @@ qautils graphql introspect https://countries.trevorblades.com/graphql --type Cou
 
 ## 🤖 Kobean AI Chat
 
-Kobean is an AI-powered chat assistant built into qautils-cli. It supports multiple providers and provides an interactive REPL-style chat experience right in your terminal.
+Kobean is an AI-powered chat assistant built into kobeanqautils-cli. It supports multiple providers and provides an interactive REPL-style chat experience right in your terminal.
 
 ### Configure AI Provider
 
@@ -375,12 +375,12 @@ qautils chat models --provider google --api-key AIzaXXX
 | `ollama` | Endpoint (local) | llama2 |
 
 Configuration is stored at:
-- **Linux / macOS**: `~/.config/qautils-cli/config.json`
-- **Windows**: `%APPDATA%\qautils-cli\config.json`
+- **Linux / macOS**: `~/.config/kobeanqautils-cli/config.json`
+- **Windows**: `%APPDATA%\kobeanqautils-cli\config.json`
 
 > ⚠️ API keys are stored in plain text. Ensure your config file has appropriate permissions:
 > ```bash
-> chmod 600 ~/.config/qautils-cli/config.json
+> chmod 600 ~/.config/kobeanqautils-cli/config.json
 > ```
 > Alternatively, use environment variables if your shell/CI environment supports them.
 
@@ -659,4 +659,4 @@ cli/
 
 ## License
 
-MIT — same as the parent [KobeanQAUtils](https://github.com/kobenguyent/qa-utils) project.
+MIT — same as the parent [KobeanQAUtils](https://github.com/kobenguyent/kobeanqautils) project.

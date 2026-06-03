@@ -14,7 +14,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/qautils-cli-rest-api
+  IMAGE_NAME: ${{ github.repository_owner }}/kobeanqautils-cli-rest-api
 
 jobs:
   test:

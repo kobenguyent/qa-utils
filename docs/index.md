@@ -14,13 +14,13 @@ hero:
       link: /guide/getting-started
     - theme: alt
       text: Live Demo
-      link: https://kobenguyent.github.io/qa-utils/#/
+      link: https://kobenguyent.github.io/kobeanqautils/#/
     - theme: alt
       text: API Docs
-      link: https://kobenguyent.github.io/qa-utils/api-docs/
+      link: https://kobenguyent.github.io/kobeanqautils/api-docs/
     - theme: alt
       text: GitHub
-      link: https://github.com/kobenguyent/qa-utils
+      link: https://github.com/kobenguyent/kobeanqautils
 
 features:
   - icon: 🛠️
@@ -59,7 +59,7 @@ features:
 
 ### Web App
 
-Visit the [live demo](https://kobenguyent.github.io/qa-utils/#/) — no installation needed.
+Visit the [live demo](https://kobenguyent.github.io/kobeanqautils/#/) — no installation needed.
 
 ### Local Development
 
@@ -78,9 +78,9 @@ Then add to your Claude Desktop config:
 ```json
 {
   "mcpServers": {
-    "qa-utils": {
+    "kobeanqautils": {
       "command": "node",
-      "args": ["/path/to/qa-utils/mcp-server/dist/mcp-server/src/index.js"]
+      "args": ["/path/to/kobeanqautils/mcp-server/dist/mcp-server/src/index.js"]
     }
   }
 }

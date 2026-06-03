@@ -1,5 +1,5 @@
 /**
- * qautils-cli — Interactive TUI Mode  (v2)
+ * kobeanqautils-cli — Interactive TUI Mode  (v2)
  * Launched when qautils is run with no arguments (or -i / --interactive).
  */
 

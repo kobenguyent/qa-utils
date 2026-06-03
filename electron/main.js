@@ -121,13 +121,13 @@ function createMenu() {
         {
           label: 'About QA Utils',
           click: async () => {
-            await shell.openExternal('https://github.com/kobenguyent/qa-utils');
+            await shell.openExternal('https://github.com/kobenguyent/kobeanqautils');
           },
         },
         {
           label: 'Documentation',
           click: async () => {
-            await shell.openExternal('https://github.com/kobenguyent/qa-utils#readme');
+            await shell.openExternal('https://github.com/kobenguyent/kobeanqautils#readme');
           },
         },
       ],

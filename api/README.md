@@ -1,6 +1,6 @@
-# qautils-cli-rest-api
+# kobeanqautils-cli-rest-api
 
-> A REST API wrapper around [KobeanQAUtils](https://github.com/kobenguyent/qa-utils) — exposes all 19 utility tools as HTTP endpoints with a built-in **Swagger UI** and an **OpenAPI 3.0 spec** ready for your automation stack.
+> A REST API wrapper around [KobeanQAUtils](https://github.com/kobenguyent/kobeanqautils) — exposes all 19 utility tools as HTTP endpoints with a built-in **Swagger UI** and an **OpenAPI 3.0 spec** ready for your automation stack.
 
 Inspired by [signal-cli-rest-api](https://github.com/bbernhard/signal-cli-rest-api).
 
@@ -12,9 +12,9 @@ Inspired by [signal-cli-rest-api](https://github.com/bbernhard/signal-cli-rest-a
 
 ```bash
 docker run -d \
-  --name qautils-cli-rest-api \
+  --name kobeanqautils-cli-rest-api \
   -p 3333:3333 \
-  ghcr.io/kobenguyent/qautils-cli-rest-api:latest
+  ghcr.io/kobenguyent/kobeanqautils-cli-rest-api:latest
 ```
 
 Then open:
@@ -34,9 +34,9 @@ Or create your own `docker-compose.yml`:
 
 ```yaml
 services:
-  qautils-cli-rest-api:
-    image: ghcr.io/kobenguyent/qautils-cli-rest-api:latest
-    container_name: qautils-cli-rest-api
+  kobeanqautils-cli-rest-api:
+    image: ghcr.io/kobenguyent/kobeanqautils-cli-rest-api:latest
+    container_name: kobeanqautils-cli-rest-api
     restart: unless-stopped
     ports:
       - "3333:3333"
