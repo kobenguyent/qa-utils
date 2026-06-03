@@ -133,3 +133,102 @@ jobs:
           echo "  - Linux: AppImage, DEB, RPM"
           echo "  - Windows: NSIS Installer, Portable EXE"
           echo "  - macOS: DMG, ZIP"
+
+  # Create a GitHub release and attach platform artifacts (only on tag pushes)
+  create-release:
+    needs: [build-linux, build-windows, build-macos]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+
+    steps:
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+
+      - name: Download Linux AppImage
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-appimage
+          path: artifacts/linux
+
+      - name: Download Linux DEB
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-deb
+          path: artifacts/linux
+
+      - name: Download Linux RPM
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-rpm
+          path: artifacts/linux
+
+      - name: Download Windows installer
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-installer
+          path: artifacts/windows
+
+      - name: Download macOS DMG
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-dmg
+          path: artifacts/macos
+
+      - name: Download macOS ZIP
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-zip
+          path: artifacts/macos
+
+      - name: Rename artifacts to kobeanqautils-version-platform pattern
+        run: |
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          mkdir -p dist
+
+          # Linux
+          for f in artifacts/linux/*.AppImage; do
+            [ -f "$f" ] && cp "$f" "dist/kobeanqautils-${VERSION}-linux.AppImage"
+          done
+          for f in artifacts/linux/*.deb; do
+            [ -f "$f" ] && cp "$f" "dist/kobeanqautils-${VERSION}-linux.deb"
+          done
+          for f in artifacts/linux/*.rpm; do
+            [ -f "$f" ] && cp "$f" "dist/kobeanqautils-${VERSION}-linux.rpm"
+          done
+
+          # Windows — electron-builder produces a setup installer (NSIS) and a portable exe
+          for f in artifacts/windows/*.exe; do
+            [ -f "$f" ] || continue
+            name=$(basename "$f")
+            if echo "$name" | grep -qi "setup\|install"; then
+              cp "$f" "dist/kobeanqautils-${VERSION}-windows-setup.exe"
+            else
+              cp "$f" "dist/kobeanqautils-${VERSION}-windows-portable.exe"
+            fi
+          done
+
+          # macOS
+          for f in artifacts/macos/*.dmg; do
+            [ -f "$f" ] && cp "$f" "dist/kobeanqautils-${VERSION}-mac.dmg"
+          done
+          for f in artifacts/macos/*.zip; do
+            [ -f "$f" ] && cp "$f" "dist/kobeanqautils-${VERSION}-mac.zip"
+          done
+
+          echo "📦 Release artifacts:"
+          ls -lh dist/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
