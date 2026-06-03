@@ -6,7 +6,7 @@
  */
 
 import { randomUUID, createHash } from 'crypto';
-import {AI_BASE_URL} from "../../../common/data.js";
+import {AI_BASE_URL} from "../../../common/data";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
