@@ -37,15 +37,30 @@ Bidirectional Base64 encoding and decoding for text and binary data.
 
 ### ﹛﹜ JSON Formatter
 
-Advanced JSON processing and validation with an interactive tree explorer.
+Advanced JSON processing and validation with interactive tree and graph explorers.
 
 - **Pretty-print** with configurable indentation (2 or 4 spaces)
 - **Collapsible tree view** for exploring deeply nested objects
+- **Key relationship graph preview** to visualize parent → child hierarchy with zoom/pan
 - **Validation** — shows line/column of syntax errors in real-time
 - **Minify** mode for compact output
 - Copy formatted or minified output to clipboard
 
 **Route:** `/jsonFormatter` &nbsp;|&nbsp; **MCP:** `format_json` &nbsp;|&nbsp; **CLI:** `qautils json format/validate/minify`
+
+---
+
+### 🕸️ JSON Visualizer
+
+Standalone graph explorer inspired by node-based JSON visualizer tools.
+
+- **Interactive relationship graph** for parent → child JSON hierarchy
+- **Type-colored nodes** for objects, arrays, primitive values, and array summaries
+- **Pan, zoom, fit, and reset controls** for large structures
+- **Node detail panel** with JSON path, type, child count, and sample value
+- **Large-payload safeguards** with truncation warnings
+
+**Route:** `/json-visualizer`
 
 ---
 

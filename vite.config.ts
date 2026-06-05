@@ -5,6 +5,7 @@ import { execSync } from 'child_process'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import type { Plugin } from 'vite'
+import type { RollupLog, WarningHandlerWithDefault } from 'rollup'
 
 // Timeout for git commands to prevent build from hanging
 const GIT_COMMAND_TIMEOUT_MS = 5000
@@ -38,6 +39,11 @@ const packageVersion = getPackageVersion()
 const appVersion = process.env.ELECTRON === 'true' 
   ? `${packageVersion}+${commitHash}`
   : packageVersion
+
+const shouldIgnoreRollupWarning = (warning: RollupLog): boolean => (
+  warning.code === 'EVAL' &&
+  warning.id?.includes('node_modules/bluebird/js/release/util.js')
+)
 
 // Plugin to remove redundant external scripts for Electron builds
 function removeExternalScriptsForElectron(): Plugin {
@@ -96,6 +102,13 @@ export default defineConfig(({ mode }) => {
     build: {
       target: 'esnext',
       rollupOptions: {
+        onwarn(warning: RollupLog, warn: WarningHandlerWithDefault) {
+          if (shouldIgnoreRollupWarning(warning)) {
+            return
+          }
+
+          warn(warning)
+        },
         output: {
           manualChunks: {
             vendor: ['react', 'react-dom', 'react-router-dom'],

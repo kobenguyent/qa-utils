@@ -25,7 +25,8 @@
 | 🔑 [JWT Debugger](https://kobenguyent.github.io/kobeanqautils/#/jwtDebugger) | Decode & validate JSON Web Tokens with syntax-highlighted output |
 | 🛸 [Base64](https://kobenguyent.github.io/kobeanqautils/#/base64) | Bidirectional Base64 encode / decode |
 | ⏰ [Timestamp Converter](https://kobenguyent.github.io/kobeanqautils/#/timestamp) | Unix epoch ↔ human-readable date with timezone support |
-| ﹛﹜ [JSON Formatter](https://kobenguyent.github.io/kobeanqautils/#/jsonFormatter) | Pretty-print, validate, and explore JSON with a collapsible tree view |
+| ﹛﹜ [JSON Formatter](https://kobenguyent.github.io/kobeanqautils/#/jsonFormatter) | Pretty-print, validate, and explore JSON with a tree view and graph preview |
+| 🕸️ [JSON Visualizer](https://kobenguyent.github.io/kobeanqautils/#/json-visualizer) | Explore JSON hierarchy as a professional interactive relationship graph |
 | 🎨 [Color Converter](https://kobenguyent.github.io/kobeanqautils/#/color-converter) | HEX ↔ RGB ↔ HSL ↔ CMYK ↔ LAB with palette generation & WCAG contrast check |
 | 🗄️ [SQL Generator](https://kobenguyent.github.io/kobeanqautils/#/sql-generator) | Visual SQL query builder (SELECT, INSERT, UPDATE, DELETE, CREATE TABLE) |
 | 🌐 [HTML Renderer](https://kobenguyent.github.io/kobeanqautils/#/html-renderer) | Live preview and render HTML in real-time |

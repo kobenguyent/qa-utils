@@ -377,11 +377,20 @@ const navigableTools: ToolDefinition[] = [
     {
         id: 'json-formatter',
         name: 'JSON Formatter',
-        description: 'Format, validate, and beautify JSON data',
+        description: 'Format, validate, beautify, and inspect JSON data',
         category: 'converter',
-        keywords: ['json', 'format', 'beautify', 'validate', 'pretty'],
+        keywords: ['json', 'format', 'beautify', 'validate', 'pretty', 'tree'],
         examples: ['format json', 'beautify json', 'validate json'],
         route: '/jsonFormatter',
+    },
+    {
+        id: 'json-visualizer',
+        name: 'JSON Visualizer',
+        description: 'Visualize JSON hierarchy as an interactive relationship graph',
+        category: 'converter',
+        keywords: ['json', 'visualize', 'visualizer', 'graph', 'relationship', 'nodes', 'hierarchy'],
+        examples: ['visualize json', 'show json graph', 'json relationships'],
+        route: '/json-visualizer',
     },
     {
         id: 'otp-generator',
