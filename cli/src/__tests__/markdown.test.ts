@@ -35,7 +35,7 @@ describe('convertMarkdownToConfluence (CLI)', () => {
   });
 
   it('converts links', () => {
-    expect(convertMarkdownToConfluence('[QA Utils](https://qa-utils.com)')).toBe('[QA Utils|https://qa-utils.com]');
+    expect(convertMarkdownToConfluence('[QA Utils](https://kobeanqautils.com)')).toBe('[QA Utils|https://kobeanqautils.com]');
   });
 
   it('converts images', () => {

@@ -59,7 +59,7 @@ export const Home: React.FC = () => {
                   Explore Tools
                 </Button>
                 <Button
-                  href="https://github.com/kobenguyent/qa-utils"
+                  href="https://github.com/kobenguyent/kobeanqautils"
                   target="_blank"
                   rel="noopener noreferrer"
                   variant="outline-secondary"

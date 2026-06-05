@@ -57,7 +57,7 @@ export interface DynamicQREntry {
     shortUrl: string;
 }
 
-const STORAGE_KEY = 'qa-utils-dynamic-qr-history';
+const STORAGE_KEY = 'kobeanqautils-dynamic-qr-history';
 
 /**
  * Format WiFi configuration for QR code

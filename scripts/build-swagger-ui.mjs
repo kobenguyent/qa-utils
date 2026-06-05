@@ -53,8 +53,8 @@ const html = `<!DOCTYPE html>
     </style>
   </head>
   <body>
-    <a class="back-link" href="/qa-utils/">← QA Utils App</a>
-    <a class="back-link" href="/qa-utils/docs/">📖 Docs</a>
+    <a class="back-link" href="/kobeanqautils/">← QA Utils App</a>
+    <a class="back-link" href="/kobeanqautils/docs/">📖 Docs</a>
     <div id="swagger-ui"></div>
     <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js" crossorigin></script>
     <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js" crossorigin></script>

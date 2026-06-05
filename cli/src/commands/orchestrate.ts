@@ -1,5 +1,5 @@
 /**
- * qautils-cli — Orchestrate Command
+ * kobeanqautils-cli — Orchestrate Command
  *
  * Usage:
  *   qautils orchestrate <task>             Run an auto-orchestrated multi-agent pipeline

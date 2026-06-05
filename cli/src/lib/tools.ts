@@ -1,5 +1,5 @@
 /**
- * qautils-cli — Core Tool Implementations
+ * kobeanqautils-cli — Core Tool Implementations
  *
  * Re-exports all tools from the shared Node.js tool module so the CLI
  * has a single, consistent set of implementations with the API and MCP server.

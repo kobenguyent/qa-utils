@@ -6,7 +6,7 @@ KobeanQAUtils is a comprehensive collection of quality assurance tools and utili
 
 The fastest way to get started is the live demo — no installation required:
 
-🌐 **[Open KobeanQAUtils](https://kobenguyent.github.io/qa-utils/#/)**
+🌐 **[Open KobeanQAUtils](https://kobenguyent.github.io/kobeanqautils/#/)**
 
 ## Local Development
 
@@ -19,8 +19,8 @@ The fastest way to get started is the live demo — no installation required:
 
 ```bash
 # Clone the repository
-git clone https://github.com/kobenguyent/qa-utils.git
-cd qa-utils
+git clone https://github.com/kobenguyent/kobeanqautils.git
+cd kobeanqautils
 
 # Install dependencies
 npm install

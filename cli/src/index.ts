@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * qautils-cli — QA Utils Command-Line Interface  (v1.1)
+ * kobeanqautils-cli — QA Utils Command-Line Interface  (v1.1)
  *
  * No arguments  →  interactive TUI mode
  * With arguments →  direct CLI mode
@@ -56,7 +56,7 @@ program
     chalk.bold('KobeanQAUtils CLI') +
       chalk.dim(' — 24 utility tools for testing and automation workflows') +
       '\n' +
-      chalk.dim('  https://github.com/kobenguyent/qa-utils'),
+      chalk.dim('  https://github.com/kobenguyent/kobeanqautils'),
   )
   .version(CLI_VERSION, '-v, --version', 'print the current version')
   .option('-i, --interactive', 'launch the interactive TUI (default when no args given)')

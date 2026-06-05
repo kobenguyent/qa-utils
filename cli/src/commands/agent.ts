@@ -1,5 +1,5 @@
 /**
- * qautils-cli — Agent Command
+ * kobeanqautils-cli — Agent Command
  *
  * Usage:
  *   qautils agent run <task>          Run an autonomous agent task

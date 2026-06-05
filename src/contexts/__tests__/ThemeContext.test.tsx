@@ -41,7 +41,7 @@ describe('ThemeProvider', () => {
   });
 
   it('reads the stored theme from localStorage on mount', () => {
-    localStorage.setItem('qa-utils-theme', 'dark');
+    localStorage.setItem('kobeanqautils-theme', 'dark');
     render(
       <ThemeProvider>
         <ThemeConsumer />
@@ -76,7 +76,7 @@ describe('ThemeProvider', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Change' }));
     });
 
-    expect(localStorage.getItem('qa-utils-theme')).toBe('dark');
+    expect(localStorage.getItem('kobeanqautils-theme')).toBe('dark');
   });
 
   it('applies the theme to the document element', async () => {

@@ -5,7 +5,7 @@ An overview of the KobeanQAUtils repository layout and architecture.
 ## Repository Layout
 
 ```
-qa-utils/
+kobeanqautils/
 ├── src/                          # React application source
 │   ├── components/               # React components
 │   │   ├── utils/                # Tool components (AgentMode, etc.)

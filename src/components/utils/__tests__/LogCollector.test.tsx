@@ -200,7 +200,7 @@ describe('LogCollector Component', () => {
     const { container } = render(<LogCollector />);
     const link = container.querySelector('a[aria-label="Report issue on GitHub"]');
     expect(link).not.toBeNull();
-    expect(link?.getAttribute('href')).toContain('github.com/kobenguyent/qa-utils/issues/new');
+    expect(link?.getAttribute('href')).toContain('github.com/kobenguyent/kobeanqautils/issues/new');
   });
   it('Pause button toggles live update state', () => {
     setupMocks([]);

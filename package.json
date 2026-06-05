@@ -1,13 +1,13 @@
 {
-  "name": "qa-utils",
+  "name": "kobeanqautils",
   "version": "1.2.0",
   "description": "KobeanQAUtils — A comprehensive collection of quality assurance tools and utilities to enhance your testing workflow",
   "author": "KobeT <kobenguyent@gmail.com>",
   "license": "MIT",
-  "homepage": "https://github.com/kobenguyent/qa-utils",
+  "homepage": "https://github.com/kobenguyent/kobeanqautils",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kobenguyent/qa-utils.git"
+    "url": "https://github.com/kobenguyent/kobeanqautils.git"
   },
   "type": "module",
   "main": "electron/main.js",
@@ -102,7 +102,7 @@
     "wait-on": "^9.0.3"
   },
   "build": {
-    "appId": "com.kobenguyent.qa-utils",
+    "appId": "com.kobenguyent.kobeanqautils",
     "productName": "KobeanQAUtils",
     "copyright": "Copyright © 2024 KobeT",
     "directories": {

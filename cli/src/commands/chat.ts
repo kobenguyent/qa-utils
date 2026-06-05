@@ -1,5 +1,5 @@
 /**
- * qautils-cli — Kobean Chat Command
+ * kobeanqautils-cli — Kobean Chat Command
  *
  * Usage:
  *   qautils chat                   Start an interactive AI chat session

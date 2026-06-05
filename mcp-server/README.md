@@ -1,6 +1,6 @@
-# qa-utils MCP Server
+# kobeanqautils MCP Server
 
-A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that exposes qa-utils tools to AI agents like Claude. This enables AI assistants to programmatically use QA utility functions through the standardized MCP protocol.
+A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that exposes kobeanqautils tools to AI agents like Claude. This enables AI assistants to programmatically use QA utility functions through the standardized MCP protocol.
 
 ## Available Tools
 
@@ -54,22 +54,22 @@ Add the following to your Claude Desktop configuration file:
 ```json
 {
   "mcpServers": {
-    "qa-utils": {
+    "kobeanqautils": {
       "command": "node",
-      "args": ["/absolute/path/to/qa-utils/mcp-server/dist/mcp-server/src/index.js"]
+      "args": ["/absolute/path/to/kobeanqautils/mcp-server/dist/mcp-server/src/index.js"]
     }
   }
 }
 ```
 
-After adding the configuration, restart Claude Desktop. The qa-utils tools will then be available for Claude to use.
+After adding the configuration, restart Claude Desktop. The kobeanqautils tools will then be available for Claude to use.
 
 ## Usage with Other MCP Clients
 
 The server uses stdio transport, which is the standard for local MCP servers. Any MCP-compatible client can connect by spawning the process:
 
 ```bash
-node /path/to/qa-utils/mcp-server/dist/mcp-server/src/index.js
+node /path/to/kobeanqautils/mcp-server/dist/mcp-server/src/index.js
 ```
 
 ## Development

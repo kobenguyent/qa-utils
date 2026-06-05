@@ -1,5 +1,5 @@
 /**
- * qautils-cli — Output Formatting Utilities (v2)
+ * kobeanqautils-cli — Output Formatting Utilities (v2)
  *
  * Consistent, chalk-based helpers for all CLI commands.
  * Every exported function writes directly to stdout/stderr.

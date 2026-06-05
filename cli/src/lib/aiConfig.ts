@@ -1,5 +1,5 @@
 /**
- * qautils-cli — AI Provider Configuration
+ * kobeanqautils-cli — AI Provider Configuration
  *
  * Reads and writes the AI provider settings to a persistent config file at:
  *   Linux/macOS: ~/.config/qautils-cli/config.json
@@ -23,7 +23,7 @@ export interface AIProviderConfig {
   cloudflareAccountId?: string; // For Cloudflare Workers AI
 }
 
-const CONFIG_DIR_NAME = 'qautils-cli';
+const CONFIG_DIR_NAME = 'kobeanqautils-cli';
 const CONFIG_FILE_NAME = 'config.json';
 
 /** Returns the platform-specific config directory path */

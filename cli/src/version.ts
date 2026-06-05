@@ -1,5 +1,5 @@
 /**
- * qautils-cli — Version helper
+ * kobeanqautils-cli — Version helper
  *
  * Reads the package version from package.json at runtime so that
  * the version string is always in sync with cli/package.json.

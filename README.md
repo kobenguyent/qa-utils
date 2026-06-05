@@ -1,14 +1,14 @@
 # KobeanQAUtils 🚀
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Visit-brightgreen?style=flat-square)](https://kobenguyent.github.io/qa-utils/#/)
-[![npm version](https://img.shields.io/npm/v/qautils-cli?label=CLI&style=flat-square)](https://www.npmjs.com/package/qautils-cli)
-[![Tests](https://img.shields.io/badge/Tests-928%2B-blue?style=flat-square)](https://github.com/kobenguyent/qa-utils/actions)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Visit-brightgreen?style=flat-square)](https://kobenguyent.github.io/kobeanqautils/#/)
+[![npm version](https://img.shields.io/npm/v/kobeanqautils-cli?label=CLI&style=flat-square)](https://www.npmjs.com/package/kobeanqautils-cli)
+[![Tests](https://img.shields.io/badge/Tests-928%2B-blue?style=flat-square)](https://github.com/kobenguyent/kobeanqautils/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 [![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-blue?style=flat-square)](https://paypal.me/peternguyentr?country.x=DE&locale.x=en_US)
 
 **KobeanQAUtils** is an all-in-one quality assurance toolkit — 47+ tools for developers and testers, available as a **web app**, **desktop app** (macOS/Windows/Linux), **CLI**, **REST API**, and **MCP server** for AI agent integration.
 
-🌐 **[Try it now →](https://kobenguyent.github.io/qa-utils/#/)**
+🌐 **[Try it now →](https://kobenguyent.github.io/kobeanqautils/#/)**
 <img alt="Screenshot" src="public/screenshot.png" />
 
 
@@ -22,66 +22,66 @@
 
 | Tool | What it does |
 |------|-------------|
-| 🔑 [JWT Debugger](https://kobenguyent.github.io/qa-utils/#/jwtDebugger) | Decode & validate JSON Web Tokens with syntax-highlighted output |
-| 🛸 [Base64](https://kobenguyent.github.io/qa-utils/#/base64) | Bidirectional Base64 encode / decode |
-| ⏰ [Timestamp Converter](https://kobenguyent.github.io/qa-utils/#/timestamp) | Unix epoch ↔ human-readable date with timezone support |
-| ﹛﹜ [JSON Formatter](https://kobenguyent.github.io/qa-utils/#/jsonFormatter) | Pretty-print, validate, and explore JSON with a tree view and graph preview |
-| 🕸️ [JSON Visualizer](https://kobenguyent.github.io/qa-utils/#/json-visualizer) | Explore JSON hierarchy as a professional interactive relationship graph |
-| 🎨 [Color Converter](https://kobenguyent.github.io/qa-utils/#/color-converter) | HEX ↔ RGB ↔ HSL ↔ CMYK ↔ LAB with palette generation & WCAG contrast check |
-| 🗄️ [SQL Generator](https://kobenguyent.github.io/qa-utils/#/sql-generator) | Visual SQL query builder (SELECT, INSERT, UPDATE, DELETE, CREATE TABLE) |
-| 🌐 [HTML Renderer](https://kobenguyent.github.io/qa-utils/#/html-renderer) | Live preview and render HTML in real-time |
-| 🔄 [Media Converter](https://kobenguyent.github.io/qa-utils/#/media-converter) | Image ↔ PDF, PNG ↔ JPEG, background removal |
+| 🔑 [JWT Debugger](https://kobenguyent.github.io/kobeanqautils/#/jwtDebugger) | Decode & validate JSON Web Tokens with syntax-highlighted output |
+| 🛸 [Base64](https://kobenguyent.github.io/kobeanqautils/#/base64) | Bidirectional Base64 encode / decode |
+| ⏰ [Timestamp Converter](https://kobenguyent.github.io/kobeanqautils/#/timestamp) | Unix epoch ↔ human-readable date with timezone support |
+| ﹛﹜ [JSON Formatter](https://kobenguyent.github.io/kobeanqautils/#/jsonFormatter) | Pretty-print, validate, and explore JSON with a tree view and graph preview |
+| 🕸️ [JSON Visualizer](https://kobenguyent.github.io/kobeanqautils/#/json-visualizer) | Explore JSON hierarchy as a professional interactive relationship graph |
+| 🎨 [Color Converter](https://kobenguyent.github.io/kobeanqautils/#/color-converter) | HEX ↔ RGB ↔ HSL ↔ CMYK ↔ LAB with palette generation & WCAG contrast check |
+| 🗄️ [SQL Generator](https://kobenguyent.github.io/kobeanqautils/#/sql-generator) | Visual SQL query builder (SELECT, INSERT, UPDATE, DELETE, CREATE TABLE) |
+| 🌐 [HTML Renderer](https://kobenguyent.github.io/kobeanqautils/#/html-renderer) | Live preview and render HTML in real-time |
+| 🔄 [Media Converter](https://kobenguyent.github.io/kobeanqautils/#/media-converter) | Image ↔ PDF, PNG ↔ JPEG, background removal |
 
 ### 🎲 Generators
 
 | Tool | What it does |
 |------|-------------|
-| 🆔 [UUID Generator](https://kobenguyent.github.io/qa-utils/#/uuid) | Generate UUIDs v1 and v4 |
-| 🔐 [OTP Generator](https://kobenguyent.github.io/qa-utils/#/otp) | Time-based (TOTP) and counter-based (HOTP) one-time passwords |
-| 🔑 [Password Generator](https://kobenguyent.github.io/qa-utils/#/password) | Cryptographically secure passwords with configurable rules |
-| 🔐 [Hash Generator](https://kobenguyent.github.io/qa-utils/#/hash) | SHA-1/256/512 and MD5 checksums |
-| 🔒 [HTPasswd Generator](https://kobenguyent.github.io/qa-utils/#/htpasswd) | Apache/Nginx HTTP basic-auth entries |
-| 📝 [Lorem Ipsum](https://kobenguyent.github.io/qa-utils/#/lorem-ipsum) | Placeholder text by words, sentences, or paragraphs |
-| 📋 [JIRA Comment Generator](https://kobenguyent.github.io/qa-utils/#/jiraComment) | Format Markdown-styled JIRA comments |
-| 🔢 [Character Counter](https://kobenguyent.github.io/qa-utils/#/character-counter) | Count characters, words, sentences, and lines |
-| 📁 [Test File Generator](https://kobenguyent.github.io/qa-utils/#/test-file-generator) | Generate PNG, PDF, WAV, and other file types for upload testing |
-| 🚀 [GitHub PR Script Generator](https://kobenguyent.github.io/qa-utils/#/github-pr-generator) | Generate bash scripts for full GitHub PR workflows |
-| 📱 [QR Code Generator](https://kobenguyent.github.io/qa-utils/#/qr-code) | Static and dynamic QR codes for URLs, Wi-Fi, vCards, SMS, and more |
-| 🎭 [Dummy Data Generator](https://kobenguyent.github.io/qa-utils/#/dummy-data) | Fake names, emails, addresses, phone numbers for test data |
+| 🆔 [UUID Generator](https://kobenguyent.github.io/kobeanqautils/#/uuid) | Generate UUIDs v1 and v4 |
+| 🔐 [OTP Generator](https://kobenguyent.github.io/kobeanqautils/#/otp) | Time-based (TOTP) and counter-based (HOTP) one-time passwords |
+| 🔑 [Password Generator](https://kobenguyent.github.io/kobeanqautils/#/password) | Cryptographically secure passwords with configurable rules |
+| 🔐 [Hash Generator](https://kobenguyent.github.io/kobeanqautils/#/hash) | SHA-1/256/512 and MD5 checksums |
+| 🔒 [HTPasswd Generator](https://kobenguyent.github.io/kobeanqautils/#/htpasswd) | Apache/Nginx HTTP basic-auth entries |
+| 📝 [Lorem Ipsum](https://kobenguyent.github.io/kobeanqautils/#/lorem-ipsum) | Placeholder text by words, sentences, or paragraphs |
+| 📋 [JIRA Comment Generator](https://kobenguyent.github.io/kobeanqautils/#/jiraComment) | Format Markdown-styled JIRA comments |
+| 🔢 [Character Counter](https://kobenguyent.github.io/kobeanqautils/#/character-counter) | Count characters, words, sentences, and lines |
+| 📁 [Test File Generator](https://kobenguyent.github.io/kobeanqautils/#/test-file-generator) | Generate PNG, PDF, WAV, and other file types for upload testing |
+| 🚀 [GitHub PR Script Generator](https://kobenguyent.github.io/kobeanqautils/#/github-pr-generator) | Generate bash scripts for full GitHub PR workflows |
+| 📱 [QR Code Generator](https://kobenguyent.github.io/kobeanqautils/#/qr-code) | Static and dynamic QR codes for URLs, Wi-Fi, vCards, SMS, and more |
+| 🎭 [Dummy Data Generator](https://kobenguyent.github.io/kobeanqautils/#/dummy-data) | Fake names, emails, addresses, phone numbers for test data |
 
 ### 🌐 API Testing
 
 | Tool | What it does |
 |------|-------------|
-| 🌐 [REST Client](https://kobenguyent.github.io/qa-utils/#/rest-client) | HTTP requests (GET/POST/PUT/DELETE), curl import, response viewer |
-| 🔌 [WebSocket Client](https://kobenguyent.github.io/qa-utils/#/websocket-client) | Real-time WebSocket testing with auto-reconnect and message history |
-| ⚡ [gRPC Client](https://kobenguyent.github.io/qa-utils/#/grpc-client) | gRPC-Web unary and server-streaming calls with .proto support |
-| 📦 [Collection Manager](https://kobenguyent.github.io/qa-utils/#/collection-manager) | Import, edit, convert, and export Postman / Insomnia / Thunder Client collections |
-| 🗺️ [Collection Visualizer](https://kobenguyent.github.io/qa-utils/#/collection-visualizer) | Interactive tree view of all requests, folders, and HTTP methods in a collection |
-| ⬡ [GraphQL Client](https://kobenguyent.github.io/qa-utils/#/graphql-client) | Execute GraphQL queries & mutations with introspection and schema exploration |
+| 🌐 [REST Client](https://kobenguyent.github.io/kobeanqautils/#/rest-client) | HTTP requests (GET/POST/PUT/DELETE), curl import, response viewer |
+| 🔌 [WebSocket Client](https://kobenguyent.github.io/kobeanqautils/#/websocket-client) | Real-time WebSocket testing with auto-reconnect and message history |
+| ⚡ [gRPC Client](https://kobenguyent.github.io/kobeanqautils/#/grpc-client) | gRPC-Web unary and server-streaming calls with .proto support |
+| 📦 [Collection Manager](https://kobenguyent.github.io/kobeanqautils/#/collection-manager) | Import, edit, convert, and export Postman / Insomnia / Thunder Client collections |
+| 🗺️ [Collection Visualizer](https://kobenguyent.github.io/kobeanqautils/#/collection-visualizer) | Interactive tree view of all requests, folders, and HTTP methods in a collection |
+| ⬡ [GraphQL Client](https://kobenguyent.github.io/kobeanqautils/#/graphql-client) | Execute GraphQL queries & mutations with introspection and schema exploration |
 
 ### 🔧 Developer Tools
 
 | Tool | What it does |
 |------|-------------|
-| 🎨 [Image Editor](https://kobenguyent.github.io/qa-utils/#/image-editor) | Filters, rotation, brightness/contrast, compression |
-| 🔒 [Encryption / Decryption](https://kobenguyent.github.io/qa-utils/#/encryption) | AES and other cipher algorithms |
-| 🎭 [Test Code Converter](https://kobenguyent.github.io/qa-utils/#/playwright2codecept) | Convert Playwright tests to CodeceptJS (regex mode or AI-powered) |
-| 📊 [Sequence Diagram Generator](https://kobenguyent.github.io/qa-utils/#/sequence-diagram) | Generate Mermaid sequence diagrams from test code |
-| 🚀 [CI/CD Workflow Generator](https://kobenguyent.github.io/qa-utils/#/workflow-generator) | GitHub Actions, GitLab CI, Azure DevOps, Jenkins, Bitbucket workflows |
-| 📋 [Kanban Board](https://kobenguyent.github.io/qa-utils/#/kanban) | Drag-and-drop task management |
-| 📁 [File Processor](https://kobenguyent.github.io/qa-utils/#/file-processor) | Batch resize, compress, and convert images and documents |
-| 🔍 [Website Scanner](https://kobenguyent.github.io/qa-utils/#/website-scanner) | Audit broken links, accessibility, SEO, and security issues |
+| 🎨 [Image Editor](https://kobenguyent.github.io/kobeanqautils/#/image-editor) | Filters, rotation, brightness/contrast, compression |
+| 🔒 [Encryption / Decryption](https://kobenguyent.github.io/kobeanqautils/#/encryption) | AES and other cipher algorithms |
+| 🎭 [Test Code Converter](https://kobenguyent.github.io/kobeanqautils/#/playwright2codecept) | Convert Playwright tests to CodeceptJS (regex mode or AI-powered) |
+| 📊 [Sequence Diagram Generator](https://kobenguyent.github.io/kobeanqautils/#/sequence-diagram) | Generate Mermaid sequence diagrams from test code |
+| 🚀 [CI/CD Workflow Generator](https://kobenguyent.github.io/kobeanqautils/#/workflow-generator) | GitHub Actions, GitLab CI, Azure DevOps, Jenkins, Bitbucket workflows |
+| 📋 [Kanban Board](https://kobenguyent.github.io/kobeanqautils/#/kanban) | Drag-and-drop task management |
+| 📁 [File Processor](https://kobenguyent.github.io/kobeanqautils/#/file-processor) | Batch resize, compress, and convert images and documents |
+| 🔍 [Website Scanner](https://kobenguyent.github.io/kobeanqautils/#/website-scanner) | Audit broken links, accessibility, SEO, and security issues |
 
 ### 🤖 AI Features
 
 | Feature | What it does |
 |---------|-------------|
-| 🤖 [Kobean Assistant](https://kobenguyent.github.io/qa-utils/#/kobean) | AI chat with multi-provider support, knowledge base, and MCP tool integration |
-| ✨ [Prompt Enhancer](https://kobenguyent.github.io/qa-utils/#/prompt-enhancer) | Transform basic prompts into detailed, structured versions |
-| 🤖 [Agent Mode](https://kobenguyent.github.io/qa-utils/#/agent) | Autonomous observe-think-act agent — describe a task and it runs the tools |
-| 🗂️ [Agent Manager](https://kobenguyent.github.io/qa-utils/#/agent-manager) | Create reusable named agent profiles and review run history |
-| 🤖 [AI Website Tester](https://kobenguyent.github.io/qa-utils/#/ai-website-tester) | AI-powered functional, UI/UX, performance, and security checks |
+| 🤖 [Kobean Assistant](https://kobenguyent.github.io/kobeanqautils/#/kobean) | AI chat with multi-provider support, knowledge base, and MCP tool integration |
+| ✨ [Prompt Enhancer](https://kobenguyent.github.io/kobeanqautils/#/prompt-enhancer) | Transform basic prompts into detailed, structured versions |
+| 🤖 [Agent Mode](https://kobenguyent.github.io/kobeanqautils/#/agent) | Autonomous observe-think-act agent — describe a task and it runs the tools |
+| 🗂️ [Agent Manager](https://kobenguyent.github.io/kobeanqautils/#/agent-manager) | Create reusable named agent profiles and review run history |
+| 🤖 [AI Website Tester](https://kobenguyent.github.io/kobeanqautils/#/ai-website-tester) | AI-powered functional, UI/UX, performance, and security checks |
 
 **AI providers supported:** OpenAI · Anthropic Claude · Google Gemini · Azure OpenAI · Ollama (local)
 
@@ -89,22 +89,22 @@
 
 | Resource | What it covers |
 |----------|---------------|
-| 🔥💡 [Testing Cheat Sheet](https://kobenguyent.github.io/qa-utils/#/codeceptjs) | Quick-reference for Playwright, Pytest, Cypress, Jest, Vitest, CodeceptJS & more |
-| 📖 [Command Book](https://kobenguyent.github.io/qa-utils/#/command-book) | Git, Docker, Bash, and CodeceptJS command reference |
-| 🤖 [AI Instructions Guide](https://kobenguyent.github.io/qa-utils/#/ai-instructions) | Best practices for Claude, ChatGPT, Gemini, Copilot & Cursor system prompts |
-| ⚖️ [Test Frameworks Comparison](https://kobenguyent.github.io/qa-utils/#/test-frameworks-comparison) | Side-by-side comparison to pick the right framework |
-| ✅ [Testing Checklists](https://kobenguyent.github.io/qa-utils/#/web-testing-checklist) | Web, API, and mobile testing checklists |
-| 🎓 [ISTQB CTFL v4 Practice Exams](https://kobenguyent.github.io/qa-utils/#/ctfl) | Interactive practice tests for certification prep |
-| 🃏 [Flashcards](https://kobenguyent.github.io/qa-utils/#/flashcards) | Spaced-repetition (SM-2) flashcards for QA concepts |
-| 🌐 [API Types Guide](https://kobenguyent.github.io/qa-utils/#/api-types-guide) | Interactive comparison of REST, GraphQL, gRPC, WebSocket, SOAP, SSE, Webhooks & MQTT |
+| 🔥💡 [Testing Cheat Sheet](https://kobenguyent.github.io/kobeanqautils/#/codeceptjs) | Quick-reference for Playwright, Pytest, Cypress, Jest, Vitest, CodeceptJS & more |
+| 📖 [Command Book](https://kobenguyent.github.io/kobeanqautils/#/command-book) | Git, Docker, Bash, and CodeceptJS command reference |
+| 🤖 [AI Instructions Guide](https://kobenguyent.github.io/kobeanqautils/#/ai-instructions) | Best practices for Claude, ChatGPT, Gemini, Copilot & Cursor system prompts |
+| ⚖️ [Test Frameworks Comparison](https://kobenguyent.github.io/kobeanqautils/#/test-frameworks-comparison) | Side-by-side comparison to pick the right framework |
+| ✅ [Testing Checklists](https://kobenguyent.github.io/kobeanqautils/#/web-testing-checklist) | Web, API, and mobile testing checklists |
+| 🎓 [ISTQB CTFL v4 Practice Exams](https://kobenguyent.github.io/kobeanqautils/#/ctfl) | Interactive practice tests for certification prep |
+| 🃏 [Flashcards](https://kobenguyent.github.io/kobeanqautils/#/flashcards) | Spaced-repetition (SM-2) flashcards for QA concepts |
+| 🌐 [API Types Guide](https://kobenguyent.github.io/kobeanqautils/#/api-types-guide) | Interactive comparison of REST, GraphQL, gRPC, WebSocket, SOAP, SSE, Webhooks & MQTT |
 
 ### 🏛️ Palace (Visual Navigation)
 
 | Feature | What it does |
 |---------|-------------|
-| 🗺️ [QA Palace](https://kobenguyent.github.io/qa-utils/#/palace) | Spatial map — browse all tools organised into themed rooms |
-| 🏠 [My Palace](https://kobenguyent.github.io/qa-utils/#/my-palace) | Personal pinboard of favourite tools |
-| 🗺️ [Coverage Palace](https://kobenguyent.github.io/qa-utils/#/coverage-palace) | Visual heatmap of your test coverage across unit, integration, E2E, security, and more |
+| 🗺️ [QA Palace](https://kobenguyent.github.io/kobeanqautils/#/palace) | Spatial map — browse all tools organised into themed rooms |
+| 🏠 [My Palace](https://kobenguyent.github.io/kobeanqautils/#/my-palace) | Personal pinboard of favourite tools |
+| 🗺️ [Coverage Palace](https://kobenguyent.github.io/kobeanqautils/#/coverage-palace) | Visual heatmap of your test coverage across unit, integration, E2E, security, and more |
 
 ---
 
@@ -154,9 +154,9 @@ Add to your Claude Desktop config:
 ```json
 {
   "mcpServers": {
-    "qa-utils": {
+    "kobeanqautils": {
       "command": "node",
-      "args": ["/absolute/path/to/qa-utils/mcp-server/dist/mcp-server/src/index.js"]
+      "args": ["/absolute/path/to/kobeanqautils/mcp-server/dist/mcp-server/src/index.js"]
     }
   }
 }
@@ -185,12 +185,12 @@ See [mcp-server/README.md](mcp-server/README.md) for full documentation.
 
 ---
 
-## 🖥️ CLI (`qautils-cli`)
+## 🖥️ CLI (`kobeanqautils-cli`)
 
 All tools are available in your terminal, plus an AI-powered Kobean chat assistant.
 
 ```bash
-npm install -g qautils-cli
+npm install -g kobeanqautils-cli
 
 # AI chat
 qautils chat config --provider openai --api-key sk-xxxxxx
@@ -210,7 +210,7 @@ See the [CLI README](./cli/README.md) for the full command reference.
 
 ## 💻 Desktop App (Electron)
 
-Download a pre-built app for **macOS, Windows, or Linux** from the [GitHub Actions artifacts](https://github.com/kobenguyent/qa-utils/actions/workflows/build-electron.yml), or build locally:
+Download a pre-built app for **macOS, Windows, or Linux** from the [GitHub Actions artifacts](https://github.com/kobenguyent/kobeanqautils/actions/workflows/build-electron.yml), or build locally:
 
 ```bash
 npm run electron:dev      # dev mode with hot reload

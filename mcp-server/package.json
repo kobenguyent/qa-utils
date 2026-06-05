@@ -1,11 +1,11 @@
 {
-  "name": "qa-utils-mcp-server",
+  "name": "kobeanqautils-mcp-server",
   "version": "1.1.0",
   "description": "MCP server for KobeanQAUtils - enables AI agents to interact with QA utility tools",
   "type": "module",
   "main": "dist/mcp-server/src/index.js",
   "bin": {
-    "qa-utils-mcp": "dist/mcp-server/src/index.js"
+    "kobeanqautils-mcp": "dist/mcp-server/src/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -17,7 +17,7 @@
   "keywords": [
     "mcp",
     "model-context-protocol",
-    "qa-utils",
+    "kobeanqautils",
     "ai-tools"
   ],
   "license": "MIT",

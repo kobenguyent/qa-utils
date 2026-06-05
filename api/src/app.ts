@@ -27,7 +27,7 @@ const swaggerOptions: swaggerJsdoc.Options = {
         'or import the OpenAPI spec into your automation framework.',
       contact: {
         name: 'KobeT',
-        url: 'https://github.com/kobenguyent/qa-utils',
+        url: 'https://github.com/kobenguyent/kobeanqautils',
       },
       license: {
         name: 'MIT',

@@ -20,7 +20,7 @@ import {
 import { fetchModels } from '../lib/aiClient.js';
 
 // Use a temporary directory for config during tests
-const TEST_HOME = path.join(os.tmpdir(), `qautils-cli-test-${Math.random().toString(36).slice(2)}`);
+const TEST_HOME = path.join(os.tmpdir(), `kobeanqautils-cli-test-${Math.random().toString(36).slice(2)}`);
 const REAL_HOME = os.homedir();
 const REAL_APPDATA = process.env.APPDATA;
 
@@ -28,7 +28,7 @@ function setupTestHome(): void {
   // Override os.homedir() via environment (Linux/macOS only in tests)
   vi.spyOn(os, 'homedir').mockReturnValue(TEST_HOME);
   // Clean up any previous test config
-  const dir = path.join(TEST_HOME, '.config', 'qautils-cli');
+  const dir = path.join(TEST_HOME, '.config', 'kobeanqautils-cli');
   if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true });
 }
 
@@ -44,7 +44,7 @@ describe('getConfigDir', () => {
 
   it('returns a path inside the test home on non-Windows', () => {
     if (process.platform === 'win32') return;
-    expect(getConfigDir()).toContain('qautils-cli');
+    expect(getConfigDir()).toContain('kobeanqautils-cli');
     expect(getConfigDir()).toContain('.config');
   });
 });

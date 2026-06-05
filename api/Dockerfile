@@ -9,6 +9,7 @@ WORKDIR /app
 
 # Install API deps first (layer cache)
 COPY api/package*.json ./api/
+COPY common/data.ts ./common/
 RUN cd api && npm i --include=dev
 
 # Copy API source and shared utils required for compilation
@@ -26,25 +27,25 @@ RUN cd api && npm prune --omit=dev
 # ── Stage 2: runtime ─────────────────────────────────────────────────────────
 FROM ${NODE_IMAGE} AS runtime
 
-LABEL org.opencontainers.image.title="qautils-cli-rest-api" \
+LABEL org.opencontainers.image.title="kobeanqautils-cli-rest-api" \
       org.opencontainers.image.description="REST API + Swagger UI for QA Utils — 19 utility endpoints for automation testing" \
-      org.opencontainers.image.source="https://github.com/kobenguyent/qa-utils" \
+      org.opencontainers.image.source="https://github.com/kobenguyent/kobeanqautils" \
       org.opencontainers.image.licenses="MIT"
 
 # Re-declare ARG so it's available in this stage
 ARG APP_PORT=3333
 
 # Non-root user for security
-RUN addgroup -S qautils && adduser -S qautils -G qautils
+RUN addgroup -S kobeanqautils && adduser -S kobeanqautils -G kobeanqautils
 
 WORKDIR /app
 
 # Copy only what's needed to run
-COPY --from=builder --chown=qautils:qautils /app/api/dist ./dist
-COPY --from=builder --chown=qautils:qautils /app/api/node_modules ./node_modules
-COPY --chown=qautils:qautils api/package.json ./
+COPY --from=builder --chown=kobeanqautils:kobeanqautils /app/api/dist ./dist
+COPY --from=builder --chown=kobeanqautils:kobeanqautils /app/api/node_modules ./node_modules
+COPY --chown=kobeanqautils:kobeanqautils api/package.json ./
 
-USER qautils
+USER kobeanqautils
 
 ENV NODE_ENV=production \
     PORT=${APP_PORT}

@@ -78,7 +78,7 @@ export default defineConfig(({ mode }) => {
 
   // For GitHub Pages deployment
   if (process.env.DEPLOY_ENV === 'github') {
-    base = '/qa-utils/'
+    base = '/kobeanqautils/'
   }
   
   // For Electron builds, use relative paths
