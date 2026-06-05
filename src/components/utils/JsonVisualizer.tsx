@@ -1,4 +1,4 @@
-import { Container, Row, Col, Form, Button } from 'react-bootstrap';
+import { Container, Row, Col, Button } from 'react-bootstrap';
 import { useRef, useState, useMemo, useCallback, type ChangeEvent } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getEffectiveTheme } from '../../utils/themeManager';
@@ -283,7 +283,7 @@ export const JsonVisualizer = () => {
                   Clear
                 </Button>
               </div>
-              <Form.Control
+              <input
                 ref={fileInputRef}
                 type="file"
                 accept=".json,application/json"
