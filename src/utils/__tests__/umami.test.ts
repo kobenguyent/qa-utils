@@ -69,18 +69,16 @@ describe('umami utilities', () => {
       expect(mockTrack).toHaveBeenCalledTimes(1);
     });
 
-    it('should log warning when umami is not available', () => {
+    it('should no-op silently when umami is not available', () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       
       const testUrl = '/test-page';
       trackPageView(testUrl);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Umami tracking script not loaded or track function not available.'
-      );
+      expect(consoleSpy).not.toHaveBeenCalled();
     });
 
-    it('should log warning when umami.track is not a function', () => {
+    it('should no-op silently when umami.track is not a function', () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       mockWindow.umami = {
         track: 'not a function' as unknown as (event: string, data?: Record<string, string | number>) => void
@@ -89,9 +87,7 @@ describe('umami utilities', () => {
       const testUrl = '/test-page';
       trackPageView(testUrl);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Umami tracking script not loaded or track function not available.'
-      );
+      expect(consoleSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -143,14 +139,12 @@ describe('umami utilities', () => {
       });
     });
 
-    it('should log warning when umami is not available', () => {
+    it('should no-op silently when umami is not available', () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       
       trackEvent('test-event');
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Umami tracking script not loaded or track function not available.'
-      );
+      expect(consoleSpy).not.toHaveBeenCalled();
     });
   });
 });

@@ -16,6 +16,7 @@ const JWTDebugger = lazy(() => import('./components/utils/JWTDebugger.tsx').then
 const Base64 = lazy(() => import('./components/utils/Base64.tsx').then(module => ({ default: module.Base64 })));
 const UnixTimestamp = lazy(() => import('./components/utils/UnixTimestamp.tsx').then(module => ({ default: module.UnixTimestamp })));
 const JSONFormatter = lazy(() => import('./components/utils/JSONFormatter.tsx').then(module => ({ default: module.JSONFormatter })));
+const JsonVisualizer = lazy(() => import('./components/utils/JsonVisualizer.tsx').then(module => ({ default: module.JsonVisualizer })));
 const UuidGenerator = lazy(() => import('./components/utils/UuidGenerator.tsx').then(module => ({ default: module.UuidGenerator })));
 const JiraComment = lazy(() => import('./components/utils/JiraComment.tsx').then(module => ({ default: module.JiraComment })));
 const OtpGenerator = lazy(() => import('./components/utils/OtpGenerator.tsx').then(module => ({ default: module.OtpGenerator })));
@@ -125,6 +126,10 @@ const router = createHashRouter([
   {
     path: 'jsonFormatter',
     element: <RouteWrapper><JSONFormatter /></RouteWrapper>
+  },
+  {
+    path: 'json-visualizer',
+    element: <RouteWrapper><JsonVisualizer /></RouteWrapper>
   },
   {
     path: 'uuid',
@@ -355,7 +360,7 @@ const router = createHashRouter([
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <ThemeProvider>
-      <RouterProvider router={router} />
+      <RouterProvider router={router} future={{ v7_startTransition: true }} />
     </ThemeProvider>
   </React.StrictMode>
 );

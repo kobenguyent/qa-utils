@@ -42,8 +42,6 @@ export const trackPageView = (url: string) => {
     // Track event with custom properties
     // @ts-ignore
     window.umami.track(trackingUrl, platformInfo);
-  } else {
-    console.warn('Umami tracking script not loaded or track function not available.');
   }
 };
 
@@ -58,7 +56,5 @@ export const trackEvent = (eventName: string, eventData?: Record<string, string 
     
     // @ts-ignore
     window.umami.track(eventName, data);
-  } else {
-    console.warn('Umami tracking script not loaded or track function not available.');
   }
 };
