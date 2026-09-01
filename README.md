@@ -221,20 +221,39 @@ npm run electron:build    # production build for your platform
 
 ---
 
-## 🚀 Getting Started (Web / Dev)
+## 🚀 Getting Started
+
+### ⚡ One-Command Setup
+
+Get the full workspace (Web App, REST API, CLI, and MCP Server) running with a single command:
 
 ```bash
-# Prerequisites: Node.js 16+
-npm install && npm run dev   # → http://localhost:5173/
+# Prerequisites: Node.js 18+
+git clone https://github.com/kobenguyent/kobeanqautils.git
+cd kobeanqautils
+
+# One-command setup
+npm run setup     # or `make setup`
+
+# Start development server (→ http://localhost:5173/)
+npm run dev       # or `npm start` / `make dev`
 ```
+
+### 🛠️ Common Commands
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Development server with hot reload |
-| `npm run build` | Production build |
-| `npm test` | Run all 928+ tests |
-| `npm run test:coverage` | Coverage report |
-| `npm run lint` | ESLint (TypeScript strict) |
+| `npm run setup` | Bootstrap entire monorepo (root web app + api + cli + mcp-server) |
+| `npm run setup:quick` | Quick setup for root frontend development only |
+| `npm run setup:clean` | Fresh clean reinstall of all dependencies |
+| `npm run dev` / `npm start` | Launch development server with hot reload |
+| `npm run build` | Build root production bundle |
+| `npm run build:all` | Build all modules (Web, REST API, CLI, MCP Server) |
+| `npm test` | Run Vitest unit test suite |
+| `npm run test:all` | Run test suites across all packages |
+| `npm run lint` | ESLint TypeScript checks |
+| `npm run electron:dev` | Launch Electron desktop application in dev mode |
+| `npm run docs:dev` | Launch VitePress documentation dev server |
 
 ## 🏗️ Technology Stack
 
